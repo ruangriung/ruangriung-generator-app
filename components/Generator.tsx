@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ControlPanel, { GeneratorSettings } from './ControlPanel';
+import ControlPanel, { GeneratorSettings } from './ControlPanel'; // <-- Impor tipe data
 import ImageDisplay from './ImageDisplay';
 import ImageModal from './ImageModal';
 
@@ -9,10 +9,10 @@ type AspectRatioPreset = 'Kotak' | 'Portrait' | 'Lansekap';
 
 export default function Generator() {
   const [settings, setSettings] = useState<GeneratorSettings>({
-    prompt: 'Kastil fantasi di atas awan',
+    prompt: 'The spiderman in the style of a 1980s comic book, vibrant colors, dynamic pose, detailed city background',
     model: 'flux',
     width: 1024,
-    height: 1024,
+    height: 1792,
     seed: Math.floor(Math.random() * 1000000),
     artStyle: '',
   });
@@ -21,7 +21,7 @@ export default function Generator() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [modelList, setModelList] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Kotak');
+  const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Portrait');
 
   useEffect(() => {
     const fetchModels = async () => {
@@ -35,7 +35,7 @@ export default function Generator() {
         }
       } catch (error) {
         console.error("Error fetching models:", error);
-        setModelList(['flux', 'dall-e-3', 'stable-diffusion-xl']);
+        setModelList(['flux', 'turbo', 'kontext']);
       }
     };
     fetchModels();
@@ -78,8 +78,26 @@ export default function Generator() {
     setImageUrl(finalUrl);
   };
 
+  const handleDownloadImage = async () => {
+    if (!imageUrl) return;
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `ruangriung-${Date.now()}.png`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Gagal mengunduh gambar:", error);
+      alert("Gagal mengunduh gambar. Silakan coba simpan manual.");
+    }
+  };
+
   return (
-    // Tambahkan div pembungkus dengan kelas untuk menengahkan konten
     <div className="w-full flex flex-col items-center">
       <ControlPanel 
         settings={settings}
@@ -100,6 +118,8 @@ export default function Generator() {
           alert('Gagal memuat gambar. API mungkin sibuk atau parameter tidak valid.');
         }}
         onZoomClick={() => setIsModalOpen(true)}
+        onDownloadClick={handleDownloadImage}
+        onVariationsClick={handleGenerateImage}
       />
       <ImageModal 
         isOpen={isModalOpen}

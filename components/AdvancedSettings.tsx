@@ -1,8 +1,9 @@
 'use client';
 
-import { GeneratorSettings } from './ControlPanel';
-import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings } from 'lucide-react'; // 1. Impor ikon Settings
+import { GeneratorSettings } from './ControlPanel'; // <-- Impor tipe data dari sumbernya
+import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings } from 'lucide-react';
 
+// Definisikan props untuk komponen ini
 interface AdvancedSettingsProps {
   settings: GeneratorSettings;
   setSettings: React.Dispatch<React.SetStateAction<GeneratorSettings>>;
@@ -47,20 +48,17 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
   return (
     <details className="w-full mt-6 group">
       <summary className="flex items-center justify-between p-4 bg-light-bg rounded-lg cursor-pointer list-none shadow-neumorphic-button transition-shadow">
-        {/* 2. Tambahkan div untuk mengelompokkan ikon dan teks */}
         <div className="flex items-center gap-x-2">
           <Settings className="w-5 h-5 text-purple-600" />
           <span className="font-medium text-gray-700">
             Pengaturan Lanjutan
           </span>
         </div>
-        
         <svg className="w-5 h-5 text-purple-600 transition-transform duration-300 group-open:rotate-90"
              xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
         </svg>
       </summary>
-      
       <div className="mt-6 p-6 bg-light-bg rounded-2xl shadow-neumorphic-inset">
         <div className="mb-6">
           <label className="block text-center text-sm font-medium text-gray-600 mb-2">Preset Aspek Rasio</label>

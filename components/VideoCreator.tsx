@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-// 1. Tambahkan ikon yang hilang di sini
-import { Sparkles, Film, Type, Clapperboard, Settings, Camera, Wand, Smile, ClipboardCopy, Check } from 'lucide-react'; 
+import { Sparkles, Film, Type, Clapperboard, Settings, Camera, Wand, Smile, ClipboardCopy, Check, X, Expand } from 'lucide-react'; 
 import ButtonSpinner from './ButtonSpinner';
 import Accordion from './Accordion';
+import TextareaModal from './TextareaModal';
 
 export default function VideoCreator() {
-  // State untuk menampung semua input dari form
   const [inputs, setInputs] = useState({
     konsep: 'Detektif cyberpunk di gang kota yang diterangi lampu neon',
     narasi: '',
@@ -18,9 +17,11 @@ export default function VideoCreator() {
     efekVisual: 'Tidak Ada',
     mood: 'Misterius',
   });
+  
   const [videoIdea, setVideoIdea] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isCopied, setIsCopied] = useState(false); // State untuk melacak status copy
+  const [isCopied, setIsCopied] = useState(false);
+  const [editingField, setEditingField] = useState<null | 'konsep' | 'narasi'>(null);
 
   const handleInputChange = (field: keyof typeof inputs, value: string) => {
     setInputs(prev => ({ ...prev, [field]: value }));
@@ -79,22 +80,42 @@ export default function VideoCreator() {
   };
 
   const inputStyle = "w-full p-3 bg-light-bg rounded-lg shadow-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow";
-  const selectStyle = `${inputStyle} appearance-none`;
+  const textareaStyle = `${inputStyle} pr-20 cursor-pointer resize-none`; // pr-20 untuk ruang tombol, resize-none untuk mematikan handle resize browser
 
   return (
-    <div className="w-full p-6 md:p-8 bg-light-bg rounded-2xl shadow-neumorphic">
+    <>
       <div className="space-y-4">
+        <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-700 flex items-center justify-center gap-x-2">
+                <Film className="text-purple-600" />
+                Creator Prompt Video
+            </h2>
+            <p className="text-gray-500 mt-1">Masukkan topik, dan biarkan AI membuatkan ide video untuk Anda.</p>
+        </div>
+        
         <div>
           <label htmlFor="konsep" className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2"><Type size={16} className="text-purple-600"/>Konsep Utama Video *</label>
-          <textarea id="konsep" rows={3} value={inputs.konsep} onChange={(e) => handleInputChange('konsep', e.target.value)} className={inputStyle} placeholder="Cth: Detektif cyberpunk di gang neon..."/>
+          <div className="relative w-full">
+            <textarea id="konsep" value={inputs.konsep} readOnly onFocus={() => setEditingField('konsep')} className={`${textareaStyle} h-24`} placeholder="Klik untuk mengedit..."/>
+            <div className="absolute top-2 right-2 flex gap-x-1">
+              {inputs.konsep && <button title="Hapus" onClick={(e) => { e.stopPropagation(); handleInputChange('konsep', '') }} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200"><X size={18} /></button>}
+              <button title="Perbesar" onClick={() => setEditingField('konsep')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200"><Expand size={18} /></button>
+            </div>
+          </div>
         </div>
         <div>
           <label htmlFor="narasi" className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2"><Type size={16} className="text-purple-600"/>Narasi (Opsional)</label>
-          <textarea id="narasi" rows={2} value={inputs.narasi} onChange={(e) => handleInputChange('narasi', e.target.value)} className={inputStyle} placeholder="Ketik narasi atau dialog di sini..."/>
+          <div className="relative w-full">
+            <textarea id="narasi" value={inputs.narasi} readOnly onFocus={() => setEditingField('narasi')} className={`${textareaStyle} h-20`} placeholder="Klik untuk mengedit..."/>
+            <div className="absolute top-2 right-2 flex gap-x-1">
+              {inputs.narasi && <button title="Hapus" onClick={(e) => { e.stopPropagation(); handleInputChange('narasi', '')}} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200"><X size={18} /></button>}
+              <button title="Perbesar" onClick={() => setEditingField('narasi')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200"><Expand size={18} /></button>
+            </div>
+          </div>
         </div>
         <div>
           <label htmlFor="model" className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2"><Clapperboard size={16} className="text-purple-600"/>Model Video AI</label>
-          <select id="model" value={inputs.model} onChange={(e) => handleInputChange('model', e.target.value)} className={selectStyle}>
+          <select id="model" value={inputs.model} onChange={(e) => handleInputChange('model', e.target.value)} className={`${inputStyle} appearance-none`}>
             <option>Default (Umum)</option>
             <option>Animasi</option>
             <option>Realistis</option>
@@ -102,8 +123,8 @@ export default function VideoCreator() {
         </div>
 
         <div className="space-y-2 pt-4">
-          <Accordion title={<div className="flex items-center gap-2"><Settings size={16} /> Pengaturan Dasar</div>}>
-             <select value={inputs.gayaVisual} onChange={(e) => handleInputChange('gayaVisual', e.target.value)} className={selectStyle}>
+          <Accordion title={<div className="flex items-center gap-2"><Settings size={16} /> Gaya Visual</div>}>
+             <select value={inputs.gayaVisual} onChange={(e) => handleInputChange('gayaVisual', e.target.value)} className={`${inputStyle} appearance-none`}>
                 <option>Sinematik</option><option>Vlog</option><option>Dokumenter</option>
             </select>
           </Accordion>
@@ -111,25 +132,25 @@ export default function VideoCreator() {
             <div className="space-y-4">
               <div>
                 <label className="text-sm">Shot Size</label>
-                <select value={inputs.shotSize} onChange={(e) => handleInputChange('shotSize', e.target.value)} className={`${selectStyle} mt-1`}>
+                <select value={inputs.shotSize} onChange={(e) => handleInputChange('shotSize', e.target.value)} className={`${inputStyle} appearance-none mt-1`}>
                   <option>Medium Shot</option><option>Close Up</option><option>Wide Shot</option><option>Extreme Close Up</option><option>Full Shot</option>
                 </select>
               </div>
               <div>
                 <label className="text-sm">Pergerakan Kamera</label>
-                <select value={inputs.pergerakanKamera} onChange={(e) => handleInputChange('pergerakanKamera', e.target.value)} className={`${selectStyle} mt-1`}>
+                <select value={inputs.pergerakanKamera} onChange={(e) => handleInputChange('pergerakanKamera', e.target.value)} className={`${inputStyle} appearance-none mt-1`}>
                   <option>Statis</option><option>Tracking Shot</option><option>Dolly Zoom</option><option>Handheld</option><option>Crane Shot</option>
                 </select>
               </div>
             </div>
           </Accordion>
           <Accordion title={<div className="flex items-center gap-2"><Wand size={16} /> Efek Visual</div>}>
-            <select value={inputs.efekVisual} onChange={(e) => handleInputChange('efekVisual', e.target.value)} className={selectStyle}>
+            <select value={inputs.efekVisual} onChange={(e) => handleInputChange('efekVisual', e.target.value)} className={`${inputStyle} appearance-none`}>
               <option>Tidak Ada</option><option>Slow Motion</option><option>Vignette</option><option>Light Leaks</option><option>Glitch</option>
             </select>
           </Accordion>
           <Accordion title={<div className="flex items-center gap-2"><Smile size={16} /> Mood & Suasana</div>}>
-            <select value={inputs.mood} onChange={(e) => handleInputChange('mood', e.target.value)} className={selectStyle}>
+            <select value={inputs.mood} onChange={(e) => handleInputChange('mood', e.target.value)} className={`${inputStyle} appearance-none`}>
               <option>Misterius</option><option>Ceria</option><option>Dramatis</option><option>Nostalgia</option><option>Tegang</option><option>Romantis</option>
             </select>
           </Accordion>
@@ -158,6 +179,18 @@ export default function VideoCreator() {
           </div>
         )}
       </div>
-    </div>
+
+      <TextareaModal
+        isOpen={editingField !== null}
+        onClose={() => setEditingField(null)}
+        title={editingField === 'konsep' ? 'Edit Konsep Utama' : 'Edit Narasi'}
+        value={editingField ? inputs[editingField] : ''}
+        onChange={(newValue) => {
+          if (editingField) {
+            handleInputChange(editingField, newValue);
+          }
+        }}
+      />
+    </>
   );
 }

@@ -1,7 +1,8 @@
-// components/ImageDisplay.tsx
 'use client';
 
+import { useState } from 'react';
 import Spinner from './Spinner';
+import { ZoomIn, Download, Paintbrush, Sun, Contrast, Droplets, Shuffle } from 'lucide-react';
 
 interface ImageDisplayProps {
   isLoading: boolean;
@@ -10,44 +11,45 @@ interface ImageDisplayProps {
   onLoad: () => void;
   onError: () => void;
   onZoomClick: () => void;
+  onDownloadClick: () => void;
+  onVariationsClick: () => void;
 }
 
-export default function ImageDisplay({ isLoading, imageUrl, prompt, onLoad, onError, onZoomClick }: ImageDisplayProps) {
-  // Variabel untuk menentukan apakah gambar sudah ada dan selesai dimuat
+export default function ImageDisplay({ isLoading, imageUrl, prompt, onLoad, onError, onZoomClick, onDownloadClick, onVariationsClick }: ImageDisplayProps) {
   const isImageReady = !isLoading && imageUrl;
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [filters, setFilters] = useState({
+    brightness: 100,
+    contrast: 100,
+    saturate: 100,
+  });
+
+  const handleFilterChange = (filterName: keyof typeof filters, value: string) => {
+    setFilters(prev => ({ ...prev, [filterName]: Number(value) }));
+  };
+  
+  const imageFilterStyle = {
+    filter: `brightness(${filters.brightness}%) contrast(${filters.contrast}%) saturate(${filters.saturate}%)`
+  };
+
+  const actionButtonStyle = `p-3 bg-light-bg rounded-lg shadow-neumorphic-button active:shadow-neumorphic-inset text-gray-700 hover:text-purple-600 transition-all`;
 
   return (
     <div className="w-full max-w-2xl mt-8">
       <div className="relative aspect-square w-full bg-light-bg rounded-2xl shadow-neumorphic-inset p-4 flex items-center justify-center">
-
-        {/* Gambar Utama (hanya dirender jika ada URL) */}
         {imageUrl && (
           <img
-            // 'key' akan memaksa React untuk membuat ulang elemen <img> setiap kali URL berubah.
-            // Ini adalah kunci untuk memastikan event 'onLoad' selalu terpicu dengan andal!
-            key={imageUrl} 
+            key={imageUrl} // Kunci ini SANGAT PENTING untuk memastikan onLoad terpicu
             src={imageUrl}
             alt={prompt}
-            className={`w-full h-full object-contain rounded-lg transition-opacity duration-300 ${isLoading ? 'opacity-50' : 'opacity-100'}`}
-            onLoad={onLoad} // Panggil fungsi onLoad dari parent saat gambar selesai dimuat
+            className={`w-full h-full object-contain rounded-lg transition-all duration-300 ${isLoading ? 'opacity-50' : 'opacity-100'}`}
+            style={imageFilterStyle}
+            onLoad={onLoad} // Memanggil fungsi dari parent untuk menghentikan loading
             onError={onError}
           />
         )}
-
-        {/* Tombol Zoom (muncul jika gambar sudah siap) */}
-        {isImageReady && (
-          <button 
-            onClick={onZoomClick}
-            className="absolute top-3 right-3 p-2 bg-black bg-opacity-40 rounded-full text-white hover:bg-opacity-60 transition-colors"
-            aria-label="Perbesar gambar"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </button>
-        )}
-
-        {/* Placeholder Awal (muncul jika tidak ada gambar dan tidak sedang loading) */}
+        
         {!imageUrl && !isLoading && (
           <div className="text-center text-gray-500">
             <p>Gambar Anda akan muncul di sini.</p>
@@ -55,13 +57,50 @@ export default function ImageDisplay({ isLoading, imageUrl, prompt, onLoad, onEr
           </div>
         )}
 
-        {/* Lapisan Loading dengan Spinner (muncul hanya saat loading) */}
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-40 rounded-xl">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-40 rounded-xl">
             <Spinner />
+            {/* Tambahkan teks ini untuk umpan balik yang lebih baik */}
+            <p className="text-white mt-2 font-semibold">Membuat gambar...</p>
           </div>
         )}
       </div>
+
+      {isImageReady && (
+        <div className="mt-4 flex justify-center items-center gap-4">
+          <button onClick={onVariationsClick} className={actionButtonStyle} aria-label="Buat Variasi">
+            <Shuffle size={24} />
+          </button>
+          <button onClick={() => setIsEditing(!isEditing)} className={`${actionButtonStyle} ${isEditing ? '!text-purple-600' : ''}`} aria-label="Edit Gambar">
+            <Paintbrush size={24} />
+          </button>
+          <button onClick={onZoomClick} className={actionButtonStyle} aria-label="Perbesar Gambar">
+            <ZoomIn size={24} />
+          </button>
+          <button onClick={onDownloadClick} className={actionButtonStyle} aria-label="Unduh Gambar">
+            <Download size={24} />
+          </button>
+        </div>
+      )}
+
+      {isEditing && isImageReady && (
+        <div className="mt-4 p-4 bg-light-bg rounded-2xl shadow-neumorphic space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <label htmlFor="brightness" className="flex items-center gap-2 text-sm font-medium text-gray-600"><Sun size={16} /> Kecerahan</label>
+              <input id="brightness" type="range" min="0" max="200" value={filters.brightness} onChange={(e) => handleFilterChange('brightness', e.target.value)} className="w-full" />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="contrast" className="flex items-center gap-2 text-sm font-medium text-gray-600"><Contrast size={16} /> Kontras</label>
+              <input id="contrast" type="range" min="0" max="200" value={filters.contrast} onChange={(e) => handleFilterChange('contrast', e.target.value)} className="w-full" />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="saturate" className="flex items-center gap-2 text-sm font-medium text-gray-600"><Droplets size={16} /> Saturasi</label>
+              <input id="saturate" type="range" min="0" max="200" value={filters.saturate} onChange={(e) => handleFilterChange('saturate', e.target.value)} className="w-full" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
