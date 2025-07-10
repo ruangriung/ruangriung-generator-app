@@ -5,7 +5,6 @@ import ControlPanel, { GeneratorSettings } from './ControlPanel';
 import ImageDisplay from './ImageDisplay';
 import ImageModal from './ImageModal';
 
-// Tipe untuk preset aspek rasio
 type AspectRatioPreset = 'Kotak' | 'Portrait' | 'Lansekap';
 
 export default function Generator() {
@@ -31,7 +30,7 @@ export default function Generator() {
         if (!response.ok) throw new Error('Gagal mengambil daftar model');
         const models = await response.json();
         setModelList(models);
-        if (models.length > 0 && !settings.model) {
+        if (models.length > 0 && settings.model === 'flux') {
             setSettings(prev => ({ ...prev, model: models[0] }));
         }
       } catch (error) {
@@ -42,7 +41,6 @@ export default function Generator() {
     fetchModels();
   }, []);
 
-  // Efek untuk mengubah ukuran berdasarkan preset aspek rasio
   useEffect(() => {
     const presetSettings = {
       'Kotak': { width: 1024, height: 1024 },
@@ -81,7 +79,8 @@ export default function Generator() {
   };
 
   return (
-    <>
+    // Tambahkan div pembungkus dengan kelas untuk menengahkan konten
+    <div className="w-full flex flex-col items-center">
       <ControlPanel 
         settings={settings}
         setSettings={setSettings}
@@ -107,6 +106,6 @@ export default function Generator() {
         onClose={() => setIsModalOpen(false)}
         imageUrl={imageUrl}
       />
-    </>
+    </div>
   );
 }

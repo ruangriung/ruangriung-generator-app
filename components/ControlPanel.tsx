@@ -4,6 +4,7 @@ import AdvancedSettings from './AdvancedSettings';
 import ButtonSpinner from './ButtonSpinner';
 import { Sparkles } from 'lucide-react';
 
+// Definisikan tipe data untuk pengaturan, untuk diekspor dan digunakan di komponen lain
 export interface GeneratorSettings {
   prompt: string;
   model: string;
@@ -13,6 +14,7 @@ export interface GeneratorSettings {
   artStyle: string;
 }
 
+// Definisikan tipe data untuk props yang diterima oleh komponen ini
 interface ControlPanelProps {
   settings: GeneratorSettings;
   setSettings: React.Dispatch<React.SetStateAction<GeneratorSettings>>;
@@ -26,9 +28,9 @@ interface ControlPanelProps {
 export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange }: ControlPanelProps) {
   
   return (
-    <div className="w-full max-w-4xl p-6 md:p-8 bg-light-bg rounded-2xl shadow-neumorphic">
+    <div className="w-full p-6 md:p-8 bg-light-bg rounded-2xl shadow-neumorphic">
       <div>
-        <label htmlFor="prompt" className="block text-sm font-medium text-white-600 mb-2">Prompt Utama</label>
+        <label htmlFor="prompt" className="block text-sm font-medium text-gray-600 mb-2">Prompt Utama</label>
         <textarea 
           id="prompt" 
           rows={4} 
@@ -52,7 +54,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
           onClick={onGenerate}
           disabled={isLoading}
           className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150"
->
+        >
           {isLoading ? (
             <>
               <ButtonSpinner />

@@ -1,7 +1,7 @@
 'use client';
 
 import { GeneratorSettings } from './ControlPanel';
-import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sprout } from 'lucide-react';
+import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings } from 'lucide-react'; // 1. Impor ikon Settings
 
 interface AdvancedSettingsProps {
   settings: GeneratorSettings;
@@ -28,11 +28,10 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
   const inputStyle = "w-full p-3 bg-light-bg rounded-lg shadow-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow";
   const selectStyle = `${inputStyle} appearance-none`;
   
-  // Perubahan ada di fungsi ini
   const presetButtonStyle = (isActive: boolean) => 
     `px-4 py-2 rounded-lg transition-all duration-200 font-medium ${
       isActive 
-        ? 'bg-purple-600 text-white shadow-neumorphic-button' // Menggunakan shadow timbul
+        ? 'bg-purple-600 text-white shadow-neumorphic-button'
         : 'bg-light-bg text-gray-700 shadow-neumorphic-button'
     }`;
   
@@ -46,11 +45,16 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
   );
 
   return (
-    <details className="w-full mt-6 group" open>
+    <details className="w-full mt-6 group">
       <summary className="flex items-center justify-between p-4 bg-light-bg rounded-lg cursor-pointer list-none shadow-neumorphic-button transition-shadow">
-        <span className="font-medium text-gray-700">
-          Pengaturan Lanjutan
-        </span>
+        {/* 2. Tambahkan div untuk mengelompokkan ikon dan teks */}
+        <div className="flex items-center gap-x-2">
+          <Settings className="w-5 h-5 text-purple-600" />
+          <span className="font-medium text-gray-700">
+            Pengaturan Lanjutan
+          </span>
+        </div>
+        
         <svg className="w-5 h-5 text-purple-600 transition-transform duration-300 group-open:rotate-90"
              xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
