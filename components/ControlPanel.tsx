@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import AdvancedSettings from './AdvancedSettings';
 import ButtonSpinner from './ButtonSpinner';
-import { Sparkles, X, Expand } from 'lucide-react';
+import { Sparkles, X, Expand, Image as ImageIcon } from 'lucide-react'; // Ganti nama impor agar tidak konflik
 import TextareaModal from './TextareaModal';
 
 // Definisikan tipe data di sini dan ekspor
@@ -14,6 +14,7 @@ export interface GeneratorSettings {
   height: number;
   seed: number;
   artStyle: string;
+  batchSize: number; // Ditambahkan untuk jumlah gambar
 }
 
 // Definisikan props untuk komponen ini
@@ -34,19 +35,22 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     setSettings(prev => ({ ...prev, prompt: '' }));
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSettings(prev => ({ ...prev, [e.target.name]: parseInt(e.target.value, 10) }));
+  }
+
   return (
     <>
       <div className="w-full p-6 md:p-8 bg-light-bg rounded-2xl shadow-neumorphic">
         <div>
           <label htmlFor="prompt" className="block text-sm font-medium text-gray-600 mb-2">Describe your imagination</label>
           <div className="relative w-full">
-            <textarea 
-              id="prompt" 
+            <textarea
+              id="prompt"
               value={settings.prompt}
-              readOnly
-              onFocus={() => setIsModalOpen(true)}
-              placeholder="Klik untuk mulai menulis atau mengedit prompt..."
-              className="w-full p-3 pr-20 bg-light-bg rounded-lg shadow-neumorphic-inset border-0 h-24 cursor-pointer resize-none"
+              onChange={(e) => setSettings(prev => ({ ...prev, prompt: e.target.value }))}
+              placeholder="Ketikkan imajinasimu di sini..."
+              className="w-full p-3 pr-20 bg-light-bg rounded-lg shadow-neumorphic-inset border-0 h-24 resize-none"
             />
             <div className="absolute top-2 right-2 flex gap-x-1">
               {settings.prompt && (
@@ -59,6 +63,26 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
               </button>
             </div>
           </div>
+        </div>
+
+        {/* --- Penambahan Input Jumlah Gambar --- */}
+        <div className="mt-4">
+            <div className="flex items-center gap-x-2 mb-2">
+                <ImageIcon className="h-4 w-4 text-purple-600" />
+                <label htmlFor="batchSize" className="block text-sm font-medium text-gray-600">
+                    Jumlah Gambar (Biaya per gambar: 1 koin)
+                </label>
+            </div>
+            <input
+                type="number"
+                id="batchSize"
+                name="batchSize"
+                min="1"
+                max="10" // Batasi agar tidak terlalu banyak
+                value={settings.batchSize}
+                onChange={handleInputChange}
+                className="w-full p-3 bg-light-bg rounded-lg shadow-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+            />
         </div>
 
         <AdvancedSettings
@@ -83,7 +107,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
             ) : (
               <>
                 <Sparkles className="w-5 h-5 mr-2" />
-                <span>Buat Gambar</span>
+                <span>Buat {settings.batchSize > 1 ? `${settings.batchSize} Gambar` : 'Gambar'}</span>
               </>
             )}
           </button>

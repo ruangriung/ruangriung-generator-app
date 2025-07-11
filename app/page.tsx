@@ -2,6 +2,7 @@
 import { Wand2 } from 'lucide-react';
 import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
+import CoinDisplay from '@/components/CoinDisplay'; // <-- Impor komponen baru
 
 export default function Home() {
   return (
@@ -15,9 +16,10 @@ export default function Home() {
         <p className="text-gray-500 mt-2">Transform your imagination into stunning visuals with AI</p>
       </header>
       
-      {/* Tombol Login/Logout dipindahkan ke sini */}
-      <div className="w-full max-w-4xl flex justify-start mb-4">
+      {/* PERUBAHAN DI SINI: Bungkus tombol dan koin dalam satu div */}
+      <div className="w-full max-w-4xl flex justify-between items-center mb-4">
         <AuthButton />
+        <CoinDisplay />
       </div>
       
       <Tabs />

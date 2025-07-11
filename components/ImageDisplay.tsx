@@ -8,14 +8,23 @@ interface ImageDisplayProps {
   isLoading: boolean;
   imageUrl: string;
   prompt: string;
-  onLoad: () => void;
-  onError: () => void;
+  onLoad?: () => void; // <-- TAMBAHKAN '?'
+  onError?: () => void; // <-- TAMBAHKAN '?'
   onZoomClick: () => void;
   onDownloadClick: () => void;
   onVariationsClick: () => void;
 }
 
-export default function ImageDisplay({ isLoading, imageUrl, prompt, onLoad, onError, onZoomClick, onDownloadClick, onVariationsClick }: ImageDisplayProps) {
+export default function ImageDisplay({ 
+    isLoading, 
+    imageUrl, 
+    prompt, 
+    onLoad, 
+    onError, 
+    onZoomClick, 
+    onDownloadClick, 
+    onVariationsClick 
+}: ImageDisplayProps) {
   const isImageReady = !isLoading && imageUrl;
 
   const [isEditing, setIsEditing] = useState(false);
@@ -40,12 +49,12 @@ export default function ImageDisplay({ isLoading, imageUrl, prompt, onLoad, onEr
       <div className="relative aspect-square w-full bg-light-bg rounded-2xl shadow-neumorphic-inset p-4 flex items-center justify-center">
         {imageUrl && (
           <img
-            key={imageUrl} // Kunci ini SANGAT PENTING untuk memastikan onLoad terpicu
+            key={imageUrl}
             src={imageUrl}
             alt={prompt}
             className={`w-full h-full object-contain rounded-lg transition-all duration-300 ${isLoading ? 'opacity-50' : 'opacity-100'}`}
             style={imageFilterStyle}
-            onLoad={onLoad} // Memanggil fungsi dari parent untuk menghentikan loading
+            onLoad={onLoad} 
             onError={onError}
           />
         )}
@@ -60,7 +69,6 @@ export default function ImageDisplay({ isLoading, imageUrl, prompt, onLoad, onEr
         {isLoading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-40 rounded-xl">
             <Spinner />
-            {/* Tambahkan teks ini untuk umpan balik yang lebih baik */}
             <p className="text-white mt-2 font-semibold">Membuat gambar...</p>
           </div>
         )}
