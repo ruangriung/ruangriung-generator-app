@@ -38,7 +38,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     <>
       <div className="w-full p-6 md:p-8 bg-light-bg rounded-2xl shadow-neumorphic">
         <div>
-          <label htmlFor="prompt" className="block text-sm font-medium text-gray-600 mb-2">Prompt Utama</label>
+          <label htmlFor="prompt" className="block text-sm font-medium text-gray-600 mb-2">Describe your imagination</label>
           <div className="relative w-full">
             <textarea 
               id="prompt" 
