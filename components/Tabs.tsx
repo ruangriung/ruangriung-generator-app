@@ -1,4 +1,3 @@
-// components/Tabs.tsx
 'use client';
 
 import { useState } from 'react';
@@ -9,9 +8,9 @@ import Generator from '@/components/Generator';
 import VideoCreator from '@/components/VideoCreator';
 import AudioGenerator from '@/components/AudioGenerator';
 
-// Komponen Placeholder Konten Terkunci
+// Komponen Placeholder untuk konten yang terkunci
 const LockedContent = () => (
-  <div className="text-center p-8">
+  <div className="w-full p-6 md:p-8 bg-light-bg rounded-2xl shadow-neumorphic text-center">
     <div className="flex flex-col items-center gap-4 text-gray-600">
       <Lock size={48} className="text-purple-600" />
       <h2 className="text-2xl font-bold">Fitur Terkunci</h2>
@@ -46,10 +45,8 @@ export default function Tabs() {
   };
 
   return (
-    // Panel Neumorphic utama yang membungkus semuanya
-    <div className="w-full max-w-4xl p-6 md:p-8 bg-light-bg rounded-2xl shadow-neumorphic">
-      {/* Header Tab di dalam panel */}
-      <div className="p-2 bg-light-bg rounded-xl shadow-neumorphic-inset flex items-center gap-x-2">
+    <div className="w-full max-w-4xl">
+      <div className="p-2 bg-light-bg rounded-xl shadow-neumorphic-inset flex flex-wrap justify-center items-center gap-2">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.name;
@@ -57,7 +54,8 @@ export default function Tabs() {
             <button
               key={tab.name}
               onClick={() => setActiveTab(tab.name)}
-              className={`flex-1 flex items-center justify-center gap-x-2 px-4 py-3 rounded-lg font-semibold transition-all duration-300
+              // PERUBAHAN DI SINI: Tambahkan 'md:flex-1'
+              className={`md:flex-1 flex items-center justify-center gap-x-2 px-4 py-3 rounded-lg font-semibold transition-all duration-300
                 ${
                   isActive
                     ? 'bg-purple-600 text-white shadow-neumorphic-button'
@@ -72,8 +70,7 @@ export default function Tabs() {
         })}
       </div>
 
-      {/* Konten dinamis dengan jarak dari header tab */}
-      <div className="mt-8">
+      <div className="pt-8">
         {activeContent()}
       </div>
     </div>
