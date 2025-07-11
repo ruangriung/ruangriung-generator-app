@@ -6,13 +6,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  
-  // PERUBAHAN UTAMA DI SINI
-  // Cek variabel Vercel dulu, jika tidak ada, baru pakai variabel lokal.
-  url       = env("PRISMA_DATABASE_URL")
-  directUrl = env("DATABASE_URL")
+  provider  = "postgresql"
+  // GUNAKAN NAMA VARIABEL DARI VERCEL
+  url       = env("ruangriung_PRISMA_DATABASE_URL")
+  directUrl = env("ruangriung_DATABASE_URL")
 }
+
 
 
 model User {
