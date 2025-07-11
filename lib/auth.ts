@@ -1,10 +1,9 @@
-// lib/auth.ts
 import type { NextAuthOptions } from 'next-auth';
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 
-// Deklarasi tipe untuk sesi
+// Deklarasi tipe untuk sesi agar TypeScript mengenali 'id' dan 'coins'
 declare module 'next-auth' {
   interface Session {
     user: {
@@ -15,13 +14,12 @@ declare module 'next-auth' {
       coins?: number;
     }
   }
-
   interface User {
     coins?: number;
   }
 }
 
-// Definisikan dan ekspor authOptions dari sini
+// Definisikan dan EKSPOR authOptions dari SATU tempat ini
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [

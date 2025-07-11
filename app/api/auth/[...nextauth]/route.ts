@@ -1,5 +1,5 @@
 import NextAuth from "next-auth";
-import { authOptions } from "@/lib/auth"; // <-- PERUBAHAN DI SINI
+import { authOptions } from "@/lib/auth"; // Impor dari pusat konfigurasi
 
 const handler = NextAuth(authOptions);
 

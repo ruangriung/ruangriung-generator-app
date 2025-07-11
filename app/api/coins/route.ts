@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from "@/lib/auth"; // Impor konfigurasi dari pusat yang sama
+import { authOptions } from "@/lib/auth"; // Impor dari pusat konfigurasi yang sama
 import prisma from '@/lib/prisma';
 
 const GUEST_SESSION_COOKIE = 'ruangriung_guest_session';
