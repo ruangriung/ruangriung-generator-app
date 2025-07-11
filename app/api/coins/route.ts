@@ -1,21 +1,16 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from "@/lib/auth"; // Impor konfigurasi dari pusat yang sama
 import prisma from '@/lib/prisma';
-// Kita tidak lagi memerlukan 'cookies' dari 'next/headers' untuk menghindari kebingungan
 
 const GUEST_SESSION_COOKIE = 'ruangriung_guest_session';
 const TWENTY_FOUR_HOURS_IN_MS = 24 * 60 * 60 * 1000;
 
 async function handleGuestSession(request: NextRequest) {
-  // PERBAIKAN UTAMA: Ambil cookies langsung dari objek 'request'
   const guestSessionId = request.cookies.get(GUEST_SESSION_COOKIE)?.value;
 
   if (guestSessionId) {
-    const guest = await prisma.guestSession.findUnique({
-      where: { id: guestSessionId },
-    });
-
+    const guest = await prisma.guestSession.findUnique({ where: { id: guestSessionId } });
     if (guest) {
       const timeSinceLastUpdate = Date.now() - new Date(guest.updatedAt).getTime();
       if (timeSinceLastUpdate > TWENTY_FOUR_HOURS_IN_MS) {
@@ -47,7 +42,6 @@ export async function GET(request: NextRequest) {
       const user = await prisma.user.findUnique({ where: { id: session.user.id } });
       return NextResponse.json({ coins: user?.coins ?? 0 });
     }
-    // Kirim objek 'request' ke fungsi handler tamu
     return await handleGuestSession(request);
   } catch (error) {
     console.error("!!! [GET /api/coins] CRASH TERDETEKSI !!!", error);
@@ -56,40 +50,39 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  const { amount } = await request.json();
-  const amountToDeduct = Number(amount);
+    const session = await getServerSession(authOptions);
+    const { amount } = await request.json();
+    const amountToDeduct = Number(amount);
 
-  if (!amountToDeduct || amountToDeduct <= 0) {
-    return NextResponse.json({ success: false, error: 'Jumlah tidak valid' }, { status: 400 });
-  }
-
-  if (session?.user) {
-    const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-    if (!user || user.coins < amountToDeduct) {
-      return NextResponse.json({ success: false, error: 'Koin tidak cukup' }, { status: 400 });
+    if (!amountToDeduct || amountToDeduct <= 0) {
+        return NextResponse.json({ success: false, error: 'Jumlah tidak valid' }, { status: 400 });
     }
-    const updatedUser = await prisma.user.update({
-      where: { id: session.user.id },
-      data: { coins: { decrement: amountToDeduct } },
+
+    if (session?.user) {
+        const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+        if (!user || user.coins < amountToDeduct) {
+        return NextResponse.json({ success: false, error: 'Koin tidak cukup' }, { status: 400 });
+        }
+        const updatedUser = await prisma.user.update({
+        where: { id: session.user.id },
+        data: { coins: { decrement: amountToDeduct } },
+        });
+        return NextResponse.json({ success: true, coins: updatedUser.coins });
+    }
+    
+    const guestSessionId = request.cookies.get(GUEST_SESSION_COOKIE)?.value;
+    if (!guestSessionId) {
+        return NextResponse.json({ success: false, error: 'Sesi tamu tidak ditemukan.' }, { status: 400 });
+    }
+
+    const guest = await prisma.guestSession.findUnique({ where: { id: guestSessionId } });
+    if (!guest || guest.coins < amountToDeduct) {
+        return NextResponse.json({ success: false, error: 'Koin tamu tidak cukup' }, { status: 400 });
+    }
+
+    const updatedGuest = await prisma.guestSession.update({
+        where: { id: guestSessionId },
+        data: { coins: { decrement: amountToDeduct } },
     });
-    return NextResponse.json({ success: true, coins: updatedUser.coins });
-  }
-  
-  // PERBAIKAN UTAMA: Ambil cookies langsung dari objek 'request'
-  const guestSessionId = request.cookies.get(GUEST_SESSION_COOKIE)?.value;
-  if (!guestSessionId) {
-    return NextResponse.json({ success: false, error: 'Sesi tamu tidak ditemukan.' }, { status: 400 });
-  }
-
-  const guest = await prisma.guestSession.findUnique({ where: { id: guestSessionId } });
-  if (!guest || guest.coins < amountToDeduct) {
-    return NextResponse.json({ success: false, error: 'Koin tamu tidak cukup' }, { status: 400 });
-  }
-
-  const updatedGuest = await prisma.guestSession.update({
-    where: { id: guestSessionId },
-    data: { coins: { decrement: amountToDeduct } },
-  });
-  return NextResponse.json({ success: true, coins: updatedGuest.coins });
+    return NextResponse.json({ success: true, coins: updatedGuest.coins });
 }
