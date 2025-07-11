@@ -1,9 +1,8 @@
-// app/layout.tsx
-
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import AuthProvider from "@/components/AuthProvider"; // Impor provider
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import AuthProvider from '@/components/AuthProvider';
+import Footer from '@/components/Footer'; // Impor Footer
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,10 +18,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        {/* Bungkus children dengan AuthProvider */}
+      <body className={`${inter.className} bg-light-bg`}>
         <AuthProvider>
-          {children}
+          {/* Main content tetap di sini, tetapi body akan flex column */}
+          <div className="flex flex-col min-h-screen">
+            <main className="flex-grow">
+              {children}
+            </main>
+            {/* Tambahkan Footer di sini */}
+            <Footer />
+          </div>
         </AuthProvider>
       </body>
     </html>
