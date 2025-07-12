@@ -1,10 +1,12 @@
+// components/ControlPanel.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Tambahkan useEffect
 import AdvancedSettings from './AdvancedSettings';
 import ButtonSpinner from './ButtonSpinner';
 import { Sparkles, X, Expand, Shuffle, Save, Wand2 } from 'lucide-react';
 import TextareaModal from './TextareaModal';
+import Accordion from './Accordion'; // Impor Accordion
 
 export interface GeneratorSettings {
   prompt: string;
@@ -31,7 +33,28 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
   const [isRandomizing, setIsRandomizing] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [savedPrompts, setSavedPrompts] = useState<string[]>([]); // State baru untuk prompt yang disimpan
 
+  // Muat prompt dari localStorage saat komponen pertama kali di-mount
+  useEffect(() => {
+    try {
+      const storedPrompts = localStorage.getItem('ruangriung_saved_prompts');
+      if (storedPrompts) {
+        setSavedPrompts(JSON.parse(storedPrompts));
+      }
+    } catch (error) {
+      console.error("Gagal memuat prompt tersimpan:", error);
+    }
+  }, []);
+
+  // Simpan prompt ke localStorage setiap kali savedPrompts berubah
+  useEffect(() => {
+    try {
+      localStorage.setItem('ruangriung_saved_prompts', JSON.stringify(savedPrompts));
+    } catch (error) {
+      console.error("Gagal menyimpan prompt:", error);
+    }
+  }, [savedPrompts]);
 
   const handleClearPrompt = () => {
     setSettings(prev => ({ ...prev, prompt: '' }));
@@ -47,8 +70,6 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          // --- PERBAIKAN UTAMA DI SINI ---
-          // Mengganti model yang salah dengan model yang benar sesuai dokumentasi
           model: 'openai', 
           messages: [{ role: 'user', content: promptForApi }],
         }),
@@ -91,15 +112,31 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     }
     setIsSaving(true);
     try {
-      const savedPrompts = JSON.parse(localStorage.getItem('ruangriung_saved_prompts') || '[]');
-      if (!savedPrompts.includes(settings.prompt)) {
-        const newSavedPrompts = [settings.prompt, ...savedPrompts].slice(0, 50);
-        localStorage.setItem('ruangriung_saved_prompts', JSON.stringify(newSavedPrompts));
-      }
+      // Gunakan Set untuk memastikan keunikan dan mempertahankan urutan (terbaru di depan)
+      const updatedPrompts = new Set([settings.prompt, ...savedPrompts]);
+      const newSavedPromptsArray = Array.from(updatedPrompts).slice(0, 50); // Batasi hingga 50 prompt terbaru
+      setSavedPrompts(newSavedPromptsArray); // Perbarui state, yang akan memicu penyimpanan ke localStorage
     } catch (error) {
       alert("Gagal menyimpan prompt.");
+      console.error("Error saving prompt:", error);
     } finally {
       setTimeout(() => setIsSaving(false), 1500);
+    }
+  };
+
+  const handleSelectSavedPrompt = (prompt: string) => {
+    setSettings(prev => ({ ...prev, prompt }));
+  };
+
+  const handleDeleteSavedPrompt = (promptToDelete: string) => {
+    if (window.confirm("Yakin ingin menghapus prompt ini?")) {
+      setSavedPrompts(prev => prev.filter(p => p !== promptToDelete));
+    }
+  };
+
+  const handleClearAllSavedPrompts = () => {
+    if (window.confirm("Yakin ingin menghapus semua prompt yang disimpan?")) {
+      setSavedPrompts([]);
     }
   };
   
@@ -150,6 +187,30 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
                 <Save size={16} /> <span>{isSaving ? 'Tersimpan!' : 'Simpan'}</span>
             </button>
         </div>
+
+        {/* --- Bagian Baru untuk Prompt Tersimpan --- */}
+        {savedPrompts.length > 0 && (
+            <Accordion title={<div className="flex items-center gap-2"><Save size={16} className="text-purple-600" />Prompt Tersimpan ({savedPrompts.length})</div>}>
+                <div className="flex justify-end mb-4">
+                    <button onClick={handleClearAllSavedPrompts} className="text-sm text-red-500 hover:underline">
+                        Hapus Semua
+                    </button>
+                </div>
+                <ul className="space-y-3">
+                    {savedPrompts.map((prompt, index) => (
+                        <li key={index} className="flex justify-between items-center bg-white p-3 rounded-lg shadow-md cursor-pointer hover:bg-gray-50 transition-colors">
+                            <span onClick={() => handleSelectSavedPrompt(prompt)} className="flex-grow text-sm text-gray-700 truncate mr-4">
+                                {prompt}
+                            </span>
+                            <button onClick={() => handleDeleteSavedPrompt(prompt)} className="p-1 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200" title="Hapus">
+                                <X size={16} />
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            </Accordion>
+        )}
+        {/* --- Akhir Bagian Baru --- */}
 
 
         <div className="mt-8 text-center">
