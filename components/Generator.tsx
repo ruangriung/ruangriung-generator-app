@@ -1,4 +1,4 @@
-// app/components/Generator.tsx
+// components/Generator.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -22,7 +22,7 @@ export default function Generator() {
 
   const [imageUrl, setImageUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [modelList, setModelList] = useState<string[]>([]); // State untuk daftar model
+  const [modelList, setModelList] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Kotak');
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -51,15 +51,11 @@ export default function Generator() {
       try {
         const response = await fetch('https://image.pollinations.ai/models');
         if (!response.ok) {
-          // Jika gagal mengambil model dari API, lempar error
           throw new Error(`Gagal mengambil model: ${response.statusText}`);
         }
         const data = await response.json();
         let fetchedModels: string[] = [];
 
-        // Asumsi struktur respons: bisa berupa array string langsung,
-        // atau objek dengan kunci 'models' yang berisi array string,
-        // atau objek dengan kunci 'image' yang berisi array string.
         if (Array.isArray(data)) {
           fetchedModels = data;
         } else if (data && typeof data === 'object' && Array.isArray(data.models)) {
@@ -68,32 +64,27 @@ export default function Generator() {
             fetchedModels = data.image; 
         } else {
           console.warn("Struktur data model tidak terduga:", data);
-          // Fallback jika struktur tidak sesuai, gunakan model default 'flux' dan 'turbo'
           fetchedModels = ['flux', 'turbo'];
         }
 
         if (fetchedModels.length > 0) {
           setModelList(fetchedModels);
-          // Atur model default ke yang pertama dari daftar yang diambil, jika model saat ini tidak ada
           if (!fetchedModels.includes(settings.model)) {
             setSettings(prev => ({ ...prev, model: fetchedModels[0] }));
           }
         } else {
-            // Jika API mengembalikan daftar kosong, gunakan daftar default 'flux' dan 'turbo'
             setModelList(['flux', 'turbo']);
             alert("Model sementara gagal dimuat dari API. Menggunakan model fallback.");
         }
       } catch (error) {
         console.error("Error mengambil model gambar:", error);
-        // Notifikasi ke pengguna jika gagal memuat model dari API
         alert("Model sementara gagal dimuat dari API. Menggunakan model fallback.");
-        // Daftar model fallback jika terjadi error pengambilan
         setModelList(['flux', 'turbo']);
       }
     };
 
     fetchImageModels();
-  }, []); // Array dependensi kosong berarti efek ini hanya berjalan sekali saat mount
+  }, []);
 
   const addToHistory = (newItem: HistoryItem) => {
     setHistory(prev => [newItem, ...prev.filter(i => i.imageUrl !== newItem.imageUrl)].slice(0, 15));
@@ -129,14 +120,24 @@ export default function Generator() {
       });
       const finalUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?${params.toString()}`;
       
-      const imageResponse = await fetch(finalUrl);
-      if (!imageResponse.ok) throw new Error('Gagal mengambil gambar dari API Pollinations.');
+      // Tetap lakukan fetch untuk menunggu respons dari API
+      // Ini juga memungkinkan penanganan error jika API tidak mengembalikan gambar yang valid
+      const imageResponse = await fetch(finalUrl); 
+      if (!imageResponse.ok) {
+        // Jika respons tidak OK, kita bisa mencoba untuk membaca body sebagai teks error
+        const errorText = await imageResponse.text();
+        throw new Error(`Gagal mengambil gambar dari API Pollinations: ${imageResponse.status} - ${errorText}`);
+      }
 
-      const imageBlob = await imageResponse.blob();
-      const objectURL = URL.createObjectURL(imageBlob);
-
-      setImageUrl(objectURL);
-      addToHistory({ imageUrl: objectURL, prompt: settings.prompt, timestamp: Date.now() });
+      // Pastikan respons adalah gambar. Jika tidak, bisa jadi error dari API (meskipun status OK)
+      const contentType = imageResponse.headers.get('content-type');
+      if (!contentType || !contentType.startsWith('image/')) {
+        throw new Error('Respons API bukan gambar atau tipe konten tidak valid.');
+      }
+      
+      // Jika berhasil, setel imageUrl ke URL permanen dan tambahkan ke riwayat
+      setImageUrl(finalUrl); 
+      addToHistory({ imageUrl: finalUrl, prompt: settings.prompt, timestamp: Date.now() });
 
     } catch (error: any) {
       alert(`Terjadi kesalahan: ${error.message}`);
@@ -149,7 +150,7 @@ export default function Generator() {
       if (!imageUrl) return;
       try {
           const a = document.createElement('a');
-          a.href = imageUrl;
+          a.href = imageUrl; 
           a.download = `${settings.prompt.substring(0, 30)}_${Date.now()}.png`;
           document.body.appendChild(a);
           a.click();
@@ -160,7 +161,7 @@ export default function Generator() {
   };
 
   const handleSelectFromHistory = (item: HistoryItem) => {
-    setImageUrl(item.imageUrl);
+    setImageUrl(item.imageUrl); 
     setSettings(prev => ({ ...prev, prompt: item.prompt }));
   };
   
@@ -178,13 +179,13 @@ export default function Generator() {
           setSettings={setSettings}
           onGenerate={handleGenerateImage}
           isLoading={isLoading}
-          models={modelList} // Meneruskan daftar model yang sudah diambil
+          models={modelList}
           aspectRatio={aspectRatio}
           onAspectRatioChange={setAspectRatio}
         />
         <ImageDisplay
           isLoading={isLoading}
-          imageUrl={imageUrl}
+          imageUrl={imageUrl} 
           prompt={settings.prompt}
           onZoomClick={() => setIsModalOpen(true)}
           onDownloadClick={handleDownloadImage}
@@ -193,7 +194,7 @@ export default function Generator() {
         <ImageModal 
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          imageUrl={imageUrl}
+          imageUrl={imageUrl} 
         />
       </div>
 

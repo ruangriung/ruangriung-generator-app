@@ -37,13 +37,23 @@ export default function AuthButton() {
   }
 
   return (
-    // Tombol login dengan gaya neumorphic
-    <button 
-      onClick={() => signIn('google')} 
-      className="inline-flex items-center justify-center px-4 py-3 bg-light-bg text-gray-700 font-bold rounded-lg shadow-neumorphic-button active:shadow-neumorphic-inset transition-all duration-150"
-    >
-      <img src="/google-icon.svg" alt="Google logo" className="w-5 h-5 mr-3" />
-      <span>Login dengan Google</span>
-    </button>
+    <div className="flex flex-wrap justify-center gap-4"> {/* Kontainer untuk beberapa tombol login */}
+      <button 
+        onClick={() => signIn('google')} 
+        className="inline-flex items-center justify-center px-4 py-3 bg-light-bg text-gray-700 font-bold rounded-lg shadow-neumorphic-button active:shadow-neumorphic-inset transition-all duration-150"
+      >
+        <img src="/google-icon.svg" alt="Google logo" className="w-5 h-5 mr-3" />
+        <span>Login dengan Google</span>
+      </button>
+      {/* Tombol Login Facebook yang baru */}
+      <button 
+        onClick={() => signIn('facebook')} 
+        className="inline-flex items-center justify-center px-4 py-3 bg-light-bg text-gray-700 font-bold rounded-lg shadow-neumorphic-button active:shadow-neumorphic-inset transition-all duration-150"
+      >
+        {/* Anda perlu memastikan ada file /facebook-icon.svg di folder public Anda */}
+        <img src="/facebook-icon.svg" alt="Facebook logo" className="w-5 h-5 mr-3" />
+        <span>Login dengan Facebook</span>
+      </button>
+    </div>
   );
 }
