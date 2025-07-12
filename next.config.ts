@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+        { // Tambahkan pola ini untuk avatar Facebook
+        protocol: 'https',
+        hostname: 'platform-lookaside.fbsbx.com',
+        port: '',
+        pathname: '/**',
+        },
     ],
   },
 }
