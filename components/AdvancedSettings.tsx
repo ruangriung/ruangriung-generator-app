@@ -10,22 +10,40 @@ interface AdvancedSettingsProps {
   settings: GeneratorSettings;
   setSettings: React.Dispatch<React.SetStateAction<GeneratorSettings>>;
   models: string[];
-  aspectRatio: string;
+  aspectRatio: 'Kotak' | 'Portrait' | 'Lansekap' | 'Custom'; // <--- PERUBAHAN: Tambahkan 'Custom'
   onAspectRatioChange: (preset: 'Kotak' | 'Portrait' | 'Lansekap') => void;
-  className?: string; // <--- TAMBAH BARIS INI
+  onManualDimensionChange: (width: number, height: number) => void; // <--- PERUBAHAN BARU: Tambahkan prop ini
+  className?: string;
 }
 
-export default function AdvancedSettings({ settings, setSettings, models, aspectRatio, onAspectRatioChange, className }: AdvancedSettingsProps) { // <--- TAMBAH 'className' DI SINI
+export default function AdvancedSettings({ settings, setSettings, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, className }: AdvancedSettingsProps) { // <--- PERUBAHAN: Tambahkan prop baru di sini
+  // <--- PERUBAHAN: Fungsi ini sekarang memanggil onManualDimensionChange untuk width/height
   const handleSettingChange = (field: keyof GeneratorSettings, value: string | number) => {
-    setSettings(prev => ({ ...prev, [field]: value }));
+    if (field === 'width' || field === 'height') {
+      const numValue = parseInt(value as string, 10);
+      if (isNaN(numValue) || numValue <= 0) { // Validasi dasar
+        // Opsional: Anda bisa menambahkan feedback ke user atau mengatur nilai default
+        return;
+      }
+      // Panggil fungsi baru untuk memperbarui dimensi DAN memeriksa preset
+      if (field === 'width') {
+        onManualDimensionChange(numValue, settings.height);
+      } else { // field === 'height'
+        onManualDimensionChange(settings.width, numValue);
+      }
+    } else {
+      // Untuk pengaturan lain (model, seed, artStyle, batchSize)
+      setSettings(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   const inputStyle = "w-full p-3 bg-light-bg rounded-lg shadow-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow";
   const selectStyle = `${inputStyle} appearance-none`;
   
-  const presetButtonStyle = (isActive: boolean) => 
+  // <--- PERUBAHAN: Sesuaikan logika presetButtonStyle
+  const presetButtonStyle = (presetName: 'Kotak' | 'Portrait' | 'Lansekap') => 
     `px-4 py-2 rounded-lg transition-all duration-200 font-medium ${
-      isActive 
+      aspectRatio === presetName // Sekarang cek langsung terhadap prop aspectRatio
         ? 'bg-purple-600 text-white shadow-neumorphic-button'
         : 'bg-light-bg text-gray-700 shadow-neumorphic-button'
     }`;
@@ -40,7 +58,7 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
   );
 
   return (
-    <details className={`w-full group ${className || ''}`}> {/* <--- TERAPKAN 'className' DI SINI */}
+    <details className={`w-full group ${className || ''}`}>
       <summary className="flex items-center justify-between p-4 bg-light-bg rounded-lg cursor-pointer list-none shadow-neumorphic-button transition-shadow">
         <div className="flex items-center gap-x-2">
           <Settings className="w-5 h-5 text-purple-600" />
@@ -57,9 +75,9 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
         <div className="mb-6">
           <label className="block text-center text-sm font-medium text-gray-600 mb-2">Preset Aspek Rasio</label>
           <div className="flex justify-center gap-4">
-            <button onClick={() => onAspectRatioChange('Kotak')} className={presetButtonStyle(aspectRatio === 'Kotak')}>Kotak</button>
-            <button onClick={() => onAspectRatioChange('Portrait')} className={presetButtonStyle(aspectRatio === 'Portrait')}>Portrait</button>
-            <button onClick={() => onAspectRatioChange('Lansekap')} className={presetButtonStyle(aspectRatio === 'Lansekap')}>Lansekap</button>
+            <button onClick={() => onAspectRatioChange('Kotak')} className={presetButtonStyle('Kotak')}>Kotak</button>
+            <button onClick={() => onAspectRatioChange('Portrait')} className={presetButtonStyle('Portrait')}>Portrait</button>
+            <button onClick={() => onAspectRatioChange('Lansekap')} className={presetButtonStyle('Lansekap')}>Lansekap</button>
           </div>
         </div>
         <hr className="my-6 border-gray-300" />

@@ -67,9 +67,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>{/* <--- Tambahkan tag <head> di sini */}
-        <link rel="manifest" href="/manifest.json" /> {/* <--- Tambahkan ini */}
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" /> {/* Opsional: untuk iOS */}
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className={`${inter.className} bg-light-bg`}>
         <AuthProvider>

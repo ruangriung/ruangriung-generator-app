@@ -8,7 +8,7 @@ import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUp
 import TextareaModal from './TextareaModal';
 import Accordion from './Accordion';
 import PromptAssistant from './PromptAssistant';
-import TranslationAssistant from './TranslationAssistant'; // <--- TAMBAHKAN INI
+import TranslationAssistant from './TranslationAssistant';
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
 
 
@@ -28,11 +28,12 @@ interface ControlPanelProps {
   onGenerate: () => void;
   isLoading: boolean;
   models: string[];
-  aspectRatio: string;
+  aspectRatio: 'Kotak' | 'Portrait' | 'Lansekap' | 'Custom'; // <--- PERUBAHAN: Sesuaikan tipe
   onAspectRatioChange: (preset: 'Kotak' | 'Portrait' | 'Lansekap') => void;
+  onManualDimensionChange: (width: number, height: number) => void; // <--- PERUBAHAN BARU: Tambahkan prop ini
 }
 
-export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange }: ControlPanelProps) {
+export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange }: ControlPanelProps) { // <--- PERUBAHAN: Tambahkan prop baru di sini
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRandomizing, setIsRandomizing] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
@@ -185,11 +186,9 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
           onUsePrompt={(newPrompt) => setSettings(prev => ({ ...prev, prompt: newPrompt }))} 
         />
         
-        {/* <--- TAMBAHKAN KOMPONEN TRANSLATIONASSISTANT DI SINI --- */}
         <TranslationAssistant
           onUsePrompt={(newPrompt) => setSettings(prev => ({ ...prev, prompt: newPrompt }))}
         />
-        {/* <---------------------------------------------------> */}
 
         <AdvancedSettings
           settings={settings}
@@ -197,6 +196,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
           models={models}
           aspectRatio={aspectRatio}
           onAspectRatioChange={onAspectRatioChange}
+          onManualDimensionChange={onManualDimensionChange}
           className="mt-4"
         />
 

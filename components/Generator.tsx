@@ -7,11 +7,11 @@ import ImageDisplay from './ImageDisplay';
 import ImageModal from './ImageModal';
 import HistoryPanel, { HistoryItem } from './HistoryPanel';
 
-type AspectRatioPreset = 'Kotak' | 'Portrait' | 'Lansekap';
+type AspectRatioPreset = 'Kotak' | 'Portrait' | 'Lansekap' | 'Custom'; // <--- PERUBAHAN: Tambahkan 'Custom'
 
 export default function Generator() {
   const [settings, setSettings] = useState<GeneratorSettings>({
-    prompt: 'Kastil fantasi di atas awan',
+    prompt: 'Spiderman in a futuristic city',
     model: 'flux', // Default model
     width: 1024,
     height: 1024,
@@ -24,7 +24,7 @@ export default function Generator() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [modelList, setModelList] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Kotak');
+  const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Kotak'); // <--- PERUBAHAN: Inisialisasi dengan 'Kotak'
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
 
@@ -88,6 +88,38 @@ export default function Generator() {
 
   const addToHistory = (newItem: HistoryItem) => {
     setHistory(prev => [newItem, ...prev.filter(i => i.imageUrl !== newItem.imageUrl)].slice(0, 15));
+  };
+
+  // <--- PERUBAHAN: Fungsi ini dipanggil saat tombol preset diklik
+  const onAspectRatioChange = (preset: 'Kotak' | 'Portrait' | 'Lansekap') => {
+    setAspectRatio(preset);
+    switch (preset) {
+      case 'Kotak':
+        setSettings(prev => ({ ...prev, width: 1024, height: 1024 }));
+        break;
+      case 'Portrait':
+        setSettings(prev => ({ ...prev, width: 1792, height: 1024 }));
+        break;
+      case 'Lansekap':
+        setSettings(prev => ({ ...prev, width: 1024, height: 1792 }));
+        break;
+    }
+  };
+
+  // <--- PERUBAHAN BARU: Fungsi ini dipanggil saat input width/height diubah secara manual
+  const handleManualDimensionChange = (newWidth: number, newHeight: number) => {
+    setSettings(prev => ({ ...prev, width: newWidth, height: newHeight }));
+
+    // Cek apakah dimensi baru cocok dengan preset yang ada
+    if (newWidth === 1024 && newHeight === 1024) {
+      setAspectRatio('Kotak');
+    } else if (newWidth === 1792 && newHeight === 1024) {
+      setAspectRatio('Portrait');
+    } else if (newWidth === 1024 && newHeight === 1792) {
+      setAspectRatio('Lansekap');
+    } else {
+      setAspectRatio('Custom'); // Jika tidak ada preset yang cocok, atur ke 'Custom'
+    }
   };
 
   const handleGenerateImage = async () => {
@@ -181,7 +213,8 @@ export default function Generator() {
           isLoading={isLoading}
           models={modelList}
           aspectRatio={aspectRatio}
-          onAspectRatioChange={setAspectRatio}
+          onAspectRatioChange={onAspectRatioChange}
+          onManualDimensionChange={handleManualDimensionChange}
         />
         <ImageDisplay
           isLoading={isLoading}
