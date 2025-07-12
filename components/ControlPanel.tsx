@@ -9,7 +9,7 @@ import TextareaModal from './TextareaModal';
 import Accordion from './Accordion';
 import PromptAssistant from './PromptAssistant';
 import TranslationAssistant from './TranslationAssistant';
-import toast from 'react-hot-toast'; // <--- Tambahkan ini
+import toast from 'react-hot-toast';
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
 
 
@@ -41,6 +41,8 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
   const [isSaving, setIsSaving] = useState(false);
   const [savedPrompts, setSavedPrompts] = useState<string[]>([]);
 
+  // Hapus state 'isHistoryLoaded' karena ini milik Generator.tsx
+  // Hapus useEffect untuk memuat riwayat karena ini milik Generator.tsx
   useEffect(() => {
     try {
       const storedPrompts = localStorage.getItem('ruangriung_saved_prompts');
@@ -52,6 +54,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     }
   }, []);
 
+  // Hapus useEffect untuk menyimpan riwayat karena ini milik Generator.tsx
   useEffect(() => {
     try {
       localStorage.setItem('ruangriung_saved_prompts', JSON.stringify(savedPrompts));
@@ -87,12 +90,12 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       const result = await response.json();
       const newPrompt = result.choices[0].message.content.replace(/"/g, '');
       setSettings(prev => ({ ...prev, prompt: newPrompt }));
-      return newPrompt; // Mengembalikan prompt baru agar bisa digunakan di toast.promise
+      return newPrompt;
     } catch (error: any) {
       console.error("Gagal memanggil API prompt:", error);
-      toast.error(`Terjadi kesalahan saat berkomunikasi dengan AI: ${error.message}`); // <--- PERUBAHAN
+      toast.error(`Terjadi kesalahan saat berkomunikasi dengan AI: ${error.message}`);
       setSettings(prev => ({ ...prev, prompt: "Gagal menghasilkan prompt. Silakan coba lagi." }));
-      throw error; // Lempar kembali error agar promise tertolak
+      throw error;
     }
   };
 
@@ -110,7 +113,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
   const handleEnhancePrompt = async () => {
     if (!settings.prompt) {
-      toast.error("Tuliskan prompt terlebih dahulu untuk disempurnakan!"); // <--- PERUBAHAN
+      toast.error("Tuliskan prompt terlebih dahulu untuk disempurnakan!");
       return;
     }
     setIsEnhancing(true);
@@ -126,7 +129,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
   
   const handleSavePrompt = () => {
     if (!settings.prompt) {
-      toast.error("Tidak ada prompt untuk disimpan!"); // <--- PERUBAHAN
+      toast.error("Tidak ada prompt untuk disimpan!");
       return;
     }
     setIsSaving(true);
@@ -134,9 +137,9 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       const updatedPrompts = new Set([settings.prompt, ...savedPrompts]);
       const newSavedPromptsArray = Array.from(updatedPrompts).slice(0, 50);
       setSavedPrompts(newSavedPromptsArray);
-      toast.success("Prompt berhasil disimpan!"); // <--- PERUBAHAN
+      toast.success("Prompt berhasil disimpan!");
     } catch (error) {
-      toast.error("Gagal menyimpan prompt."); // <--- PERUBAHAN
+      toast.error("Gagal menyimpan prompt.");
       console.error("Error saving prompt:", error);
     } finally {
       setTimeout(() => setIsSaving(false), 1500);
@@ -145,56 +148,56 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
   const handleSelectSavedPrompt = (prompt: string) => {
     setSettings(prev => ({ ...prev, prompt }));
-    toast.success("Prompt dimuat dari riwayat!"); // <--- PERUBAHAN
+    toast.success("Prompt dimuat dari riwayat!");
   };
 
   const handleDeleteSavedPrompt = (promptToDelete: string) => {
     if (window.confirm("Yakin ingin menghapus prompt ini?")) {
       setSavedPrompts(prev => prev.filter(p => p !== promptToDelete));
-      toast.success("Prompt berhasil dihapus!"); // <--- PERUBAHAN
+      toast.success("Prompt berhasil dihapus!");
     }
   };
 
   const handleClearAllSavedPrompts = () => {
     if (window.confirm("Yakin ingin menghapus semua prompt yang disimpan?")) {
       setSavedPrompts([]);
-      toast.success("Semua prompt tersimpan berhasil dihapus!"); // <--- PERUBAHAN
+      toast.success("Semua prompt tersimpan berhasil dihapus!");
     }
   };
   
-  const featureButtonStyle = "flex-1 inline-flex items-center justify-center gap-x-2 px-3 py-2 bg-light-bg text-gray-600 font-semibold rounded-lg shadow-neumorphic-button active:shadow-neumorphic-inset transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed";
-  const inputStyle = "w-full p-3 bg-light-bg rounded-lg shadow-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow";
+  const featureButtonStyle = "flex-1 inline-flex items-center justify-center gap-x-2 px-3 py-2 bg-light-bg dark:bg-dark-bg text-gray-600 dark:text-gray-300 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed";
+  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
   const selectStyle = `${inputStyle} appearance-none`;
 
   const LabelWithIcon = ({ icon: Icon, text, htmlFor }: { icon: React.ElementType, text: string, htmlFor: string }) => (
     <div className="flex items-center gap-x-2 mb-2">
       <Icon className="h-4 w-4 text-purple-600" />
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600">
+      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600 dark:text-gray-300">
         {text}
       </label>
     </div>
   );
 
   return (
-    <>
-      <div className="w-full p-6 md:p-8 bg-light-bg rounded-2xl shadow-neumorphic">
+    <> {/* Fragment utama */}
+      <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
         <div>
-          <label htmlFor="prompt" className="block text-sm font-medium text-gray-600 mb-2">Describe your imagination</label>
+          <label htmlFor="prompt" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Describe your imagination</label>
           <div className="relative w-full">
             <textarea
               id="prompt"
+              className="w-full p-3 pr-20 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 h-24 resize-none text-gray-800 dark:text-gray-200"
               value={settings.prompt}
               onChange={(e) => setSettings(prev => ({ ...prev, prompt: e.target.value }))}
               placeholder="Ketikkan imajinasimu atau gunakan tombol bantuan di bawah..."
-              className="w-full p-3 pr-20 bg-light-bg rounded-lg shadow-neumorphic-inset border-0 h-24 resize-none"
             />
             <div className="absolute top-2 right-2 flex gap-x-1">
               {settings.prompt && (
-                <button onClick={handleClearPrompt} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 transition-colors" title="Hapus Prompt">
+                <button onClick={handleClearPrompt} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus Prompt">
                   <X size={18} />
                 </button>
               )}
-              <button onClick={() => setIsModalOpen(true)} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 transition-colors" title="Perbesar Textarea">
+              <button onClick={() => setIsModalOpen(true)} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar Textarea">
                 <Expand size={18} />
               </button>
             </div>
@@ -219,7 +222,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
           className="mt-4"
         />
 
-        <div className="mt-4 pt-4 border-t border-gray-300 flex flex-row flex-wrap justify-center items-center gap-3">
+        <div className="mt-4 pt-4 border-t border-gray-300 dark:border-gray-600 flex flex-row flex-wrap justify-center items-center gap-3">
             <button onClick={handleRandomPrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing}>
                 {isRandomizing ? <ButtonSpinner /> : <Shuffle size={16} />} <span>Acak</span>
             </button>
@@ -242,12 +245,13 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
                     </button>
                 </div>
                 <ul className="space-y-3">
+                    {/* <--- PERBAIKAN UTAMA DI SINI: Pindahkan li ke dalam map */}
                     {savedPrompts.map((prompt, index) => (
-                        <li key={index} className="flex justify-between items-center bg-white p-3 rounded-lg shadow-md cursor-pointer hover:bg-gray-50 transition-colors">
-                            <span onClick={() => handleSelectSavedPrompt(prompt)} className="flex-grow text-sm text-gray-700 truncate mr-4">
+                        <li key={index} className="flex justify-between items-center bg-white dark:bg-gray-700 p-3 rounded-lg shadow-md dark:shadow-dark-neumorphic cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                            <span onClick={() => handleSelectSavedPrompt(prompt)} className="flex-grow text-sm text-gray-700 dark:text-gray-200 truncate mr-4">
                                 {prompt}
                             </span>
-                            <button onClick={() => handleDeleteSavedPrompt(prompt)} className="p-1 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200" title="Hapus">
+                            <button onClick={() => handleDeleteSavedPrompt(prompt)} className="p-1 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" title="Hapus">
                                 <X size={16} />
                             </button>
                         </li>
@@ -259,8 +263,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
         <div className="mt-4 text-center">
           <button
             onClick={onGenerate}
-            disabled={isLoading}
-            className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150"
+            className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150"
           >
             {isLoading ? (
               <>

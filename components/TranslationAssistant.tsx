@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Languages, Copy, Check, Sparkles } from 'lucide-react';
 import Accordion from './Accordion';
 import ButtonSpinner from './ButtonSpinner';
-import toast from 'react-hot-toast'; // <--- Tambahkan ini
+import toast from 'react-hot-toast';
 
 interface TranslationAssistantProps {
   onUsePrompt: (prompt: string) => void;
@@ -19,14 +19,16 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
   const [isLoading, setIsLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
-  const inputStyle = "w-full p-3 bg-light-bg rounded-lg shadow-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow";
+  // <--- PERUBAHAN: inputStyle, textareaStyle, selectStyle sekarang punya dark variant
+  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
   const textareaStyle = `${inputStyle} resize-none`;
   const selectStyle = `${inputStyle} appearance-none`;
 
+  // <--- PERUBAHAN: LabelWithIcon class text
   const LabelWithIcon = ({ icon: Icon, text, htmlFor }: { icon: React.ElementType, text: string, htmlFor: string }) => (
     <div className="flex items-center gap-x-2 mb-2">
       <Icon className="h-4 w-4 text-purple-600" />
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600">
+      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600 dark:text-gray-300"> {/* <--- PERUBAHAN */}
         {text}
       </label>
     </div>
@@ -34,7 +36,7 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
 
   const handleTranslate = async () => {
     if (!inputText.trim()) {
-      toast.error("Teks yang akan diterjemahkan tidak boleh kosong!"); // <--- PERUBAHAN
+      toast.error("Teks yang akan diterjemahkan tidak boleh kosong!");
       return;
     }
     setIsLoading(true);
@@ -68,11 +70,11 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
       const result = await response.json();
       const newTranslatedText = result.choices[0].message.content.trim();
       setTranslatedText(newTranslatedText);
-      toast.success("Teks berhasil diterjemahkan!"); // <--- PERUBAHAN
+      toast.success("Teks berhasil diterjemahkan!");
 
     } catch (error: any) {
       console.error("Gagal melakukan terjemahan:", error);
-      toast.error(`Terjadi kesalahan saat terjemahan: ${error.message}`); // <--- PERUBAHAN
+      toast.error(`Terjadi kesalahan saat terjemahan: ${error.message}`);
       setTranslatedText("Gagal menerjemahkan teks. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
@@ -83,7 +85,7 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
     if (translatedText) {
       navigator.clipboard.writeText(translatedText);
       setIsCopied(true);
-      toast.success("Teks terjemahan berhasil disalin!"); // <--- PERUBAHAN
+      toast.success("Teks terjemahan berhasil disalin!");
       setTimeout(() => setIsCopied(false), 2000);
     }
   };
@@ -91,7 +93,7 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
   const handleUseTranslatedPrompt = () => {
     if (translatedText) {
       onUsePrompt(translatedText);
-      toast.success("Teks terjemahan telah digunakan di kolom utama!"); // <--- PERUBAHAN
+      toast.success("Teks terjemahan telah digunakan di kolom utama!");
     }
   };
 
@@ -100,10 +102,11 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
     setTargetLanguage(sourceLanguage);
     setInputText(translatedText);
     setTranslatedText('');
-    toast('Bahasa ditukar!', { icon: '🔄' }); // <--- PERUBAHAN: Toast singkat
+    toast('Bahasa ditukar!', { icon: '🔄' });
   };
 
   return (
+    // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg dan dark:shadow-dark-neumorphic
     <Accordion title={<div className="flex items-center gap-2"><Languages className="text-purple-600" />Asisten Terjemahan</div>} className="mt-6">
       <div className="space-y-4">
         <div className="flex items-center gap-4">
@@ -118,15 +121,17 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
                   setTargetLanguage(e.target.value === 'id' ? 'en' : 'id');
                 }
               }}
-              className={inputStyle}
+              className={selectStyle}
             >
-              <option value="id">Bahasa Indonesia</option>
-              <option value="en">Bahasa Inggris</option>
+              {/* <--- PERUBAHAN: option style */}
+              <option value="id" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Bahasa Indonesia</option>
+              <option value="en" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Bahasa Inggris</option>
             </select>
           </div>
           <button
             onClick={swapLanguages}
-            className="mt-7 p-2 bg-light-bg rounded-lg shadow-neumorphic-button active:shadow-neumorphic-inset text-gray-700 hover:text-purple-600 transition-all duration-150"
+            // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg, dark:shadow-dark-neumorphic-button, dark:active:shadow-dark-neumorphic-inset, dark:text-gray-300, dark:hover:text-purple-500
+            className="mt-7 p-2 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-500 transition-all duration-150"
             aria-label="Tukar Bahasa"
           >
             <Sparkles size={16} />
@@ -142,10 +147,11 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
                   setSourceLanguage(e.target.value === 'id' ? 'en' : 'id');
                 }
               }}
-              className={inputStyle}
+              className={selectStyle}
             >
-              <option value="en">Bahasa Inggris</option>
-              <option value="id">Bahasa Indonesia</option>
+              {/* <--- PERUBAHAN: option style */}
+              <option value="en" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Bahasa Inggris</option>
+              <option value="id" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Bahasa Indonesia</option>
             </select>
           </div>
         </div>
@@ -166,7 +172,8 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
           <button
             onClick={handleTranslate}
             disabled={isLoading || !inputText.trim()}
-            className="inline-flex items-center justify-center px-6 py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150"
+            // <--- PERUBAHAN: Tambahkan dark:active:shadow-dark-neumorphic-button-active
+            className="inline-flex items-center justify-center px-6 py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150"
           >
             {isLoading ? <ButtonSpinner /> : <Languages className="w-5 h-5 mr-2" />}
             <span>Terjemahkan</span>
@@ -174,23 +181,26 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
         </div>
 
         {translatedText && (
-          <div className="mt-4 p-4 bg-light-bg rounded-lg shadow-neumorphic-inset">
-            <label className="block text-sm font-medium text-gray-600 mb-2">Hasil Terjemahan:</label>
+          // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg dan dark:shadow-dark-neumorphic-inset
+          <div className="mt-4 p-4 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset">
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Hasil Terjemahan:</label> {/* <--- PERUBAHAN */}
             <textarea
               readOnly
               value={translatedText}
-              className={`${textareaStyle} h-32`}
+              className={`${textareaStyle}`}
             />
             <div className="flex justify-end gap-3 mt-3">
               <button
                 onClick={handleCopyTranslatedPrompt}
-                className={`inline-flex items-center px-4 py-2 bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-neumorphic-button active:shadow-neumorphic-inset transition-all ${isCopied ? '!bg-green-200 text-green-700' : ''}`}
+                // <--- PERUBAHAN: Tambahkan dark:bg-gray-700, dark:text-gray-200, dark:active:shadow-dark-neumorphic-inset, dark:hover:bg-gray-600
+                className={`inline-flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all ${isCopied ? '!bg-green-200 text-green-700' : ''} hover:bg-gray-400 dark:hover:bg-gray-600`}
               >
                 {isCopied ? <><Check size={16} className="mr-2" />Tersalin!</> : <><Copy size={16} className="mr-2" />Salin Teks</>}
               </button>
               <button
                 onClick={handleUseTranslatedPrompt}
-                className="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-neumorphic-button active:shadow-neumorphic-inset"
+                // <--- PERUBAHAN: Tambahkan dark:active:shadow-dark-neumorphic-inset
+                className="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset"
               >
                 <Sparkles size={16} className="mr-2" />Gunakan Prompt
               </button>

@@ -10,8 +10,9 @@ import AudioGenerator from '@/components/AudioGenerator';
 
 // Komponen Placeholder untuk konten yang terkunci
 const LockedContent = () => (
-  <div className="w-full p-6 md:p-8 bg-light-bg rounded-2xl shadow-neumorphic text-center">
-    <div className="flex flex-col items-center gap-4 text-gray-600">
+  // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg dan dark:shadow-dark-neumorphic
+  <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic text-center">
+    <div className="flex flex-col items-center gap-4 text-gray-600 dark:text-gray-300"> {/* <--- PERUBAHAN: dark:text-gray-300 */}
       <Lock size={48} className="text-purple-600" />
       <h2 className="text-2xl font-bold">Fitur Terkunci</h2>
       <p className="max-w-md">
@@ -46,7 +47,8 @@ export default function Tabs() {
 
   return (
     <div className="w-full max-w-4xl">
-      <div className="p-2 bg-light-bg rounded-xl shadow-neumorphic-inset flex flex-wrap justify-center items-center gap-2">
+      {/* <--- PERUBAHAN: Tambahkan dark:bg-dark-bg dan dark:shadow-dark-neumorphic-inset */}
+      <div className="p-2 bg-light-bg dark:bg-dark-bg rounded-xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset flex flex-wrap justify-center items-center gap-2">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.name;
@@ -54,12 +56,13 @@ export default function Tabs() {
             <button
               key={tab.name}
               onClick={() => setActiveTab(tab.name)}
-              // PERUBAHAN DI SINI: Tambahkan 'md:flex-1'
               className={`md:flex-1 flex items-center justify-center gap-x-2 px-4 py-3 rounded-lg font-semibold transition-all duration-300
                 ${
                   isActive
-                    ? 'bg-purple-600 text-white shadow-neumorphic-button'
-                    : 'text-gray-500 hover:text-purple-600'
+                    // <--- PERUBAHAN: Tambahkan dark:shadow-dark-neumorphic-button untuk active state
+                    ? 'bg-purple-600 text-white shadow-neumorphic-button dark:shadow-dark-neumorphic-button'
+                    // <--- PERUBAHAN: Tambahkan dark:text-gray-400 dan dark:hover:text-purple-600 untuk inactive state
+                    : 'text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-500' 
                 }`
               }
             >

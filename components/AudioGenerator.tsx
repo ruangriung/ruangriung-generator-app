@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, Volume2 } from 'lucide-react';
 import ButtonSpinner from './ButtonSpinner';
-import toast from 'react-hot-toast'; // <--- Tambahkan ini
+import toast from 'react-hot-toast';
 
 export default function AudioGenerator() {
   const [text, setText] = useState('Halo! Selamat datang di Ruang Riung AI Generator.');
@@ -27,7 +27,7 @@ export default function AudioGenerator() {
       } catch (error) {
         console.error("Gagal mengambil daftar suara:", error);
         setVoices(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']);
-        toast.error("Gagal memuat daftar suara. Menggunakan suara fallback."); // <--- PERUBAHAN
+        toast.error("Gagal memuat daftar suara. Menggunakan suara fallback.");
       }
     };
     fetchVoices();
@@ -35,7 +35,7 @@ export default function AudioGenerator() {
 
   const handleGenerateAudio = () => {
     if (!text) {
-      toast.error('Teks tidak boleh kosong!'); // <--- PERUBAHAN
+      toast.error('Teks tidak boleh kosong!');
       return;
     }
     setIsLoading(true);
@@ -51,20 +51,20 @@ export default function AudioGenerator() {
     const finalUrl = `https://text.pollinations.ai/${encodedText}?${params.toString()}`;
     
     setAudioUrl(finalUrl);
-    toast.success("Audio berhasil dibuat!"); // <--- PERUBAHAN
-    // Kita set loading ke false setelah beberapa saat untuk memberi jeda visual,
-    // karena pembuatan audio biasanya sangat cepat.
+    toast.success("Audio berhasil dibuat!");
     setTimeout(() => setIsLoading(false), 300);
   };
 
-  const inputStyle = "w-full p-3 bg-light-bg rounded-lg shadow-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow";
+  // <--- PERUBAHAN: inputStyle dan selectStyle sekarang juga punya dark variant
+  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
   const selectStyle = `${inputStyle} appearance-none`;
 
   return (
-    <div className="w-full p-6 md:p-8 bg-light-bg rounded-2xl shadow-neumorphic">
+    // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg dan dark:shadow-dark-neumorphic
+    <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
       <div className="space-y-6">
         <div>
-          <label htmlFor="audio-text" className="block text-sm font-medium text-gray-600 mb-2">Teks untuk Audio</label>
+          <label htmlFor="audio-text" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Teks untuk Audio</label> {/* <--- PERUBAHAN: text-gray-600 dark:text-gray-300 */}
           <textarea
             id="audio-text"
             rows={5}
@@ -76,7 +76,7 @@ export default function AudioGenerator() {
         </div>
 
         <div>
-          <label htmlFor="voice-select" className="block text-sm font-medium text-gray-600 mb-2">Pilih Suara</label>
+          <label htmlFor="voice-select" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Pilih Suara</label> {/* <--- PERUBAHAN: text-gray-600 dark:text-gray-300 */}
           <select
             id="voice-select"
             value={selectedVoice}
@@ -84,9 +84,15 @@ export default function AudioGenerator() {
             className={selectStyle}
           >
             {voices.length > 0 ? (
-              voices.map(voice => <option key={voice} value={voice}>{voice}</option>)
+              voices.map(voice => (
+                // <--- PERUBAHAN: option style
+                <option key={voice} value={voice} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                  {voice}
+                </option>
+              ))
             ) : (
-              <option>Memuat suara...</option>
+              // <--- PERUBAHAN: option style
+              <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Memuat suara...</option>
             )}
           </select>
         </div>
@@ -95,7 +101,8 @@ export default function AudioGenerator() {
           <button
             onClick={handleGenerateAudio}
             disabled={isLoading}
-            className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150"
+            // <--- PERUBAHAN: Tambahkan dark:active:shadow-dark-neumorphic-button-active
+            className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150"
           >
             {isLoading ? <ButtonSpinner /> : <Volume2 className="w-5 h-5 mr-2" />}
             <span>Buat Audio</span>

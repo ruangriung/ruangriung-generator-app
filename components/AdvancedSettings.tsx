@@ -10,48 +10,45 @@ interface AdvancedSettingsProps {
   settings: GeneratorSettings;
   setSettings: React.Dispatch<React.SetStateAction<GeneratorSettings>>;
   models: string[];
-  aspectRatio: 'Kotak' | 'Portrait' | 'Lansekap' | 'Custom'; // <--- PERUBAHAN: Tambahkan 'Custom'
+  aspectRatio: 'Kotak' | 'Portrait' | 'Lansekap' | 'Custom';
   onAspectRatioChange: (preset: 'Kotak' | 'Portrait' | 'Lansekap') => void;
-  onManualDimensionChange: (width: number, height: number) => void; // <--- PERUBAHAN BARU: Tambahkan prop ini
+  onManualDimensionChange: (width: number, height: number) => void;
   className?: string;
 }
 
-export default function AdvancedSettings({ settings, setSettings, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, className }: AdvancedSettingsProps) { // <--- PERUBAHAN: Tambahkan prop baru di sini
-  // <--- PERUBAHAN: Fungsi ini sekarang memanggil onManualDimensionChange untuk width/height
+export default function AdvancedSettings({ settings, setSettings, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, className }: AdvancedSettingsProps) {
   const handleSettingChange = (field: keyof GeneratorSettings, value: string | number) => {
     if (field === 'width' || field === 'height') {
       const numValue = parseInt(value as string, 10);
-      if (isNaN(numValue) || numValue <= 0) { // Validasi dasar
-        // Opsional: Anda bisa menambahkan feedback ke user atau mengatur nilai default
+      if (isNaN(numValue) || numValue <= 0) {
         return;
       }
-      // Panggil fungsi baru untuk memperbarui dimensi DAN memeriksa preset
       if (field === 'width') {
         onManualDimensionChange(numValue, settings.height);
-      } else { // field === 'height'
+      } else {
         onManualDimensionChange(settings.width, numValue);
       }
     } else {
-      // Untuk pengaturan lain (model, seed, artStyle, batchSize)
       setSettings(prev => ({ ...prev, [field]: value }));
     }
   };
 
-  const inputStyle = "w-full p-3 bg-light-bg rounded-lg shadow-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow";
+  // <--- PERUBAHAN: inputStyle dan selectStyle sekarang juga punya dark variant
+  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
   const selectStyle = `${inputStyle} appearance-none`;
   
-  // <--- PERUBAHAN: Sesuaikan logika presetButtonStyle
+  // <--- PERUBAHAN: presetButtonStyle sekarang juga punya dark variant
   const presetButtonStyle = (presetName: 'Kotak' | 'Portrait' | 'Lansekap') => 
     `px-4 py-2 rounded-lg transition-all duration-200 font-medium ${
-      aspectRatio === presetName // Sekarang cek langsung terhadap prop aspectRatio
-        ? 'bg-purple-600 text-white shadow-neumorphic-button'
-        : 'bg-light-bg text-gray-700 shadow-neumorphic-button'
+      aspectRatio === presetName 
+        ? 'bg-purple-600 text-white shadow-neumorphic-button dark:shadow-dark-neumorphic-button' // active state
+        : 'bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 shadow-neumorphic-button dark:shadow-dark-neumorphic-button' // inactive state
     }`;
   
   const LabelWithIcon = ({ icon: Icon, text, htmlFor }: { icon: React.ElementType, text: string, htmlFor: string }) => (
     <div className="flex items-center gap-x-2 mb-2">
       <Icon className="h-4 w-4 text-purple-600" />
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600">
+      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600 dark:text-gray-300"> {/* <--- PERUBAHAN: text-gray-600 dark:text-gray-300 */}
         {text}
       </label>
     </div>
@@ -59,10 +56,11 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
 
   return (
     <details className={`w-full group ${className || ''}`}>
-      <summary className="flex items-center justify-between p-4 bg-light-bg rounded-lg cursor-pointer list-none shadow-neumorphic-button transition-shadow">
+      {/* <--- PERUBAHAN: summary bg dan shadow */}
+      <summary className="flex items-center justify-between p-4 bg-light-bg dark:bg-dark-bg rounded-lg cursor-pointer list-none shadow-neumorphic-button dark:shadow-dark-neumorphic-button transition-shadow">
         <div className="flex items-center gap-x-2">
           <Settings className="w-5 h-5 text-purple-600" />
-          <span className="font-medium text-gray-700">
+          <span className="font-medium text-gray-700 dark:text-gray-300"> {/* <--- PERUBAHAN: text-gray-700 dark:text-gray-300 */}
             Pengaturan Lanjutan
           </span>
         </div>
@@ -71,16 +69,17 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
           <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
         </svg>
       </summary>
-      <div className="mt-6 p-6 bg-light-bg rounded-2xl shadow-neumorphic-inset">
+      {/* <--- PERUBAHAN: div konten utama settings */}
+      <div className="mt-6 p-6 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset">
         <div className="mb-6">
-          <label className="block text-center text-sm font-medium text-gray-600 mb-2">Preset Aspek Rasio</label>
+          <label className="block text-center text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Preset Aspek Rasio</label> {/* <--- PERUBAHAN */}
           <div className="flex justify-center gap-4">
             <button onClick={() => onAspectRatioChange('Kotak')} className={presetButtonStyle('Kotak')}>Kotak</button>
             <button onClick={() => onAspectRatioChange('Portrait')} className={presetButtonStyle('Portrait')}>Portrait</button>
             <button onClick={() => onAspectRatioChange('Lansekap')} className={presetButtonStyle('Lansekap')}>Lansekap</button>
           </div>
         </div>
-        <hr className="my-6 border-gray-300" />
+        <hr className="my-6 border-gray-300 dark:border-gray-600" /> {/* <--- PERUBAHAN: dark:border-gray-600 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
           <div>
             <LabelWithIcon icon={ArrowLeftRight} text="Lebar" htmlFor="width" />
@@ -95,9 +94,11 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
             <LabelWithIcon icon={Palette} text="Gaya Seni" htmlFor="artStyle" />
             <select id="artStyle" value={settings.artStyle} onChange={(e) => handleSettingChange('artStyle', e.target.value)} className={selectStyle}>
               {artStyles.map((category: ArtStyleCategory, index: number) => (
-                <optgroup key={index} label={category.label}>
+                <optgroup key={index} label={category.label} className="bg-light-bg dark:bg-gray-800 text-gray-800 dark:text-gray-200"> {/* <--- PERUBAHAN: optgroup style */}
                   {category.options.map((style: ArtStyleOption) => (
-                    <option key={style.value} value={style.value}>{style.label}</option>
+                    <option key={style.value} value={style.value} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"> {/* <--- PERUBAHAN: option style */}
+                      {style.label}
+                    </option>
                   ))}
                 </optgroup>
               ))}
@@ -107,17 +108,16 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
           <div>
             <LabelWithIcon icon={Cpu} text="Model AI" htmlFor="model" />
             <select id="model" value={settings.model} onChange={(e) => handleSettingChange('model', e.target.value)} className={selectStyle}>
-              {models.length > 0 ? (models.map(model => (<option key={model} value={model}>{model}</option>))) : (<option disabled>Memuat...</option>)}
+              {models.length > 0 ? (models.map(model => (<option key={model} value={model} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">{model}</option>))) : (<option disabled className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Memuat...</option>)} {/* <--- PERUBAHAN: option style */}
             </select>
           </div>
-          {/* --- Penambahan Input Batch Size di sini --- */}
           <div>
             <LabelWithIcon icon={ImageIcon} text="Jumlah Gambar" htmlFor="batchSize" />
             <input
                 type="number"
                 id="batchSize"
                 min="1"
-                max="10" // Batasi agar tidak terlalu banyak
+                max="10"
                 value={settings.batchSize}
                 onChange={(e) => handleSettingChange('batchSize', parseInt(e.target.value, 10))}
                 className={inputStyle}

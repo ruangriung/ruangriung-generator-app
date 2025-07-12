@@ -23,7 +23,8 @@ export default function HistoryPanel({ history, onSelect, onClear }: HistoryPane
   return (
     <div className="w-full max-w-4xl mt-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-700 flex items-center gap-2">
+        {/* <--- PERUBAHAN: Tambahkan dark:text-gray-300 */}
+        <h2 className="text-xl font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
           <History className="text-purple-600" />
           Riwayat Generate
         </h2>
@@ -34,7 +35,8 @@ export default function HistoryPanel({ history, onSelect, onClear }: HistoryPane
           Hapus Riwayat
         </button>
       </div>
-      <div className="p-4 bg-light-bg rounded-2xl shadow-neumorphic">
+      {/* <--- PERUBAHAN: Tambahkan dark:bg-dark-bg dan dark:shadow-dark-neumorphic */}
+      <div className="p-4 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {history.map((item) => (
             <div 

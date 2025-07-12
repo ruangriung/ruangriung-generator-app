@@ -8,8 +8,8 @@ interface ImageDisplayProps {
   isLoading: boolean;
   imageUrl: string;
   prompt: string;
-  onLoad?: () => void; // <-- TAMBAHKAN '?'
-  onError?: () => void; // <-- TAMBAHKAN '?'
+  onLoad?: () => void;
+  onError?: () => void;
   onZoomClick: () => void;
   onDownloadClick: () => void;
   onVariationsClick: () => void;
@@ -42,11 +42,13 @@ export default function ImageDisplay({
     filter: `brightness(${filters.brightness}%) contrast(${filters.contrast}%) saturate(${filters.saturate}%)`
   };
 
-  const actionButtonStyle = `p-3 bg-light-bg rounded-lg shadow-neumorphic-button active:shadow-neumorphic-inset text-gray-700 hover:text-purple-600 transition-all`;
+  // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg, dark:shadow-dark-neumorphic-button, dark:active:shadow-dark-neumorphic-inset, dark:text-gray-300
+  const actionButtonStyle = `p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-700 dark:text-gray-300 hover:text-purple-600 transition-all`;
 
   return (
     <div className="w-full max-w-2xl mt-8">
-      <div className="relative aspect-square w-full bg-light-bg rounded-2xl shadow-neumorphic-inset p-4 flex items-center justify-center">
+      {/* <--- PERUBAHAN: Tambahkan dark:bg-dark-bg, dark:shadow-dark-neumorphic-inset */}
+      <div className="relative aspect-square w-full bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset p-4 flex items-center justify-center">
         {imageUrl && (
           <img
             key={imageUrl}
@@ -60,7 +62,7 @@ export default function ImageDisplay({
         )}
         
         {!imageUrl && !isLoading && (
-          <div className="text-center text-gray-500">
+          <div className="text-center text-gray-500 dark:text-gray-400"> {/* <--- PERUBAHAN: dark:text-gray-400 */}
             <p>Gambar Anda akan muncul di sini.</p>
             <p className="text-sm">Atur parameter di atas dan klik "Buat Gambar".</p>
           </div>
@@ -92,18 +94,19 @@ export default function ImageDisplay({
       )}
 
       {isEditing && isImageReady && (
-        <div className="mt-4 p-4 bg-light-bg rounded-2xl shadow-neumorphic space-y-4">
+        // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg, dark:shadow-dark-neumorphic
+        <div className="mt-4 p-4 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1">
-              <label htmlFor="brightness" className="flex items-center gap-2 text-sm font-medium text-gray-600"><Sun size={16} /> Kecerahan</label>
+              <label htmlFor="brightness" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300"><Sun size={16} /> Kecerahan</label> {/* <--- PERUBAHAN */}
               <input id="brightness" type="range" min="0" max="200" value={filters.brightness} onChange={(e) => handleFilterChange('brightness', e.target.value)} className="w-full" />
             </div>
             <div className="space-y-1">
-              <label htmlFor="contrast" className="flex items-center gap-2 text-sm font-medium text-gray-600"><Contrast size={16} /> Kontras</label>
+              <label htmlFor="contrast" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300"><Contrast size={16} /> Kontras</label> {/* <--- PERUBAHAN */}
               <input id="contrast" type="range" min="0" max="200" value={filters.contrast} onChange={(e) => handleFilterChange('contrast', e.target.value)} className="w-full" />
             </div>
             <div className="space-y-1">
-              <label htmlFor="saturate" className="flex items-center gap-2 text-sm font-medium text-gray-600"><Droplets size={16} /> Saturasi</label>
+              <label htmlFor="saturate" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300"><Droplets size={16} /> Saturasi</label> {/* <--- PERUBAHAN */}
               <input id="saturate" type="range" min="0" max="200" value={filters.saturate} onChange={(e) => handleFilterChange('saturate', e.target.value)} className="w-full" />
             </div>
           </div>

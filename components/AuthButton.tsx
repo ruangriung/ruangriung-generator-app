@@ -3,20 +3,20 @@
 
 import { useSession, signIn, signOut } from "next-auth/react";
 import Image from "next/image";
-import { LogOut } from "lucide-react"; // Impor ikon logout
+import { LogOut } from "lucide-react";
 
 export default function AuthButton() {
   const { data: session, status } = useSession();
 
   if (status === "loading") {
-    // Tampilkan placeholder saat status sedang loading
-    return <div className="h-[52px] w-[210px] bg-light-bg rounded-lg shadow-neumorphic-inset animate-pulse"></div>;
+    // <--- PERUBAHAN: Tambahkan dark:bg-gray-700 dan dark:shadow-dark-neumorphic-inset
+    return <div className="h-[52px] w-[210px] bg-light-bg dark:bg-gray-700 rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset animate-pulse"></div>;
   }
 
   if (status === "authenticated") {
     return (
-      // Tampilan saat sudah login dengan gaya neumorphic
-      <div className="flex items-center gap-3 p-2 bg-light-bg rounded-lg shadow-neumorphic-button">
+      // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg dan dark:shadow-dark-neumorphic-button, dark:text-gray-200
+      <div className="flex items-center gap-3 p-2 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button">
         <Image 
           src={session.user?.image || ''} 
           alt={session.user?.name || 'User Avatar'}
@@ -24,10 +24,11 @@ export default function AuthButton() {
           height={36}
           className="rounded-lg"
         />
-        <span className="font-semibold text-gray-700 text-sm">{session.user?.name}</span>
+        <span className="font-semibold text-gray-700 dark:text-gray-200">{session.user?.name}</span> {/* <--- PERUBAHAN: dark:text-gray-200 */}
         <button 
           onClick={() => signOut()} 
-          className="ml-auto p-2 text-gray-600 hover:text-purple-600 transition-colors rounded-full hover:bg-white"
+          // <--- PERUBAHAN: Tambahkan dark:hover:bg-gray-700
+          className="ml-auto p-2 text-gray-600 dark:text-gray-300 hover:text-purple-600 transition-colors rounded-full hover:bg-white dark:hover:bg-gray-700" // <--- PERUBAHAN: dark:text-gray-300 dan dark:hover:bg-gray-700
           aria-label="Logout"
         >
           <LogOut size={20} />
@@ -37,22 +38,22 @@ export default function AuthButton() {
   }
 
   return (
-    <div className="flex flex-wrap justify-center gap-4"> {/* Kontainer untuk beberapa tombol login */}
+    <div className="flex flex-wrap justify-center gap-4">
       <button 
         onClick={() => signIn('google')} 
-        className="inline-flex items-center justify-center px-4 py-3 bg-light-bg text-gray-700 font-bold rounded-lg shadow-neumorphic-button active:shadow-neumorphic-inset transition-all duration-150"
+        // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg, dark:shadow-dark-neumorphic-button, dark:active:shadow-dark-neumorphic-inset, dark:text-gray-200
+        className="inline-flex items-center justify-center px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-200 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150"
       >
         <img src="/google-icon.svg" alt="Google logo" className="w-5 h-5 mr-3" />
-        <span>Login dengan Google</span>
+        <span>Login with Google</span>
       </button>
-      {/* Tombol Login Facebook yang baru */}
       <button 
         onClick={() => signIn('facebook')} 
-        className="inline-flex items-center justify-center px-4 py-3 bg-light-bg text-gray-700 font-bold rounded-lg shadow-neumorphic-button active:shadow-neumorphic-inset transition-all duration-150"
+        // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg, dark:shadow-dark-neumorphic-button, dark:active:shadow-dark-neumorphic-inset, dark:text-gray-200
+        className="inline-flex items-center justify-center px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-200 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150"
       >
-        {/* Anda perlu memastikan ada file /facebook-icon.svg di folder public Anda */}
         <img src="/facebook-icon.svg" alt="Facebook logo" className="w-5 h-5 mr-3" />
-        <span>Login dengan Facebook</span>
+        <span>Login with Facebook</span>
       </button>
     </div>
   );

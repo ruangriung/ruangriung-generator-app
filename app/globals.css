@@ -3,7 +3,12 @@
 @tailwind utilities;
 
 body {
-  background-color: #e0e0e0;
+  background-color: #e0e0e0; /* Default light background */
+}
+
+/* <--- BARU: Dark mode for body background */
+.dark body {
+  background-color: #2b2b2b; /* Use dark-bg color */
 }
 
 /* Menghilangkan panah di input number untuk tampilan yang lebih bersih */
