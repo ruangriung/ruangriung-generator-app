@@ -1,12 +1,12 @@
 // components/ControlPanel.tsx
 'use client';
 
-import { useState, useEffect } from 'react'; // Tambahkan useEffect
+import { useState, useEffect } from 'react';
 import AdvancedSettings from './AdvancedSettings';
 import ButtonSpinner from './ButtonSpinner';
 import { Sparkles, X, Expand, Shuffle, Save, Wand2 } from 'lucide-react';
 import TextareaModal from './TextareaModal';
-import Accordion from './Accordion'; // Impor Accordion
+import Accordion from './Accordion';
 
 export interface GeneratorSettings {
   prompt: string;
@@ -33,9 +33,8 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
   const [isRandomizing, setIsRandomizing] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [savedPrompts, setSavedPrompts] = useState<string[]>([]); // State baru untuk prompt yang disimpan
+  const [savedPrompts, setSavedPrompts] = useState<string[]>([]);
 
-  // Muat prompt dari localStorage saat komponen pertama kali di-mount
   useEffect(() => {
     try {
       const storedPrompts = localStorage.getItem('ruangriung_saved_prompts');
@@ -47,7 +46,6 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     }
   }, []);
 
-  // Simpan prompt ke localStorage setiap kali savedPrompts berubah
   useEffect(() => {
     try {
       localStorage.setItem('ruangriung_saved_prompts', JSON.stringify(savedPrompts));
@@ -112,10 +110,9 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     }
     setIsSaving(true);
     try {
-      // Gunakan Set untuk memastikan keunikan dan mempertahankan urutan (terbaru di depan)
       const updatedPrompts = new Set([settings.prompt, ...savedPrompts]);
-      const newSavedPromptsArray = Array.from(updatedPrompts).slice(0, 50); // Batasi hingga 50 prompt terbaru
-      setSavedPrompts(newSavedPromptsArray); // Perbarui state, yang akan memicu penyimpanan ke localStorage
+      const newSavedPromptsArray = Array.from(updatedPrompts).slice(0, 50);
+      setSavedPrompts(newSavedPromptsArray);
     } catch (error) {
       alert("Gagal menyimpan prompt.");
       console.error("Error saving prompt:", error);
@@ -176,7 +173,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
           onAspectRatioChange={onAspectRatioChange}
         />
 
-        <div className="mt-4 pt-4 border-t border-gray-300 flex flex-col sm:flex-row items-center gap-3">
+        <div className="mt-5 pt-3 border-t border-gray-300 flex flex-row flex-wrap justify-center items-center gap-3">
             <button onClick={handleRandomPrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing}>
                 {isRandomizing ? <ButtonSpinner /> : <Shuffle size={16} />} <span>Acak</span>
             </button>
@@ -188,9 +185,11 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
             </button>
         </div>
 
-        {/* --- Bagian Baru untuk Prompt Tersimpan --- */}
         {savedPrompts.length > 0 && (
-            <Accordion title={<div className="flex items-center gap-2"><Save size={16} className="text-purple-600" />Prompt Tersimpan ({savedPrompts.length})</div>}>
+            <Accordion 
+                title={<div className="flex items-center gap-2"><Save size={16} className="text-purple-600" />Prompt Tersimpan ({savedPrompts.length})</div>}
+                className="mt-5" // BARIS INI DITAMBAH UNTUK MEMBERIKAN JARAK
+            >
                 <div className="flex justify-end mb-4">
                     <button onClick={handleClearAllSavedPrompts} className="text-sm text-red-500 hover:underline">
                         Hapus Semua
@@ -210,8 +209,6 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
                 </ul>
             </Accordion>
         )}
-        {/* --- Akhir Bagian Baru --- */}
-
 
         <div className="mt-8 text-center">
           <button

@@ -7,16 +7,17 @@ import { ChevronRight } from 'lucide-react';
 interface AccordionProps {
   title: ReactNode; // Izinkan judul berupa JSX (untuk ikon)
   children: ReactNode;
+  className?: string; // <--- TAMBAH BARIS INI
 }
 
-export default function Accordion({ title, children }: AccordionProps) {
+export default function Accordion({ title, children, className }: AccordionProps) { // <--- TAMBAH 'className' DI SINI
   return (
-    <details className="w-full group">
+    <details className={`w-full group ${className || ''}`}> {/* <--- TERAPKAN 'className' DI SINI */}
       <summary className="flex items-center justify-between p-3 bg-light-bg rounded-lg cursor-pointer list-none shadow-neumorphic-button">
         <div className="font-medium text-gray-700">{title}</div>
         <ChevronRight className="w-5 h-5 text-purple-600 transition-transform duration-300 group-open:rotate-90" />
       </summary>
-      <div className="mt-2 p-4">
+      <div className="mt-2 p-3">
         {children}
       </div>
     </details>
