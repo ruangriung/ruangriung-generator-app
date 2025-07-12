@@ -1,7 +1,9 @@
+// components/AdvancedSettings.tsx
 'use client';
 
-import { GeneratorSettings } from './ControlPanel'; // Impor tipe data
-import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon } from 'lucide-react'; // Tambahkan ImageIcon
+import { GeneratorSettings } from './ControlPanel';
+import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon } from 'lucide-react';
+import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
 
 // Definisikan props untuk komponen ini
 interface AdvancedSettingsProps {
@@ -10,18 +12,10 @@ interface AdvancedSettingsProps {
   models: string[];
   aspectRatio: string;
   onAspectRatioChange: (preset: 'Kotak' | 'Portrait' | 'Lansekap') => void;
+  className?: string; // <--- TAMBAH BARIS INI
 }
 
-const artStyles = [
-  { name: 'Default', value: '' },
-  { name: 'Fotorealistis', value: ', photorealistic, 4k, hyper-detailed' },
-  { name: 'Lukisan Cat Minyak', value: ', oil painting, masterpiece' },
-  { name: 'Gaya Anime', value: ', anime style, trending on artstation' },
-  { name: 'Seni Digital', value: ', digital art, smooth, sharp focus' },
-  { name: 'Konsep Seni', value: ', concept art, intricate details' },
-];
-
-export default function AdvancedSettings({ settings, setSettings, models, aspectRatio, onAspectRatioChange }: AdvancedSettingsProps) {
+export default function AdvancedSettings({ settings, setSettings, models, aspectRatio, onAspectRatioChange, className }: AdvancedSettingsProps) { // <--- TAMBAH 'className' DI SINI
   const handleSettingChange = (field: keyof GeneratorSettings, value: string | number) => {
     setSettings(prev => ({ ...prev, [field]: value }));
   };
@@ -46,7 +40,7 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
   );
 
   return (
-    <details className="w-full mt-6 group">
+    <details className={`w-full group ${className || ''}`}> {/* <--- TERAPKAN 'className' DI SINI */}
       <summary className="flex items-center justify-between p-4 bg-light-bg rounded-lg cursor-pointer list-none shadow-neumorphic-button transition-shadow">
         <div className="flex items-center gap-x-2">
           <Settings className="w-5 h-5 text-purple-600" />
@@ -78,12 +72,20 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
             <LabelWithIcon icon={ArrowUpDown} text="Tinggi" htmlFor="height" />
             <input type="number" id="height" value={settings.height} onChange={(e) => handleSettingChange('height', parseInt(e.target.value))} className={inputStyle} />
           </div>
+          
           <div>
             <LabelWithIcon icon={Palette} text="Gaya Seni" htmlFor="artStyle" />
             <select id="artStyle" value={settings.artStyle} onChange={(e) => handleSettingChange('artStyle', e.target.value)} className={selectStyle}>
-              {artStyles.map(style => (<option key={style.name} value={style.value}>{style.name}</option>))}
+              {artStyles.map((category: ArtStyleCategory, index: number) => (
+                <optgroup key={index} label={category.label}>
+                  {category.options.map((style: ArtStyleOption) => (
+                    <option key={style.value} value={style.value}>{style.label}</option>
+                  ))}
+                </optgroup>
+              ))}
             </select>
           </div>
+
           <div>
             <LabelWithIcon icon={Cpu} text="Model AI" htmlFor="model" />
             <select id="model" value={settings.model} onChange={(e) => handleSettingChange('model', e.target.value)} className={selectStyle}>

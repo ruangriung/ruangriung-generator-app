@@ -4,9 +4,12 @@
 import { useState, useEffect } from 'react';
 import AdvancedSettings from './AdvancedSettings';
 import ButtonSpinner from './ButtonSpinner';
-import { Sparkles, X, Expand, Shuffle, Save, Wand2 } from 'lucide-react';
+import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon } from 'lucide-react';
 import TextareaModal from './TextareaModal';
 import Accordion from './Accordion';
+import PromptAssistant from './PromptAssistant';
+import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
+
 
 export interface GeneratorSettings {
   prompt: string;
@@ -89,7 +92,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
   const handleRandomPrompt = async () => {
     setIsRandomizing(true);
-    await callPromptApi("Give me a single, random, creative, and visually descriptive image prompt. Be concise and do not use quotation marks.");
+    await callPromptApi("Berikan saya satu prompt gambar yang acak, kreatif, dan deskriptif secara visual. Jadilah ringkas dan jangan gunakan tanda kutip.");
     setIsRandomizing(false);
   };
 
@@ -99,7 +102,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       return;
     }
     setIsEnhancing(true);
-    await callPromptApi(`Enhance and add more visual details to the following image prompt, but keep it concise: "${settings.prompt}". Do not use quotation marks in your response.`);
+    await callPromptApi(`Sempurnakan dan tambahkan lebih banyak detail visual ke prompt gambar berikut, tetapi tetap ringkas: "${settings.prompt}". Jangan gunakan tanda kutip dalam respons Anda.`);
     setIsEnhancing(false);
   };
   
@@ -138,6 +141,17 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
   };
   
   const featureButtonStyle = "flex-1 inline-flex items-center justify-center gap-x-2 px-3 py-2 bg-light-bg text-gray-600 font-semibold rounded-lg shadow-neumorphic-button active:shadow-neumorphic-inset transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed";
+  const inputStyle = "w-full p-3 bg-light-bg rounded-lg shadow-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow";
+  const selectStyle = `${inputStyle} appearance-none`;
+
+  const LabelWithIcon = ({ icon: Icon, text, htmlFor }: { icon: React.ElementType, text: string, htmlFor: string }) => (
+    <div className="flex items-center gap-x-2 mb-2">
+      <Icon className="h-4 w-4 text-purple-600" />
+      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600">
+        {text}
+      </label>
+    </div>
+  );
 
   return (
     <>
@@ -165,15 +179,20 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
           </div>
         </div>
 
+        <PromptAssistant 
+          onUsePrompt={(newPrompt) => setSettings(prev => ({ ...prev, prompt: newPrompt }))} 
+        />
+
         <AdvancedSettings
           settings={settings}
           setSettings={setSettings}
           models={models}
           aspectRatio={aspectRatio}
           onAspectRatioChange={onAspectRatioChange}
+          className="mt-4"
         />
 
-        <div className="mt-5 pt-3 border-t border-gray-300 flex flex-row flex-wrap justify-center items-center gap-3">
+        <div className="mt-4 pt-4 border-t border-gray-300 flex flex-row flex-wrap justify-center items-center gap-3">
             <button onClick={handleRandomPrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing}>
                 {isRandomizing ? <ButtonSpinner /> : <Shuffle size={16} />} <span>Acak</span>
             </button>
@@ -186,9 +205,9 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
         </div>
 
         {savedPrompts.length > 0 && (
-            <Accordion 
+            <Accordion
                 title={<div className="flex items-center gap-2"><Save size={16} className="text-purple-600" />Prompt Tersimpan ({savedPrompts.length})</div>}
-                className="mt-5" // BARIS INI DITAMBAH UNTUK MEMBERIKAN JARAK
+                className="mt-4"
             >
                 <div className="flex justify-end mb-4">
                     <button onClick={handleClearAllSavedPrompts} className="text-sm text-red-500 hover:underline">
@@ -210,7 +229,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
             </Accordion>
         )}
 
-        <div className="mt-8 text-center">
+        <div className="mt-4 text-center">
           <button
             onClick={onGenerate}
             disabled={isLoading}

@@ -1,3 +1,4 @@
+// app/components/Generator.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,28 +12,28 @@ type AspectRatioPreset = 'Kotak' | 'Portrait' | 'Lansekap';
 export default function Generator() {
   const [settings, setSettings] = useState<GeneratorSettings>({
     prompt: 'Kastil fantasi di atas awan',
-    model: 'flux',
+    model: 'flux', // Default model
     width: 1024,
     height: 1024,
     seed: Math.floor(Math.random() * 1000000),
     artStyle: '',
-    batchSize: 1, // Kita biarkan ini di state, tapi tidak akan digunakan untuk logika koin
+    batchSize: 1,
   });
 
   const [imageUrl, setImageUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [modelList, setModelList] = useState<string[]>([]);
+  const [modelList, setModelList] = useState<string[]>([]); // State untuk daftar model
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Kotak');
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
 
-  // Efek untuk memuat dan menyimpan riwayat tetap ada
+  // Efek untuk memuat dan menyimpan riwayat
   useEffect(() => {
     try {
       const savedHistory = localStorage.getItem('ruangriung_history');
       if (savedHistory) setHistory(JSON.parse(savedHistory));
-    } catch (error) { console.error("Gagal memuat riwayat:", error); } 
+    } catch (error) { console.error("Gagal memuat riwayat:", error); }
     finally { setIsHistoryLoaded(true); }
   }, []);
 
@@ -43,6 +44,56 @@ export default function Generator() {
       } catch (error) { console.error("Gagal menyimpan riwayat:", error); }
     }
   }, [history, isHistoryLoaded]);
+
+  // Efek untuk mengambil daftar model dari Pollinations.ai
+  useEffect(() => {
+    const fetchImageModels = async () => {
+      try {
+        const response = await fetch('https://image.pollinations.ai/models');
+        if (!response.ok) {
+          // Jika gagal mengambil model dari API, lempar error
+          throw new Error(`Gagal mengambil model: ${response.statusText}`);
+        }
+        const data = await response.json();
+        let fetchedModels: string[] = [];
+
+        // Asumsi struktur respons: bisa berupa array string langsung,
+        // atau objek dengan kunci 'models' yang berisi array string,
+        // atau objek dengan kunci 'image' yang berisi array string.
+        if (Array.isArray(data)) {
+          fetchedModels = data;
+        } else if (data && typeof data === 'object' && Array.isArray(data.models)) {
+          fetchedModels = data.models;
+        } else if (data && typeof data === 'object' && Array.isArray(data.image)) {
+            fetchedModels = data.image; 
+        } else {
+          console.warn("Struktur data model tidak terduga:", data);
+          // Fallback jika struktur tidak sesuai, gunakan model default 'flux' dan 'turbo'
+          fetchedModels = ['flux', 'turbo'];
+        }
+
+        if (fetchedModels.length > 0) {
+          setModelList(fetchedModels);
+          // Atur model default ke yang pertama dari daftar yang diambil, jika model saat ini tidak ada
+          if (!fetchedModels.includes(settings.model)) {
+            setSettings(prev => ({ ...prev, model: fetchedModels[0] }));
+          }
+        } else {
+            // Jika API mengembalikan daftar kosong, gunakan daftar default 'flux' dan 'turbo'
+            setModelList(['flux', 'turbo']);
+            alert("Model sementara gagal dimuat dari API. Menggunakan model fallback.");
+        }
+      } catch (error) {
+        console.error("Error mengambil model gambar:", error);
+        // Notifikasi ke pengguna jika gagal memuat model dari API
+        alert("Model sementara gagal dimuat dari API. Menggunakan model fallback.");
+        // Daftar model fallback jika terjadi error pengambilan
+        setModelList(['flux', 'turbo']);
+      }
+    };
+
+    fetchImageModels();
+  }, []); // Array dependensi kosong berarti efek ini hanya berjalan sekali saat mount
 
   const addToHistory = (newItem: HistoryItem) => {
     setHistory(prev => [newItem, ...prev.filter(i => i.imageUrl !== newItem.imageUrl)].slice(0, 15));
@@ -127,7 +178,7 @@ export default function Generator() {
           setSettings={setSettings}
           onGenerate={handleGenerateImage}
           isLoading={isLoading}
-          models={modelList}
+          models={modelList} // Meneruskan daftar model yang sudah diambil
           aspectRatio={aspectRatio}
           onAspectRatioChange={setAspectRatio}
         />
