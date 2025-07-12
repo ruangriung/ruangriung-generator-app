@@ -1,7 +1,7 @@
 'use client';
 
-import { GeneratorSettings } from './ControlPanel'; // <-- Impor tipe data dari sumbernya
-import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings } from 'lucide-react';
+import { GeneratorSettings } from './ControlPanel'; // Impor tipe data
+import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon } from 'lucide-react'; // Tambahkan ImageIcon
 
 // Definisikan props untuk komponen ini
 interface AdvancedSettingsProps {
@@ -90,7 +90,20 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
               {models.length > 0 ? (models.map(model => (<option key={model} value={model}>{model}</option>))) : (<option disabled>Memuat...</option>)}
             </select>
           </div>
-          <div className="md:col-span-2">
+          {/* --- Penambahan Input Batch Size di sini --- */}
+          <div>
+            <LabelWithIcon icon={ImageIcon} text="Jumlah Gambar" htmlFor="batchSize" />
+            <input
+                type="number"
+                id="batchSize"
+                min="1"
+                max="10" // Batasi agar tidak terlalu banyak
+                value={settings.batchSize}
+                onChange={(e) => handleSettingChange('batchSize', parseInt(e.target.value, 10))}
+                className={inputStyle}
+            />
+          </div>
+          <div className="md:col-start-2">
             <LabelWithIcon icon={Sprout} text="Seed" htmlFor="seed" />
             <input type="number" id="seed" value={settings.seed} onChange={(e) => handleSettingChange('seed', parseInt(e.target.value))} className={inputStyle} />
           </div>
