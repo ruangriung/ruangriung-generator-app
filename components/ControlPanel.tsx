@@ -8,6 +8,7 @@ import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUp
 import TextareaModal from './TextareaModal';
 import Accordion from './Accordion';
 import PromptAssistant from './PromptAssistant';
+import TranslationAssistant from './TranslationAssistant'; // <--- TAMBAHKAN INI
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
 
 
@@ -87,6 +88,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     } catch (error: any) {
       console.error("Gagal memanggil API prompt:", error);
       alert(`Terjadi kesalahan saat berkomunikasi dengan AI: ${error.message}`);
+      setSettings(prev => ({ ...prev, prompt: "Gagal menghasilkan prompt. Silakan coba lagi." })); // Update prompt with error
     }
   };
 
@@ -182,6 +184,12 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
         <PromptAssistant 
           onUsePrompt={(newPrompt) => setSettings(prev => ({ ...prev, prompt: newPrompt }))} 
         />
+        
+        {/* <--- TAMBAHKAN KOMPONEN TRANSLATIONASSISTANT DI SINI --- */}
+        <TranslationAssistant
+          onUsePrompt={(newPrompt) => setSettings(prev => ({ ...prev, prompt: newPrompt }))}
+        />
+        {/* <---------------------------------------------------> */}
 
         <AdvancedSettings
           settings={settings}
