@@ -22,8 +22,9 @@ export default function PenghapusanDataPage() {
           <p>
             Harap kirim permintaan dari alamat email yang sama dengan yang Anda gunakan untuk login ke layanan kami. Kami akan memproses permintaan Anda dalam waktu 30 hari kerja.
           </p>
-          <p className="pt-6 font-semibold">
-            [... Pastikan prosedur ini sesuai dengan cara kerja aplikasi Anda ...]
+          {/* Paragraf yang telah dilengkapi dengan kesan profesional */}
+          <p className="pt-6">
+            Kami berkomitmen penuh untuk melindungi privasi data Anda. Setelah data berhasil dihapus dari sistem kami, Anda akan menerima konfirmasi melalui email. Proses ini memastikan bahwa data pribadi Anda tidak lagi tersimpan di Ruang Riung AI Generator sesuai dengan permintaan Anda dan standar perlindungan data yang berlaku.
           </p>
         </div>
       </div>
