@@ -1,3 +1,4 @@
+// components/VideoCreator.tsx
 'use client';
 
 import { useState } from 'react';
@@ -5,6 +6,7 @@ import { Sparkles, Film, Type, Clapperboard, Settings, Camera, Wand, Smile, Clip
 import ButtonSpinner from './ButtonSpinner';
 import Accordion from './Accordion';
 import TextareaModal from './TextareaModal';
+import toast from 'react-hot-toast';
 
 export default function VideoCreator() {
   const [inputs, setInputs] = useState({
@@ -29,7 +31,7 @@ export default function VideoCreator() {
 
   const handleGenerateIdea = async () => {
     if (!inputs.konsep) {
-      alert('Konsep Utama Video tidak boleh kosong!');
+      toast.error('Konsep Utama Video tidak boleh kosong!');
       return;
     }
     setIsLoading(true);
@@ -46,41 +48,56 @@ export default function VideoCreator() {
     fullPrompt += `- Mood dan Suasana: ${inputs.mood}\n\n`;
     fullPrompt += `Berikan hasilnya dalam format naratif yang mendeskripsikan adegan per adegan secara sinematik.`;
 
-    try {
-      const response = await fetch('https://text.pollinations.ai/openai', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN}`
-        },
-        body: JSON.stringify({
-          model: 'openai',
-          messages: [{ role: 'user', content: fullPrompt }],
-        }),
-      });
+    // <--- PERBAIKAN: Beri tipe eksplisit Promise<string>
+    const generatePromise = new Promise<string>(async (resolve, reject) => {
+      try {
+        const response = await fetch('https://text.pollinations.ai/openai', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN}`
+          },
+          body: JSON.stringify({
+            model: 'openai',
+            messages: [{ role: 'user', content: fullPrompt }],
+          }),
+        });
 
-      if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API Error: ${response.statusText} - ${errorText}`);
+        }
 
-      const result = await response.json();
-      setVideoIdea(result.choices[0].message.content);
-    } catch (error) {
-      console.error("Error generating video idea:", error);
-      alert('Terjadi kesalahan saat membuat ide video.');
-    } finally {
-      setIsLoading(false);
-    }
+        const result = await response.json();
+        const idea = result.choices[0].message.content;
+        setVideoIdea(idea);
+        resolve('Ide video berhasil dibuat!');
+      } catch (error: any) {
+        console.error("Error generating video idea:", error);
+        reject('Terjadi kesalahan saat membuat ide video.');
+      } finally {
+        setIsLoading(false);
+      }
+    });
+
+    toast.promise(generatePromise, {
+      loading: 'Membuat ide video...',
+      success: (message: string) => message,
+      error: (message: string) => `Gagal membuat ide video: ${message}`,
+    });
   };
   
   const handleCopy = () => {
     if (!videoIdea) return;
     navigator.clipboard.writeText(videoIdea).then(() => {
       setIsCopied(true);
+      toast.success("Ide video berhasil disalin!");
       setTimeout(() => setIsCopied(false), 2000);
     });
   };
 
   const inputStyle = "w-full p-3 bg-light-bg rounded-lg shadow-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow";
-  const textareaStyle = `${inputStyle} pr-20 cursor-pointer resize-none`; // pr-20 untuk ruang tombol, resize-none untuk mematikan handle resize browser
+  const textareaStyle = `${inputStyle} pr-20 cursor-pointer resize-none`;
 
   return (
     <>

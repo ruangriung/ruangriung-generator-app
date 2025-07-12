@@ -6,13 +6,14 @@ import ControlPanel, { GeneratorSettings } from './ControlPanel';
 import ImageDisplay from './ImageDisplay';
 import ImageModal from './ImageModal';
 import HistoryPanel, { HistoryItem } from './HistoryPanel';
+import toast from 'react-hot-toast';
 
-type AspectRatioPreset = 'Kotak' | 'Portrait' | 'Lansekap' | 'Custom'; // <--- PERUBAHAN: Tambahkan 'Custom'
+type AspectRatioPreset = 'Kotak' | 'Portrait' | 'Lansekap' | 'Custom';
 
 export default function Generator() {
   const [settings, setSettings] = useState<GeneratorSettings>({
-    prompt: 'Spiderman in a futuristic city',
-    model: 'flux', // Default model
+    prompt: 'Kastil fantasi di atas awan',
+    model: 'flux',
     width: 1024,
     height: 1024,
     seed: Math.floor(Math.random() * 1000000),
@@ -24,11 +25,10 @@ export default function Generator() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [modelList, setModelList] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Kotak'); // <--- PERUBAHAN: Inisialisasi dengan 'Kotak'
+  const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Kotak');
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
 
-  // Efek untuk memuat dan menyimpan riwayat
   useEffect(() => {
     try {
       const savedHistory = localStorage.getItem('ruangriung_history');
@@ -45,7 +45,6 @@ export default function Generator() {
     }
   }, [history, isHistoryLoaded]);
 
-  // Efek untuk mengambil daftar model dari Pollinations.ai
   useEffect(() => {
     const fetchImageModels = async () => {
       try {
@@ -74,11 +73,11 @@ export default function Generator() {
           }
         } else {
             setModelList(['flux', 'turbo']);
-            alert("Model sementara gagal dimuat dari API. Menggunakan model fallback.");
+            toast.error("Model sementara gagal dimuat dari API. Menggunakan model fallback.");
         }
       } catch (error) {
         console.error("Error mengambil model gambar:", error);
-        alert("Model sementara gagal dimuat dari API. Menggunakan model fallback.");
+        toast.error("Model sementara gagal dimuat dari API. Menggunakan model fallback.");
         setModelList(['flux', 'turbo']);
       }
     };
@@ -90,7 +89,6 @@ export default function Generator() {
     setHistory(prev => [newItem, ...prev.filter(i => i.imageUrl !== newItem.imageUrl)].slice(0, 15));
   };
 
-  // <--- PERUBAHAN: Fungsi ini dipanggil saat tombol preset diklik
   const onAspectRatioChange = (preset: 'Kotak' | 'Portrait' | 'Lansekap') => {
     setAspectRatio(preset);
     switch (preset) {
@@ -106,11 +104,9 @@ export default function Generator() {
     }
   };
 
-  // <--- PERUBAHAN BARU: Fungsi ini dipanggil saat input width/height diubah secara manual
   const handleManualDimensionChange = (newWidth: number, newHeight: number) => {
     setSettings(prev => ({ ...prev, width: newWidth, height: newHeight }));
 
-    // Cek apakah dimensi baru cocok dengan preset yang ada
     if (newWidth === 1024 && newHeight === 1024) {
       setAspectRatio('Kotak');
     } else if (newWidth === 1792 && newHeight === 1024) {
@@ -118,64 +114,68 @@ export default function Generator() {
     } else if (newWidth === 1024 && newHeight === 1792) {
       setAspectRatio('Lansekap');
     } else {
-      setAspectRatio('Custom'); // Jika tidak ada preset yang cocok, atur ke 'Custom'
+      setAspectRatio('Custom');
     }
   };
 
   const handleGenerateImage = async () => {
     if (!settings.prompt) {
-      alert('Prompt tidak boleh kosong!');
+      toast.error('Prompt tidak boleh kosong!');
       return;
     }
 
     setIsLoading(true);
     setImageUrl('');
 
-    try {
-      const newSeed = Math.floor(Math.random() * 1000000);
-      const currentSettings = { ...settings, seed: newSeed };
-      setSettings(currentSettings);
-      
-      const fullPrompt = `${currentSettings.prompt}${currentSettings.artStyle}`;
-      const encodedPrompt = encodeURIComponent(fullPrompt);
-      
-      const params = new URLSearchParams({
-        model: currentSettings.model,
-        width: currentSettings.width.toString(),
-        height: currentSettings.height.toString(),
-        seed: currentSettings.seed.toString(),
-        nologo: 'true',
-        enhance: 'true',
-        safe: 'false',
-        referrer: 'ruangriung.my.id',
-        cb: Date.now().toString()
-      });
-      const finalUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?${params.toString()}`;
-      
-      // Tetap lakukan fetch untuk menunggu respons dari API
-      // Ini juga memungkinkan penanganan error jika API tidak mengembalikan gambar yang valid
-      const imageResponse = await fetch(finalUrl); 
-      if (!imageResponse.ok) {
-        // Jika respons tidak OK, kita bisa mencoba untuk membaca body sebagai teks error
-        const errorText = await imageResponse.text();
-        throw new Error(`Gagal mengambil gambar dari API Pollinations: ${imageResponse.status} - ${errorText}`);
-      }
+    // <--- PERBAIKAN: Beri tipe eksplisit Promise<string>
+    const generatePromise = new Promise<string>(async (resolve, reject) => {
+      try {
+        const newSeed = Math.floor(Math.random() * 1000000);
+        const currentSettings = { ...settings, seed: newSeed };
+        setSettings(currentSettings);
+        
+        const fullPrompt = `${currentSettings.prompt}${currentSettings.artStyle}`;
+        const encodedPrompt = encodeURIComponent(fullPrompt);
+        
+        const params = new URLSearchParams({
+          model: currentSettings.model,
+          width: currentSettings.width.toString(),
+          height: currentSettings.height.toString(),
+          seed: currentSettings.seed.toString(),
+          nologo: 'true',
+          enhance: 'true',
+          safe: 'false',
+          referrer: 'ruangriung.my.id',
+          cb: Date.now().toString()
+        });
+        const finalUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?${params.toString()}`;
+        
+        const imageResponse = await fetch(finalUrl); 
+        if (!imageResponse.ok) {
+          const errorText = await imageResponse.text();
+          throw new Error(`Gagal mengambil gambar dari API Pollinations: ${imageResponse.status} - ${errorText}`);
+        }
 
-      // Pastikan respons adalah gambar. Jika tidak, bisa jadi error dari API (meskipun status OK)
-      const contentType = imageResponse.headers.get('content-type');
-      if (!contentType || !contentType.startsWith('image/')) {
-        throw new Error('Respons API bukan gambar atau tipe konten tidak valid.');
+        const contentType = imageResponse.headers.get('content-type');
+        if (!contentType || !contentType.startsWith('image/')) {
+          throw new Error('Respons API bukan gambar atau tipe konten tidak valid.');
+        }
+        
+        setImageUrl(finalUrl); 
+        addToHistory({ imageUrl: finalUrl, prompt: settings.prompt, timestamp: Date.now() });
+        resolve('Gambar berhasil dibuat!');
+      } catch (error: any) {
+        reject(error.message);
+      } finally {
+        setIsLoading(false);
       }
-      
-      // Jika berhasil, setel imageUrl ke URL permanen dan tambahkan ke riwayat
-      setImageUrl(finalUrl); 
-      addToHistory({ imageUrl: finalUrl, prompt: settings.prompt, timestamp: Date.now() });
+    });
 
-    } catch (error: any) {
-      alert(`Terjadi kesalahan: ${error.message}`);
-    } finally {
-      setIsLoading(false);
-    }
+    toast.promise(generatePromise, {
+      loading: 'Membuat gambar...',
+      success: (message: string) => message,
+      error: (message: string) => `Gagal membuat gambar: ${message}`,
+    });
   };
 
   const handleDownloadImage = async () => {
@@ -187,19 +187,22 @@ export default function Generator() {
           document.body.appendChild(a);
           a.click();
           a.remove();
+          toast.success("Gambar berhasil diunduh!");
       } catch (error) {
-          alert("Gagal mengunduh gambar.");
+          toast.error("Gagal mengunduh gambar.");
       }
   };
 
   const handleSelectFromHistory = (item: HistoryItem) => {
     setImageUrl(item.imageUrl); 
     setSettings(prev => ({ ...prev, prompt: item.prompt }));
+    toast.success("Gambar dimuat dari riwayat!");
   };
   
   const handleClearHistory = () => {
     if (window.confirm("Yakin ingin menghapus riwayat?")) {
       setHistory([]);
+      toast.success("Riwayat berhasil dihapus!");
     }
   };
 

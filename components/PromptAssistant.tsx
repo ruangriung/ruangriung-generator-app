@@ -2,10 +2,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// <--- PERUBAHAN: Tambahkan Star di import
-import { Sparkles, Wand2, MessageSquarePlus, Copy, Check, Megaphone, X, Cpu, Star } from 'lucide-react'; 
+import { Sparkles, Wand2, MessageSquarePlus, Copy, Check, Megaphone, X, Cpu, Star } from 'lucide-react';
 import Accordion from './Accordion';
 import ButtonSpinner from './ButtonSpinner';
+import toast from 'react-hot-toast'; // <--- Tambahkan ini
 
 interface PromptAssistantProps {
   onUsePrompt: (prompt: string) => void;
@@ -24,10 +24,9 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
   const textareaStyle = `${inputStyle} resize-none`;
   const selectStyle = `${inputStyle} appearance-none`;
 
-  // <--- PERUBAHAN: LabelWithIcon sekarang menerima colorClass
   const LabelWithIcon = ({ icon: Icon, text, htmlFor, colorClass }: { icon: React.ElementType, text: string, htmlFor: string, colorClass?: string }) => (
     <div className="flex items-center gap-x-2 mb-2">
-      <Icon className={`h-4 w-4 ${colorClass || 'text-purple-600'}`} /> {/* Gunakan colorClass jika ada */}
+      <Icon className={`h-4 w-4 ${colorClass || 'text-purple-600'}`} />
       <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600">
         {text}
       </label>
@@ -75,11 +74,11 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
           console.warn("Tidak ada model teks valid yang ditemukan dari API. Menggunakan model fallback.");
           setModelList(['openai', 'mistral']);
           setSelectedModel('openai');
-          alert("Model teks sementara gagal dimuat dari API. Menggunakan model fallback.");
+          toast.error("Model teks sementara gagal dimuat dari API. Menggunakan model fallback."); // <--- PERUBAHAN
         }
       } catch (error) {
         console.error("Error mengambil model teks:", error);
-        alert("Model teks sementara gagal dimuat dari API. Menggunakan model fallback.");
+        toast.error("Model teks sementara gagal dimuat dari API. Menggunakan model fallback."); // <--- PERUBAHAN
         setModelList(['openai', 'mistral']);
         setSelectedModel('openai');
       }
@@ -90,7 +89,7 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
 
   const handleGenerateAssistantPrompt = async () => {
     if (!assistantSubject) {
-      alert("Subjek tidak boleh kosong untuk Asisten Prompt!");
+      toast.error("Subjek tidak boleh kosong untuk Asisten Prompt!"); // <--- PERUBAHAN
       return;
     }
 
@@ -125,9 +124,10 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
       const result = await response.json();
       const newPrompt = result.choices[0].message.content.replace(/"/g, '');
       setGeneratedAssistantPrompt(newPrompt);
+      toast.success("Prompt berhasil dibuat!"); // <--- PERUBAHAN
     } catch (error: any) {
       console.error("Gagal membuat prompt dengan Asisten Prompt:", error);
-      alert(`Terjadi kesalahan dengan Asisten Prompt: ${error.message}`);
+      toast.error(`Terjadi kesalahan dengan Asisten Prompt: ${error.message}`); // <--- PERUBAHAN
       setGeneratedAssistantPrompt("Gagal menghasilkan prompt. Silakan coba lagi.");
     } finally {
       setIsGeneratingAssistantPrompt(false);
@@ -138,6 +138,7 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
     if (generatedAssistantPrompt) {
       navigator.clipboard.writeText(generatedAssistantPrompt);
       setIsAssistantPromptCopied(true);
+      toast.success("Prompt berhasil disalin!"); // <--- PERUBAHAN
       setTimeout(() => setIsAssistantPromptCopied(false), 2000);
     }
   };
@@ -145,7 +146,7 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
   const handleUseAssistantPrompt = () => {
     if (generatedAssistantPrompt) {
       onUsePrompt(generatedAssistantPrompt);
-      alert("Prompt telah digunakan di kolom utama!");
+      toast.success("Prompt telah digunakan di kolom utama!"); // <--- PERUBAHAN
     }
   };
 
@@ -171,20 +172,18 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
           </select>
         </div>
 
-        {/* <--- PERUBAHAN: Gunakan ikon Star dan warna merah */}
         <div>
-          <LabelWithIcon icon={MessageSquarePlus} text="Subjek Utama Prompt (Wajib)" htmlFor="assistant-subject" colorClass="text-red-600" />
+          <LabelWithIcon icon={Star} text="Subjek Utama Prompt (Wajib)" htmlFor="assistant-subject" colorClass="text-red-600" />
           <input
             type="text"
             id="assistant-subject"
             value={assistantSubject}
             onChange={(e) => setAssistantSubject(e.target.value)}
-            placeholder="Misal: Superman naik tangga ajaib"
+            placeholder="Misal: Pemandangan kota futuristik"
             className={inputStyle}
             required
           />
         </div>
-        {/* <--- AKHIR PERUBAHAN */}
 
         <div>
           <LabelWithIcon icon={Sparkles} text="Detail Tambahan (Opsional)" htmlFor="assistant-details" />
@@ -193,7 +192,7 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
             rows={3}
             value={assistantDetails}
             onChange={(e) => setAssistantDetails(e.target.value)}
-            placeholder="Contoh: dengan mobil terbang, pencahayaan neon, suasana hujan."
+            placeholder="Misal: dengan mobil terbang, pencahayaan neon, suasana hujan."
             className={textareaStyle}
           />
         </div>

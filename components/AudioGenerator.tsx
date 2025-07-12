@@ -1,8 +1,10 @@
+// components/AudioGenerator.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Sparkles, Volume2 } from 'lucide-react';
 import ButtonSpinner from './ButtonSpinner';
+import toast from 'react-hot-toast'; // <--- Tambahkan ini
 
 export default function AudioGenerator() {
   const [text, setText] = useState('Halo! Selamat datang di Ruang Riung AI Generator.');
@@ -25,6 +27,7 @@ export default function AudioGenerator() {
       } catch (error) {
         console.error("Gagal mengambil daftar suara:", error);
         setVoices(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']);
+        toast.error("Gagal memuat daftar suara. Menggunakan suara fallback."); // <--- PERUBAHAN
       }
     };
     fetchVoices();
@@ -32,7 +35,7 @@ export default function AudioGenerator() {
 
   const handleGenerateAudio = () => {
     if (!text) {
-      alert('Teks tidak boleh kosong!');
+      toast.error('Teks tidak boleh kosong!'); // <--- PERUBAHAN
       return;
     }
     setIsLoading(true);
@@ -48,6 +51,7 @@ export default function AudioGenerator() {
     const finalUrl = `https://text.pollinations.ai/${encodedText}?${params.toString()}`;
     
     setAudioUrl(finalUrl);
+    toast.success("Audio berhasil dibuat!"); // <--- PERUBAHAN
     // Kita set loading ke false setelah beberapa saat untuk memberi jeda visual,
     // karena pembuatan audio biasanya sangat cepat.
     setTimeout(() => setIsLoading(false), 300);
@@ -100,7 +104,6 @@ export default function AudioGenerator() {
 
         {audioUrl && (
           <div className="mt-6">
-            {/* INI PERBAIKANNYA: Tambahkan 'key' prop */}
             <audio key={audioUrl} controls autoPlay className="w-full">
               <source src={audioUrl} type="audio/mpeg" />
               Browser Anda tidak mendukung elemen audio.

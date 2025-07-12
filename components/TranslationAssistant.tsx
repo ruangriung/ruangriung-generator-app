@@ -5,21 +5,23 @@ import { useState } from 'react';
 import { Languages, Copy, Check, Sparkles } from 'lucide-react';
 import Accordion from './Accordion';
 import ButtonSpinner from './ButtonSpinner';
+import toast from 'react-hot-toast'; // <--- Tambahkan ini
 
 interface TranslationAssistantProps {
-  onUsePrompt: (prompt: string) => void; // Callback to use the translated prompt in the main input
+  onUsePrompt: (prompt: string) => void;
 }
 
 export default function TranslationAssistant({ onUsePrompt }: TranslationAssistantProps) {
   const [inputText, setInputText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
-  const [sourceLanguage, setSourceLanguage] = useState('id'); // 'id' for Indonesian, 'en' for English
-  const [targetLanguage, setTargetLanguage] = useState('en'); // 'en' for English, 'id' for Indonesian
+  const [sourceLanguage, setSourceLanguage] = useState('id');
+  const [targetLanguage, setTargetLanguage] = useState('en');
   const [isLoading, setIsLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
   const inputStyle = "w-full p-3 bg-light-bg rounded-lg shadow-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow";
   const textareaStyle = `${inputStyle} resize-none`;
+  const selectStyle = `${inputStyle} appearance-none`;
 
   const LabelWithIcon = ({ icon: Icon, text, htmlFor }: { icon: React.ElementType, text: string, htmlFor: string }) => (
     <div className="flex items-center gap-x-2 mb-2">
@@ -32,7 +34,7 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
 
   const handleTranslate = async () => {
     if (!inputText.trim()) {
-      alert("Teks yang akan diterjemahkan tidak boleh kosong!");
+      toast.error("Teks yang akan diterjemahkan tidak boleh kosong!"); // <--- PERUBAHAN
       return;
     }
     setIsLoading(true);
@@ -43,7 +45,7 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
     const textToTranslate = inputText.trim();
 
     const combinedPrompt = `${promptInstruction}\n\nTeks: "${textToTranslate}"`;
-    const urlWithToken = `https://text.pollinations.ai/openai?token=${process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN}`; // Pastikan token diatur
+    const urlWithToken = `https://text.pollinations.ai/openai?token=${process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN}`;
 
     try {
       const response = await fetch(urlWithToken, {
@@ -52,9 +54,9 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'openai', // Atau model lain yang mendukung terjemahan
+          model: 'openai',
           messages: [{ role: 'user', content: combinedPrompt }],
-          temperature: 0.2, // Rendahkan temperature untuk hasil yang lebih akurat
+          temperature: 0.2,
         }),
       });
 
@@ -66,10 +68,11 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
       const result = await response.json();
       const newTranslatedText = result.choices[0].message.content.trim();
       setTranslatedText(newTranslatedText);
+      toast.success("Teks berhasil diterjemahkan!"); // <--- PERUBAHAN
 
     } catch (error: any) {
       console.error("Gagal melakukan terjemahan:", error);
-      alert(`Terjadi kesalahan saat terjemahan: ${error.message}`);
+      toast.error(`Terjadi kesalahan saat terjemahan: ${error.message}`); // <--- PERUBAHAN
       setTranslatedText("Gagal menerjemahkan teks. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
@@ -80,6 +83,7 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
     if (translatedText) {
       navigator.clipboard.writeText(translatedText);
       setIsCopied(true);
+      toast.success("Teks terjemahan berhasil disalin!"); // <--- PERUBAHAN
       setTimeout(() => setIsCopied(false), 2000);
     }
   };
@@ -87,21 +91,21 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
   const handleUseTranslatedPrompt = () => {
     if (translatedText) {
       onUsePrompt(translatedText);
-      alert("Teks terjemahan telah digunakan di kolom utama!");
+      toast.success("Teks terjemahan telah digunakan di kolom utama!"); // <--- PERUBAHAN
     }
   };
 
   const swapLanguages = () => {
     setSourceLanguage(targetLanguage);
     setTargetLanguage(sourceLanguage);
-    setInputText(translatedText); // Pindahkan hasil terjemahan ke input jika menukar
-    setTranslatedText(''); // Kosongkan hasil terjemahan sebelumnya
+    setInputText(translatedText);
+    setTranslatedText('');
+    toast('Bahasa ditukar!', { icon: '🔄' }); // <--- PERUBAHAN: Toast singkat
   };
 
   return (
     <Accordion title={<div className="flex items-center gap-2"><Languages className="text-purple-600" />Asisten Terjemahan</div>} className="mt-6">
       <div className="space-y-4">
-        {/* Pilihan Bahasa */}
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <LabelWithIcon icon={Languages} text="Bahasa Sumber" htmlFor="source-lang" />
@@ -110,7 +114,6 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
               value={sourceLanguage}
               onChange={(e) => {
                 setSourceLanguage(e.target.value);
-                // Otomatis atur bahasa target jika sama
                 if (e.target.value === targetLanguage) {
                   setTargetLanguage(e.target.value === 'id' ? 'en' : 'id');
                 }
@@ -126,7 +129,7 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
             className="mt-7 p-2 bg-light-bg rounded-lg shadow-neumorphic-button active:shadow-neumorphic-inset text-gray-700 hover:text-purple-600 transition-all duration-150"
             aria-label="Tukar Bahasa"
           >
-            <Sparkles size={16} /> {/* Menggunakan Sparkles untuk ikon tukar */}
+            <Sparkles size={16} />
           </button>
           <div className="flex-1">
             <LabelWithIcon icon={Languages} text="Bahasa Target" htmlFor="target-lang" />
@@ -135,7 +138,6 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
               value={targetLanguage}
               onChange={(e) => {
                 setTargetLanguage(e.target.value);
-                // Otomatis atur bahasa sumber jika sama
                 if (e.target.value === sourceLanguage) {
                   setSourceLanguage(e.target.value === 'id' ? 'en' : 'id');
                 }
@@ -148,7 +150,6 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
           </div>
         </div>
 
-        {/* Input Teks */}
         <div>
           <LabelWithIcon icon={Sparkles} text="Teks yang Ingin Diterjemahkan" htmlFor="input-text" />
           <textarea

@@ -9,6 +9,7 @@ import TextareaModal from './TextareaModal';
 import Accordion from './Accordion';
 import PromptAssistant from './PromptAssistant';
 import TranslationAssistant from './TranslationAssistant';
+import toast from 'react-hot-toast'; // <--- Tambahkan ini
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
 
 
@@ -28,12 +29,12 @@ interface ControlPanelProps {
   onGenerate: () => void;
   isLoading: boolean;
   models: string[];
-  aspectRatio: 'Kotak' | 'Portrait' | 'Lansekap' | 'Custom'; // <--- PERUBAHAN: Sesuaikan tipe
+  aspectRatio: 'Kotak' | 'Portrait' | 'Lansekap' | 'Custom';
   onAspectRatioChange: (preset: 'Kotak' | 'Portrait' | 'Lansekap') => void;
-  onManualDimensionChange: (width: number, height: number) => void; // <--- PERUBAHAN BARU: Tambahkan prop ini
+  onManualDimensionChange: (width: number, height: number) => void;
 }
 
-export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange }: ControlPanelProps) { // <--- PERUBAHAN: Tambahkan prop baru di sini
+export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange }: ControlPanelProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRandomizing, setIsRandomizing] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
@@ -86,32 +87,46 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       const result = await response.json();
       const newPrompt = result.choices[0].message.content.replace(/"/g, '');
       setSettings(prev => ({ ...prev, prompt: newPrompt }));
+      return newPrompt; // Mengembalikan prompt baru agar bisa digunakan di toast.promise
     } catch (error: any) {
       console.error("Gagal memanggil API prompt:", error);
-      alert(`Terjadi kesalahan saat berkomunikasi dengan AI: ${error.message}`);
-      setSettings(prev => ({ ...prev, prompt: "Gagal menghasilkan prompt. Silakan coba lagi." })); // Update prompt with error
+      toast.error(`Terjadi kesalahan saat berkomunikasi dengan AI: ${error.message}`); // <--- PERUBAHAN
+      setSettings(prev => ({ ...prev, prompt: "Gagal menghasilkan prompt. Silakan coba lagi." }));
+      throw error; // Lempar kembali error agar promise tertolak
     }
   };
 
   const handleRandomPrompt = async () => {
     setIsRandomizing(true);
-    await callPromptApi("Berikan saya satu prompt gambar yang acak, kreatif, dan deskriptif secara visual. Jadilah ringkas dan jangan gunakan tanda kutip.");
-    setIsRandomizing(false);
+    toast.promise(
+      callPromptApi("Berikan saya satu prompt gambar yang acak, kreatif, dan deskriptif secara visual. Jadilah ringkas dan jangan gunakan tanda kutip."),
+      {
+        loading: 'Mencari ide prompt acak...',
+        success: 'Prompt acak berhasil dibuat!',
+        error: 'Gagal membuat prompt acak.',
+      }
+    ).finally(() => setIsRandomizing(false));
   };
 
   const handleEnhancePrompt = async () => {
     if (!settings.prompt) {
-      alert("Tuliskan prompt terlebih dahulu untuk disempurnakan!");
+      toast.error("Tuliskan prompt terlebih dahulu untuk disempurnakan!"); // <--- PERUBAHAN
       return;
     }
     setIsEnhancing(true);
-    await callPromptApi(`Sempurnakan dan tambahkan lebih banyak detail visual ke prompt gambar berikut, tetapi tetap ringkas: "${settings.prompt}". Jangan gunakan tanda kutip dalam respons Anda.`);
-    setIsEnhancing(false);
+    toast.promise(
+      callPromptApi(`Sempurnakan dan tambahkan lebih banyak detail visual ke prompt gambar berikut, tetapi tetap ringkas: "${settings.prompt}". Jangan gunakan tanda kutip dalam respons Anda.`),
+      {
+        loading: 'Menyempurnakan prompt...',
+        success: 'Prompt berhasil disempurnakan!',
+        error: 'Gagal menyempurnakan prompt.',
+      }
+    ).finally(() => setIsEnhancing(false));
   };
   
   const handleSavePrompt = () => {
     if (!settings.prompt) {
-      alert("Tidak ada prompt untuk disimpan!");
+      toast.error("Tidak ada prompt untuk disimpan!"); // <--- PERUBAHAN
       return;
     }
     setIsSaving(true);
@@ -119,8 +134,9 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       const updatedPrompts = new Set([settings.prompt, ...savedPrompts]);
       const newSavedPromptsArray = Array.from(updatedPrompts).slice(0, 50);
       setSavedPrompts(newSavedPromptsArray);
+      toast.success("Prompt berhasil disimpan!"); // <--- PERUBAHAN
     } catch (error) {
-      alert("Gagal menyimpan prompt.");
+      toast.error("Gagal menyimpan prompt."); // <--- PERUBAHAN
       console.error("Error saving prompt:", error);
     } finally {
       setTimeout(() => setIsSaving(false), 1500);
@@ -129,17 +145,20 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
   const handleSelectSavedPrompt = (prompt: string) => {
     setSettings(prev => ({ ...prev, prompt }));
+    toast.success("Prompt dimuat dari riwayat!"); // <--- PERUBAHAN
   };
 
   const handleDeleteSavedPrompt = (promptToDelete: string) => {
     if (window.confirm("Yakin ingin menghapus prompt ini?")) {
       setSavedPrompts(prev => prev.filter(p => p !== promptToDelete));
+      toast.success("Prompt berhasil dihapus!"); // <--- PERUBAHAN
     }
   };
 
   const handleClearAllSavedPrompts = () => {
     if (window.confirm("Yakin ingin menghapus semua prompt yang disimpan?")) {
       setSavedPrompts([]);
+      toast.success("Semua prompt tersimpan berhasil dihapus!"); // <--- PERUBAHAN
     }
   };
   

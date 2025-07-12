@@ -5,6 +5,7 @@ import './globals.css';
 import AuthProvider from '@/components/AuthProvider';
 import Footer from '@/components/Footer';
 import Script from 'next/script';
+import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -80,6 +81,7 @@ export default function RootLayout({
             <Footer />
           </div>
         </AuthProvider>
+          <Toaster />
 
         {/* Google Tag (gtag.js) script */}
         <Script
