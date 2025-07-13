@@ -4,9 +4,9 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import AuthProvider from '@/components/AuthProvider';
 import Footer from '@/components/Footer';
-import Script from 'next/script';
+import Script from 'next/script'; // Pastikan Script diimpor dari 'next/script'
 import { Toaster } from 'react-hot-toast';
-import CookieConsent from '@/components/CookieConsent'; // Pastikan ini diimpor
+import CookieConsent from '@/components/CookieConsent';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -57,7 +57,6 @@ export const viewport: Viewport = {
   themeColor: "#6c5ce7",
 };
 
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -76,18 +75,14 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
+            {/* Elemen Histats div dan noscript sudah dihapus dari sini */}
           </div>
         </AuthProvider>
-          <Toaster />
-
-        {/* Komponen Cookie Consent ditambahkan di sini */}
+        <Toaster />
         <CookieConsent />
 
-        {/* Google Tag (gtag.js) script */}
-        <Script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-PWFT2SQWNZ"
-        />
+        {/* Google Analytics Script */}
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-PWFT2SQWNZ" />
         <Script
           id="google-analytics-script"
           strategy="afterInteractive"
@@ -100,6 +95,21 @@ export default function RootLayout({
             `,
           }}
         />
+
+        {/* Skrip Histats tetap di sini agar bisa berfungsi */}
+        <Script id="histats-logic" strategy="afterInteractive">
+          {`
+            var _Hasync= _Hasync|| [];
+            _Hasync.push(['Histats.start', '1,4944741,4,4012,112,61,00011111']);
+            _Hasync.push(['Histats.fasi', '1']);
+            _Hasync.push(['Histats.track_hits', '']);
+            (function() {
+            var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
+            hs.src = ('//s10.histats.com/js15_as.js');
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
+            })();
+          `}
+        </Script>
       </body>
     </html>
   );

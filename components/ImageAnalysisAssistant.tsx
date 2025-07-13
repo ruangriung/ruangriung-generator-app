@@ -1,8 +1,8 @@
 // components/ImageAnalysisAssistant.tsx
 'use client';
 
-import { useState, useRef } from 'react'; // Import useRef
-import { Image, Copy, Check, Sparkles, Wand2, Upload } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Image, Copy, Check, Sparkles, Upload, Cpu, ChevronDown, RefreshCw, Loader } from 'lucide-react';
 import Accordion from './Accordion';
 import ButtonSpinner from './ButtonSpinner';
 import toast from 'react-hot-toast';
@@ -11,36 +11,65 @@ interface ImageAnalysisAssistantProps {
   onUsePrompt: (prompt: string) => void;
 }
 
-export default function ImageAnalysisAssistant({ onUsePrompt }: ImageAnalysisAssistantProps) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [analysisResult, setAnalysisResult] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null); // Untuk menampilkan pratinjau gambar
-  const fileInputRef = useRef<HTMLInputElement>(null); // Ref untuk input file
-
-  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
-  const textareaStyle = `${inputStyle} resize-none`;
-
-  const LabelWithIcon = ({ icon: Icon, text, htmlFor }: { icon: React.ElementType, text: string, htmlFor: string }) => (
+const LabelWithIcon = ({ icon: Icon, text, htmlFor }: { icon: React.ElementType, text: string, htmlFor: string }) => (
     <div className="flex items-center gap-x-2 mb-2">
       <Icon className="h-4 w-4 text-purple-600" />
       <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600 dark:text-gray-300">
         {text}
       </label>
     </div>
-  );
+);
+
+const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
+const textareaStyle = `${inputStyle} resize-none`;
+const selectStyle = `${inputStyle} appearance-none`;
+
+export default function ImageAnalysisAssistant({ onUsePrompt }: ImageAnalysisAssistantProps) {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [analysisResult, setAnalysisResult] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  
+  const [models, setModels] = useState<string[]>([]);
+  const [selectedModel, setSelectedModel] = useState('openai');
+  const [modelError, setModelError] = useState<string | null>(null);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fetchVisionModels = async () => {
+      setIsLoadingModels(true);
+      setModelError(null);
+      try {
+        // Asumsi model vision adalah statis untuk saat ini, tapi kita simulasikan fetch
+        await new Promise(resolve => setTimeout(resolve, 500)); // Simulasi jeda jaringan
+        const visionModels = ['openai', 'openai-large', 'deepseek'];
+        if (visionModels.length === 0) throw new Error("Daftar model vision kosong.");
+
+        setModels(visionModels);
+        setSelectedModel(visionModels[0]);
+      } catch (error) {
+          console.error("Error memuat model vision:", error);
+          setModelError("Gagal memuat model. Coba lagi.");
+          setModels(['openai']); // Fallback
+      } finally {
+          setIsLoadingModels(false);
+      }
+  };
+
+  useEffect(() => {
+    fetchVisionModels();
+  }, []);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      setAnalysisResult(''); // Clear previous analysis
+      setAnalysisResult('');
       setIsCopied(false);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
-      };
+      reader.onloadend = () => setPreviewUrl(reader.result as string);
       reader.readAsDataURL(file);
     } else {
       setSelectedFile(null);
@@ -53,66 +82,47 @@ export default function ImageAnalysisAssistant({ onUsePrompt }: ImageAnalysisAss
       toast.error("Silakan unggah gambar terlebih dahulu!");
       return;
     }
-
     setIsLoading(true);
     setAnalysisResult('');
-    setIsCopied(false);
-
     const reader = new FileReader();
-    reader.readAsDataURL(selectedFile); // Read file as Base64
+    reader.readAsDataURL(selectedFile);
 
     reader.onloadend = async () => {
       const base64String = reader.result as string;
-      const analyzePromise = new Promise<string>(async (resolve, reject) => {
-        try {
-          const response = await fetch('https://text.pollinations.ai/openai', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              model: 'openai', // or 'openai-large', 'claude-hybridspace'
-              messages: [
-                {
-                  "role": "user",
-                  "content": [
-                    { "type": "text", "text": "Jelaskan gambar ini secara ringkas namun detail, fokus pada subjek utama, gaya, dan elemen penting lainnya. Format output sebagai potensi prompt untuk generator gambar." },
-                    { "type": "image_url", "image_url": { "url": base64String } }
-                  ]
-                }
-              ],
-              max_tokens: 300 // Batasi panjang respons
-            }),
-          });
-
-          if (!response.ok) {
-            const errorBody = await response.text();
-            throw new Error(`API merespons dengan status ${response.status}. Isi: ${errorBody}`);
-          }
-
-          const result = await response.json();
-          const description = result.choices?.[0]?.message?.content?.trim();
-          if (description) {
-            setAnalysisResult(description);
-            resolve("Analisis gambar berhasil dibuat!");
-          } else {
-            reject("API tidak memberikan deskripsi gambar.");
-            setAnalysisResult("Gagal menganalisis gambar. API tidak memberikan deskripsi.");
-          }
-
-        } catch (error: any) {
-          console.error("Gagal menganalisis gambar:", error);
-          reject(`Terjadi kesalahan saat menganalisis gambar: ${error.message}`);
-          setAnalysisResult("Gagal menganalisis gambar. Silakan coba lagi.");
-        } finally {
-          setIsLoading(false);
+      const analyzePromise = fetch('https://text.pollinations.ai/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: selectedModel,
+          messages: [{ "role": "user", "content": [{ "type": "text", "text": "Jelaskan gambar ini secara ringkas namun detail, fokus pada subjek utama, gaya, dan elemen penting lainnya. Format output sebagai potensi prompt untuk generator gambar." }, { "type": "image_url", "image_url": { "url": base64String } }] }],
+          max_tokens: 300
+        }),
+      })
+      .then(async (res) => {
+        if (!res.ok) {
+          const errorBody = await res.text();
+          throw new Error(`Gagal menganalisis gambar. Status: ${res.status}. Pesan: ${errorBody}`);
         }
+        return res.json();
+      })
+      .then(result => {
+        const description = result.choices?.[0]?.message?.content?.trim();
+        if (!description) throw new Error("API tidak memberikan deskripsi yang valid.");
+        setAnalysisResult(description);
+        return "Analisis gambar berhasil!";
+      })
+      .catch(err => {
+        setAnalysisResult("Gagal menganalisis gambar. Periksa konsol untuk detail.");
+        throw err;
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
 
       toast.promise(analyzePromise, {
         loading: 'Menganalisis gambar...',
         success: (message: string) => message,
-        error: (message: string) => message,
+        error: (err) => `Error: ${err.message || 'Terjadi kesalahan tidak diketahui.'}`,
       });
     };
   };
@@ -137,43 +147,37 @@ export default function ImageAnalysisAssistant({ onUsePrompt }: ImageAnalysisAss
     <Accordion title={<div className="flex items-center gap-2"><Image className="text-purple-600" />Asisten Analisis Gambar</div>} className="mt-6">
       <div className="space-y-4">
         <div>
-          <LabelWithIcon icon={Upload} text="Unggah Gambar" htmlFor="image-upload-hidden" /> {/* htmlFor menunjuk ke input yang tersembunyi */}
-          <input
-            type="file"
-            id="image-upload-hidden" // ID ini akan dihubungkan dengan label
-            accept="image/*"
-            onChange={handleFileChange}
-            ref={fileInputRef} // Tambahkan ref
-            className="hidden" // Sembunyikan input file bawaan
-          />
-          {/* Tombol kustom yang akan terlihat oleh pengguna */}
-          <label
-            htmlFor="image-upload-hidden"
-            className="inline-flex items-center justify-center px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-200 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150 cursor-pointer w-full" /* <-- PERUBAHAN DI SINI: Menambahkan kelas w-full */
-          >
+            <LabelWithIcon icon={Cpu} text="Pilih Model Analisis" htmlFor="analysis-model" />
+            {modelError ? (
+                <div className="flex items-center justify-between p-2 bg-red-100 dark:bg-red-900/50 rounded-lg">
+                    <p className="text-sm text-red-700 dark:text-red-200">{modelError}</p>
+                    <button onClick={fetchVisionModels} className="p-1 rounded-full hover:bg-red-200 dark:hover:bg-red-800" title="Coba Lagi" disabled={isLoadingModels}>
+                        {isLoadingModels ? <Loader className="animate-spin h-4 w-4"/> : <RefreshCw className="h-4 w-4 text-red-700 dark:text-red-200"/>}
+                    </button>
+                </div>
+            ) : (
+                <div className="relative">
+                    <select id="analysis-model" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className={selectStyle} disabled={isLoadingModels}>
+                        {isLoadingModels ? <option>Memuat...</option> : models.map(model => (<option key={model} value={model} className="bg-white dark:bg-gray-700">{model}</option>))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
+                </div>
+            )}
+        </div>
+
+        <div>
+          <LabelWithIcon icon={Upload} text="Unggah Gambar" htmlFor="image-upload-hidden" />
+          <input type="file" id="image-upload-hidden" accept="image/*" onChange={handleFileChange} ref={fileInputRef} className="hidden" />
+          <label htmlFor="image-upload-hidden" className="inline-flex items-center justify-center px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-200 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150 cursor-pointer w-full">
             <Upload className="w-5 h-5 mr-2" />
             <span>Pilih Gambar</span>
           </label>
-
-          {selectedFile && (
-            <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
-              File terpilih: <span className="font-semibold">{selectedFile.name}</span>
-            </p>
-          )}
-
-          {previewUrl && (
-            <div className="mt-4 p-2 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset flex justify-center items-center">
-              <img src={previewUrl} alt="Pratinjau Gambar" className="max-h-64 max-w-full object-contain rounded-md" />
-            </div>
-          )}
+          {selectedFile && <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">File terpilih: <span className="font-semibold">{selectedFile.name}</span></p>}
+          {previewUrl && <div className="mt-4 p-2 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset flex justify-center items-center"><img src={previewUrl} alt="Pratinjau" className="max-h-64 max-w-full object-contain rounded-md" /></div>}
         </div>
 
         <div className="text-center pt-2">
-          <button
-            onClick={handleAnalyzeImage}
-            disabled={isLoading || !selectedFile}
-            className="inline-flex items-center justify-center px-6 py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150"
-          >
+          <button onClick={handleAnalyzeImage} disabled={isLoading || !selectedFile} className="inline-flex items-center justify-center px-6 py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed">
             {isLoading ? <ButtonSpinner /> : <Sparkles className="w-5 h-5 mr-2" />}
             <span>Analisis Gambar</span>
           </button>
@@ -182,23 +186,13 @@ export default function ImageAnalysisAssistant({ onUsePrompt }: ImageAnalysisAss
         {analysisResult && (
           <div className="mt-4 p-4 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset">
             <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Hasil Analisis AI:</label>
-            <textarea
-              readOnly
-              className={`${textareaStyle} h-64`}
-              value={analysisResult}
-            />
+            <textarea readOnly className={`${textareaStyle} h-64`} value={analysisResult} />
             <div className="flex justify-end gap-3 mt-3">
-              <button
-                onClick={handleCopyAnalysis}
-                className={`inline-flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all ${isCopied ? '!bg-green-200 text-green-700' : ''} hover:bg-gray-400 dark:hover:bg-gray-600`}
-              >
-                {isCopied ? <><Check size={16} className="mr-2" />Tersalin!</> : <><Copy size={16} className="mr-2" />Salin Hasil</>}
+              <button onClick={handleCopyAnalysis} className={`inline-flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all ${isCopied ? '!bg-green-200 text-green-700' : ''} hover:bg-gray-400 dark:hover:bg-gray-600`}>
+                {isCopied ? <Check size={16} className="mr-2" /> : <Copy size={16} className="mr-2" />} {isCopied ? 'Tersalin!' : 'Salin'}
               </button>
-              <button
-                onClick={handleUseAnalysisAsPrompt}
-                className="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset"
-              >
-                <Sparkles size={16} className="mr-2" />Gunakan Prompt
+              <button onClick={handleUseAnalysisAsPrompt} className="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset">
+                <Sparkles size={16} className="mr-2" />Gunakan
               </button>
             </div>
           </div>
