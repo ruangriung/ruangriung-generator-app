@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { Lock, Image, Video, AudioLines } from 'lucide-react';
+import { Lock, Image, Video, AudioLines, MessageSquare } from 'lucide-react'; // Import ikon MessageSquare
 import AuthButton from './AuthButton';
 import Generator from '@/components/Generator';
 import VideoCreator from '@/components/VideoCreator';
 import AudioGenerator from '@/components/AudioGenerator';
+import Chatbot from '@/components/Chatbot'; // <-- Import komponen Chatbot
 
 // Komponen Placeholder untuk konten yang terkunci
 const LockedContent = () => (
@@ -28,6 +29,9 @@ const LockedContent = () => (
 export default function Tabs() {
   const tabs = [
     { name: 'image', label: 'Image', icon: Image, content: <Generator />, isProtected: false },
+    // --- PENAMBAHAN BARU ---
+    { name: 'chatbot', label: 'Chatbot', icon: MessageSquare, content: <Chatbot />, isProtected: true },
+    // --- AKHIR PENAMBAHAN ---
     { name: 'video', label: 'Video', icon: Video, content: <VideoCreator />, isProtected: true },
     { name: 'audio', label: 'Audio', icon: AudioLines, content: <AudioGenerator />, isProtected: true }
   ];
@@ -39,6 +43,7 @@ export default function Tabs() {
     const currentTab = tabs.find(tab => tab.name === activeTab);
     if (!currentTab) return null;
     
+    // Fitur chatbot hanya bisa diakses jika sudah login
     if (currentTab.isProtected && status !== 'authenticated') {
       return <LockedContent />;
     }
