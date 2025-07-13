@@ -31,57 +31,44 @@ export default function ImageAnalysisAssistant({ onUsePrompt }: ImageAnalysisAss
   const [isCopied, setIsCopied] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
-  const [models, setModels] = useState<string[]>([]);
+  const [models, setModels] = useState<{name: string, description: string}[]>([]);
   const [selectedModel, setSelectedModel] = useState('openai');
-  const [modelError, setModelError] = useState<string | null>(null);
-  const [isLoadingModels, setIsLoadingModels] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // --- PERUBAHAN DIMULAI DI SINI ---
-  const fetchVisionModels = async () => {
-      setIsLoadingModels(true);
-      setModelError(null);
-      try {
-        const response = await fetch('https://text.pollinations.ai/models');
-        if (!response.ok) throw new Error(`Gagal mengambil model: Status ${response.status}`);
-        const data = await response.json();
-        
-        let extractedModels: string[] = [];
-        if (Array.isArray(data)) {
-            extractedModels = data;
-        } else if (typeof data === 'object' && data !== null) {
-            extractedModels = Object.keys(data);
-        }
-
-        // Filter hanya untuk model vision
-        const visionModels = extractedModels.filter(m => typeof m === 'string' && (m.includes('vision') || m.includes('openai') || m.includes('deepseek')));
-
-        if (visionModels.length > 0) {
-            setModels(visionModels);
-            // Pilih 'openai' jika ada, jika tidak, pilih yang pertama
-            if (visionModels.includes('openai')) {
-                setSelectedModel('openai');
-            } else {
-                setSelectedModel(visionModels[0]);
-            }
-        } else {
-            throw new Error('Tidak ada model vision yang ditemukan');
-        }
-      } catch (error) {
-          console.error("Error memuat model vision:", error);
-          setModelError("Gagal memuat model. Coba lagi.");
-          setModels(['openai', 'openai-large', 'deepseek']); // Fallback models
-          setSelectedModel('openai');
-      } finally {
-          setIsLoadingModels(false);
-      }
-  };
-  // --- PERUBAHAN SELESAI DI SINI ---
-
+  // --- PERUBAHAN LOGIKA MODEL DIMULAI DI SINI ---
   useEffect(() => {
-    fetchVisionModels();
+    const modelData = [
+      {"name": "llama-fast-roblox", "description": "Llama 3.2 11B Vision (Cloudflare)", "vision": true, "input_modalities": ["text", "image"]},
+      {"name": "mistral", "description": "Mistral Small 3.1 24B", "vision": true, "input_modalities": ["text", "image"]},
+      {"name": "mistral-roblox", "description": "Mistral Small 3.1 24B (Cloudflare)", "vision": true, "input_modalities": ["text", "image"]},
+      {"name": "openai", "description": "OpenAI GPT-4o Mini", "vision": true, "input_modalities": ["text", "image"]},
+      {"name": "openai-audio", "description": "OpenAI GPT-4o Mini Audio Preview", "vision": true, "input_modalities": ["text", "image", "audio"]},
+      {"name": "openai-fast", "description": "OpenAI GPT-4.1 Nano", "vision": true, "input_modalities": ["text", "image"]},
+      {"name": "openai-large", "description": "OpenAI GPT-4.1", "vision": true, "input_modalities": ["text", "image"]},
+      {"name": "openai-reasoning", "description": "OpenAI O3", "vision": true, "input_modalities": ["text", "image"]},
+      {"name": "openai-roblox", "description": "OpenAI GPT-4.1 Mini (Roblox)", "vision": true, "input_modalities": ["text", "image"]},
+      {"name": "phi", "description": "Phi-4 Mini Instruct", "vision": true, "input_modalities": ["text", "image", "audio"]},
+      {"name": "bidara", "description": "BIDARA by NASA", "vision": true, "input_modalities": ["text", "image"]},
+      {"name": "evil", "description": "Evil (Uncensored)", "vision": true, "input_modalities": ["text", "image"]},
+      {"name": "mirexa", "description": "Mirexa AI Companion", "vision": true, "input_modalities": ["text", "image"]},
+      {"name": "sur", "description": "Sur AI Assistant", "vision": true, "input_modalities": ["text", "image"]},
+      {"name": "unity", "description": "Unity Unrestricted Agent", "vision": true, "input_modalities": ["text", "image"]}
+    ];
+
+    const visionModels = modelData
+        .filter(model => model.vision || model.input_modalities.includes('image'))
+        .map(model => ({ name: model.name, description: model.description }));
+    
+    setModels(visionModels);
+    
+    if (visionModels.some(m => m.name === 'openai')) {
+        setSelectedModel('openai');
+    } else if (visionModels.length > 0) {
+        setSelectedModel(visionModels[0].name);
+    }
   }, []);
+  // --- AKHIR PERUBAHAN LOGIKA MODEL ---
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -169,21 +156,16 @@ export default function ImageAnalysisAssistant({ onUsePrompt }: ImageAnalysisAss
       <div className="space-y-4">
         <div>
             <LabelWithIcon icon={Cpu} text="Pilih Model Analisis" htmlFor="analysis-model" />
-            {modelError ? (
-                <div className="flex items-center justify-between p-2 bg-red-100 dark:bg-red-900/50 rounded-lg">
-                    <p className="text-sm text-red-700 dark:text-red-200">{modelError}</p>
-                    <button onClick={fetchVisionModels} className="p-1 rounded-full hover:bg-red-200 dark:hover:bg-red-800" title="Coba Lagi" disabled={isLoadingModels}>
-                        {isLoadingModels ? <Loader className="animate-spin h-4 w-4"/> : <RefreshCw className="h-4 w-4 text-red-700 dark:text-red-200"/>}
-                    </button>
-                </div>
-            ) : (
-                <div className="relative">
-                    <select id="analysis-model" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className={selectStyle} disabled={isLoadingModels}>
-                        {isLoadingModels ? <option>Memuat...</option> : models.map(model => (<option key={model} value={model} className="bg-white dark:bg-gray-700">{model}</option>))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
-                </div>
-            )}
+            <div className="relative">
+                <select id="analysis-model" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className={selectStyle} disabled={models.length === 0}>
+                    {models.length > 0 ? models.map(model => (
+                        <option key={model.name} value={model.name} className="bg-white dark:bg-gray-700">
+                            {model.description} ({model.name})
+                        </option>
+                    )) : <option>Memuat...</option>}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
+            </div>
         </div>
 
         <div>

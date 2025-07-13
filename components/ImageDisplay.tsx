@@ -1,32 +1,33 @@
 // components/ImageDisplay.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, forwardRef } from 'react'; // Impor forwardRef
 import Spinner from './Spinner';
 import { ZoomIn, Download, Paintbrush, Sun, Contrast, Droplets, Shuffle } from 'lucide-react';
 
 interface ImageDisplayProps {
   isLoading: boolean;
-  imageUrls: string[]; // PERUBAHAN: Sekarang menerima array URL gambar
+  imageUrls: string[];
   prompt: string;
   onLoad?: () => void;
   onError?: () => void;
-  onZoomClick: () => void; // Mungkin perlu disesuaikan jika ingin zoom satu per satu
-  onDownloadClick: () => void; // Akan mendownload semua gambar
+  onZoomClick: () => void;
+  onDownloadClick: () => void;
   onVariationsClick: () => void;
 }
 
-export default function ImageDisplay({ 
+// Bungkus komponen dengan forwardRef
+const ImageDisplay = forwardRef<HTMLDivElement, ImageDisplayProps>(({ 
     isLoading, 
-    imageUrls, // PERUBAHAN: Menerima array
+    imageUrls,
     prompt, 
     onLoad, 
     onError, 
     onZoomClick, 
     onDownloadClick, 
     onVariationsClick 
-}: ImageDisplayProps) {
-  const isImageReady = !isLoading && imageUrls.length > 0; // PERUBAHAN: Cek panjang array
+}, ref) => {
+  const isImageReady = !isLoading && imageUrls.length > 0;
 
   const [isEditing, setIsEditing] = useState(false);
   const [filters, setFilters] = useState({
@@ -46,9 +47,9 @@ export default function ImageDisplay({
   const actionButtonStyle = `p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-700 dark:text-gray-300 hover:text-purple-600 transition-all`;
 
   return (
-    <div className="w-full max-w-2xl mt-8">
+    // Tambahkan ref ke div utama ini
+    <div ref={ref} className="w-full max-w-2xl mt-8">
       <div className="relative aspect-square w-full bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset p-4 flex items-center justify-center">
-        {/* PERUBAHAN: Tampilan untuk banyak gambar atau satu gambar */}
         {imageUrls.length > 0 && !isLoading ? (
           <div className={`grid gap-4 ${imageUrls.length > 1 ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1'}`}>
             {imageUrls.map((url, index) => (
@@ -86,21 +87,19 @@ export default function ImageDisplay({
           <button onClick={onVariationsClick} className={actionButtonStyle} aria-label="Buat Variasi">
             <Shuffle size={24} />
           </button>
-          {/* Tombol edit/filter hanya relevan untuk satu gambar, nonaktifkan jika batch > 1 */}
           <button 
             onClick={() => setIsEditing(!isEditing)} 
             className={`${actionButtonStyle} ${isEditing ? '!text-purple-600' : ''}`} 
             aria-label="Edit Gambar"
-            disabled={imageUrls.length > 1} // Nonaktifkan jika lebih dari 1 gambar
+            disabled={imageUrls.length > 1}
           >
             <Paintbrush size={24} />
           </button>
-          {/* Tombol Zoom In juga bisa dinonaktifkan atau disesuaikan jika batch > 1 */}
           <button 
             onClick={onZoomClick} 
             className={actionButtonStyle} 
             aria-label="Perbesar Gambar"
-            disabled={imageUrls.length > 1} // Nonaktifkan jika lebih dari 1 gambar
+            disabled={imageUrls.length > 1}
           >
             <ZoomIn size={24} />
           </button>
@@ -110,7 +109,6 @@ export default function ImageDisplay({
         </div>
       )}
 
-      {/* Filter gambar hanya akan tampil jika ada satu gambar dan mode editing aktif */}
       {isEditing && isImageReady && imageUrls.length === 1 && (
         <div className="mt-4 p-4 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -131,4 +129,7 @@ export default function ImageDisplay({
       )}
     </div>
   );
-}
+});
+
+ImageDisplay.displayName = 'ImageDisplay'; // Wajib untuk debugging
+export default ImageDisplay;

@@ -124,8 +124,8 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
               className={selectStyle}
             >
               {/* <--- PERUBAHAN: option style */}
-              <option value="id" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Bahasa Indonesia</option>
-              <option value="en" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Bahasa Inggris</option>
+              <option value="id" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Indonesia</option>
+              <option value="en" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Inggris</option>
             </select>
           </div>
           <button
@@ -150,8 +150,8 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
               className={selectStyle}
             >
               {/* <--- PERUBAHAN: option style */}
-              <option value="en" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Bahasa Inggris</option>
-              <option value="id" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Bahasa Indonesia</option>
+              <option value="en" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Inggris</option>
+              <option value="id" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Indonesia</option>
             </select>
           </div>
         </div>

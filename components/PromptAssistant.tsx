@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Wand2, Copy, Check, Megaphone, Cpu, ChevronDown, Star, Loader, RefreshCw } from 'lucide-react';
+import { Sparkles, Wand2, Copy, Check, Megaphone, Cpu, ChevronDown, Star } from 'lucide-react';
 import Accordion from './Accordion';
 import ButtonSpinner from './ButtonSpinner';
 import toast from 'react-hot-toast';
@@ -31,54 +31,62 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
   const [isGeneratingAssistantPrompt, setIsGeneratingAssistantPrompt] = useState(false);
   const [isAssistantPromptCopied, setIsAssistantPromptCopied] = useState(false);
   
-  const [models, setModels] = useState<string[]>([]);
+  const [models, setModels] = useState<{name: string, description: string}[]>([]);
   const [selectedModel, setSelectedModel] = useState('openai');
-  const [modelError, setModelError] = useState<string | null>(null);
-  const [isLoadingModels, setIsLoadingModels] = useState(false);
 
-  // --- PERUBAHAN DIMULAI DI SINI ---
-  const fetchTextModels = async () => {
-    setIsLoadingModels(true);
-    setModelError(null);
-    try {
-      const response = await fetch('https://text.pollinations.ai/models');
-      if (!response.ok) throw new Error(`Gagal mengambil model: Status ${response.status}`);
-      const data = await response.json();
-      
-      let extractedModels: string[] = [];
-      if (Array.isArray(data)) {
-        extractedModels = data;
-      } else if (typeof data === 'object' && data !== null) {
-        extractedModels = Object.keys(data);
-      }
-
-      // Filter untuk model teks (bukan audio atau vision)
-      const validModels = extractedModels.filter(m => typeof m === 'string' && !m.includes('audio') && !m.includes('vision') && m.length > 0);
-      
-      if (validModels.length > 0) {
-        setModels(validModels);
-        if (validModels.includes('openai')) {
-          setSelectedModel('openai');
-        } else {
-          setSelectedModel(validModels[0]);
-        }
-      } else {
-        throw new Error('Tidak ada model teks valid yang ditemukan');
-      }
-    } catch (error) {
-      console.error("Error mengambil model teks:", error);
-      setModelError("Gagal memuat model. Periksa koneksi Anda.");
-      setModels(['openai', 'mistral', 'google']); // Fallback models
-      setSelectedModel('openai');
-    } finally {
-      setIsLoadingModels(false);
-    }
-  };
-  // --- PERUBAHAN SELESAI DI SINI ---
-
+  // --- PERUBAHAN LOGIKA FETCH DIMULAI DI SINI ---
   useEffect(() => {
+    const fetchTextModels = async () => {
+      try {
+        // Data model langsung dari informasi yang Anda berikan
+        const modelData = [
+          {"name": "deepseek", "description": "DeepSeek V3", "input_modalities": ["text"], "output_modalities": ["text"]},
+          {"name": "deepseek-reasoning", "description": "DeepSeek R1 0528", "input_modalities": ["text"], "output_modalities": ["text"]},
+          {"name": "grok", "description": "xAI Grok-3 Mini", "input_modalities": ["text"], "output_modalities": ["text"]},
+          {"name": "llamascout", "description": "Llama 4 Scout 17B", "input_modalities": ["text"], "output_modalities": ["text"]},
+          {"name": "mistral", "description": "Mistral Small 3.1 24B", "input_modalities": ["text", "image"], "output_modalities": ["text"]},
+          {"name": "openai", "description": "OpenAI GPT-4o Mini", "input_modalities": ["text", "image"], "output_modalities": ["text"]},
+          {"name": "openai-fast", "description": "OpenAI GPT-4.1 Nano", "input_modalities": ["text", "image"], "output_modalities": ["text"]},
+          {"name": "openai-large", "description": "OpenAI GPT-4.1", "input_modalities": ["text", "image"], "output_modalities": ["text"]},
+          {"name": "phi", "description": "Phi-4 Mini Instruct", "input_modalities": ["text", "image", "audio"], "output_modalities": ["text"]},
+          {"name": "rtist", "description": "Rtist", "input_modalities": ["text"], "output_modalities": ["text"]},
+          {"name": "midijourney", "description": "MIDIjourney", "input_modalities": ["text"], "output_modalities": ["text"]}
+        ];
+
+        // Filter model yang relevan untuk Asisten Prompt (inputnya teks, outputnya teks)
+        const relevantModels = modelData.filter(model => 
+          model.input_modalities.includes('text') && model.output_modalities.includes('text')
+        ).map(model => ({ name: model.name, description: model.description }));
+
+        if (relevantModels.length > 0) {
+          setModels(relevantModels);
+          // Set 'openai' sebagai default jika tersedia
+          if (relevantModels.some(m => m.name === 'openai')) {
+            setSelectedModel('openai');
+          } else {
+            setSelectedModel(relevantModels[0].name);
+          }
+        } else {
+           // Fallback jika tidak ada model yang cocok
+           throw new Error('Tidak ada model teks yang relevan ditemukan');
+        }
+      } catch (error) {
+          console.error("Gagal memproses daftar model:", error);
+          // Daftar fallback yang solid jika terjadi kesalahan
+          const fallbackModels = [
+              { name: 'openai', description: 'OpenAI GPT-4o Mini' },
+              { name: 'mistral', description: 'Mistral Small 3.1 24B' },
+              { name: 'grok', description: 'xAI Grok-3 Mini' },
+              { name: 'deepseek', description: 'DeepSeek V3' }
+          ];
+          setModels(fallbackModels);
+          setSelectedModel('openai');
+      }
+    };
+    
     fetchTextModels();
   }, []);
+  // --- AKHIR PERUBAHAN LOGIKA FETCH ---
 
   const handleGenerateAssistantPrompt = async () => {
     if (!assistantSubject) {
@@ -148,21 +156,16 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
       <div className="space-y-4">
         <div>
           <LabelWithIcon icon={Cpu} text="Pilih Model Asisten" htmlFor="assistant-model" />
-          {modelError ? (
-            <div className="flex items-center justify-between p-2 bg-red-100 dark:bg-red-900/50 rounded-lg">
-                <p className="text-sm text-red-700 dark:text-red-200">{modelError}</p>
-                <button onClick={fetchTextModels} className="p-1 rounded-full hover:bg-red-200 dark:hover:bg-red-800" title="Coba Lagi" disabled={isLoadingModels}>
-                    {isLoadingModels ? <Loader className="animate-spin h-4 w-4"/> : <RefreshCw className="h-4 w-4 text-red-700 dark:text-red-200"/>}
-                </button>
-            </div>
-          ) : (
-            <div className="relative">
-              <select id="assistant-model" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className={selectStyle} disabled={models.length === 0 || isLoadingModels}>
-                {isLoadingModels ? <option>Memuat...</option> : models.map(model => (<option key={model} value={model} className="bg-white dark:bg-gray-700">{model}</option>))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
-            </div>
-          )}
+          <div className="relative">
+            <select id="assistant-model" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className={selectStyle} disabled={models.length === 0}>
+                {models.length > 0 ? models.map(model => (
+                  <option key={model.name} value={model.name} className="bg-white dark:bg-gray-700">
+                    {model.description} ({model.name})
+                  </option>
+                )) : <option>Memuat...</option>}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
+          </div>
         </div>
 
         <div>
@@ -176,7 +179,7 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
         </div>
 
         <div className="text-center pt-2">
-          <button onClick={handleGenerateAssistantPrompt} disabled={isGeneratingAssistantPrompt || !assistantSubject || isLoadingModels} className="inline-flex items-center justify-center px-6 py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed">
+          <button onClick={handleGenerateAssistantPrompt} disabled={isGeneratingAssistantPrompt || !assistantSubject} className="inline-flex items-center justify-center px-6 py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed">
             {isGeneratingAssistantPrompt ? <ButtonSpinner /> : <Wand2 className="w-5 h-5 mr-2" />}
             <span>Buat Prompt</span>
           </button>

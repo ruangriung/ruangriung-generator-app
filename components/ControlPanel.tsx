@@ -25,6 +25,11 @@ export interface GeneratorSettings {
   artStyle: string;
   batchSize: number;
   imageQuality: 'Standar' | 'HD' | 'Ultra';
+  // --- TAMBAHKAN PROPERTI BARU DI SINI ---
+  private: boolean;
+  safe: boolean;
+  transparent: boolean;
+  inputImage: string;
 }
 
 interface ControlPanelProps {

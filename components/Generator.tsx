@@ -1,11 +1,11 @@
 // components/Generator.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ControlPanel, { GeneratorSettings } from './ControlPanel';
 import ImageDisplay from './ImageDisplay';
 import ImageModal from './ImageModal';
-import ApiKeyModal from './ApiKeyModal'; 
+import ApiKeyModal from './ApiKeyModal';
 import HistoryPanel, { HistoryItem } from './HistoryPanel';
 import toast from 'react-hot-toast';
 
@@ -15,12 +15,18 @@ export default function Generator() {
   const [settings, setSettings] = useState<GeneratorSettings>({
     prompt: 'Spiderman di ruangriung, digital art, fantasy, vibrant colors',
     model: 'flux',
+    // --- PERUBAHAN: Default width & height untuk Portrait ---
     width: 1024,
-    height: 1024,
+    height: 1792,
     seed: Math.floor(Math.random() * 1000000),
     artStyle: '',
     batchSize: 1,
-    imageQuality: 'Standar',
+    // --- PERUBAHAN: Default kualitas gambar ---
+    imageQuality: 'Ultra',
+    private: false,
+    safe: false,
+    transparent: false,
+    inputImage: '',
   });
 
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
@@ -34,9 +40,12 @@ export default function Generator() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [modelList, setModelList] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Kotak');
+  // --- PERUBAHAN: Default preset aspek rasio ---
+  const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Portrait');
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
+
+  const imageDisplayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     try {
@@ -97,7 +106,6 @@ export default function Generator() {
   const onImageQualityChange = (quality: 'Standar' | 'HD' | 'Ultra') => {
     setSettings(prev => {
         let newWidth = prev.width, newHeight = prev.height;
-        // ... (logika kualitas gambar tetap sama)
         return { ...prev, width: newWidth, height: newHeight, imageQuality: quality };
     });
   };
@@ -134,10 +142,14 @@ export default function Generator() {
 
     setIsLoading(true);
     setImageUrls([]);
-    const { model, prompt, width, height, seed, imageQuality, batchSize, artStyle } = settings;
+    
+    setTimeout(() => {
+        imageDisplayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+
+    const { model, prompt, width, height, seed, imageQuality, batchSize, artStyle, private: isPrivate, safe, transparent, inputImage } = settings;
     const fullPrompt = `${prompt}${artStyle}`;
     
-    // Ini adalah placeholder. Implementasi nyata memerlukan panggilan API yang sesuai.
     const generatePromises = Array(batchSize).fill(0).map(async (_, i) => {
       const newSeed = seed + i;
       let finalUrl = '';
@@ -145,24 +157,36 @@ export default function Generator() {
         if (model === 'DALL-E 3') {
           if (!apiKeys.dalle) throw new Error('API Key DALL-E 3 dibutuhkan.');
           finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?model=dalle3&width=${width}&height=${height}&seed=${newSeed}`;
-          // Di dunia nyata: fetch ke 'https://api.openai.com/v1/images/generations' dengan API key
         } else if (model === 'Leonardo') {
           if (!apiKeys.leonardo) throw new Error('API Key Leonardo dibutuhkan.');
           finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?model=leonardo&width=${width}&height=${height}&seed=${newSeed}`;
-          // Di dunia nyata: fetch ke API Leonardo dengan API Key
         } else {
-          const params = new URLSearchParams({ model, width: width.toString(), height: height.toString(), seed: newSeed.toString(), nologo: 'true', enhance: imageQuality !== 'Standar' ? 'true' : 'false' });
+          const params = new URLSearchParams({
+            model,
+            width: width.toString(),
+            height: height.toString(),
+            seed: newSeed.toString(),
+            enhance: imageQuality !== 'Standar' ? 'true' : 'false',
+            nologo: 'true',
+            // --- PERUBAHAN: Referrer diubah ---
+            referrer: 'ruangriung.my.id'
+          });
+
+          if (isPrivate) params.append('private', 'true');
+          if (safe) params.append('safe', 'true');
+          if (transparent && model === 'gptimage') params.append('transparent', 'true');
+          if (inputImage && (model === 'kontext' || model === 'gptimage')) params.append('image', inputImage);
+          
           finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?${params.toString()}`;
         }
         
-        // Asumsi semua model mengembalikan URL gambar
         const response = await fetch(finalUrl);
         if (!response.ok) throw new Error(`Gagal membuat gambar #${i + 1}`);
         return response.url;
 
       } catch (error: any) {
         toast.error(error.message || `Gagal membuat gambar #${i + 1}`);
-        setSettings(prev => ({...prev, model: 'flux'})); // Fallback
+        setSettings(prev => ({...prev, model: 'flux'}));
         return null;
       }
     });
@@ -181,7 +205,27 @@ export default function Generator() {
   };
 
   const handleDownloadImage = async () => {
-      // ... (logika download tetap sama)
+    if (imageUrls.length === 0) return;
+    if (imageUrls.length === 1) {
+        try {
+            const response = await fetch(imageUrls[0]);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ruangriung-ai-${Date.now()}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+            toast.success("Gambar berhasil diunduh!");
+        } catch (error) {
+            toast.error("Gagal mengunduh gambar.");
+            console.error(error);
+        }
+    } else {
+        toast.success("Klik kanan pada setiap gambar untuk menyimpannya.");
+    }
   };
 
   const handleSelectFromHistory = (item: HistoryItem) => {
@@ -213,6 +257,7 @@ export default function Generator() {
           onModelSelect={handleModelSelect}
         />
         <ImageDisplay
+          ref={imageDisplayRef}
           isLoading={isLoading}
           imageUrls={imageUrls}
           prompt={settings.prompt}
