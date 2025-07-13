@@ -12,17 +12,18 @@ type AspectRatioPreset = 'Kotak' | 'Portrait' | 'Lansekap' | 'Custom';
 
 export default function Generator() {
   const [settings, setSettings] = useState<GeneratorSettings>({
-    prompt: 'Kastil fantasi di atas awan',
+    prompt: 'Spiderman di ruangriung, digital art, fantasy, vibrant colors',
     model: 'flux',
     width: 1024,
     height: 1024,
     seed: Math.floor(Math.random() * 1000000),
     artStyle: '',
     batchSize: 1,
-    imageQuality: 'Standar', // <-- PERUBAHAN DI SINI
+    imageQuality: 'Standar',
   });
 
-  const [imageUrl, setImageUrl] = useState<string>('');
+  // PERUBAHAN: imageUrl menjadi imageUrls (array)
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [modelList, setModelList] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -92,7 +93,6 @@ export default function Generator() {
 
   const onAspectRatioChange = (preset: 'Kotak' | 'Portrait' | 'Lansekap') => {
     setAspectRatio(preset);
-    // Ketika aspek rasio berubah, set dimensi default dan reset kualitas ke standar
     let newWidth = 1024;
     let newHeight = 1024;
     if (preset === 'Portrait') {
@@ -105,12 +105,12 @@ export default function Generator() {
         ...prev,
         width: newWidth,
         height: newHeight,
-        imageQuality: 'Standar', // Reset kualitas ke standar saat aspek rasio berubah
+        imageQuality: 'Standar',
     }));
   };
 
   const onManualDimensionChange = (newWidth: number, newHeight: number) => {
-    setSettings(prev => ({ ...prev, width: newWidth, height: newHeight, imageQuality: 'Standar' })); // Reset kualitas ke standar
+    setSettings(prev => ({ ...prev, width: newWidth, height: newHeight, imageQuality: 'Standar' }));
     if (newWidth === 1024 && newHeight === 1024) {
       setAspectRatio('Kotak');
     } else if (newWidth === 1024 && newHeight === 1792) {
@@ -122,27 +122,25 @@ export default function Generator() {
     }
   };
 
-  // Fungsi baru untuk mengubah kualitas gambar
   const onImageQualityChange = (quality: 'Standar' | 'HD' | 'Ultra') => {
       setSettings(prev => {
           let newWidth = prev.width;
           let newHeight = prev.height;
 
-          // Menentukan dimensi berdasarkan kualitas dan aspek rasio aktif
           if (quality === 'Standar') {
               switch (aspectRatio) {
                   case 'Kotak': newWidth = 1024; newHeight = 1024; break;
                   case 'Portrait': newWidth = 1024; newHeight = 1792; break;
                   case 'Lansekap': newWidth = 1792; newHeight = 1024; break;
-                  default: // Jika custom, kembali ke standar square sebagai fallback
+                  default:
                       newWidth = 1024; newHeight = 1024; break;
               }
           } else if (quality === 'HD') {
               switch (aspectRatio) {
                   case 'Kotak': newWidth = 1536; newHeight = 1536; break;
-                  case 'Portrait': newWidth = 1536; newHeight = 2688; break; // 1536 * 1.75
-                  case 'Lansekap': newWidth = 2688; newHeight = 1536; break; // 1536 * 1.75
-                  default: // Jika custom, skalakan dimensi yang ada ke HD
+                  case 'Portrait': newWidth = 1536; newHeight = 2688; break;
+                  case 'Lansekap': newWidth = 2688; newHeight = 1536; break;
+                  default:
                       newWidth = Math.min(Math.round(prev.width * 1.5 / 64) * 64, 3584);
                       newHeight = Math.min(Math.round(prev.height * 1.5 / 64) * 64, 3584);
                       break;
@@ -152,14 +150,13 @@ export default function Generator() {
                   case 'Kotak': newWidth = 2048; newHeight = 2048; break;
                   case 'Portrait': newWidth = 2048; newHeight = 3584; break;
                   case 'Lansekap': newWidth = 3584; newHeight = 2048; break;
-                  default: // Jika custom, skalakan dimensi yang ada ke Ultra
+                  default:
                       newWidth = Math.min(Math.round(prev.width * 2.0 / 64) * 64, 3584);
                       newHeight = Math.min(Math.round(prev.height * 2.0 / 64) * 64, 3584);
                       break;
               }
           }
 
-          // Perbarui aspek rasio UI jika dimensi sesuai preset yang dikenal
           if (newWidth === 1024 && newHeight === 1024) setAspectRatio('Kotak');
           else if (newWidth === 1024 && newHeight === 1792) setAspectRatio('Portrait');
           else if (newWidth === 1792 && newHeight === 1024) setAspectRatio('Lansekap');
@@ -181,79 +178,107 @@ export default function Generator() {
     }
 
     setIsLoading(true);
-    setImageUrl('');
+    setImageUrls([]); // PERUBAHAN: Bersihkan array URL gambar sebelumnya
 
-    // <--- PERBAIKAN: Beri tipe eksplisit Promise<string>
-    const generatePromise = new Promise<string>(async (resolve, reject) => {
-      try {
-        const newSeed = Math.floor(Math.random() * 1000000);
-        const currentSettings = { ...settings, seed: newSeed };
-        setSettings(currentSettings);
+    // PERUBAHAN: Array untuk menyimpan URL gambar yang dihasilkan
+    const generatedUrls: string[] = [];
+    const generatePromises: Promise<void>[] = [];
+
+    const enhanceFlag = settings.imageQuality === 'Standar' ? 'false' : 'true';
+
+    for (let i = 0; i < settings.batchSize; i++) {
+        const newSeed = Math.floor(Math.random() * 1000000000); // Gunakan seed unik untuk setiap gambar
         
-        const fullPrompt = `${currentSettings.prompt}${currentSettings.artStyle}`;
-        const encodedPrompt = encodeURIComponent(fullPrompt);
-        
-        // Menentukan nilai 'enhance' berdasarkan kualitas gambar
-        const enhanceFlag = currentSettings.imageQuality === 'Standar' ? 'false' : 'true'; // <-- PERUBAHAN DI SINI
+        const currentPrompt = `${settings.prompt}${settings.artStyle}`;
+        const encodedPrompt = encodeURIComponent(currentPrompt);
         
         const params = new URLSearchParams({
-          model: currentSettings.model,
-          width: currentSettings.width.toString(),
-          height: currentSettings.height.toString(),
-          seed: currentSettings.seed.toString(),
-          nologo: 'true',
-          enhance: enhanceFlag, // <-- MENGGUNAKAN enhanceFlag YANG DITENTUKAN
-          safe: 'false',
-          referrer: 'ruangriung.my.id',
-          cb: Date.now().toString()
+            model: settings.model,
+            width: settings.width.toString(),
+            height: settings.height.toString(),
+            seed: newSeed.toString(),
+            nologo: 'true',
+            enhance: enhanceFlag,
+            safe: 'false',
+            referrer: 'ruangriung.my.id',
+            cb: Date.now().toString() + i // Tambahkan indeks untuk keunikan cachebuster
         });
         const finalUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?${params.toString()}`;
-        
-        const imageResponse = await fetch(finalUrl); 
-        if (!imageResponse.ok) {
-          const errorText = await imageResponse.text();
-          throw new Error(`Gagal mengambil gambar dari API Pollinations: ${imageResponse.status} - ${errorText}`);
-        }
 
-        const contentType = imageResponse.headers.get('content-type');
-        if (!contentType || !contentType.startsWith('image/')) {
-          throw new Error('Respons API bukan gambar atau tipe konten tidak valid.');
-        }
-        
-        setImageUrl(finalUrl); 
-        addToHistory({ imageUrl: finalUrl, prompt: settings.prompt, timestamp: Date.now() });
-        resolve('Gambar berhasil dibuat!');
-      } catch (error: any) {
-        reject(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    });
+        // Tambahkan promise ke array
+        generatePromises.push(
+            (async () => {
+                try {
+                    const imageResponse = await fetch(finalUrl); 
+                    if (!imageResponse.ok) {
+                        const errorText = await imageResponse.text();
+                        throw new Error(`Gagal mengambil gambar dari API Pollinations: ${imageResponse.status} - ${errorText}`);
+                    }
 
-    toast.promise(generatePromise, {
-      loading: 'Membuat gambar...',
+                    const contentType = imageResponse.headers.get('content-type');
+                    if (!contentType || !contentType.startsWith('image/')) {
+                        throw new Error('Respons API bukan gambar atau tipe konten tidak valid.');
+                    }
+                    
+                    generatedUrls.push(finalUrl); // Simpan URL yang berhasil
+                    addToHistory({ imageUrl: finalUrl, prompt: settings.prompt, timestamp: Date.now() });
+                } catch (error: any) {
+                    toast.error(`Gagal membuat gambar #${i + 1}: ${error.message}`);
+                    console.error(`Error generating image #${i + 1}:`, error);
+                }
+            })()
+        );
+    }
+
+    const generationProcessPromise = Promise.all(generatePromises)
+        .then(() => {
+            setImageUrls(generatedUrls); // Set semua URL yang berhasil ke state
+            if (generatedUrls.length > 0) {
+                return `Berhasil membuat ${generatedUrls.length} gambar!`;
+            } else {
+                throw new Error("Tidak ada gambar yang berhasil dibuat.");
+            }
+        })
+        .catch((error) => {
+            // Error handling untuk Promise.all akan menangkap error dari individual fetches
+            // namun toast error sudah ditangani di dalam loop.
+            // Ini akan menangani jika Promise.all itu sendiri gagal atau tidak ada gambar.
+            throw new Error(error.message || "Terjadi kesalahan saat membuat gambar.");
+        })
+        .finally(() => {
+            setIsLoading(false);
+        });
+
+    toast.promise(generationProcessPromise, {
+      loading: `Membuat ${settings.batchSize} gambar...`,
       success: (message: string) => message,
       error: (message: string) => `Gagal membuat gambar: ${message}`,
     });
   };
 
   const handleDownloadImage = async () => {
-      if (!imageUrl) return;
+      if (imageUrls.length === 0) return; // PERUBAHAN: Cek array
       try {
-          const a = document.createElement('a');
-          a.href = imageUrl; 
-          a.download = `${settings.prompt.substring(0, 30)}_${Date.now()}.png`;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          toast.success("Gambar berhasil diunduh!");
+          // Download all images
+          for (const url of imageUrls) {
+              const a = document.createElement('a');
+              a.href = url; 
+              // Gunakan prompt dan timestamp untuk nama file yang unik dan deskriptif
+              const filename = `${settings.prompt.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.png`;
+              a.download = filename;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+          }
+          toast.success(`Berhasil mengunduh ${imageUrls.length} gambar!`); // PERUBAHAN: Pesan untuk banyak gambar
       } catch (error) {
           toast.error("Gagal mengunduh gambar.");
       }
   };
 
   const handleSelectFromHistory = (item: HistoryItem) => {
-    setImageUrl(item.imageUrl); 
+    // Saat memilih dari riwayat, hanya satu gambar yang dimuat ke ImageDisplay utama
+    setImageUrls([item.imageUrl]); // PERUBAHAN: Set array dengan satu item
     setSettings(prev => ({ ...prev, prompt: item.prompt }));
     toast.success("Gambar dimuat dari riwayat!");
   };
@@ -277,20 +302,21 @@ export default function Generator() {
           aspectRatio={aspectRatio}
           onAspectRatioChange={onAspectRatioChange}
           onManualDimensionChange={onManualDimensionChange}
-          onImageQualityChange={onImageQualityChange} // <-- PERUBAHAN DI SINI
+          onImageQualityChange={onImageQualityChange}
         />
         <ImageDisplay
           isLoading={isLoading}
-          imageUrl={imageUrl} 
+          imageUrls={imageUrls} // PERUBAHAN: Meneruskan array URL gambar
           prompt={settings.prompt}
-          onZoomClick={() => setIsModalOpen(true)}
+          onZoomClick={() => setIsModalOpen(true)} // Akan tetap membuka modal untuk gambar utama/pertama jika perlu
           onDownloadClick={handleDownloadImage}
           onVariationsClick={handleGenerateImage}
         />
+        {/* ImageModal masih akan menampilkan satu gambar, mungkin perlu modifikasi lebih lanjut untuk batch */}
         <ImageModal 
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          imageUrl={imageUrl} 
+          imageUrl={imageUrls[0] || ''} // Menampilkan gambar pertama dari batch di modal
         />
       </div>
 
