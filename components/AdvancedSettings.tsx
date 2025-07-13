@@ -2,7 +2,7 @@
 'use client';
 
 import { GeneratorSettings } from './ControlPanel';
-import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon, Sparkles, ChevronDown } from 'lucide-react';
+import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sparkles, ImageIcon, Sprout, ChevronDown } from 'lucide-react';
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
 
 interface AdvancedSettingsProps {
@@ -14,11 +14,14 @@ interface AdvancedSettingsProps {
   onManualDimensionChange: (width: number, height: number) => void;
   onImageQualityChange: (quality: 'Standar' | 'HD' | 'Ultra') => void;
   className?: string;
+  onModelSelect: (model: string) => void;
 }
 
-export default function AdvancedSettings({ settings, setSettings, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, className }: AdvancedSettingsProps) {
+export default function AdvancedSettings({ settings, setSettings, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, className, onModelSelect }: AdvancedSettingsProps) {
   const handleSettingChange = (field: keyof GeneratorSettings, value: string | number) => {
-    if (field === 'width' || field === 'height' || field === 'batchSize' || field === 'seed') {
+    if (field === 'model') {
+        onModelSelect(value as string);
+    } else if (field === 'width' || field === 'height' || field === 'batchSize' || field === 'seed') {
       const parsedValue = parseInt(value as string, 10);
       const numValue = isNaN(parsedValue) ? 0 : parsedValue;
 
@@ -55,7 +58,6 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
   );
 
   return (
-    // Root element diubah menjadi div, elemen <details> dan <summary> dipindahkan ke ControlPanel.tsx
     <div className={`mt-6 p-6 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset ${className || ''}`}>
         <div className="mb-6">
           <label className="block text-center text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Preset Aspek Rasio</label>

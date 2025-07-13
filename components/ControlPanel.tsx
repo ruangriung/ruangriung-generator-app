@@ -5,7 +5,7 @@ import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { useSession } from 'next-auth/react';
 import AdvancedSettings from './AdvancedSettings';
 import ButtonSpinner from './ButtonSpinner';
-import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon, Languages, Megaphone } from 'lucide-react';
+import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon, ChevronDown, Languages, Megaphone } from 'lucide-react';
 import TextareaModal from './TextareaModal';
 import Accordion from './Accordion';
 import PromptAssistant from './PromptAssistant';
@@ -37,9 +37,10 @@ interface ControlPanelProps {
   onAspectRatioChange: (preset: 'Kotak' | 'Portrait' | 'Lansekap') => void;
   onManualDimensionChange: (width: number, height: number) => void;
   onImageQualityChange: (quality: 'Standar' | 'HD' | 'Ultra') => void;
+  onModelSelect: (model: string) => void; // Prop untuk menangani pemilihan model
 }
 
-export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange }: ControlPanelProps) {
+export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, onModelSelect }: ControlPanelProps) {
   const { status } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRandomizing, setIsRandomizing] = useState(false);
@@ -184,10 +185,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
                   Pengaturan Lanjutan
                 </span>
               </div>
-              <svg className="w-5 h-5 text-purple-600 transition-transform duration-300 group-open:rotate-90"
-                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-              </svg>
+              <ChevronDown className="w-5 h-5 text-purple-600 transition-transform duration-300 group-open:rotate-90" />
             </summary>
             <AdvancedSettings
               settings={settings}
@@ -197,7 +195,8 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
               onAspectRatioChange={onAspectRatioChange}
               onManualDimensionChange={onManualDimensionChange}
               onImageQualityChange={onImageQualityChange}
-              className="mt-0 pt-0" // Reset margin/padding atas karena sudah dibungkus
+              onModelSelect={onModelSelect}
+              className="mt-0 pt-0"
             />
           </details>
         ) : (
@@ -237,6 +236,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
           <button
             onClick={onGenerate}
             className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150 w-full"
+            disabled={isLoading}
           >
             {isLoading ? (
               <>
