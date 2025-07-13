@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Film, Type, Clapperboard, Settings, Camera, Wand, Smile, ClipboardCopy, Check, X, Expand } from 'lucide-react'; 
+import { Sparkles, Film, Type, Clapperboard, Settings, Camera, Wand, Smile, ClipboardCopy, Check, X, Expand, Download } from 'lucide-react'; // Tambahkan ikon Download
 import ButtonSpinner from './ButtonSpinner';
 import Accordion from './Accordion';
 import TextareaModal from './TextareaModal';
@@ -95,12 +95,35 @@ export default function VideoCreator() {
     });
   };
 
-  // inputStyle dan textareaStyle sekarang juga punya dark variant
+  const handleDownloadJson = () => {
+    if (!videoIdea) return;
+    
+    const dataToSave = {
+      inputs: inputs,
+      generatedIdea: videoIdea,
+      timestamp: new Date().toISOString()
+    };
+    
+    const jsonString = JSON.stringify(dataToSave, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `video_prompt_${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast.success("File JSON berhasil diunduh!");
+  };
+
   const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
   const textareaStyle = `${inputStyle} pr-20 cursor-pointer resize-none`;
+  const actionButtonStyle = "flex items-center gap-x-1.5 px-3 py-1.5 text-sm rounded-md transition-colors duration-200 bg-light-bg dark:bg-dark-bg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700";
 
   return (
-    // Tambahkan dark:bg-dark-bg dan dark:shadow-dark-neumorphic
     <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
       <div className="space-y-4">
         <div className="text-center">
@@ -117,7 +140,7 @@ export default function VideoCreator() {
             <textarea
               id="konsep"
               value={inputs.konsep}
-              onChange={(e) => handleInputChange('konsep', e.target.value)} // PERUBAHAN: Menghapus readOnly dan mengganti onFocus dengan onChange
+              onChange={(e) => handleInputChange('konsep', e.target.value)}
               className={`${textareaStyle} h-24`}
               placeholder="Ketik di sini atau klik perbesar untuk edit..."
             />
@@ -133,7 +156,7 @@ export default function VideoCreator() {
             <textarea
               id="narasi"
               value={inputs.narasi}
-              onChange={(e) => handleInputChange('narasi', e.target.value)} // PERUBAHAN: Menghapus readOnly dan mengganti onFocus dengan onChange
+              onChange={(e) => handleInputChange('narasi', e.target.value)}
               className={`${textareaStyle} h-20`}
               placeholder="Ketik di sini atau klik perbesar untuk edit..."
             />
@@ -218,15 +241,19 @@ export default function VideoCreator() {
           <div className="mt-6">
             <div className="flex justify-between items-center mb-2">
               <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Hasil Ide Prompt:</label>
-              <button onClick={handleCopy} 
-                className="flex items-center gap-x-1.5 px-3 py-1.5 text-sm rounded-md transition-colors duration-200 bg-light-bg dark:bg-dark-bg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700"
-              >
-                {isCopied ? (
-                  <><Check size={16} className="text-green-500" /> <span className="text-green-500">Tersalin!</span></>
-                ) : (
-                  <><ClipboardCopy size={16} className="text-gray-600 dark:text-gray-300" /> <span className="text-gray-600 dark:text-gray-300">Salin</span></>
-                )}
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={handleDownloadJson} className={actionButtonStyle}>
+                  <Download size={16} className="text-gray-600 dark:text-gray-300" />
+                  <span className="text-gray-600 dark:text-gray-300">JSON</span>
+                </button>
+                <button onClick={handleCopy} className={actionButtonStyle}>
+                  {isCopied ? (
+                    <><Check size={16} className="text-green-500" /> <span className="text-green-500">Tersalin!</span></>
+                  ) : (
+                    <><ClipboardCopy size={16} className="text-gray-600 dark:text-gray-300" /> <span className="text-gray-600 dark:text-gray-300">Salin</span></>
+                  )}
+                </button>
+              </div>
             </div>
             <textarea readOnly value={videoIdea} className={`${inputStyle} h-64`} />
           </div>
