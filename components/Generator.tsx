@@ -15,13 +15,11 @@ export default function Generator() {
   const [settings, setSettings] = useState<GeneratorSettings>({
     prompt: 'Spiderman di ruangriung, digital art, fantasy, vibrant colors',
     model: 'flux',
-    // --- PERUBAHAN: Default width & height untuk Portrait ---
     width: 1024,
     height: 1792,
     seed: Math.floor(Math.random() * 1000000),
     artStyle: '',
     batchSize: 1,
-    // --- PERUBAHAN: Default kualitas gambar ---
     imageQuality: 'Ultra',
     private: false,
     safe: false,
@@ -31,16 +29,11 @@ export default function Generator() {
 
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [modelRequiringKey, setModelRequiringKey] = useState<'DALL-E 3' | 'Leonardo' | ''>('');
-  const [apiKeys, setApiKeys] = useState({
-      dalle: '',
-      leonardo: ''
-  });
-
+  const [apiKeys, setApiKeys] = useState({ dalle: '', leonardo: '' });
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [modelList, setModelList] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // --- PERUBAHAN: Default preset aspek rasio ---
   const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Portrait');
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
@@ -72,7 +65,6 @@ export default function Generator() {
     const savedLeonardoKey = localStorage.getItem('leonardo_api_key');
     if (savedDalleKey) setApiKeys(prev => ({ ...prev, dalle: savedDalleKey }));
     if (savedLeonardoKey) setApiKeys(prev => ({ ...prev, leonardo: savedLeonardoKey }));
-
   }, []);
 
   useEffect(() => {
@@ -104,10 +96,7 @@ export default function Generator() {
   };
 
   const onImageQualityChange = (quality: 'Standar' | 'HD' | 'Ultra') => {
-    setSettings(prev => {
-        let newWidth = prev.width, newHeight = prev.height;
-        return { ...prev, width: newWidth, height: newHeight, imageQuality: quality };
-    });
+    setSettings(prev => ({ ...prev, imageQuality: quality }));
   };
   
   const handleModelSelect = (model: string) => {
@@ -134,7 +123,7 @@ export default function Generator() {
     setModelRequiringKey('');
   };
 
-  const handleGenerateImage = async () => {
+  const handleGenerate = async (isVariation = false) => {
     if (!settings.prompt) {
       toast.error('Prompt tidak boleh kosong!');
       return;
@@ -147,38 +136,28 @@ export default function Generator() {
         imageDisplayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
 
-    const { model, prompt, width, height, seed, imageQuality, batchSize, artStyle, private: isPrivate, safe, transparent, inputImage } = settings;
+    const currentSeed = isVariation ? Math.floor(Math.random() * 1000000) : settings.seed;
+    if (isVariation) {
+        setSettings(prev => ({...prev, seed: currentSeed}));
+    }
+
+    const { model, prompt, width, height, imageQuality, batchSize, artStyle, private: isPrivate, safe, transparent, inputImage } = settings;
     const fullPrompt = `${prompt}${artStyle}`;
     
     const generatePromises = Array(batchSize).fill(0).map(async (_, i) => {
-      const newSeed = seed + i;
+      const newSeed = currentSeed + i;
       let finalUrl = '';
       try {
-        if (model === 'DALL-E 3') {
-          if (!apiKeys.dalle) throw new Error('API Key DALL-E 3 dibutuhkan.');
-          finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?model=dalle3&width=${width}&height=${height}&seed=${newSeed}`;
-        } else if (model === 'Leonardo') {
-          if (!apiKeys.leonardo) throw new Error('API Key Leonardo dibutuhkan.');
-          finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?model=leonardo&width=${width}&height=${height}&seed=${newSeed}`;
-        } else {
-          const params = new URLSearchParams({
-            model,
-            width: width.toString(),
-            height: height.toString(),
-            seed: newSeed.toString(),
-            enhance: imageQuality !== 'Standar' ? 'true' : 'false',
-            nologo: 'true',
-            // --- PERUBAHAN: Referrer diubah ---
-            referrer: 'ruangriung.my.id'
-          });
-
-          if (isPrivate) params.append('private', 'true');
-          if (safe) params.append('safe', 'true');
-          if (transparent && model === 'gptimage') params.append('transparent', 'true');
-          if (inputImage && (model === 'kontext' || model === 'gptimage')) params.append('image', inputImage);
-          
-          finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?${params.toString()}`;
-        }
+        const params = new URLSearchParams({
+          model, width: width.toString(), height: height.toString(), seed: newSeed.toString(),
+          enhance: imageQuality !== 'Standar' ? 'true' : 'false', nologo: 'true', referrer: 'ruangriung.my.id'
+        });
+        if (isPrivate) params.append('private', 'true');
+        if (safe) params.append('safe', 'true');
+        if (transparent && model === 'gptimage') params.append('transparent', 'true');
+        if (inputImage && (model === 'kontext' || model === 'gptimage')) params.append('image', inputImage);
+        
+        finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?${params.toString()}`;
         
         const response = await fetch(finalUrl);
         if (!response.ok) throw new Error(`Gagal membuat gambar #${i + 1}`);
@@ -203,51 +182,14 @@ export default function Generator() {
 
     setIsLoading(false);
   };
-
-  const handleDownloadImage = async () => {
-    if (imageUrls.length === 0) return;
-    if (imageUrls.length === 1) {
-        try {
-            const response = await fetch(imageUrls[0]);
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `ruangriung-ai-${Date.now()}.jpg`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-            toast.success("Gambar berhasil diunduh!");
-        } catch (error) {
-            toast.error("Gagal mengunduh gambar.");
-            console.error(error);
-        }
-    } else {
-        toast.success("Klik kanan pada setiap gambar untuk menyimpannya.");
-    }
-  };
-
-  const handleSelectFromHistory = (item: HistoryItem) => {
-    setImageUrls([item.imageUrl]);
-    setSettings(prev => ({ ...prev, prompt: item.prompt }));
-    toast.success("Gambar dimuat dari riwayat!");
-  };
   
-  const handleClearHistory = () => {
-    if (window.confirm("Yakin ingin menghapus riwayat?")) {
-      setHistory([]);
-      toast.success("Riwayat berhasil dihapus!");
-    }
-  };
-
   return (
     <>
       <div className="w-full flex flex-col items-center">
         <ControlPanel 
           settings={settings}
           setSettings={setSettings}
-          onGenerate={handleGenerateImage}
+          onGenerate={() => handleGenerate(false)}
           isLoading={isLoading}
           models={modelList}
           aspectRatio={aspectRatio}
@@ -256,19 +198,19 @@ export default function Generator() {
           onImageQualityChange={onImageQualityChange}
           onModelSelect={handleModelSelect}
         />
+        {/* --- PERBAIKAN: Menghapus prop onDownloadClick yang tidak perlu --- */}
         <ImageDisplay
           ref={imageDisplayRef}
           isLoading={isLoading}
           imageUrls={imageUrls}
           prompt={settings.prompt}
           onZoomClick={() => setIsModalOpen(true)}
-          onDownloadClick={handleDownloadImage}
-          onVariationsClick={handleGenerateImage}
+          onVariationsClick={() => handleGenerate(true)}
         />
         <ImageModal 
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          imageUrl={imageUrls[0] || ''}
+          imageUrl={imageUrls.length > 0 ? imageUrls[0] : ''}
         />
       </div>
 
@@ -281,8 +223,17 @@ export default function Generator() {
 
       <HistoryPanel 
         history={history}
-        onSelect={handleSelectFromHistory}
-        onClear={handleClearHistory}
+        onSelect={(item) => {
+          setImageUrls([item.imageUrl]);
+          setSettings(prev => ({ ...prev, prompt: item.prompt }));
+          toast.success("Gambar dimuat dari riwayat!");
+        }}
+        onClear={() => {
+          if (window.confirm("Yakin ingin menghapus riwayat?")) {
+            setHistory([]);
+            toast.success("Riwayat berhasil dihapus!");
+          }
+        }}
       />
     </>
   );
