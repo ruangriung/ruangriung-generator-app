@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Kebijakan Privasi - Ruang Riung',
+  title: 'Kebijakan Privasi - RuangRiung Generator',
 };
 
 export default function KebijakanPrivasiPage() {

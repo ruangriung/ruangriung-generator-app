@@ -48,7 +48,7 @@ export default function KetentuanLayananPage() {
           <section>
             <h2 className="text-xl font-semibold mb-2">5. Hak Kekayaan Intelektual</h2>
             <p>
-              Konten yang Anda hasilkan menggunakan Layanan ini adalah milik Anda. Namun, dengan menggunakan Layanan, Anda memberikan kami lisensi non-eksklusif untuk menggunakan, mereproduksi, dan menampilkan konten tersebut sebatas untuk keperluan operasional dan promosi Layanan. [Sesuaikan klausul ini sesuai dengan model bisnis Anda.]
+              Konten yang Anda hasilkan menggunakan Layanan ini adalah milik Anda. Namun, dengan menggunakan Layanan, Anda memberikan kami lisensi non-eksklusif untuk menggunakan, mereproduksi, dan menampilkan konten tersebut sebatas untuk keperluan operasional dan promosi Layanan.
             </p>
           </section>
 
