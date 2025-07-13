@@ -5,11 +5,12 @@ import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useState, useEffect } from 'react';
+import FAQ from '@/components/FAQ'; // Pastikan komponen FAQ diimpor
 
 export default function Home() {
   const [deferredPrompt, setDeferredPrompt] = useState<any | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
-  const [showBanner, setShowBanner] = useState(true); // <--- PERUBAHAN: Inisialisasi selalu dengan true
+  const [showBanner, setShowBanner] = useState(true);
 
   useEffect(() => {
     // Tangani event 'beforeinstallprompt' untuk PWA
@@ -28,25 +29,12 @@ export default function Home() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // <--- PERUBAHAN: Hapus logika pemuatan status banner dari localStorage
-    // const bannerDismissed = localStorage.getItem('ruangriung_banner_dismissed');
-    // if (bannerDismissed === 'true') {
-    //   setShowBanner(false);
-    // }
-    // <--- AKHIR PERUBAHAN
-
     // Cleanup listener saat komponen di-unmount
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
-
-  // <--- PERUBAHAN: Hapus useEffect untuk menyimpan status banner ke localStorage
-  // useEffect(() => {
-  //   localStorage.setItem('ruangriung_banner_dismissed', String(!showBanner));
-  // }, [showBanner]);
-  // <--- AKHIR PERUBAHAN
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
@@ -67,7 +55,7 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-4 sm:p-8">
+    <div className="flex min-h-screen flex-col items-center p-4 sm:p-8">
       {showBanner && (
         <div className="w-full max-w-4xl bg-gradient-to-r from-purple-500 to-indigo-600 text-white p-3 rounded-lg shadow-md mb-8 flex flex-col sm:flex-row items-center justify-center gap-3 relative">
           <p className="text-sm sm:text-base font-semibold flex items-center gap-2">
@@ -91,7 +79,6 @@ export default function Home() {
           </button>
         </div>
       )}
-      {/* Akhir dari Banner */}
 
       <header className="w-full max-w-4xl mb-8 text-center">
         <div className="flex items-center justify-center">
@@ -110,7 +97,13 @@ export default function Home() {
         <ThemeToggle />
       </div>
       
-      <Tabs />
-    </main>
+      <main className="w-full flex flex-col items-center">
+        <Tabs />
+      </main>
+
+      <div className="w-full mt-16">
+        <FAQ />
+      </div>
+    </div>
   );
 }
