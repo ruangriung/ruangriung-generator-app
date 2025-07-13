@@ -18,6 +18,7 @@ export const useChatManager = () => {
   const [sessions, setSessions] = useState<ChatSession[] | null>(null);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [models, setModels] = useState<string[]>([]); // <-- KEMBALIKAN STATE MODEL
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const activeChat = sessions?.find((s) => s.id === activeSessionId);
@@ -46,6 +47,35 @@ export const useChatManager = () => {
     }
   }, [sessions]);
 
+  // --- KEMBALIKAN LOGIKA FETCH MODEL ---
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const res = await fetch('https://text.pollinations.ai/models');
+        if (!res.ok) throw new Error('API request failed');
+        const data = await res.json();
+        let extractedModels: string[] = [];
+
+        if (Array.isArray(data)) {
+          extractedModels = data.map(item => (typeof item === 'string' ? item : (item?.id || item?.name))).filter(Boolean) as string[];
+        } else if (typeof data === 'object' && data !== null) {
+          extractedModels = Object.keys(data);
+        }
+
+        const validModels = extractedModels.filter(m => typeof m === 'string' && m.length > 0 && !m.includes('audio'));
+        if (validModels.length > 0) setModels(validModels);
+        else throw new Error("Tidak ada model teks valid yang ditemukan");
+
+      } catch (error) {
+        console.error("Gagal memuat model:", error);
+        setModels(['openai', 'mistral', 'google']); // Fallback
+      }
+    };
+    fetchModels();
+  }, []);
+  // --- AKHIR LOGIKA FETCH MODEL ---
+
+
   const updateMessages = (sessionId: number, messages: Message[]) => {
     setSessions(prev => 
       prev!.map(s => s.id === sessionId ? { ...s, messages } : s)
@@ -73,10 +103,10 @@ export const useChatManager = () => {
     updateMessages(activeChat.id, updatedMessages);
     
     const apiMessages = updatedMessages.map(msg => {
-        if (typeof msg.content === 'string') {
-            return { role: msg.role, content: msg.content };
-        }
-        return { role: msg.role, content: [{ type: 'text', text: msg.content.text || 'Analisis gambar ini.' }, { type: 'image_url', image_url: msg.content.image_url }] };
+      if (typeof msg.content === 'string') {
+        return { role: msg.role, content: msg.content };
+      }
+      return { role: msg.role, content: [{ type: 'text', text: msg.content.text || 'Analisis gambar ini.' }, { type: 'image_url', image_url: msg.content.image_url }] };
     });
 
     try {
@@ -100,7 +130,6 @@ export const useChatManager = () => {
     } catch (error: any) {
       if (error.name === 'AbortError') {
         toast.success('Pembuatan respons dihentikan.');
-        // --- PERBAIKAN: Beri tahu TypeScript tipe objek ini adalah Message ---
         const finalMessages = [...updatedMessages, {role: 'assistant', content: '*Respons dihentikan oleh pengguna.*'} as Message];
         updateMessages(activeChat.id, finalMessages);
       } else {
@@ -131,7 +160,7 @@ export const useChatManager = () => {
 
   return {
     sessions, setSessions, activeSessionId, setActiveSessionId,
-    activeChat, isLoading, processAndSendMessage, startNewChat,
+    activeChat, isLoading, models, processAndSendMessage, startNewChat,
     stopGenerating, regenerateResponse
   };
 };

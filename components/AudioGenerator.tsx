@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Volume2, Play, Loader, Pause } from 'lucide-react';
+import { Sparkles, Volume2, Play, Pause } from 'lucide-react';
 import ButtonSpinner from './ButtonSpinner';
 import toast from 'react-hot-toast';
 
@@ -13,7 +13,6 @@ export default function AudioGenerator() {
   const [isLoading, setIsLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   
-  // State baru untuk pratinjau suara
   const [previewingVoice, setPreviewingVoice] = useState<string | null>(null);
   const [audioPreview, setAudioPreview] = useState<HTMLAudioElement | null>(null);
 
@@ -31,7 +30,6 @@ export default function AudioGenerator() {
     };
     fetchVoices();
     
-    // Cleanup audio preview saat komponen di-unmount
     return () => {
         if(audioPreview) {
             audioPreview.pause();
@@ -41,16 +39,14 @@ export default function AudioGenerator() {
   }, [audioPreview]);
 
   const handlePreviewVoice = (e: React.MouseEvent, voice: string) => {
-    e.stopPropagation(); // Mencegah dropdown tertutup
+    e.stopPropagation(); 
     
     if (previewingVoice === voice) {
-        // Jika suara yang sama diklik lagi, hentikan pratinjau
         if(audioPreview) audioPreview.pause();
         setPreviewingVoice(null);
         return;
     }
     
-    // Hentikan pratinjau sebelumnya jika ada
     if(audioPreview) audioPreview.pause();
 
     setPreviewingVoice(voice);
@@ -102,27 +98,41 @@ export default function AudioGenerator() {
         <div>
           <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Pilih Suara (Klik ikon Play untuk pratinjau)</label>
           <div className="space-y-2">
-            {voices.map(voice => (
-              <div 
-                key={voice}
-                onClick={() => setSelectedVoice(voice)}
-                className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${selectedVoice === voice ? 'bg-purple-600 text-white shadow-neumorphic-button-active' : 'bg-light-bg dark:bg-dark-bg shadow-neumorphic-button hover:shadow-neumorphic-inset'}`}
-              >
-                <span className="font-semibold capitalize">{voice}</span>
-                <button
-                  onClick={(e) => handlePreviewVoice(e, voice)}
-                  className={`p-2 rounded-full ${selectedVoice === voice ? 'hover:bg-purple-500' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-                  title={`Pratinjau suara ${voice}`}
-                  disabled={previewingVoice !== null && previewingVoice !== voice}
+            {voices.map(voice => {
+              const isActive = selectedVoice === voice;
+              return (
+                <div 
+                  key={voice}
+                  onClick={() => setSelectedVoice(voice)}
+                  // --- PERBAIKAN UTAMA: Gaya tombol aktif diubah menjadi lebih tegas dan tanpa shadow ---
+                  className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all duration-200 
+                    ${isActive 
+                      ? 'bg-purple-600 text-white' // Gaya aktif yang baru: solid, tanpa shadow
+                      : 'bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 shadow-neumorphic-button dark:shadow-dark-neumorphic-button hover:shadow-neumorphic-inset dark:hover:shadow-dark-neumorphic-inset'
+                    }`
+                  }
                 >
-                  {previewingVoice === voice ? (
-                    <Pause size={18} />
-                  ) : (
-                    <Play size={18} />
-                  )}
-                </button>
-              </div>
-            ))}
+                  <span className="font-semibold capitalize">{voice}</span>
+                  <button
+                    onClick={(e) => handlePreviewVoice(e, voice)}
+                    className={`p-2 rounded-full transition-colors 
+                      ${isActive 
+                        ? 'hover:bg-purple-500' // Gaya hover saat aktif
+                        : 'hover:bg-gray-200 dark:hover:bg-gray-700' // Gaya hover saat tidak aktif
+                      }`
+                    }
+                    title={`Pratinjau suara ${voice}`}
+                    disabled={previewingVoice !== null && previewingVoice !== voice}
+                  >
+                    {previewingVoice === voice ? (
+                      <Pause size={18} />
+                    ) : (
+                      <Play size={18} />
+                    )}
+                  </button>
+                </div>
+              )
+            })}
              {voices.length === 0 && <p className="text-center text-gray-500 dark:text-gray-400">Memuat suara...</p>}
           </div>
         </div>

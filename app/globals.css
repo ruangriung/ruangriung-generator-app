@@ -67,10 +67,9 @@ input[type='number'] {
   }
 }
 
-/* --- PERBAIKAN UTAMA: Gaya untuk Syntax Highlighting & Word Wrap --- */
+/* Gaya untuk Syntax Highlighting */
 .prose pre {
   @apply bg-gray-800 text-gray-200 rounded-lg p-4 text-sm;
-  /* Memaksa blok kode untuk membungkus teks yang panjang */
   white-space: pre-wrap;
   word-break: break-all;
 }
@@ -81,10 +80,18 @@ input[type='number'] {
 
 .prose code {
   @apply text-purple-600 dark:text-purple-400 before:content-[''] after:content-[''] font-mono font-semibold;
-  /* Memaksa kode inline untuk membungkus jika perlu */
   word-break: break-all;
 }
 
 .prose pre code {
-  @apply text-inherit;
+  @apply text-inherit p-0 m-0;
+}
+
+/* --- PERBAIKAN UTAMA: Warna Teks Respons AI di Mode Gelap --- */
+/* Aturan ini secara spesifik menargetkan elemen teks di dalam balon pesan AI 
+   ketika mode gelap aktif, dan mengubah warnanya menjadi lebih terang. */
+.dark .prose-invert p,
+.dark .prose-invert li,
+.dark .prose-invert strong {
+  @apply text-gray-300;
 }

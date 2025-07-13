@@ -36,7 +36,9 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
       )}
 
       <div className={`max-w-xl flex flex-col`}>
-        <div className={`break-words ${isAssistant ? 'prose dark:prose-invert bg-white dark:bg-gray-800 shadow-md rounded-xl p-3 sm:p-4' : 'p-3 sm:p-4 rounded-xl bg-purple-600 text-white shadow-md'}`}>
+        {/* --- PERBAIKAN UTAMA DI SINI --- */}
+        {/* Menambahkan 'text-gray-700 dark:text-gray-300' untuk memastikan warna teks selalu kontras */}
+        <div className={`break-words ${isAssistant ? 'prose dark:prose-invert text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 shadow-md rounded-xl p-3 sm:p-4' : 'p-3 sm:p-4 rounded-xl bg-purple-600 text-white shadow-md'}`}>
           <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
             {content}
           </ReactMarkdown>
