@@ -1,11 +1,12 @@
 // app/layout.tsx
-import type { Metadata, Viewport } from 'next'; // Import Viewport type
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import AuthProvider from '@/components/AuthProvider';
 import Footer from '@/components/Footer';
 import Script from 'next/script';
 import { Toaster } from 'react-hot-toast';
+import CookieConsent from '@/components/CookieConsent'; // Pastikan ini diimpor
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,8 +31,6 @@ export const metadata: Metadata = {
     google: "3Mybm59m8--LyAZpVYIGHrVk1fSkYemj33bq5RBBdxA",
   },
   
-  // themeColor Dihapus dari sini dan dipindahkan ke `viewport` di bawah
-
   openGraph: {
     title: "RuangRiung AI Image Generator - Create Stunning Digital Art",
     description: "Transform text into beautiful AI-generated artwork in various styles including photography, anime, digital painting and more.",
@@ -55,9 +54,7 @@ export const metadata: Metadata = {
 
 // Definisikan viewport metadata secara terpisah
 export const viewport: Viewport = {
-  themeColor: "#6c5ce7", // themeColor dipindahkan ke sini
-  // properti msapplication-navbutton-color dan apple-mobile-web-app-status-bar-style
-  // umumnya sudah tercakup oleh themeColor di browser modern.
+  themeColor: "#6c5ce7",
 };
 
 
@@ -82,6 +79,9 @@ export default function RootLayout({
           </div>
         </AuthProvider>
           <Toaster />
+
+        {/* Komponen Cookie Consent ditambahkan di sini */}
+        <CookieConsent />
 
         {/* Google Tag (gtag.js) script */}
         <Script
