@@ -1,206 +1,288 @@
 // components/Chatbot.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Bot, User, Send, Trash2, Copy, Check, Sparkles, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Bot, User, Send, Trash2, Edit, Save, Plus, MessageSquare, Loader, ChevronDown, Sparkles, X, Paperclip } from 'lucide-react';
 import ButtonSpinner from './ButtonSpinner';
 import toast from 'react-hot-toast';
 
+// Mendefinisikan tipe data untuk pesan dan sesi chat
+interface Message {
+  role: 'user' | 'assistant';
+  content: string | { type: 'image_url', image_url: { url: string }, text?: string };
+}
+
+interface ChatSession {
+  id: number;
+  title: string;
+  messages: Message[];
+  model: string;
+}
+
 export default function Chatbot() {
-  const [prompt, setPrompt] = useState('');
-  const [response, setResponse] = useState('');
+  const [sessions, setSessions] = useState<ChatSession[] | null>(null);
+  const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
+  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isRenaming, setIsRenaming] = useState<number | null>(null);
+  const [renameInput, setRenameInput] = useState('');
   const [models, setModels] = useState<string[]>([]);
   const [selectedModel, setSelectedModel] = useState('openai');
-  const [isCopied, setIsCopied] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
-  const textareaStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow text-gray-800 dark:text-gray-200 resize-none";
-  const selectStyle = `${textareaStyle} appearance-none`;
+  const activeChat = sessions?.find((s) => s.id === activeSessionId);
 
-  // --- PERBAIKAN LOGIKA FETCH MODEL ---
+  // --- ALUR INISIALISASI ---
   useEffect(() => {
-    const fetchTextModels = async () => {
-      try {
-        const response = await fetch('https://text.pollinations.ai/models');
-        if (!response.ok) {
-          throw new Error(`Gagal mengambil model teks: ${response.statusText}`);
-        }
-        const data = await response.json();
-        let extractedModels: string[] = [];
-
-        if (Array.isArray(data)) {
-          extractedModels = data.map(item => {
-            if (typeof item === 'string') {
-              return item;
-            } else if (typeof item === 'object' && item !== null && (item.id || item.name)) {
-              return item.id || item.name;
-            }
-            return null;
-          }).filter(Boolean) as string[];
-        } else if (typeof data === 'object' && data !== null) {
-          extractedModels = Object.keys(data).filter(key => {
-            const modelDetails = data[key];
-            // Filter sederhana untuk memastikan itu adalah model teks
-            return typeof modelDetails === 'object' && modelDetails !== null &&
-                   !modelDetails.capabilities?.includes('audio-text') &&
-                   !modelDetails.capabilities?.includes('vision');
-          });
-        }
-
-        const validModels = extractedModels.filter(name => typeof name === 'string' && name.length > 0 && !name.includes('audio'));
-
-        if (validModels.length > 0) {
-          setModels(validModels);
-          if (validModels.includes('openai')) {
-            setSelectedModel('openai');
-          } else {
-            setSelectedModel(validModels[0]);
-          }
-        } else {
-          throw new Error("Tidak ada model teks yang valid ditemukan dari API.");
-        }
-      } catch (error) {
-        console.error("Error mengambil model teks:", error);
-        toast.error("Gagal memuat model AI. Menggunakan model default.");
-        setModels(['openai', 'mistral', 'google']);
-        setSelectedModel('openai');
-      }
-    };
-
-    fetchTextModels();
-  }, []);
-  // --- AKHIR PERBAIKAN LOGIKA FETCH MODEL ---
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!prompt.trim()) {
-      toast.error("Pertanyaan tidak boleh kosong!");
-      return;
+    try {
+      const savedSessions = localStorage.getItem('ruangriung_chatbot_sessions');
+      setSessions(savedSessions ? JSON.parse(savedSessions) : []);
+    } catch (error) {
+      console.error("Gagal memuat sesi:", error);
+      setSessions([]);
     }
+  }, []);
 
-    setIsLoading(true);
-    setResponse('');
-    setIsCopied(false);
+  useEffect(() => {
+    if (sessions === null) return;
+    if (sessions.length > 0) {
+      if (!activeSessionId || !sessions.some(s => s.id === activeSessionId)) {
+        setActiveSessionId(sessions[0].id);
+      }
+    } else {
+      startNewChat();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessions]);
+  
+  useEffect(() => {
+    if (sessions !== null) {
+      localStorage.setItem('ruangriung_chatbot_sessions', JSON.stringify(sessions));
+    }
+  }, [sessions]);
 
-    const apiPromise = fetch('https://text.pollinations.ai/openai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: selectedModel,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    })
-    .then(res => {
-        if (!res.ok) throw new Error(`Respons API tidak baik (${res.status})`);
-        return res.json();
-    })
-    .then(result => {
-        const content = result.choices[0].message.content;
-        setResponse(content);
-        return 'Jawaban berhasil diterima!';
-    })
-    .catch(err => {
-        console.error('Error:', err);
-        setResponse('Maaf, terjadi kesalahan saat menghubungi AI. Silakan coba lagi.');
-        throw new Error('Gagal mendapatkan respons dari AI.');
-    })
-    .finally(() => {
-        setIsLoading(false);
-    });
+  useEffect(() => {
+      if (isRenaming !== null && renameInputRef.current) {
+          renameInputRef.current.focus();
+      }
+  }, [isRenaming]);
 
-    toast.promise(apiPromise, {
-        loading: 'AI sedang berpikir...',
-        success: (message) => message,
-        error: (errorMessage) => errorMessage.toString(),
-    });
-  };
+  useEffect(() => {
+    if (activeChat?.messages) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [activeChat?.messages]);
 
-  const handleCopyResponse = () => {
-    if (!response) return;
-    navigator.clipboard.writeText(response);
-    setIsCopied(true);
-    toast.success("Respons berhasil disalin!");
-    setTimeout(() => setIsCopied(false), 2000);
+  useEffect(() => {
+    fetch('https://text.pollinations.ai/models')
+      .then(res => res.ok ? res.json() : Promise.reject('Gagal mengambil model'))
+      .then(data => {
+        const visionModels = ['openai', 'openai-large', 'claude-hybridspace'];
+        const textModels = (Array.isArray(data) ? data : Object.keys(data)).filter(m => typeof m === 'string' && !m.includes('audio'));
+        const allModels = [...new Set([...visionModels, ...textModels])];
+        setModels(allModels.length > 0 ? allModels : ['openai']);
+      }).catch(err => {
+        console.error(err);
+        setModels(['openai', 'mistral', 'google']);
+      });
+  }, []);
+
+  // --- FUNGSI-FUNGSI UTAMA ---
+  const startNewChat = () => {
+    const newId = Date.now();
+    const newSession: ChatSession = {
+      id: newId,
+      title: `Percakapan ${new Date().toLocaleTimeString('id-ID')}`,
+      messages: [],
+      model: selectedModel,
+    };
+    setSessions(prev => [newSession, ...(prev ?? [])]);
+    setActiveSessionId(newId);
   };
   
-  const handleClear = () => {
-      setPrompt('');
-      setResponse('');
-      setIsCopied(false);
+  const handleSelectSession = (id: number) => {
+      setActiveSessionId(id);
+  };
+
+  const handleDeleteSession = (idToDelete: number) => {
+      if (!window.confirm("Yakin ingin menghapus percakapan ini?")) return;
+      setSessions(prev => prev!.filter(s => s.id !== idToDelete));
+      toast.success("Percakapan dihapus!");
+  };
+  
+  const deleteAllHistory = () => {
+      if (!window.confirm("PERINGATAN: Anda akan menghapus SEMUA riwayat percakapan. Aksi ini tidak dapat dibatalkan. Lanjutkan?")) return;
+      setSessions([]);
+      setActiveSessionId(null);
+      localStorage.removeItem('ruangriung_chatbot_sessions');
+      toast.success("Semua riwayat telah dihapus.");
+  }
+
+  const handleRename = (session: ChatSession) => {
+      setIsRenaming(session.id);
+      setRenameInput(session.title);
+  };
+
+  const handleSaveRename = (idToRename: number) => {
+    if(!renameInput.trim()) { toast.error("Judul tidak boleh kosong!"); return; }
+    setSessions(prev => prev!.map(s => s.id === idToRename ? { ...s, title: renameInput } : s));
+    setIsRenaming(null);
+    toast.success("Judul berhasil diubah!");
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeChat) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      const imageMessage: Message = {
+        role: 'user',
+        content: {
+          type: 'image_url',
+          image_url: { url: base64String },
+          text: input || `Analisis gambar ini.`
+        }
+      };
+      
+      setSessions(prev => prev!.map(s => s.id === activeSessionId ? { ...s, messages: [...s.messages, imageMessage] } : s));
+      
+      // Kirim pesan setelah gambar ditambahkan
+      handleSendMessage(undefined, imageMessage);
+    };
+  };
+
+  const handleSendMessage = async (e?: React.FormEvent, uploadedImageMessage?: Message) => {
+    if (e) e.preventDefault();
+
+    const currentMessage = uploadedImageMessage ? null : input;
+    if (!currentMessage && !uploadedImageMessage) {
+        toast.error("Silakan masukkan pesan atau unggah gambar.");
+        return;
+    }
+    if (isLoading || !activeChat) return;
+
+    let userMessage: Message;
+    if (uploadedImageMessage) {
+        userMessage = uploadedImageMessage;
+    } else {
+        userMessage = { role: 'user', content: currentMessage! };
+    }
+    
+    const messagesWithNew = [...activeChat.messages, userMessage];
+
+    // Jika ini bukan dari upload, update state dengan pesan teks
+    if(!uploadedImageMessage) {
+        setSessions(prev => prev!.map(s => s.id === activeSessionId ? { ...s, messages: messagesWithNew } : s));
+    }
+    
+    setInput('');
+    setIsLoading(true);
+
+    const apiMessages = messagesWithNew.map(msg => {
+        if (typeof msg.content === 'string') {
+            return { role: msg.role, content: msg.content };
+        }
+        // Format untuk API Vision
+        return {
+            role: msg.role,
+            content: [
+                { type: 'text', text: msg.content.text || 'Analisis gambar ini' },
+                { type: 'image_url', image_url: msg.content.image_url }
+            ]
+        }
+    });
+
+    try {
+      const response = await fetch('https://text.pollinations.ai/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: selectedModel, messages: apiMessages, max_tokens: 500 }),
+      });
+      if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+      const result = await response.json();
+      const assistantMessage: Message = result.choices[0].message;
+      setSessions(prev => prev!.map(s => s.id === activeSessionId ? { ...s, messages: [...s.messages, assistantMessage] } : s));
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Gagal mendapatkan respons dari AI.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  if (sessions === null) {
+    return (
+      <div className="w-full p-6 flex justify-center items-center h-[80vh]">
+        <ButtonSpinner/> <span className="ml-4">Memuat Sesi...</span>
+      </div>
+    );
   }
 
   return (
-    <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label htmlFor="model-select" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2 flex items-center gap-2"><Sparkles size={16} className="text-purple-600"/>Pilih Model AI</label>
-          <div className="relative">
-             <select id="model-select" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className={selectStyle}>
-                {models.length > 0 ? (
-                  models.map((modelName) => (
-                    <option key={modelName} value={modelName} className="bg-white dark:bg-gray-700">
-                      {modelName}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>Memuat...</option>
-                )}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
-          </div>
-        </div>
-        
-        <div>
-          <label htmlFor="prompt-input" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2 flex items-center gap-2"><User size={16} className="text-purple-600"/>Pertanyaan Anda</label>
-          <textarea
-            id="prompt-input"
-            rows={4}
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Tanyakan apa saja kepada AI..."
-            className={textareaStyle}
-          />
-        </div>
-        
-        <div className="flex flex-col sm:flex-row gap-4">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full flex-1 inline-flex items-center justify-center px-6 py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed transition-all"
-            >
-              {isLoading ? <ButtonSpinner /> : <Send className="w-5 h-5 mr-2" />}
-              <span>Kirim</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleClear}
-              disabled={isLoading}
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-200 font-bold rounded-xl shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
-            >
-              <Trash2 className="w-5 h-5 mr-2" />
-              <span>Bersihkan</span>
-            </button>
-        </div>
-
-        {response && (
-           <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2 flex items-center gap-2"><Bot size={16} className="text-purple-600"/>Jawaban AI</label>
-                <div className="relative p-4 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset">
-                    <textarea
-                      readOnly
-                      value={response}
-                      className="w-full h-48 bg-transparent border-0 resize-none text-gray-800 dark:text-gray-200 focus:outline-none"
-                    />
-                    <button 
-                        onClick={handleCopyResponse}
-                        className="absolute top-3 right-3 p-2 bg-gray-300 dark:bg-gray-700 rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset"
-                    >
-                        {isCopied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
-                    </button>
+    <div className="w-full flex h-[80vh] bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
+      <aside className="w-1/4 min-w-[250px] p-4 border-r border-gray-300 dark:border-gray-700 flex flex-col">
+        <button onClick={startNewChat} className="w-full flex items-center justify-center gap-2 p-3 mb-4 rounded-lg font-semibold text-gray-700 dark:text-gray-200 bg-light-bg dark:bg-dark-bg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset">
+            <Plus size={18} /> Chat Baru
+        </button>
+        <div className="flex-1 overflow-y-auto space-y-2 pr-2">
+            {sessions.map(session => (
+                <div key={session.id} onClick={() => handleSelectSession(session.id)} className={`p-2 rounded-lg cursor-pointer group ${activeSessionId === session.id ? 'bg-purple-100 dark:bg-purple-900/50' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
+                    {isRenaming === session.id ? ( <input ref={renameInputRef} type="text" value={renameInput} onChange={e => setRenameInput(e.target.value)} onBlur={() => handleSaveRename(session.id)} onKeyDown={e => e.key === 'Enter' && handleSaveRename(session.id)} className="w-full bg-transparent text-sm font-medium focus:outline-none"/>
+                    ) : ( <div className="flex justify-between items-center"><p className="text-sm text-gray-700 dark:text-gray-300 truncate">{session.title}</p><div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity"><button onClick={(e) => { e.stopPropagation(); handleRename(session); }} className="p-1 hover:text-purple-600"><Edit size={14}/></button><button onClick={(e) => { e.stopPropagation(); handleDeleteSession(session.id); }} className="p-1 hover:text-red-500"><Trash2 size={14}/></button></div></div> )}
                 </div>
-           </div>
+            ))}
+        </div>
+        <div className="pt-4 border-t border-gray-300 dark:border-gray-600">
+            <button onClick={deleteAllHistory} className="w-full flex items-center justify-center gap-2 p-2 text-sm text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg">
+                <Trash2 size={16} /> Hapus Semua Riwayat
+            </button>
+        </div>
+      </aside>
+
+      <main className="flex-1 flex flex-col">
+        {activeChat ? (
+            <>
+            <header className="p-4 border-b border-gray-300 dark:border-gray-700 flex justify-between items-center">
+                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{activeChat.title}</h2>
+                <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="p-2 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset text-sm w-40">
+                    {models.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+            </header>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                {activeChat.messages.map((msg, index) => (
+                    <div key={`msg-${activeChat.id}-${index}`} className={`flex items-start gap-4 ${msg.role === 'user' ? 'justify-end' : ''}`}>
+                        {msg.role === 'assistant' && <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white shrink-0"><Bot size={22} /></div>}
+                        <div className={`max-w-xl p-4 rounded-xl break-words ${msg.role === 'user' ? 'bg-purple-600 text-white shadow-md' : 'bg-white dark:bg-gray-800 shadow-md'}`}>
+                            {typeof msg.content === 'string' ? <p className="text-sm" style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</p> : <div className="space-y-2"><p>{msg.content.text}</p><img src={msg.content.image_url.url} alt="Uploaded content" className="max-w-xs rounded-lg"/></div> }
+                        </div>
+                        {msg.role === 'user' && <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white shrink-0"><User size={22} /></div>}
+                    </div>
+                ))}
+                <div ref={messagesEndRef} />
+            </div>
+            
+            <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-300 dark:border-gray-700">
+                <div className="relative">
+                    <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); }}} placeholder="Kirim pesan atau unggah gambar..." className="w-full p-4 pr-28 rounded-xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset resize-none" rows={2} disabled={isLoading} />
+                    <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                        <label htmlFor="image-upload" className="p-2.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer"><Paperclip size={24} /><input id="image-upload" type="file" className="hidden" onChange={handleFileUpload} accept="image/*"/></label>
+                        <button type="submit" className="p-2.5 bg-purple-600 text-white rounded-full shadow-lg" disabled={isLoading || (!input.trim() && !activeChat.messages.some(m => typeof m.content !== 'string'))}><Send size={24} /></button>
+                    </div>
+                </div>
+            </form>
+            </>
+        ) : (
+            <div className="flex-1 flex flex-col justify-center items-center text-gray-500">
+                <MessageSquare size={48} />
+                <p className="mt-4">Pilih atau buat percakapan baru untuk memulai.</p>
+            </div>
         )}
-      </form>
+      </main>
     </div>
   );
 }
