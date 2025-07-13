@@ -19,6 +19,7 @@ interface ChatSession {
 }
 
 export default function Chatbot() {
+  const [isMounted, setIsMounted] = useState(false); // <--- PENAMBAHAN BARU
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [input, setInput] = useState('');
@@ -27,37 +28,45 @@ export default function Chatbot() {
   const [selectedModel, setSelectedModel] = useState('openai');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Load sessions from localStorage on initial render
+  // <--- PENAMBAHAN BARU: Efek untuk menandai komponen telah ter-mount di client
   useEffect(() => {
-    try {
-      const savedSessions = localStorage.getItem('chatbot_sessions');
-      if (savedSessions) {
-        const parsedSessions: ChatSession[] = JSON.parse(savedSessions);
-        if (parsedSessions.length > 0) {
-          setSessions(parsedSessions);
-          setActiveSessionId(parsedSessions[0].id);
+    setIsMounted(true);
+  }, []);
+
+  // PERUBAHAN: Load sessions hanya setelah komponen ter-mount
+  useEffect(() => {
+    if (isMounted) {
+      try {
+        const savedSessions = localStorage.getItem('chatbot_sessions');
+        if (savedSessions) {
+          const parsedSessions: ChatSession[] = JSON.parse(savedSessions);
+          if (parsedSessions.length > 0) {
+            setSessions(parsedSessions);
+            setActiveSessionId(parsedSessions[0].id);
+          } else {
+            startNewChat();
+          }
         } else {
           startNewChat();
         }
-      } else {
+      } catch (error) {
+        console.error("Gagal memuat sesi chat:", error);
         startNewChat();
       }
-    } catch (error) {
-      console.error("Gagal memuat sesi chat:", error);
-      startNewChat();
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMounted]);
 
-  // Save sessions to localStorage whenever they change
+  // PERUBAHAN: Save sessions hanya setelah komponen ter-mount
   useEffect(() => {
-    if (sessions.length > 0) {
+    if (isMounted && sessions.length > 0) {
       try {
         localStorage.setItem('chatbot_sessions', JSON.stringify(sessions));
       } catch (error) {
         console.error("Gagal menyimpan sesi chat:", error);
       }
     }
-  }, [sessions]);
+  }, [sessions, isMounted]);
 
 
   // Fetch models from API
@@ -95,11 +104,18 @@ export default function Chatbot() {
     const newId = Date.now();
     const newSession: ChatSession = {
       id: newId,
-      title: `Percakapan Baru ${sessions.length + 1}`,
+      title: `Percakapan Baru`,
       messages: [],
       model: selectedModel,
     };
-    setSessions(prev => [newSession, ...prev]);
+    
+    // Memberi judul unik berdasarkan jumlah sesi yang sudah ada
+    setSessions(prev => {
+        const newTitle = `Percakapan Baru ${prev.length + 1}`;
+        newSession.title = newTitle;
+        return [newSession, ...prev];
+    });
+
     setActiveSessionId(newId);
   };
 
@@ -179,6 +195,16 @@ export default function Chatbot() {
   }
   
   const activeChat = sessions.find(s => s.id === activeSessionId);
+
+  // Jangan render apapun sampai mounted di client untuk menghindari hydration error
+  if (!isMounted) {
+      return (
+        <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic flex justify-center items-center h-[75vh]">
+            <ButtonSpinner/>
+            <span className="ml-4 text-gray-600 dark:text-gray-300">Memuat Chat...</span>
+        </div>
+      );
+  }
 
   return (
     <div className="w-full p-4 md:p-6 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic flex flex-col h-[75vh]">
