@@ -2,17 +2,18 @@
 'use client';
 
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useSession } from 'next-auth/react'; // Impor useSession
 import AdvancedSettings from './AdvancedSettings';
 import ButtonSpinner from './ButtonSpinner';
-import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon } from 'lucide-react';
+import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon, Languages, Megaphone } from 'lucide-react'; // Impor ikon
 import TextareaModal from './TextareaModal';
 import Accordion from './Accordion';
 import PromptAssistant from './PromptAssistant';
 import TranslationAssistant from './TranslationAssistant';
 import ImageAnalysisAssistant from './ImageAnalysisAssistant';
+import LockedAccordion from './LockedAccordion'; // Impor komponen baru
 import toast from 'react-hot-toast';
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
-
 
 export interface GeneratorSettings {
   prompt: string;
@@ -38,6 +39,7 @@ interface ControlPanelProps {
 }
 
 export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange }: ControlPanelProps) {
+  const { status } = useSession(); // Dapatkan status sesi
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRandomizing, setIsRandomizing] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
@@ -252,17 +254,31 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
         </div>
 
         {/* Asisten-asisten Prompt dipindahkan ke bawah */}
-        <PromptAssistant 
-          onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))} 
-        />
+        {status === 'authenticated' ? (
+          <PromptAssistant 
+            onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))} 
+          />
+        ) : (
+          <LockedAccordion 
+            title={<div className="flex items-center gap-2"><Megaphone className="text-purple-600" />Asisten Prompt</div>} 
+            className="mt-6" 
+          />
+        )}
         
         <TranslationAssistant
           onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
         />
 
-        <ImageAnalysisAssistant
-          onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
-        />
+        {status === 'authenticated' ? (
+          <ImageAnalysisAssistant
+            onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
+          />
+        ) : (
+          <LockedAccordion 
+            title={<div className="flex items-center gap-2"><ImageIcon className="text-purple-600" />Asisten Analisis Gambar</div>}
+            className="mt-6"
+          />
+        )}
 
         {savedPrompts.length > 0 && (
             <Accordion

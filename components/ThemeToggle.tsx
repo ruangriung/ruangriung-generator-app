@@ -10,14 +10,9 @@ export default function ThemeToggle() {
 
   useEffect(() => {
     setMounted(true);
-
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null;
     if (savedTheme) {
       setTheme(savedTheme);
-    } else {
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setTheme('system');
-      document.documentElement.classList.toggle('dark', systemPrefersDark);
     }
   }, []);
 
@@ -26,21 +21,18 @@ export default function ThemeToggle() {
 
     localStorage.setItem('theme', theme);
 
-    const applyTheme = () => {
-      if (theme === 'system') {
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.classList.toggle('dark', systemPrefersDark);
-      } else {
-        document.documentElement.classList.toggle('dark', theme === 'dark');
-      }
-    };
-
-    applyTheme();
+    if (theme === 'system') {
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.toggle('dark', systemPrefersDark);
+    } else {
+      document.documentElement.classList.toggle('dark', theme === 'dark');
+    }
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
       if (theme === 'system') {
-        applyTheme();
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', systemPrefersDark);
       }
     };
 
@@ -48,38 +40,30 @@ export default function ThemeToggle() {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme, mounted]);
 
-  const toggleTheme = () => {
-    setTheme(prevTheme => {
-      if (prevTheme === 'light') return 'dark';
-      if (prevTheme === 'dark') return 'system';
-      return 'light';
-    });
+  if (!mounted) {
+    return null;
+  }
+
+  const getButtonStyle = (buttonTheme: 'light' | 'dark' | 'system') => {
+    const isActive = theme === buttonTheme;
+    return `p-2 rounded-lg transition-all duration-200 mx-0.5 ${
+      isActive
+        ? 'bg-purple-600 text-white shadow-neumorphic-button dark:shadow-dark-neumorphic-button'
+        : 'bg-light-bg dark:bg-dark-bg text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-500'
+    }`;
   };
-
-  const renderIcon = () => {
-    if (!mounted) {
-      return <Sun size={20} className="text-yellow-500" />;
-    }
-
-    if (theme === 'system') {
-      return <Monitor size={20} className="text-gray-500 dark:text-gray-400" />; // <--- PERUBAHAN: dark:text-gray-400
-    } else if (theme === 'light') {
-      return <Sun size={20} className="text-yellow-500" />;
-    } else {
-      return <Moon size={20} className="text-blue-500" />;
-    }
-  };
-
-  // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg, dark:shadow-dark-neumorphic-button, dark:active:shadow-dark-neumorphic-inset, dark:text-gray-300, dark:hover:text-purple-500
-  const buttonStyle = `p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-500 transition-all`;
 
   return (
-    <button
-      onClick={toggleTheme}
-      className={buttonStyle}
-      aria-label="Toggle theme"
-    >
-      {renderIcon()}
-    </button>
+    <div className="flex items-center p-2 bg-light-bg dark:bg-dark-bg rounded-xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset"> {/* Padding diubah di sini */}
+      <button onClick={() => setTheme('light')} className={getButtonStyle('light')} aria-label="Set Light Theme">
+        <Sun size={18} />
+      </button>
+      <button onClick={() => setTheme('dark')} className={getButtonStyle('dark')} aria-label="Set Dark Theme">
+        <Moon size={18} />
+      </button>
+      <button onClick={() => setTheme('system')} className={getButtonStyle('system')} aria-label="Set System Theme">
+        <Monitor size={18} />
+      </button>
+    </div>
   );
 }
