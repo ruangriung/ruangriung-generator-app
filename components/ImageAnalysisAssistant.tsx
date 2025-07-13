@@ -38,25 +38,46 @@ export default function ImageAnalysisAssistant({ onUsePrompt }: ImageAnalysisAss
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // --- PERUBAHAN DIMULAI DI SINI ---
   const fetchVisionModels = async () => {
       setIsLoadingModels(true);
       setModelError(null);
       try {
-        // Asumsi model vision adalah statis untuk saat ini, tapi kita simulasikan fetch
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simulasi jeda jaringan
-        const visionModels = ['openai', 'openai-large', 'deepseek'];
-        if (visionModels.length === 0) throw new Error("Daftar model vision kosong.");
+        const response = await fetch('https://text.pollinations.ai/models');
+        if (!response.ok) throw new Error(`Gagal mengambil model: Status ${response.status}`);
+        const data = await response.json();
+        
+        let extractedModels: string[] = [];
+        if (Array.isArray(data)) {
+            extractedModels = data;
+        } else if (typeof data === 'object' && data !== null) {
+            extractedModels = Object.keys(data);
+        }
 
-        setModels(visionModels);
-        setSelectedModel(visionModels[0]);
+        // Filter hanya untuk model vision
+        const visionModels = extractedModels.filter(m => typeof m === 'string' && (m.includes('vision') || m.includes('openai') || m.includes('deepseek')));
+
+        if (visionModels.length > 0) {
+            setModels(visionModels);
+            // Pilih 'openai' jika ada, jika tidak, pilih yang pertama
+            if (visionModels.includes('openai')) {
+                setSelectedModel('openai');
+            } else {
+                setSelectedModel(visionModels[0]);
+            }
+        } else {
+            throw new Error('Tidak ada model vision yang ditemukan');
+        }
       } catch (error) {
           console.error("Error memuat model vision:", error);
           setModelError("Gagal memuat model. Coba lagi.");
-          setModels(['openai']); // Fallback
+          setModels(['openai', 'openai-large', 'deepseek']); // Fallback models
+          setSelectedModel('openai');
       } finally {
           setIsLoadingModels(false);
       }
   };
+  // --- PERUBAHAN SELESAI DI SINI ---
 
   useEffect(() => {
     fetchVisionModels();

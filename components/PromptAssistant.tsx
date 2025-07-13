@@ -36,6 +36,7 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
   const [modelError, setModelError] = useState<string | null>(null);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
 
+  // --- PERUBAHAN DIMULAI DI SINI ---
   const fetchTextModels = async () => {
     setIsLoadingModels(true);
     setModelError(null);
@@ -44,7 +45,15 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
       if (!response.ok) throw new Error(`Gagal mengambil model: Status ${response.status}`);
       const data = await response.json();
       
-      const validModels = (Array.isArray(data) ? data : Object.keys(data)).filter(m => typeof m === 'string' && !m.includes('audio') && !m.includes('vision'));
+      let extractedModels: string[] = [];
+      if (Array.isArray(data)) {
+        extractedModels = data;
+      } else if (typeof data === 'object' && data !== null) {
+        extractedModels = Object.keys(data);
+      }
+
+      // Filter untuk model teks (bukan audio atau vision)
+      const validModels = extractedModels.filter(m => typeof m === 'string' && !m.includes('audio') && !m.includes('vision') && m.length > 0);
       
       if (validModels.length > 0) {
         setModels(validModels);
@@ -59,11 +68,13 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
     } catch (error) {
       console.error("Error mengambil model teks:", error);
       setModelError("Gagal memuat model. Periksa koneksi Anda.");
-      setModels(['openai']); // Fallback
+      setModels(['openai', 'mistral', 'google']); // Fallback models
+      setSelectedModel('openai');
     } finally {
       setIsLoadingModels(false);
     }
   };
+  // --- PERUBAHAN SELESAI DI SINI ---
 
   useEffect(() => {
     fetchTextModels();
