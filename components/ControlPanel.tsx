@@ -9,6 +9,7 @@ import TextareaModal from './TextareaModal';
 import Accordion from './Accordion';
 import PromptAssistant from './PromptAssistant';
 import TranslationAssistant from './TranslationAssistant';
+import ImageAnalysisAssistant from './ImageAnalysisAssistant';
 import toast from 'react-hot-toast';
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
 
@@ -21,6 +22,7 @@ export interface GeneratorSettings {
   seed: number;
   artStyle: string;
   batchSize: number;
+  imageQuality: 'Standar' | 'HD' | 'Ultra'; // <-- PERUBAHAN DI SINI
 }
 
 interface ControlPanelProps {
@@ -32,17 +34,16 @@ interface ControlPanelProps {
   aspectRatio: 'Kotak' | 'Portrait' | 'Lansekap' | 'Custom';
   onAspectRatioChange: (preset: 'Kotak' | 'Portrait' | 'Lansekap') => void;
   onManualDimensionChange: (width: number, height: number) => void;
+  onImageQualityChange: (quality: 'Standar' | 'HD' | 'Ultra') => void; // <-- PERUBAHAN DI SINI
 }
 
-export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange }: ControlPanelProps) {
+export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange }: ControlPanelProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRandomizing, setIsRandomizing] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [savedPrompts, setSavedPrompts] = useState<string[]>([]);
 
-  // Hapus state 'isHistoryLoaded' karena ini milik Generator.tsx
-  // Hapus useEffect untuk memuat riwayat karena ini milik Generator.tsx
   useEffect(() => {
     try {
       const storedPrompts = localStorage.getItem('ruangriung_saved_prompts');
@@ -54,7 +55,6 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     }
   }, []);
 
-  // Hapus useEffect untuk menyimpan riwayat karena ini milik Generator.tsx
   useEffect(() => {
     try {
       localStorage.setItem('ruangriung_saved_prompts', JSON.stringify(savedPrompts));
@@ -212,6 +212,11 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
           onUsePrompt={(newPrompt) => setSettings(prev => ({ ...prev, prompt: newPrompt }))}
         />
 
+        {/* New Image Analysis Assistant */}
+        <ImageAnalysisAssistant
+          onUsePrompt={(newPrompt) => setSettings(prev => ({ ...prev, prompt: newPrompt }))}
+        />
+
         <AdvancedSettings
           settings={settings}
           setSettings={setSettings}
@@ -219,6 +224,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
           aspectRatio={aspectRatio}
           onAspectRatioChange={onAspectRatioChange}
           onManualDimensionChange={onManualDimensionChange}
+          onImageQualityChange={onImageQualityChange}
           className="mt-4"
         />
 

@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Wand2, MessageSquarePlus, Copy, Check, Megaphone, X, Cpu, Star } from 'lucide-react';
+import { Sparkles, Wand2, MessageSquarePlus, Copy, Check, Megaphone, X, Cpu, Star, ChevronDown } from 'lucide-react'; // Import ChevronDown
 import Accordion from './Accordion';
 import ButtonSpinner from './ButtonSpinner';
 import toast from 'react-hot-toast';
@@ -29,7 +29,7 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
   const LabelWithIcon = ({ icon: Icon, text, htmlFor, colorClass }: { icon: React.ElementType, text: string, htmlFor: string, colorClass?: string }) => (
     <div className="flex items-center gap-x-2 mb-2">
       <Icon className={`h-4 w-4 ${colorClass || 'text-purple-600'}`} />
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600 dark:text-gray-300"> {/* <--- PERUBAHAN */}
+      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600 dark:text-gray-300">
         {text}
       </label>
     </div>
@@ -158,25 +158,28 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
       <div className="space-y-4">
         <div>
           <LabelWithIcon icon={Cpu} text="Model AI" htmlFor="assistant-model" />
-          <select
-            id="assistant-model"
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-            className={selectStyle}
-            disabled={modelList.length === 0}
-          >
-            {modelList.length > 0 ? (
-              modelList.map(model => (
+          <div className="relative"> {/* <-- PERUBAHAN: Tambahkan div relative */}
+            <select
+              id="assistant-model"
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className={selectStyle}
+              disabled={modelList.length === 0}
+            >
+              {modelList.length > 0 ? (
+                modelList.map(model => (
+                  // <--- PERUBAHAN: option style
+                  <option key={model} value={model} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                    {model}
+                  </option>
+                ))
+              ) : (
                 // <--- PERUBAHAN: option style
-                <option key={model} value={model} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                  {model}
-                </option>
-              ))
-            ) : (
-              // <--- PERUBAHAN: option style
-              <option disabled className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Memuat model...</option>
-            )}
-          </select>
+                <option disabled className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Memuat model...</option>
+              )}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" /> {/* <-- PERUBAHAN: Ikon Chevron */}
+          </div>
         </div>
 
         <div>
@@ -218,17 +221,17 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
         {generatedAssistantPrompt && (
           // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg dan dark:shadow-dark-neumorphic-inset
           <div className="mt-4 p-4 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset">
-            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Prompt Hasil AI:</label> {/* <--- PERUBAHAN */}
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Prompt Hasil AI:</label>
             <textarea
               readOnly
-              className={`${textareaStyle}`}
+              className={`${textareaStyle} h-64`}
               value={generatedAssistantPrompt}
             />
             <div className="flex justify-end gap-3 mt-3">
               <button
                 onClick={handleCopyAssistantPrompt}
                 // <--- PERUBAHAN: Tambahkan dark:bg-gray-700, dark:text-gray-200, dark:active:shadow-dark-neumorphic-inset, dark:hover:bg-gray-600
-                className={`inline-flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all ${isAssistantPromptCopied ? '!bg-green-200 text-green-700' : ''} hover:bg-gray-400 dark:hover:bg-gray-600`} // <--- PERUBAHAN
+                className={`inline-flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all ${isAssistantPromptCopied ? '!bg-green-200 text-green-700' : ''} hover:bg-gray-400 dark:hover:bg-gray-600`}
               >
                 {isAssistantPromptCopied ? <><Check size={16} className="mr-2" />Tersalin!</> : <><Copy size={16} className="mr-2" />Salin Prompt</>}
               </button>

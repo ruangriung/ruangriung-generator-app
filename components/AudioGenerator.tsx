@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Volume2 } from 'lucide-react';
+import { Sparkles, Volume2, ChevronDown } from 'lucide-react'; // Import ChevronDown
 import ButtonSpinner from './ButtonSpinner';
 import toast from 'react-hot-toast';
 
@@ -77,24 +77,27 @@ export default function AudioGenerator() {
 
         <div>
           <label htmlFor="voice-select" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Pilih Suara</label> {/* <--- PERUBAHAN: text-gray-600 dark:text-gray-300 */}
-          <select
-            id="voice-select"
-            value={selectedVoice}
-            onChange={(e) => setSelectedVoice(e.target.value)}
-            className={selectStyle}
-          >
-            {voices.length > 0 ? (
-              voices.map(voice => (
+          <div className="relative"> {/* <-- PERUBAHAN: Tambahkan div relative */}
+            <select
+              id="voice-select"
+              value={selectedVoice}
+              onChange={(e) => setSelectedVoice(e.target.value)}
+              className={selectStyle}
+            >
+              {voices.length > 0 ? (
+                voices.map(voice => (
+                  // <--- PERUBAHAN: option style
+                  <option key={voice} value={voice} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                    {voice}
+                  </option>
+                ))
+              ) : (
                 // <--- PERUBAHAN: option style
-                <option key={voice} value={voice} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                  {voice}
-                </option>
-              ))
-            ) : (
-              // <--- PERUBAHAN: option style
-              <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Memuat suara...</option>
-            )}
-          </select>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Memuat suara...</option>
+              )}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" /> {/* <-- PERUBAHAN: Ikon Chevron */}
+          </div>
         </div>
 
         <div className="text-center pt-4">

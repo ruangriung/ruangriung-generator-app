@@ -1,3 +1,4 @@
+// components/VideoCreator.tsx
 'use client';
 
 import { useState } from 'react';
@@ -113,7 +114,13 @@ export default function VideoCreator() {
         <div>
           <label htmlFor="konsep" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Type size={16} className="text-purple-600"/>Konsep Utama Video *</label>
           <div className="relative w-full">
-            <textarea id="konsep" value={inputs.konsep} readOnly onFocus={() => setEditingField('konsep')} className={`${textareaStyle} h-24`} placeholder="Klik untuk mengedit..."/>
+            <textarea
+              id="konsep"
+              value={inputs.konsep}
+              onChange={(e) => handleInputChange('konsep', e.target.value)} // PERUBAHAN: Menghapus readOnly dan mengganti onFocus dengan onChange
+              className={`${textareaStyle} h-24`}
+              placeholder="Ketik di sini atau klik perbesar untuk edit..."
+            />
             <div className="absolute top-2 right-2 flex gap-x-1">
               {inputs.konsep && <button title="Hapus" onClick={(e) => { e.stopPropagation(); handleInputChange('konsep', '') }} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><X size={18} /></button>}
               <button title="Perbesar" onClick={() => setEditingField('konsep')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><Expand size={18} /></button>
@@ -123,7 +130,13 @@ export default function VideoCreator() {
         <div>
           <label htmlFor="narasi" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Type size={16} className="text-purple-600"/>Narasi (Opsional)</label>
           <div className="relative w-full">
-            <textarea id="narasi" value={inputs.narasi} readOnly onFocus={() => setEditingField('narasi')} className={`${textareaStyle} h-20`} placeholder="Klik untuk mengedit..."/>
+            <textarea
+              id="narasi"
+              value={inputs.narasi}
+              onChange={(e) => handleInputChange('narasi', e.target.value)} // PERUBAHAN: Menghapus readOnly dan mengganti onFocus dengan onChange
+              className={`${textareaStyle} h-20`}
+              placeholder="Ketik di sini atau klik perbesar untuk edit..."
+            />
             <div className="absolute top-2 right-2 flex gap-x-1">
               {inputs.narasi && <button title="Hapus" onClick={(e) => { e.stopPropagation(); handleInputChange('narasi', '')}} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><X size={18} /></button>}
               <button title="Perbesar" onClick={() => setEditingField('narasi')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><Expand size={18} /></button>

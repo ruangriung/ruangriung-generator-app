@@ -2,7 +2,7 @@
 'use client';
 
 import { GeneratorSettings } from './ControlPanel';
-import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon } from 'lucide-react';
+import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon, Sparkles, ChevronDown } from 'lucide-react'; // Import ChevronDown
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
 
 // Definisikan props untuk komponen ini
@@ -13,31 +13,29 @@ interface AdvancedSettingsProps {
   aspectRatio: 'Kotak' | 'Portrait' | 'Lansekap' | 'Custom';
   onAspectRatioChange: (preset: 'Kotak' | 'Portrait' | 'Lansekap') => void;
   onManualDimensionChange: (width: number, height: number) => void;
+  onImageQualityChange: (quality: 'Standar' | 'HD' | 'Ultra') => void;
   className?: string;
 }
 
-export default function AdvancedSettings({ settings, setSettings, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, className }: AdvancedSettingsProps) {
+export default function AdvancedSettings({ settings, setSettings, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, className }: AdvancedSettingsProps) {
   const handleSettingChange = (field: keyof GeneratorSettings, value: string | number) => {
     if (field === 'width' || field === 'height') {
       const numValue = parseInt(value as string, 10);
       if (isNaN(numValue) || numValue <= 0) {
         return;
       }
-      if (field === 'width') {
-        onManualDimensionChange(numValue, settings.height);
-      } else {
-        onManualDimensionChange(settings.width, numValue);
-      }
+      onManualDimensionChange(
+        field === 'width' ? numValue : settings.width,
+        field === 'height' ? numValue : settings.height
+      );
     } else {
       setSettings(prev => ({ ...prev, [field]: value }));
     }
   };
 
-  // <--- PERUBAHAN: inputStyle dan selectStyle sekarang juga punya dark variant
   const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
   const selectStyle = `${inputStyle} appearance-none`;
   
-  // <--- PERUBAHAN: presetButtonStyle sekarang juga punya dark variant
   const presetButtonStyle = (presetName: 'Kotak' | 'Portrait' | 'Lansekap') => 
     `px-4 py-2 rounded-lg transition-all duration-200 font-medium ${
       aspectRatio === presetName 
@@ -48,7 +46,7 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
   const LabelWithIcon = ({ icon: Icon, text, htmlFor }: { icon: React.ElementType, text: string, htmlFor: string }) => (
     <div className="flex items-center gap-x-2 mb-2">
       <Icon className="h-4 w-4 text-purple-600" />
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600 dark:text-gray-300"> {/* <--- PERUBAHAN: text-gray-600 dark:text-gray-300 */}
+      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600 dark:text-gray-300">
         {text}
       </label>
     </div>
@@ -56,30 +54,28 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
 
   return (
     <details className={`w-full group ${className || ''}`}>
-      {/* <--- PERUBAHAN: summary bg dan shadow */}
       <summary className="flex items-center justify-between p-4 bg-light-bg dark:bg-dark-bg rounded-lg cursor-pointer list-none shadow-neumorphic-button dark:shadow-dark-neumorphic-button transition-shadow">
         <div className="flex items-center gap-x-2">
           <Settings className="w-5 h-5 text-purple-600" />
-          <span className="font-medium text-gray-700 dark:text-gray-300"> {/* <--- PERUBAHAN: text-gray-700 dark:text-gray-300 */}
+          <span className="font-medium text-gray-700 dark:text-gray-300">
             Pengaturan Lanjutan
           </span>
         </div>
         <svg className="w-5 h-5 text-purple-600 transition-transform duration-300 group-open:rotate-90"
              xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1_0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
         </svg>
       </summary>
-      {/* <--- PERUBAHAN: div konten utama settings */}
       <div className="mt-6 p-6 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset">
         <div className="mb-6">
-          <label className="block text-center text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Preset Aspek Rasio</label> {/* <--- PERUBAHAN */}
+          <label className="block text-center text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Preset Aspek Rasio</label>
           <div className="flex justify-center gap-4">
             <button onClick={() => onAspectRatioChange('Kotak')} className={presetButtonStyle('Kotak')}>Kotak</button>
             <button onClick={() => onAspectRatioChange('Portrait')} className={presetButtonStyle('Portrait')}>Portrait</button>
             <button onClick={() => onAspectRatioChange('Lansekap')} className={presetButtonStyle('Lansekap')}>Lansekap</button>
           </div>
         </div>
-        <hr className="my-6 border-gray-300 dark:border-gray-600" /> {/* <--- PERUBAHAN: dark:border-gray-600 */}
+        <hr className="my-6 border-gray-300 dark:border-gray-600" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
           <div>
             <LabelWithIcon icon={ArrowLeftRight} text="Lebar" htmlFor="width" />
@@ -90,26 +86,52 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
             <input type="number" id="height" value={settings.height} onChange={(e) => handleSettingChange('height', parseInt(e.target.value))} className={inputStyle} />
           </div>
           
+          {/* Pilihan Kualitas Gambar dengan ikon chevron */}
           <div>
-            <LabelWithIcon icon={Palette} text="Gaya Seni" htmlFor="artStyle" />
-            <select id="artStyle" value={settings.artStyle} onChange={(e) => handleSettingChange('artStyle', e.target.value)} className={selectStyle}>
-              {artStyles.map((category: ArtStyleCategory, index: number) => (
-                <optgroup key={index} label={category.label} className="bg-light-bg dark:bg-gray-800 text-gray-800 dark:text-gray-200"> {/* <--- PERUBAHAN: optgroup style */}
-                  {category.options.map((style: ArtStyleOption) => (
-                    <option key={style.value} value={style.value} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"> {/* <--- PERUBAHAN: option style */}
-                      {style.label}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
+            <LabelWithIcon icon={Sparkles} text="Kualitas Gambar" htmlFor="imageQuality" />
+            <div className="relative"> {/* Tambahkan wrapper relative */}
+              <select
+                id="imageQuality"
+                value={settings.imageQuality}
+                onChange={(e) => onImageQualityChange(e.target.value as 'Standar' | 'HD' | 'Ultra')}
+                className={selectStyle}
+              >
+                <option value="Standar" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Standar</option>
+                <option value="HD" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">HD</option>
+                <option value="Ultra" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Ultra</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" /> {/* Ikon Chevron */}
+            </div>
           </div>
 
+          {/* Gaya Seni dengan ikon chevron */}
+          <div>
+            <LabelWithIcon icon={Palette} text="Gaya Seni" htmlFor="artStyle" />
+            <div className="relative"> {/* Tambahkan wrapper relative */}
+              <select id="artStyle" value={settings.artStyle} onChange={(e) => handleSettingChange('artStyle', e.target.value)} className={selectStyle}>
+                {artStyles.map((category: ArtStyleCategory, index: number) => (
+                  <optgroup key={index} label={category.label} className="bg-light-bg dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+                    {category.options.map((style: ArtStyleOption) => (
+                      <option key={style.value} value={style.value} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                        {style.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" /> {/* Ikon Chevron */}
+            </div>
+          </div>
+
+          {/* Model AI dengan ikon chevron */}
           <div>
             <LabelWithIcon icon={Cpu} text="Model AI" htmlFor="model" />
-            <select id="model" value={settings.model} onChange={(e) => handleSettingChange('model', e.target.value)} className={selectStyle}>
-              {models.length > 0 ? (models.map(model => (<option key={model} value={model} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">{model}</option>))) : (<option disabled className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Memuat...</option>)} {/* <--- PERUBAHAN: option style */}
-            </select>
+            <div className="relative"> {/* Tambahkan wrapper relative */}
+              <select id="model" value={settings.model} onChange={(e) => handleSettingChange('model', e.target.value)} className={selectStyle}>
+                {models.length > 0 ? (models.map(model => (<option key={model} value={model} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">{model}</option>))) : (<option disabled className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Memuat...</option>)}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" /> {/* Ikon Chevron */}
+            </div>
           </div>
           <div>
             <LabelWithIcon icon={ImageIcon} text="Jumlah Gambar" htmlFor="batchSize" />
