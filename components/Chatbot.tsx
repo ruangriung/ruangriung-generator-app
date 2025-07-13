@@ -83,23 +83,43 @@ export default function Chatbot() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeChat?.messages]);
 
+  // --- PERBAIKAN LOGIKA FETCH MODEL DI SINI ---
   useEffect(() => {
     const fetchModels = async () => {
       try {
         const res = await fetch('https://text.pollinations.ai/models');
         if (!res.ok) throw new Error('API request failed');
         const data = await res.json();
-        const visionModels = ['openai', 'openai-large', 'claude-hybridspace'];
-        const textModels = (Array.isArray(data) ? data : Object.keys(data)).filter(m => typeof m === 'string' && !m.includes('audio'));
-        const allValid = [...new Set([...textModels, ...visionModels])];
-        setModels(allValid.length > 0 ? allValid : ['openai']);
+        let extractedModels: string[] = [];
+
+        if (Array.isArray(data)) {
+          extractedModels = data.map(item => {
+            if (typeof item === 'string') return item;
+            if (typeof item === 'object' && item !== null && (item.id || item.name)) return item.id || item.name;
+            return null;
+          }).filter(Boolean) as string[];
+        } else if (typeof data === 'object' && data !== null) {
+          extractedModels = Object.keys(data);
+        }
+
+        const validModels = extractedModels.filter(m => typeof m === 'string' && m.length > 0 && !m.includes('audio'));
+
+        if (validModels.length > 0) {
+          setModels(validModels);
+          if (activeChat && !validModels.includes(activeChat.model)) {
+            setSessions(prev => prev!.map(s => s.id === activeSessionId ? {...s, model: validModels[0]} : s));
+          }
+        } else {
+          throw new Error("Tidak ada model teks valid yang ditemukan");
+        }
       } catch (error) {
         console.error("Gagal memuat model:", error);
+        toast.error("Gagal memuat model AI. Menggunakan default.");
         setModels(['openai', 'mistral', 'google']);
       }
     };
     fetchModels();
-  }, []);
+  }, [activeChat, activeSessionId]); // Tambahkan dependensi
   
   // --- FUNGSI-FUNGSI UTAMA ---
   const startNewChat = () => {
@@ -217,6 +237,8 @@ export default function Chatbot() {
     return <div className="w-full p-6 flex justify-center items-center h-[80vh] bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic"><Loader className="animate-spin" /><span className="ml-4 text-gray-600 dark:text-gray-300">Memuat...</span></div>;
   }
 
+  const formElementStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow text-gray-800 dark:text-gray-200";
+
   return (
     <div className="w-full flex h-[80vh] bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic overflow-hidden relative">
       <aside className={`absolute top-0 left-0 h-full z-20 md:static md:z-auto w-full md:w-1/4 md:min-w-[280px] p-4 border-r border-gray-300 dark:border-gray-700 flex flex-col bg-light-bg dark:bg-dark-bg transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
@@ -253,16 +275,14 @@ export default function Chatbot() {
                 {isLoading && <LoadingMessage />}
                 <div ref={messagesEndRef} />
             </div>
-            
-            {/* --- BAGIAN FORM YANG DIPERBARUI --- */}
             <div className="p-4 border-t border-gray-300 dark:border-gray-700 space-y-4">
                 <div className="flex items-center gap-4">
                     <label htmlFor="model-select" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300"><Cpu size={16}/> Model:</label>
-                    <select id="model-select" value={activeChat.model} onChange={(e) => setSessions(prev => prev!.map(s => s.id === activeSessionId ? {...s, model: e.target.value} : s))} className={`flex-1 text-sm appearance-none p-2 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500`}>{models.map(m => <option key={m} value={m}>{m}</option>)}</select>
+                    <select id="model-select" value={activeChat.model} onChange={(e) => setSessions(prev => prev!.map(s => s.id === activeSessionId ? {...s, model: e.target.value} : s))} className={`${formElementStyle} flex-1 text-sm appearance-none`}>{models.map(m => <option key={m} value={m}>{m}</option>)}</select>
                 </div>
                 <form onSubmit={handleTextSubmit}>
                     <div className="relative">
-                        <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleTextSubmit(e); }}} placeholder="Kirim pesan atau unggah gambar..." className={`w-full p-4 pr-24 rounded-xl resize-none bg-light-bg dark:bg-dark-bg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset text-gray-800 dark:text-gray-200`} rows={1} disabled={isLoading} />
+                        <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleTextSubmit(e); }}} placeholder="Kirim pesan atau unggah gambar..." className={`${formElementStyle} pr-24 resize-none`} rows={1} disabled={isLoading} />
                         <div className="absolute bottom-3 right-3 flex items-center gap-1">
                             <label htmlFor="image-upload" className="p-2.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer"><Paperclip size={24} /><input id="image-upload" type="file" className="hidden" onChange={handleFileUpload} accept="image/*" disabled={isLoading}/></label>
                             <button type="submit" className="p-2.5 bg-purple-600 text-white rounded-full shadow-lg disabled:bg-purple-400" disabled={isLoading || !input.trim()}><Send size={24} /></button>
