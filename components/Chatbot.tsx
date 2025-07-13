@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Bot, User, Send, Trash2, Edit, Plus, Menu, X, Paperclip, Loader, MessageSquare } from 'lucide-react';
+import { Bot, User, Send, Trash2, Edit, Plus, Menu, X, Paperclip, Loader, MessageSquare, Cpu } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // Definisikan tipe data untuk pesan dan sesi chat
@@ -239,7 +239,7 @@ export default function Chatbot() {
       <main className="flex-1 flex flex-col h-full">
         {activeChat ? (
             <>
-            <header className="p-4 border-b border-gray-300 dark:border-gray-700 flex justify-between items-center gap-4"><button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2"><Menu size={20}/></button><h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 truncate flex-1">{activeChat.title}</h2><select value={activeChat.model} onChange={(e) => setSessions(prev => prev!.map(s => s.id === activeSessionId ? {...s, model: e.target.value} : s))} className={`w-40 text-sm appearance-none p-2 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow text-gray-800 dark:text-gray-200`}>{models.map(m => <option key={m} value={m}>{m}</option>)}</select></header>
+            <header className="p-4 border-b border-gray-300 dark:border-gray-700 flex justify-between items-center gap-4"><button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2"><Menu size={20}/></button><h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 truncate flex-1">{activeChat.title}</h2></header>
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 {activeChat.messages.map((msg, index) => (
                     <div key={`msg-${activeChat.id}-${index}`} className={`flex items-start gap-4 ${msg.role === 'user' ? 'justify-end' : ''}`}>
@@ -253,22 +253,26 @@ export default function Chatbot() {
                 {isLoading && <LoadingMessage />}
                 <div ref={messagesEndRef} />
             </div>
-            {/* --- PERBAIKAN PADA FORM --- */}
-            <form onSubmit={handleTextSubmit} className="p-4 border-t border-gray-300 dark:border-gray-700">
-                <div className="relative">
-                    <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleTextSubmit(e); }}} placeholder="Kirim pesan atau unggah gambar..." className={`w-full p-4 pr-32 rounded-xl resize-none bg-light-bg dark:bg-dark-bg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset text-gray-800 dark:text-gray-200`} rows={1} disabled={isLoading} />
-                    <div className="absolute bottom-3 right-3 flex items-center gap-2">
-                        <label htmlFor="image-upload" className="p-2.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer"><Paperclip size={24} /><input id="image-upload" type="file" className="hidden" onChange={handleFileUpload} accept="image/*" disabled={isLoading}/></label>
-                        <button type="submit" className="p-2.5 bg-purple-600 text-white rounded-full shadow-lg disabled:bg-purple-400" disabled={isLoading || !input.trim()}><Send size={24} /></button>
-                    </div>
+            
+            {/* --- BAGIAN FORM YANG DIPERBARUI --- */}
+            <div className="p-4 border-t border-gray-300 dark:border-gray-700 space-y-4">
+                <div className="flex items-center gap-4">
+                    <label htmlFor="model-select" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300"><Cpu size={16}/> Model:</label>
+                    <select id="model-select" value={activeChat.model} onChange={(e) => setSessions(prev => prev!.map(s => s.id === activeSessionId ? {...s, model: e.target.value} : s))} className={`flex-1 text-sm appearance-none p-2 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500`}>{models.map(m => <option key={m} value={m}>{m}</option>)}</select>
                 </div>
-            </form>
+                <form onSubmit={handleTextSubmit}>
+                    <div className="relative">
+                        <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleTextSubmit(e); }}} placeholder="Kirim pesan atau unggah gambar..." className={`w-full p-4 pr-24 rounded-xl resize-none bg-light-bg dark:bg-dark-bg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset text-gray-800 dark:text-gray-200`} rows={1} disabled={isLoading} />
+                        <div className="absolute bottom-3 right-3 flex items-center gap-1">
+                            <label htmlFor="image-upload" className="p-2.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer"><Paperclip size={24} /><input id="image-upload" type="file" className="hidden" onChange={handleFileUpload} accept="image/*" disabled={isLoading}/></label>
+                            <button type="submit" className="p-2.5 bg-purple-600 text-white rounded-full shadow-lg disabled:bg-purple-400" disabled={isLoading || !input.trim()}><Send size={24} /></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
             </>
         ) : (
-            // --- PERBAIKAN PADA PLACEHOLDER ---
-            <div className="flex-1 flex flex-col justify-center items-center text-gray-500">
-                <MessageSquare size={48} /><p className="mt-4">Pilih atau buat percakapan baru.</p>
-            </div>
+            <div className="flex-1 flex flex-col justify-center items-center text-gray-500"><MessageSquare size={48} /><p className="mt-4">Pilih atau buat percakapan baru.</p></div>
         )}
       </main>
     </div>
