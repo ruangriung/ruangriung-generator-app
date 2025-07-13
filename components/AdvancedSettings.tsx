@@ -18,11 +18,9 @@ interface AdvancedSettingsProps {
 
 export default function AdvancedSettings({ settings, setSettings, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, className }: AdvancedSettingsProps) {
   const handleSettingChange = (field: keyof GeneratorSettings, value: string | number) => {
-    // PERBAIKAN DI SINI: Pastikan nilai numerik selalu valid
     if (field === 'width' || field === 'height' || field === 'batchSize' || field === 'seed') {
       const parsedValue = parseInt(value as string, 10);
-      // Jika hasil parse adalah NaN, gunakan 0 sebagai fallback.
-      const numValue = isNaN(parsedValue) ? 0 : parsedValue; 
+      const numValue = isNaN(parsedValue) ? 0 : parsedValue;
 
       if (field === 'width' || field === 'height') {
         onManualDimensionChange(
@@ -57,20 +55,8 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
   );
 
   return (
-    <details className={`w-full group ${className || ''}`}>
-      <summary className="flex items-center justify-between p-4 bg-light-bg dark:bg-dark-bg rounded-lg cursor-pointer list-none shadow-neumorphic-button dark:shadow-dark-neumorphic-button transition-shadow">
-        <div className="flex items-center gap-x-2">
-          <Settings className="w-5 h-5 text-purple-600" />
-          <span className="font-medium text-gray-700 dark:text-gray-300">
-            Pengaturan Lanjutan 
-          </span>
-        </div>
-        <svg className="w-5 h-5 text-purple-600 transition-transform duration-300 group-open:rotate-90"
-             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-        </svg>
-      </summary>
-      <div className="mt-6 p-6 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset">
+    // Root element diubah menjadi div, elemen <details> dan <summary> dipindahkan ke ControlPanel.tsx
+    <div className={`mt-6 p-6 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset ${className || ''}`}>
         <div className="mb-6">
           <label className="block text-center text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Preset Aspek Rasio</label>
           <div className="flex justify-center gap-4">
@@ -151,7 +137,6 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
             <input type="number" id="seed" value={settings.seed} onChange={(e) => handleSettingChange('seed', e.target.value)} className={inputStyle} />
           </div>
         </div>
-      </div>
-    </details>
+    </div>
   );
 }

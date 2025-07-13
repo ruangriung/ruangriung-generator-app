@@ -2,18 +2,19 @@
 'use client';
 
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
-import { useSession } from 'next-auth/react'; // Impor useSession
+import { useSession } from 'next-auth/react';
 import AdvancedSettings from './AdvancedSettings';
 import ButtonSpinner from './ButtonSpinner';
-import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon, Languages, Megaphone } from 'lucide-react'; // Impor ikon
+import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon, Languages, Megaphone } from 'lucide-react';
 import TextareaModal from './TextareaModal';
 import Accordion from './Accordion';
 import PromptAssistant from './PromptAssistant';
 import TranslationAssistant from './TranslationAssistant';
 import ImageAnalysisAssistant from './ImageAnalysisAssistant';
-import LockedAccordion from './LockedAccordion'; // Impor komponen baru
+import LockedAccordion from './LockedAccordion'; 
 import toast from 'react-hot-toast';
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
+
 
 export interface GeneratorSettings {
   prompt: string;
@@ -39,7 +40,7 @@ interface ControlPanelProps {
 }
 
 export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange }: ControlPanelProps) {
-  const { status } = useSession(); // Dapatkan status sesi
+  const { status } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRandomizing, setIsRandomizing] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
@@ -169,33 +170,43 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
   };
   
   const featureButtonStyle = "flex-1 inline-flex items-center justify-center gap-x-2 px-3 py-2 bg-light-bg dark:bg-dark-bg text-gray-600 dark:text-gray-300 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed";
-  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
-  const selectStyle = `${inputStyle} appearance-none`;
-
-  const LabelWithIcon = ({ icon: Icon, text, htmlFor }: { icon: React.ElementType, text: string, htmlFor: string }) => (
-    <div className="flex items-center gap-x-2 mb-2">
-      <Icon className="h-4 w-4 text-purple-600" />
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600 dark:text-gray-300">
-        {text}
-      </label>
-    </div>
-  );
-
+  
   return (
     <>
       <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
         
-        {/* Pengaturan Lanjutan dipindahkan ke atas */}
-        <AdvancedSettings
-          settings={settings}
-          setSettings={setSettings}
-          models={models}
-          aspectRatio={aspectRatio}
-          onAspectRatioChange={onAspectRatioChange}
-          onManualDimensionChange={onManualDimensionChange}
-          onImageQualityChange={onImageQualityChange}
-          className="mb-6" // Tambahkan margin-bottom untuk jarak dengan elemen di bawahnya
-        />
+        {status === 'authenticated' ? (
+          <details className="w-full group mb-6">
+            <summary className="flex items-center justify-between p-4 bg-light-bg dark:bg-dark-bg rounded-lg cursor-pointer list-none shadow-neumorphic-button dark:shadow-dark-neumorphic-button transition-shadow">
+              <div className="flex items-center gap-x-2">
+                <Settings className="w-5 h-5 text-purple-600" />
+                <span className="font-medium text-gray-700 dark:text-gray-300">
+                  Pengaturan Lanjutan
+                </span>
+              </div>
+              <svg className="w-5 h-5 text-purple-600 transition-transform duration-300 group-open:rotate-90"
+                  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+            </summary>
+            <AdvancedSettings
+              settings={settings}
+              setSettings={setSettings}
+              models={models}
+              aspectRatio={aspectRatio}
+              onAspectRatioChange={onAspectRatioChange}
+              onManualDimensionChange={onManualDimensionChange}
+              onImageQualityChange={onImageQualityChange}
+              className="mt-0 pt-0" // Reset margin/padding atas karena sudah dibungkus
+            />
+          </details>
+        ) : (
+          <LockedAccordion 
+            title="Pengaturan Lanjutan"
+            className="mb-6" 
+          />
+        )}
+
 
         {/* Textarea Prompt Utama */}
         <div>
@@ -221,11 +232,11 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
           </div>
         </div>
 
-        {/* Tombol Generate dan Aksi Prompt lainnya (dipindahkan ke sini) */}
+        {/* Tombol Generate dan Aksi Prompt lainnya */}
         <div className="mt-4 pt-4 border-t border-gray-300 dark:border-gray-600 flex flex-col justify-center items-center gap-3">
           <button
             onClick={onGenerate}
-            className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150 w-full" // w-full untuk tombol generate
+            className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150 w-full"
           >
             {isLoading ? (
               <>
@@ -239,8 +250,8 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
               </>
             )}
           </button>
-          {/* Tombol aksi lainnya diatur dalam baris terpisah atau grup */}
-          <div className="flex flex-row flex-wrap justify-center items-center gap-3 w-full mt-3"> {/* Tambahkan w-full ke wrapper tombol */}
+          
+          <div className="flex flex-row flex-wrap justify-center items-center gap-3 w-full mt-3">
             <button onClick={handleRandomPrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing}>
                 {isRandomizing ? <ButtonSpinner /> : <Shuffle size={16} />} <span>Acak</span>
             </button>
@@ -253,7 +264,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
           </div>
         </div>
 
-        {/* Asisten-asisten Prompt dipindahkan ke bawah */}
+        {/* Asisten-asisten Prompt */}
         {status === 'authenticated' ? (
           <PromptAssistant 
             onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))} 
