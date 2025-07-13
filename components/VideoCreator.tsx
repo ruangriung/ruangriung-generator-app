@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Film, Type, Clapperboard, Settings, Camera, Wand, Smile, ClipboardCopy, Check, X, Expand, Download } from 'lucide-react'; // Tambahkan ikon Download
+import { Sparkles, Film, Type, Clapperboard, Settings, Camera, Wand, Smile, ClipboardCopy, Check, X, Expand, Download } from 'lucide-react';
 import ButtonSpinner from './ButtonSpinner';
 import Accordion from './Accordion';
 import TextareaModal from './TextareaModal';
@@ -12,7 +12,7 @@ export default function VideoCreator() {
   const [inputs, setInputs] = useState({
     konsep: 'Detektif cyberpunk di gang kota yang diterangi lampu neon',
     narasi: '',
-    model: 'Default',
+    model: 'Sora', // Default diubah ke model yang lebih relevan
     gayaVisual: 'Sinematik',
     shotSize: 'Medium Shot',
     pergerakanKamera: 'Statis',
@@ -169,9 +169,16 @@ export default function VideoCreator() {
         <div>
           <label htmlFor="model" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Clapperboard size={16} className="text-purple-600"/>Model Video AI</label>
           <select id="model" value={inputs.model} onChange={(e) => handleInputChange('model', e.target.value)} className={`${inputStyle} appearance-none`}>
-            <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Default (Umum)</option>
-            <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Animasi</option>
-            <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Realistis</option>
+            {/* --- PERUBAHAN DI SINI --- */}
+            <option value="Sora" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Sora (OpenAI)</option>
+            <option value="Veo" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Veo (Google)</option>
+            <option value="Lumiere" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Lumiere (Google)</option>
+            <option value="Runway" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Runway Gen-3</option>
+            <option value="Kling" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Kling</option>
+            <option value="Pika" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Pika Labs</option>
+            <option value="CapCut" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">CapCut AI</option>
+            <option value="Stable Video" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Stable Video Diffusion</option>
+             {/* --- AKHIR PERUBAHAN --- */}
           </select>
         </div>
 
