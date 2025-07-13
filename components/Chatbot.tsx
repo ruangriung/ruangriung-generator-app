@@ -19,7 +19,7 @@ interface ChatSession {
 }
 
 export default function Chatbot() {
-  const [isMounted, setIsMounted] = useState(false); // <--- PENAMBAHAN BARU
+  const [isMounted, setIsMounted] = useState(false);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [input, setInput] = useState('');
@@ -28,48 +28,38 @@ export default function Chatbot() {
   const [selectedModel, setSelectedModel] = useState('openai');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // <--- PENAMBAHAN BARU: Efek untuk menandai komponen telah ter-mount di client
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const activeChat = sessions.find(s => s.id === activeSessionId);
 
-  // PERUBAHAN: Load sessions hanya setelah komponen ter-mount
+  useEffect(() => { setIsMounted(true); }, []);
+
   useEffect(() => {
     if (isMounted) {
       try {
         const savedSessions = localStorage.getItem('chatbot_sessions');
-        if (savedSessions) {
-          const parsedSessions: ChatSession[] = JSON.parse(savedSessions);
-          if (parsedSessions.length > 0) {
-            setSessions(parsedSessions);
-            setActiveSessionId(parsedSessions[0].id);
-          } else {
-            startNewChat();
-          }
-        } else {
-          startNewChat();
+        if (savedSessions) setSessions(JSON.parse(savedSessions));
+      } catch (error) { console.error("Gagal memuat sesi chat:", error); }
+    }
+  }, [isMounted]);
+
+  useEffect(() => {
+    if (isMounted) {
+      if (sessions.length > 0) {
+        if (!activeSessionId || !sessions.find(s => s.id === activeSessionId)) {
+          setActiveSessionId(sessions[0].id);
         }
-      } catch (error) {
-        console.error("Gagal memuat sesi chat:", error);
+      } else {
         startNewChat();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMounted]);
+  }, [sessions, isMounted]);
 
-  // PERUBAHAN: Save sessions hanya setelah komponen ter-mount
   useEffect(() => {
     if (isMounted && sessions.length > 0) {
-      try {
-        localStorage.setItem('chatbot_sessions', JSON.stringify(sessions));
-      } catch (error) {
-        console.error("Gagal menyimpan sesi chat:", error);
-      }
+      localStorage.setItem('chatbot_sessions', JSON.stringify(sessions));
     }
   }, [sessions, isMounted]);
 
-
-  // Fetch models from API
   useEffect(() => {
     const fetchTextModels = async () => {
       try {
@@ -79,12 +69,8 @@ export default function Chatbot() {
         const validModels = Array.isArray(data) ? data : Object.keys(data);
         if (validModels.length > 0) {
           setModels(validModels);
-          if (!validModels.includes(selectedModel)) {
-            setSelectedModel(validModels[0]);
-          }
-        } else {
-            throw new Error('Tidak ada model yang ditemukan');
-        }
+          if (!validModels.includes(selectedModel)) setSelectedModel(validModels[0]);
+        } else { throw new Error('Tidak ada model yang ditemukan'); }
       } catch (error) {
         console.error("Error fetching text models:", error);
         toast.error("Gagal memuat model AI. Menggunakan model default.");
@@ -94,40 +80,33 @@ export default function Chatbot() {
     fetchTextModels();
   }, []);
   
-  // Scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [sessions, activeSessionId]);
+  }, [activeChat?.messages]);
 
 
   const startNewChat = () => {
     const newId = Date.now();
     const newSession: ChatSession = {
       id: newId,
-      title: `Percakapan Baru`,
+      title: `Percakapan #${Math.floor(Math.random() * 1000)}`,
       messages: [],
       model: selectedModel,
     };
-    
-    // Memberi judul unik berdasarkan jumlah sesi yang sudah ada
-    setSessions(prev => {
-        const newTitle = `Percakapan Baru ${prev.length + 1}`;
-        newSession.title = newTitle;
-        return [newSession, ...prev];
-    });
-
+    // --- PERBAIKAN TIPE DI SINI ---
+    setSessions((prev: ChatSession[]) => [newSession, ...prev]);
     setActiveSessionId(newId);
   };
 
   const handleSendMessage = async (e?: React.FormEvent) => {
-    if(e) e.preventDefault();
+    if (e) e.preventDefault();
     if (!input.trim() || isLoading || activeSessionId === null) return;
 
     const userMessage: Message = { role: 'user', content: input };
     
-    // Update state
-    setSessions(prev =>
-      prev.map(s =>
+    // --- PERBAIKAN TIPE DI SINI ---
+    setSessions((prev: ChatSession[]) =>
+      prev.map((s: ChatSession) =>
         s.id === activeSessionId
           ? { ...s, messages: [...s.messages, userMessage] }
           : s
@@ -153,8 +132,9 @@ export default function Chatbot() {
         const result = await response.json();
         const assistantMessage = result.choices[0].message;
 
-        setSessions(prev =>
-            prev.map(s =>
+        // --- PERBAIKAN TIPE DI SINI ---
+        setSessions((prev: ChatSession[]) =>
+            prev.map((s: ChatSession) =>
                 s.id === activeSessionId ? { ...s, messages: [...s.messages, assistantMessage] } : s
             )
         );
@@ -163,8 +143,10 @@ export default function Chatbot() {
         console.error('Error:', error);
         toast.error('Gagal mendapatkan respons dari AI.');
         const errorMessage: Message = { role: 'assistant', content: 'Maaf, terjadi kesalahan. Silakan coba lagi.' };
-        setSessions(prev =>
-            prev.map(s =>
+        
+        // --- PERBAIKAN TIPE DI SINI ---
+        setSessions((prev: ChatSession[]) =>
+            prev.map((s: ChatSession) =>
                 s.id === activeSessionId ? { ...s, messages: [...s.messages, errorMessage] } : s
             )
         );
@@ -175,8 +157,9 @@ export default function Chatbot() {
 
   const clearChat = () => {
     if (activeSessionId === null || !window.confirm("Yakin ingin menghapus semua pesan di chat ini?")) return;
-    setSessions(prev =>
-        prev.map(s => (s.id === activeSessionId ? { ...s, messages: [] } : s))
+    // --- PERBAIKAN TIPE DI SINI ---
+    setSessions((prev: ChatSession[]) =>
+        prev.map((s: ChatSession) => (s.id === activeSessionId ? { ...s, messages: [] } : s))
     );
     toast.success("Riwayat chat ini telah dihapus!");
   };
@@ -189,26 +172,21 @@ export default function Chatbot() {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if(file) {
-          // Logic to handle file upload
           toast.success(`File "${file.name}" berhasil diunggah.`);
       }
   }
   
-  const activeChat = sessions.find(s => s.id === activeSessionId);
-
-  // Jangan render apapun sampai mounted di client untuk menghindari hydration error
   if (!isMounted) {
-      return (
-        <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic flex justify-center items-center h-[75vh]">
-            <ButtonSpinner/>
-            <span className="ml-4 text-gray-600 dark:text-gray-300">Memuat Chat...</span>
-        </div>
-      );
+    return (
+      <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic flex justify-center items-center h-[75vh]">
+        <ButtonSpinner/>
+        <span className="ml-4 text-gray-600 dark:text-gray-300">Memuat Chat...</span>
+      </div>
+    );
   }
 
   return (
     <div className="w-full p-4 md:p-6 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic flex flex-col h-[75vh]">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-center pb-4 border-b border-gray-300 dark:border-gray-600">
             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2 sm:mb-0">
                 {activeChat?.title || "Chatbot"}
@@ -228,21 +206,19 @@ export default function Chatbot() {
             </div>
         </div>
 
-        {/* Message Display */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {activeChat?.messages.map((msg, index) => (
                 <div key={index} className={`flex items-start gap-3 ${msg.role === 'user' ? 'justify-end' : ''}`}>
-                    {msg.role === 'assistant' && <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white"><Bot size={20} /></div>}
-                    <div className={`max-w-md p-3 rounded-lg ${msg.role === 'user' ? 'bg-purple-600 text-white shadow-md' : 'bg-white dark:bg-gray-700 shadow-md'}`}>
+                    {msg.role === 'assistant' && <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white shrink-0"><Bot size={20} /></div>}
+                    <div className={`max-w-md p-3 rounded-lg break-words ${msg.role === 'user' ? 'bg-purple-600 text-white shadow-md' : 'bg-white dark:bg-gray-700 shadow-md'}`}>
                         <p className="text-sm" style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</p>
                     </div>
-                     {msg.role === 'user' && <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-white"><User size={20} /></div>}
+                     {msg.role === 'user' && <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-white shrink-0"><User size={20} /></div>}
                 </div>
             ))}
             <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Form */}
         <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-300 dark:border-gray-600">
             <div className="relative">
                 <textarea
@@ -264,7 +240,7 @@ export default function Chatbot() {
                         <Paperclip size={20} />
                         <input id="file-upload" type="file" className="hidden" onChange={handleFileUpload} accept="image/*"/>
                     </label>
-                    <button type="submit" className="p-2 bg-purple-600 text-white rounded-full shadow-md" disabled={isLoading}>
+                    <button type="submit" className="p-2 bg-purple-600 text-white rounded-full shadow-md" disabled={isLoading || !input.trim()}>
                        {isLoading ? <Loader className="animate-spin" size={20} /> : <Send size={20} />}
                     </button>
                 </div>
