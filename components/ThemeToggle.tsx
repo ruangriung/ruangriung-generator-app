@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Monitor, Sun, Moon } from 'lucide-react';
+import { Monitor, Sun, Moon, Laptop } from 'lucide-react';
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
@@ -62,7 +62,7 @@ export default function ThemeToggle() {
         <Moon size={18} />
       </button>
       <button onClick={() => setTheme('system')} className={getButtonStyle('system')} aria-label="Set System Theme">
-        <Monitor size={18} />
+        <Laptop size={18} />
       </button>
     </div>
   );
