@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Monitor, Sun, Moon, Laptop } from 'lucide-react';
+import { Sun, Moon, Laptop } from 'lucide-react';
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
@@ -17,6 +17,7 @@ export default function ThemeToggle() {
   }, []);
 
   useEffect(() => {
+    // ... (logika tema tidak berubah)
     if (!mounted) return;
 
     localStorage.setItem('theme', theme);
@@ -40,13 +41,16 @@ export default function ThemeToggle() {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [theme, mounted]);
 
+
   if (!mounted) {
-    return null;
+    // Berikan placeholder dengan ukuran yang sama untuk mencegah layout shift
+    return <div className="h-[52px] w-[136px] bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset animate-pulse"></div>;
   }
 
   const getButtonStyle = (buttonTheme: 'light' | 'dark' | 'system') => {
     const isActive = theme === buttonTheme;
-    return `p-2 rounded-lg transition-all duration-200 mx-0.5 ${
+    // Mengubah padding tombol agar lebih besar dan seragam
+    return `p-3 rounded-lg transition-all duration-200 mx-0.5 ${
       isActive
         ? 'bg-purple-600 text-white shadow-neumorphic-button dark:shadow-dark-neumorphic-button'
         : 'bg-light-bg dark:bg-dark-bg text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-500'
@@ -54,15 +58,16 @@ export default function ThemeToggle() {
   };
 
   return (
-    <div className="flex items-center p-2 bg-light-bg dark:bg-dark-bg rounded-xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset"> {/* Padding diubah di sini */}
+    // Mengubah padding container dan menambahkan min-h- (tinggi minimum)
+    <div className="flex items-center p-1 bg-light-bg dark:bg-dark-bg rounded-xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset min-h-[52px]">
       <button onClick={() => setTheme('light')} className={getButtonStyle('light')} aria-label="Set Light Theme">
-        <Sun size={18} />
+        <Sun size={20} />
       </button>
       <button onClick={() => setTheme('dark')} className={getButtonStyle('dark')} aria-label="Set Dark Theme">
-        <Moon size={18} />
+        <Moon size={20} />
       </button>
       <button onClick={() => setTheme('system')} className={getButtonStyle('system')} aria-label="Set System Theme">
-        <Laptop size={18} />
+        <Laptop size={20} />
       </button>
     </div>
   );
