@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 export default function AudioGenerator() {
   const [text, setText] = useState('Halo! Selamat datang di Ruang Riung AI Generator.');
   const [voices, setVoices] = useState<string[]>([]);
-  const [selectedVoice, setSelectedVoice] = useState('nova');
+  const [selectedVoice, setSelectedVoice] = useState('alloy');
   const [isLoading, setIsLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -61,7 +61,7 @@ export default function AudioGenerator() {
       return;
     }
     setPreviewingVoice(voice);
-    const sampleText = "This is a preview of the selected voice.";
+    const sampleText = "Ini adalah pratinjau dari suara yang dipilih.";
     const previewUrl = createApiUrl(sampleText, voice); // Menggunakan fungsi helper
 
     const audio = new Audio(previewUrl);

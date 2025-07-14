@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Film, Type, Clapperboard, Settings, Camera, Wand, Smile, ClipboardCopy, Check, X, Expand, Download } from 'lucide-react';
+import { Sparkles, Film, Type, Clapperboard, Settings, Camera, Wand, Smile, ClipboardCopy, Check, X, Expand, Download, ChevronDown } from 'lucide-react';
 import ButtonSpinner from './ButtonSpinner';
 import Accordion from './Accordion';
 import TextareaModal from './TextareaModal';
@@ -12,7 +12,7 @@ export default function VideoCreator() {
   const [inputs, setInputs] = useState({
     konsep: 'Detektif cyberpunk di gang kota yang diterangi lampu neon',
     narasi: '',
-    model: 'Sora', // Default diubah ke model yang lebih relevan
+    model: 'Sora',
     gayaVisual: 'Sinematik',
     shotSize: 'Medium Shot',
     pergerakanKamera: 'Statis',
@@ -122,6 +122,7 @@ export default function VideoCreator() {
   const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
   const textareaStyle = `${inputStyle} pr-20 cursor-pointer resize-none`;
   const actionButtonStyle = "flex items-center gap-x-1.5 px-3 py-1.5 text-sm rounded-md transition-colors duration-200 bg-light-bg dark:bg-dark-bg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700";
+  const selectStyleWithIcon = `${inputStyle} appearance-none pr-10`;
 
   return (
     <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
@@ -137,13 +138,7 @@ export default function VideoCreator() {
         <div>
           <label htmlFor="konsep" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Type size={16} className="text-purple-600"/>Konsep Utama Video *</label>
           <div className="relative w-full">
-            <textarea
-              id="konsep"
-              value={inputs.konsep}
-              onChange={(e) => handleInputChange('konsep', e.target.value)}
-              className={`${textareaStyle} h-24`}
-              placeholder="Ketik di sini atau klik perbesar untuk edit..."
-            />
+            <textarea id="konsep" value={inputs.konsep} onChange={(e) => handleInputChange('konsep', e.target.value)} className={`${textareaStyle} h-24`} placeholder="Ketik di sini atau klik perbesar untuk edit..." />
             <div className="absolute top-2 right-2 flex gap-x-1">
               {inputs.konsep && <button title="Hapus" onClick={(e) => { e.stopPropagation(); handleInputChange('konsep', '') }} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><X size={18} /></button>}
               <button title="Perbesar" onClick={() => setEditingField('konsep')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><Expand size={18} /></button>
@@ -153,13 +148,7 @@ export default function VideoCreator() {
         <div>
           <label htmlFor="narasi" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Type size={16} className="text-purple-600"/>Narasi (Opsional)</label>
           <div className="relative w-full">
-            <textarea
-              id="narasi"
-              value={inputs.narasi}
-              onChange={(e) => handleInputChange('narasi', e.target.value)}
-              className={`${textareaStyle} h-20`}
-              placeholder="Ketik di sini atau klik perbesar untuk edit..."
-            />
+            <textarea id="narasi" value={inputs.narasi} onChange={(e) => handleInputChange('narasi', e.target.value)} className={`${textareaStyle} h-20`} placeholder="Ketik di sini atau klik perbesar untuk edit..." />
             <div className="absolute top-2 right-2 flex gap-x-1">
               {inputs.narasi && <button title="Hapus" onClick={(e) => { e.stopPropagation(); handleInputChange('narasi', '')}} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><X size={18} /></button>}
               <button title="Perbesar" onClick={() => setEditingField('narasi')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><Expand size={18} /></button>
@@ -168,77 +157,121 @@ export default function VideoCreator() {
         </div>
         <div>
           <label htmlFor="model" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Clapperboard size={16} className="text-purple-600"/>Model Video AI</label>
-          <select id="model" value={inputs.model} onChange={(e) => handleInputChange('model', e.target.value)} className={`${inputStyle} appearance-none`}>
-            {/* --- PERUBAHAN DI SINI --- */}
-            <option value="Sora" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Sora (OpenAI)</option>
-            <option value="Veo" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Veo (Google)</option>
-            <option value="Lumiere" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Lumiere (Google)</option>
-            <option value="Runway" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Runway Gen-3</option>
-            <option value="Kling" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Kling</option>
-            <option value="Pika" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Pika Labs</option>
-            <option value="CapCut" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">CapCut AI</option>
-            <option value="Stable Video" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Stable Video Diffusion</option>
-             {/* --- AKHIR PERUBAHAN --- */}
-          </select>
+          <div className="relative">
+            <select id="model" value={inputs.model} onChange={(e) => handleInputChange('model', e.target.value)} className={selectStyleWithIcon}>
+              <option value="Sora" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Sora (OpenAI)</option>
+              <option value="Veo" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Veo (Google)</option>
+              <option value="Lumiere" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Lumiere (Google)</option>
+              <option value="Runway" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Runway Gen-3</option>
+              <option value="Kling" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Kling</option>
+              <option value="Pika" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Pika Labs</option>
+              <option value="CapCut" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">CapCut AI</option>
+              <option value="Stable Video" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Stable Video Diffusion</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+              <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-2 pt-4">
           <Accordion title={<div className="flex items-center gap-2"><Settings size={16} /> <span className="text-gray-700 dark:text-gray-300">Gaya Visual</span></div>}>
-             <select value={inputs.gayaVisual} onChange={(e) => handleInputChange('gayaVisual', e.target.value)} className={`${inputStyle} appearance-none`}>
+            <div className="relative mt-2">
+              <select value={inputs.gayaVisual} onChange={(e) => handleInputChange('gayaVisual', e.target.value)} className={selectStyleWithIcon}>
                 <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Sinematik</option>
                 <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Vlog</option>
                 <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Dokumenter</option>
-            </select>
-          </Accordion>
-          <Accordion title={<div className="flex items-center gap-2"><Camera size={16} /> <span className="text-gray-700 dark:text-gray-300">Sinematografi</span></div>}>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm text-gray-600 dark:text-gray-300">Shot Size</label>
-                <select value={inputs.shotSize} onChange={(e) => handleInputChange('shotSize', e.target.value)} className={`${inputStyle} appearance-none mt-1`}>
-                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Medium Shot</option>
-                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Close Up</option>
-                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Wide Shot</option>
-                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Extreme Close Up</option>
-                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Full Shot</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-sm text-gray-600 dark:text-gray-300">Pergerakan Kamera</label>
-                <select value={inputs.pergerakanKamera} onChange={(e) => handleInputChange('pergerakanKamera', e.target.value)} className={`${inputStyle} appearance-none mt-1`}>
-                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Statis</option>
-                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Tracking Shot</option>
-                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Dolly Zoom</option>
-                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Handheld</option>
-                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Crane Shot</option>
-                </select>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Animasi 3D</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Anime</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Retro/Vintage</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Futuristik</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                <ChevronDown className="h-5 w-5" aria-hidden="true"/>
               </div>
             </div>
           </Accordion>
-          <Accordion title={<div className="flex items-center gap-2"><Wand size={16} /> <span className="text-gray-700 dark:text-gray-300">Efek Visual</span></div>}>
-            <select value={inputs.efekVisual} onChange={(e) => handleInputChange('efekVisual', e.target.value)} className={`${inputStyle} appearance-none`}>
-              <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Tidak Ada</option>
-              <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Slow Motion</option>
-              <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Vignette</option>
-              <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Light Leaks</option>
-              <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Glitch</option>
-            </select>
+          
+          <Accordion title={<div className="flex items-center gap-2"><Camera size={16} /> <span className="text-gray-700 dark:text-gray-300">Sinematografi</span></div>}>
+            <div className="space-y-4 mt-2">
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-300">Shot Size</label>
+                <div className="relative mt-1">
+                  <select value={inputs.shotSize} onChange={(e) => handleInputChange('shotSize', e.target.value)} className={selectStyleWithIcon}>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Wide Shot</option>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Full Shot</option>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Medium Shot</option>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Close Up</option>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Extreme Close Up</option>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Point of View (POV)</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-300">Pergerakan Kamera</label>
+                <div className="relative mt-1">
+                  <select value={inputs.pergerakanKamera} onChange={(e) => handleInputChange('pergerakanKamera', e.target.value)} className={selectStyleWithIcon}>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Statis</option>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Panning (Geser Horizontal)</option>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Tilting (Geser Vertikal)</option>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Dolly (Maju/Mundur)</option>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Tracking Shot</option>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Dolly Zoom</option>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Handheld (Genggam)</option>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Crane Shot</option>
+                    <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Drone Shot</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                  </div>
+                </div>
+              </div>
+            </div>
           </Accordion>
+          
+          <Accordion title={<div className="flex items-center gap-2"><Wand size={16} /> <span className="text-gray-700 dark:text-gray-300">Efek Visual</span></div>}>
+            <div className="relative mt-2">
+              <select value={inputs.efekVisual} onChange={(e) => handleInputChange('efekVisual', e.target.value)} className={selectStyleWithIcon}>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Tidak Ada</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Slow Motion</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Timelapse</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Vignette</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Light Leaks</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Glitch</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Film Grain</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Color Grading (Hangat/Dingin)</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+              </div>
+            </div>
+          </Accordion>
+          
           <Accordion title={<div className="flex items-center gap-2"><Smile size={16} /> <span className="text-gray-700 dark:text-gray-300">Mood & Suasana</span></div>}>
-            <select value={inputs.mood} onChange={(e) => handleInputChange('mood', e.target.value)} className={`${inputStyle} appearance-none`}>
-              <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Misterius</option>
-              <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Ceria</option>
-              <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Dramatis</option>
-              <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Nostalgia</option>
-              <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Tegang</option>
-              <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Romantis</option>
-            </select>
+            <div className="relative mt-2">
+              <select value={inputs.mood} onChange={(e) => handleInputChange('mood', e.target.value)} className={selectStyleWithIcon}>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Misterius</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Ceria</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Dramatis</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Nostalgia</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Tegang</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Romantis</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Epick/Megah</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Menyeramkan</option>
+                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Tenang/Damai</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+              </div>
+            </div>
           </Accordion>
         </div>
 
         <div className="text-center pt-4">
-          <button onClick={handleGenerateIdea} disabled={isLoading} 
-            className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150"
-          >
+          <button onClick={handleGenerateIdea} disabled={isLoading} className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150">
             {isLoading ? <ButtonSpinner /> : <Sparkles className="w-5 h-5 mr-2" />}
             <span>Buat Ide Video</span>
           </button>
