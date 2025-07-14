@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Sparkles, Volume2, Play, Pause, Download } from 'lucide-react'; // Impor ikon Download
+import { Sparkles, Volume2, Play, Pause, Download } from 'lucide-react';
 import ButtonSpinner from './ButtonSpinner';
 import toast from 'react-hot-toast';
 
@@ -11,7 +11,7 @@ export default function AudioGenerator() {
   const [voices, setVoices] = useState<string[]>([]);
   const [selectedVoice, setSelectedVoice] = useState('nova');
   const [isLoading, setIsLoading] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false); // State untuk proses unduh
+  const [isDownloading, setIsDownloading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   const [previewingVoice, setPreviewingVoice] = useState<string | null>(null);
@@ -32,36 +32,49 @@ export default function AudioGenerator() {
     fetchVoices();
 
     return () => {
-        if(audioPreviewRef.current) {
-            audioPreviewRef.current.pause();
-            audioPreviewRef.current = null;
-        }
-    }
+      if (audioPreviewRef.current) {
+        audioPreviewRef.current.pause();
+        audioPreviewRef.current = null;
+      }
+    };
   }, []);
+
+  // Membuat URL dengan parameter yang benar (termasuk referrer dan token jika ada)
+  const createApiUrl = (prompt: string, voice: string) => {
+    const baseUrl = `https://text.pollinations.ai/${encodeURIComponent(prompt)}`;
+    const params = new URLSearchParams({
+      model: 'openai-audio',
+      voice: voice,
+      referrer: 'ruangriung.my.id'
+    });
+    // Token ditambahkan melalui header, jadi tidak perlu di URL GET
+    return `${baseUrl}?${params.toString()}`;
+  };
 
   const handlePreviewVoice = (e: React.MouseEvent, voice: string) => {
     e.stopPropagation();
     if (audioPreviewRef.current) {
-        audioPreviewRef.current.pause();
+      audioPreviewRef.current.pause();
     }
     if (previewingVoice === voice) {
-        setPreviewingVoice(null);
-        return;
+      setPreviewingVoice(null);
+      return;
     }
     setPreviewingVoice(voice);
-    const sampleText = encodeURIComponent("This is a preview of the selected voice.");
-    const previewUrl = `https://text.pollinations.ai/${sampleText}?model=openai-audio&voice=${voice}&cb=${Date.now()}`;
+    const sampleText = "This is a preview of the selected voice.";
+    const previewUrl = createApiUrl(sampleText, voice); // Menggunakan fungsi helper
+
     const audio = new Audio(previewUrl);
     audioPreviewRef.current = audio;
     audio.play().catch(() => toast.error("Gagal memutar pratinjau."));
     audio.onended = () => setPreviewingVoice(null);
     audio.onerror = () => {
-        toast.error("Gagal memuat pratinjau audio.");
-        setPreviewingVoice(null);
+      toast.error("Gagal memuat pratinjau audio.");
+      setPreviewingVoice(null);
     };
   };
 
-  const handleGenerateAudio = () => {
+  const handleGenerateAudio = async () => {
     if (!text) {
       toast.error('Teks tidak boleh kosong!');
       return;
@@ -69,32 +82,60 @@ export default function AudioGenerator() {
     setIsLoading(true);
     setAudioUrl(null);
     if (audioPreviewRef.current) {
-        audioPreviewRef.current.pause();
-        setPreviewingVoice(null);
+      audioPreviewRef.current.pause();
+      setPreviewingVoice(null);
     }
-    const encodedText = encodeURIComponent(text);
-    const params = new URLSearchParams({ model: 'openai-audio', voice: selectedVoice });
-    const finalUrl = `https://text.pollinations.ai/${encodedText}?${params.toString()}`;
-    setAudioUrl(finalUrl);
-    toast.success("URL Audio berhasil dibuat! Memuat audio...");
-    setIsLoading(false);
+
+    try {
+      // Menggunakan metode POST agar bisa mengirim Authorization header dengan aman
+      const response = await fetch('https://text.pollinations.ai/openai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Menambahkan Token sebagai Bearer
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN}`
+        },
+        body: JSON.stringify({
+          model: 'openai-audio',
+          messages: [{ role: 'user', content: text }],
+          voice: selectedVoice,
+          private: true, // Sesuai anjuran untuk menggunakan parameter private jika memungkinkan
+          referrer: 'ruangriung.my.id'
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Gagal membuat audio: ${response.statusText} - ${errorText}`);
+      }
+      
+      // Karena API ini mengembalikan file audio langsung, kita proses sebagai blob
+      const audioBlob = await response.blob();
+      const newAudioUrl = URL.createObjectURL(audioBlob);
+      setAudioUrl(newAudioUrl);
+      toast.success("Audio berhasil dibuat!");
+
+    } catch (error: any) {
+      console.error("Gagal membuat audio:", error);
+      toast.error(error.message || "Gagal membuat audio. Cek konsol untuk detail.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // --- FUNGSI BARU UNTUK MENGUNDUH AUDIO ---
   const handleDownload = async () => {
     if (!audioUrl) return;
     setIsDownloading(true);
     toast.loading("Mempersiapkan unduhan...");
     try {
-      const response = await fetch(audioUrl);
-      const blob = await response.blob();
+      // Tidak perlu fetch ulang karena audioUrl sudah merupakan blob URL
       const downloadLink = document.createElement('a');
-      downloadLink.href = URL.createObjectURL(blob);
+      downloadLink.href = audioUrl;
       downloadLink.download = `ruangriung-audio-${Date.now()}.mp3`;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-      URL.revokeObjectURL(downloadLink.href); // Membersihkan memori
+      // Tidak perlu revoke ObjectURL jika masih digunakan oleh <audio>
       toast.dismiss();
       toast.success("Audio berhasil diunduh!");
     } catch (error) {
@@ -105,7 +146,6 @@ export default function AudioGenerator() {
       setIsDownloading(false);
     }
   };
-  // --- AKHIR FUNGSI BARU ---
 
   const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
 
@@ -150,7 +190,6 @@ export default function AudioGenerator() {
               <source src={audioUrl} type="audio/mpeg" />
               Browser Anda tidak mendukung elemen audio.
             </audio>
-            {/* --- PENAMBAHAN TOMBOL UNDUH --- */}
             <div className="text-center mt-4">
               <button onClick={handleDownload} disabled={isDownloading}
                 className="inline-flex items-center justify-center px-6 py-2 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150 disabled:opacity-50">
@@ -158,7 +197,6 @@ export default function AudioGenerator() {
                 <span>Unduh Audio</span>
               </button>
             </div>
-            {/* --- AKHIR PENAMBAHAN --- */}
           </div>
         )}
       </div>
