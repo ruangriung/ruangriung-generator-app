@@ -14,39 +14,11 @@ export interface ChatSession {
   model: string;
 }
 
-const allModels = [
-    { name: 'deepseek', description: 'DeepSeek V3', input_modalities: ['text'], output_modalities: ['text'], vision: false },
-    { name: 'deepseek-reasoning', description: 'DeepSeek R1 0528', input_modalities: ['text'], output_modalities: ['text'], vision: false },
-    { name: 'grok', description: 'xAI Grok-3 Mini', input_modalities: ['text'], output_modalities: ['text'], vision: false },
-    { name: 'llama-fast-roblox', description: 'Llama 3.2 11B Vision (Cloudflare)', input_modalities: ['text', 'image'], output_modalities: ['text'], vision: true },
-    { name: 'llama-roblox', description: 'Llama 3.1 8B FP8 (Cloudflare)', input_modalities: ['text'], output_modalities: ['text'], vision: false },
-    { name: 'llamascout', description: 'Llama 4 Scout 17B', input_modalities: ['text'], output_modalities: ['text'], vision: false },
-    { name: 'mistral', description: 'Mistral Small 3.1 24B', input_modalities: ['text', 'image'], output_modalities: ['text'], vision: true },
-    { name: 'mistral-roblox', description: 'Mistral Small 3.1 24B (Cloudflare)', input_modalities: ['text', 'image'], output_modalities: ['text'], vision: true },
-    { name: 'openai', description: 'OpenAI GPT-4o Mini', input_modalities: ['text', 'image'], output_modalities: ['text'], vision: true },
-    { name: 'openai-audio', description: 'OpenAI GPT-4o Mini Audio Preview', input_modalities: ['text', 'image', 'audio'], output_modalities: ['audio', 'text'], vision: true },
-    { name: 'openai-fast', description: 'OpenAI GPT-4.1 Nano', input_modalities: ['text', 'image'], output_modalities: ['text'], vision: true },
-    { name: 'openai-large', description: 'OpenAI GPT-4.1', input_modalities: ['text', 'image'], output_modalities: ['text'], vision: true },
-    { name: 'openai-reasoning', description: 'OpenAI O3', input_modalities: ['text', 'image'], output_modalities: ['text'], vision: true },
-    { name: 'openai-roblox', description: 'OpenAI GPT-4.1 Mini (Roblox)', input_modalities: ['text', 'image'], output_modalities: ['text'], vision: true },
-    { name: 'phi', description: 'Phi-4 Mini Instruct', input_modalities: ['text', 'image', 'audio'], output_modalities: ['text'], vision: true },
-    { name: 'qwen-coder', description: 'Qwen 2.5 Coder 32B', input_modalities: ['text'], output_modalities: ['text'], vision: false },
-    { name: 'bidara', description: 'BIDARA by NASA', input_modalities: ['text', 'image'], output_modalities: ['text'], vision: true },
-    { name: 'elixposearch', description: 'Elixpo Search', input_modalities: ['text'], output_modalities: ['text'], vision: false },
-    { name: 'evil', description: 'Evil', input_modalities: ['text', 'image'], output_modalities: ['text'], vision: true },
-    { name: 'hypnosis-tracy', description: 'Hypnosis Tracy', input_modalities: ['text', 'audio'], output_modalities: ['audio', 'text'], vision: false },
-    { name: 'midijourney', description: 'MIDIjourney', input_modalities: ['text'], output_modalities: ['text'], vision: false },
-    { name: 'mirexa', description: 'Mirexa AI Companion', input_modalities: ['text', 'image'], output_modalities: ['text'], vision: true },
-    { name: 'rtist', description: 'Rtist', input_modalities: ['text'], output_modalities: ['text'], vision: false },
-    { name: 'sur', description: 'Sur AI Assistant', input_modalities: ['text', 'image'], output_modalities: ['text'], vision: true },
-    { name: 'unity', description: 'Unity Unrestricted Agent', input_modalities: ['text', 'image'], output_modalities: ['text'], vision: true }
-];
-
 export const useChatManager = () => {
   const [sessions, setSessions] = useState<ChatSession[] | null>(null);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [models, setModels] = useState<string[]>([]);
+  const [models, setModels] = useState<string[]>(['openai', 'Gemini']); // Default models
   const [geminiApiKey, setGeminiApiKey] = useState<string>('');
   const [dalleApiKey, setDalleApiKey] = useState<string>('');
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -103,17 +75,38 @@ export const useChatManager = () => {
     }
   }, [sessions]);
 
+  // --- AWAL PERUBAHAN: Fetch dan filter model secara dinamis ---
   useEffect(() => {
-    const imageGenerationModels = ["Flux", "gptimage", "DALL-E 3"];
-    
-    const textOnlyModels = allModels
-      .filter(m => m.input_modalities.length === 1 && m.input_modalities[0] === 'text')
-      .map(m => m.name);
-      
-    const availableModels = [...imageGenerationModels, ...textOnlyModels, "openai", "Gemini", "mistral", "google"];
-    
-    setModels([...new Set(availableModels)]);
+    const fetchAndSetModels = async () => {
+        try {
+            const response = await fetch('https://text.pollinations.ai/models');
+            if (!response.ok) {
+                throw new Error('Gagal mengambil daftar model dari API.');
+            }
+            const allModels: any[] = await response.json();
+
+            const imageGenerationModels = ["Flux", "gptimage", "DALL-E 3"];
+            
+            // Filter untuk model yang hanya mendukung teks
+            const textOnlyModels = allModels
+                .filter(m => Array.isArray(m.input_modalities) && m.input_modalities.length === 1 && m.input_modalities[0] === 'text')
+                .map(m => m.name);
+            
+            // Gabungkan model-model yang ada dengan yang baru difilter
+            const availableModels = [...imageGenerationModels, ...textOnlyModels, "openai", "Gemini"];
+            
+            setModels([...new Set(availableModels)]); // Gunakan Set untuk menghilangkan duplikat
+        } catch (error) {
+            console.error("Gagal memuat model dinamis:", error);
+            // Fallback ke daftar model dasar jika API gagal
+            setModels(["Flux", "gptimage", "DALL-E 3", "openai", "Gemini", "deepseek", "grok"]);
+            toast.error("Gagal memuat daftar model terbaru, menggunakan daftar default.");
+        }
+    };
+
+    fetchAndSetModels();
   }, []);
+  // --- AKHIR PERUBAHAN ---
 
   const updateMessages = (sessionId: number, updater: (prevMessages: Message[]) => Message[]) => {
     setSessions(prev => 
@@ -240,7 +233,7 @@ export const useChatManager = () => {
             if (!geminiApiKey) {
                 toast.error('API Key Gemini diperlukan untuk fitur chat ini.');
                 updateMessages(currentActiveChatId, prev => prev.slice(0, -1));
-                setIsLoading(false); // Hentikan loading
+                setIsLoading(false);
                 return;
             }
             const response = await fetch('/api/gemini', {
@@ -255,7 +248,6 @@ export const useChatManager = () => {
             const data = await response.json();
             updateMessages(currentActiveChatId, prev => [...prev, { role: 'assistant', content: data.text }]);
           } else {
-            // --- AWAL PERBAIKAN: Memperbaiki error TypeScript ---
             const response = await fetch('https://text.pollinations.ai/openai', {
               method: 'POST',
               headers: {
@@ -264,14 +256,12 @@ export const useChatManager = () => {
               },
               body: JSON.stringify({
                 model: textModel,
-                // Menggunakan `messagesForApi` dan memberikan tipe 'any' untuk 'm'
                 messages: messagesForApi.map((m: any) => ({ 
                     role: m.role === 'assistant' ? 'assistant' : 'user', 
                     content: typeof m.content === 'string' ? m.content : m.content.text || '' 
                 })),
               })
             });
-            // --- AKHIR PERBAIKAN ---
             if (!response.ok) {
               const errorText = await response.text();
               throw new Error(`Gagal melakukan chat: ${response.statusText} - ${errorText}`);
