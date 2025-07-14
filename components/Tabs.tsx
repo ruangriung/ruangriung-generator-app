@@ -28,13 +28,16 @@ const LockedContent = () => (
 
 export default function Tabs() {
   const tabs = [
-    { name: 'image', label: 'Image', icon: Image, content: <Generator />, isProtected: false },
     { name: 'chatbot', label: 'Chatbot', icon: MessageSquare, content: <Chatbot />, isProtected: false },
     { name: 'video', label: 'Video', icon: Video, content: <VideoCreator />, isProtected: true },
-    { name: 'audio', label: 'Audio', icon: AudioLines, content: <AudioGenerator />, isProtected: true }
+    { name: 'audio', label: 'Audio', icon: AudioLines, content: <AudioGenerator />, isProtected: true },
+    { name: 'image', label: 'Image', icon: Image, content: <Generator />, isProtected: false }
   ];
 
-  const [activeTab, setActiveTab] = useState(tabs[0].name);
+  // --- PERBAIKAN DI SINI: Ubah state awal ---
+  const [activeTab, setActiveTab] = useState('image'); // Langsung set ke 'image'
+  // --- AKHIR PERBAIKAN ---
+  
   const { status } = useSession();
 
   const activeContent = () => {
@@ -49,13 +52,11 @@ export default function Tabs() {
 
   return (
     <div className="w-full max-w-4xl">
-      {/* --- PERUBAHAN UTAMA ADA DI SINI --- */}
       <div className="p-2 bg-light-bg dark:bg-dark-bg rounded-xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset grid grid-cols-3 sm:grid-cols-4 gap-2">
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.name;
           
-          // Logika untuk membuat tab terakhir memenuhi lebar di mobile
           const layoutClass = index === tabs.length - 1 ? 'col-span-3 sm:col-span-1' : '';
 
           return (
