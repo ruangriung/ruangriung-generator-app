@@ -52,16 +52,19 @@ export const useChatManager = () => {
     try {
       const saved = localStorage.getItem('ruangriung_chatbot_sessions_v3');
       if (saved) initialSessions = JSON.parse(saved);
+      
       const savedGeminiKey = localStorage.getItem('gemini_api_key');
       if (savedGeminiKey) setGeminiApiKey(savedGeminiKey);
+
       const savedDalleKey = localStorage.getItem('dalle_api_key');
       if (savedDalleKey) setDalleApiKey(savedDalleKey);
+
     } catch (error) {
       console.error("Gagal memuat sesi:", error);
     }
     
     if (initialSessions.length === 0) {
-      const newSession: ChatSession = { id: Date.now(), title: `Percakapan Baru`, messages: [], model: 'Gemini' };
+      const newSession: ChatSession = { id: Date.now(), title: `Percakapan Baru`, messages: [], model: 'openai' };
       initialSessions.push(newSession);
     }
     
@@ -94,7 +97,7 @@ export const useChatManager = () => {
         setModels([...new Set(allModels)]);
       } catch (error) {
         console.error("Gagal memuat model:", error);
-        setModels(['Flux', 'gptimage', 'DALL-E 3', 'Gemini', 'openai', 'mistral', 'google']);
+        setModels(['Flux', 'gptimage', 'DALL-E 3', 'Gemini', 'openai', 'deepseek', 'grok', 'mistral', 'llama3', 'llama2', 'claude',]);
       }
     };
     fetchModels();

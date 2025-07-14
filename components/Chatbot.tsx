@@ -103,6 +103,7 @@ export default function Chatbot() {
       setSessions(prev => prev!.map(s => s.id === activeSessionId ? {...s, model: 'Gemini'} : s));
     }
     toast.success('API Key Gemini disimpan!');
+    setIsGeminiKeyModalOpen(false); // Tutup modal setelah submit
   };
 
   const handleDalleApiKeySubmit = (apiKey: string) => {
@@ -112,6 +113,7 @@ export default function Chatbot() {
       setSessions(prev => prev!.map(s => s.id === activeSessionId ? {...s, model: 'DALL-E 3'} : s));
     }
     toast.success('API Key DALL-E 3 disimpan!');
+    setIsDalleKeyModalOpen(false); // Tutup modal setelah submit
   };
   
   const handleSendMessage = (message: any) => {
