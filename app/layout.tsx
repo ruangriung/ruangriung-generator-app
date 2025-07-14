@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     type: "website",
     url: "https://ruangriung.my.id",
     images: [{
-      url: "/assets/ruangriung.png",
+      url: "https://www.ruangriung.my.id/assets/ruangriung.png",
       alt: "RuangRiung AI Image Generator Banner",
     }],
   },

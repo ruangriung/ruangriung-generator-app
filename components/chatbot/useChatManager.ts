@@ -52,13 +52,10 @@ export const useChatManager = () => {
     try {
       const saved = localStorage.getItem('ruangriung_chatbot_sessions_v3');
       if (saved) initialSessions = JSON.parse(saved);
-      
       const savedGeminiKey = localStorage.getItem('gemini_api_key');
       if (savedGeminiKey) setGeminiApiKey(savedGeminiKey);
-
       const savedDalleKey = localStorage.getItem('dalle_api_key');
       if (savedDalleKey) setDalleApiKey(savedDalleKey);
-
     } catch (error) {
       console.error("Gagal memuat sesi:", error);
     }
@@ -79,28 +76,9 @@ export const useChatManager = () => {
   }, [sessions]);
 
   useEffect(() => {
-    const fetchModels = async () => {
-      try {
-        const res = await fetch('https://text.pollinations.ai/models');
-        if (!res.ok) throw new Error('API request failed');
-        const data = await res.json();
-        let extractedModels: string[] = [];
-        if (Array.isArray(data)) {
-          extractedModels = data.map(item => (typeof item === 'string' ? item : (item?.id || item?.name))).filter(Boolean) as string[];
-        } else if (typeof data === 'object' && data !== null) {
-          extractedModels = Object.keys(data);
-        }
-        const validModels = extractedModels.filter(m => typeof m === 'string' && m.length > 0 && !m.includes('audio'));
-        
-        const allModels = ['Flux', 'gptimage', 'DALL-E 3', 'Gemini', ...validModels];
-        
-        setModels([...new Set(allModels)]);
-      } catch (error) {
-        console.error("Gagal memuat model:", error);
-        setModels(['Flux', 'gptimage', 'DALL-E 3', 'Gemini', 'openai', 'deepseek', 'grok', 'mistral', 'llama3', 'llama2', 'claude',]);
-      }
-    };
-    fetchModels();
+    const imageModels = ["Flux", "gptimage", "DALL-E 3"];
+    const textModels = ["Gemini", "openai", "mistral", "google"];
+    setModels([...imageModels, ...textModels]);
   }, []);
 
   const updateMessages = (sessionId: number, updater: (prevMessages: Message[]) => Message[]) => {
@@ -114,7 +92,7 @@ export const useChatManager = () => {
       id: Date.now() + Math.random(),
       title: `Percakapan ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`,
       messages: [],
-      model: activeChat?.model || 'Gemini',
+      model: activeChat?.model || 'openai',
     };
     setSessions(prev => [newSession, ...(prev ?? [])]);
     setActiveSessionId(newSession.id);
@@ -126,7 +104,7 @@ export const useChatManager = () => {
             id: Date.now() + Math.random(),
             title: `Percakapan Baru`,
             messages: [],
-            model: 'Gemini',
+            model: 'openai',
         };
         setSessions([newSession]);
         setActiveSessionId(newSession.id);
@@ -145,7 +123,7 @@ export const useChatManager = () => {
 
   const processAndSendMessage = async (newMessage: Message) => {
     if (isLoading || !activeChat) return;
-
+    
     if (typeof newMessage.content === 'string' && !newMessage.content.trim()) {
         toast.error("Pesan tidak boleh kosong.");
         return;
@@ -189,7 +167,7 @@ export const useChatManager = () => {
             const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?${params.toString()}`;
             const imageResponse = await fetch(imageUrl);
 
-            if (!imageResponse.ok) throw new Error('Gagal saat menghubungi API gambar.');
+            if (!imageResponse.ok) throw new Error('Gagal saat menghubungi API gambar Pollinations.');
             
             updateMessages(currentActiveChatId, prev => [...prev, {
               role: 'assistant',
