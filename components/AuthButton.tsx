@@ -44,15 +44,15 @@ export default function AuthButton() {
         // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg, dark:shadow-dark-neumorphic-button, dark:active:shadow-dark-neumorphic-inset, dark:text-gray-200
         className="inline-flex items-center justify-center px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-200 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150"
       >
-        <img src="/google-icon.svg" alt="Google logo" className="w-5 h-5 mr-3" />
-        <span>Login with Google</span>
+       <Image src="/google-icon.svg" alt="Google logo" width={20} height={20} className="mr-3" />
+  <span>Login with Google</span>
       </button>
       <button 
         onClick={() => signIn('facebook')} 
         // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg, dark:shadow-dark-neumorphic-button, dark:active:shadow-dark-neumorphic-inset, dark:text-gray-200
         className="inline-flex items-center justify-center px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-200 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150"
       >
-        <img src="/facebook-icon.svg" alt="Facebook logo" className="w-5 h-5 mr-3" />
+        <Image src="/facebook-icon.svg" alt="Facebook logo" width={20} height={20} className="w-5 h-5 mr-3" />
         <span>Login with Facebook</span>
       </button>
     </div>
