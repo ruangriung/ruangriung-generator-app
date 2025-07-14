@@ -127,7 +127,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     }
     setIsEnhancing(true);
     toast.promise(
-      callPromptApi(`Sempurnakan dan tambahkan lebih banyak detail visual ke prompt gambar berikut, tetapi tetap ringkas: "${settings.prompt}". Jangan gunakan tanda kutip dalam respons Anda.`),
+      callPromptApi(`Sempurnakan dan tambahkan lebih banyak detail visual ke prompt gambar berikut, tetapi tetap ringkas: "${settings.prompt}". Jangan gunakan atau hapus tanda kutip dalam respons Anda.`),
       {
         loading: 'Menyempurnakan prompt...',
         success: 'Prompt berhasil disempurnakan!',
