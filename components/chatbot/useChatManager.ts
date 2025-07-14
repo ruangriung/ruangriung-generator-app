@@ -19,36 +19,26 @@ export const useChatManager = () => {
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [models, setModels] = useState<string[]>([]);
+  const [geminiApiKey, setGeminiApiKey] = useState<string>('');
+  const [dalleApiKey, setDalleApiKey] = useState<string>('');
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const activeChat = sessions?.find((s) => s.id === activeSessionId);
 
-  // Fungsi untuk menyimpan sesi dengan penanganan error kuota
   const saveSessionsToLocalStorage = (sessionsToSave: ChatSession[]) => {
     try {
       localStorage.setItem('ruangriung_chatbot_sessions_v3', JSON.stringify(sessionsToSave));
     } catch (error: any) {
       if (error.name === 'QuotaExceededError' || error.code === 22) {
-        console.warn("Penyimpanan lokal penuh. Menghapus sesi terlama...");
-        
-        // --- PERBAIKAN DI SINI ---
-        // Mengganti toast.warn dengan toast() dan ikon kustom
         toast("Penyimpanan penuh, sesi terlama akan dihapus.", {
           duration: 4000,
           icon: '⚠️',
         });
-        // --- AKHIR PERBAIKAN ---
-        
-        // Hapus sesi paling lama (yang ada di akhir array)
         const prunedSessions = sessionsToSave.slice(0, -1);
-        
-        // Coba simpan lagi setelah menghapus satu sesi
         if (prunedSessions.length > 0) {
           saveSessionsToLocalStorage(prunedSessions);
-          // Perbarui state aplikasi dengan sesi yang sudah dihapus
           setSessions(prunedSessions);
         } else {
-            console.error("Tidak bisa menyimpan bahkan setelah menghapus sesi. Semua sesi dihapus.");
             localStorage.removeItem('ruangriung_chatbot_sessions_v3');
         }
       } else {
@@ -62,12 +52,16 @@ export const useChatManager = () => {
     try {
       const saved = localStorage.getItem('ruangriung_chatbot_sessions_v3');
       if (saved) initialSessions = JSON.parse(saved);
+      const savedGeminiKey = localStorage.getItem('gemini_api_key');
+      if (savedGeminiKey) setGeminiApiKey(savedGeminiKey);
+      const savedDalleKey = localStorage.getItem('dalle_api_key');
+      if (savedDalleKey) setDalleApiKey(savedDalleKey);
     } catch (error) {
       console.error("Gagal memuat sesi:", error);
     }
     
     if (initialSessions.length === 0) {
-      const newSession: ChatSession = { id: Date.now(), title: `Percakapan Baru`, messages: [], model: 'openai' };
+      const newSession: ChatSession = { id: Date.now(), title: `Percakapan Baru`, messages: [], model: 'Gemini' };
       initialSessions.push(newSession);
     }
     
@@ -88,20 +82,19 @@ export const useChatManager = () => {
         if (!res.ok) throw new Error('API request failed');
         const data = await res.json();
         let extractedModels: string[] = [];
-
         if (Array.isArray(data)) {
           extractedModels = data.map(item => (typeof item === 'string' ? item : (item?.id || item?.name))).filter(Boolean) as string[];
         } else if (typeof data === 'object' && data !== null) {
           extractedModels = Object.keys(data);
         }
-
         const validModels = extractedModels.filter(m => typeof m === 'string' && m.length > 0 && !m.includes('audio'));
-        if (validModels.length > 0) setModels(validModels);
-        else throw new Error("Tidak ada model teks valid yang ditemukan");
-
+        
+        const allModels = ['Flux', 'gptimage', 'DALL-E 3', 'Gemini', ...validModels];
+        
+        setModels([...new Set(allModels)]);
       } catch (error) {
         console.error("Gagal memuat model:", error);
-        setModels(['openai', 'mistral', 'google']); // Fallback
+        setModels(['Flux', 'gptimage', 'DALL-E 3', 'Gemini', 'openai', 'mistral', 'google']);
       }
     };
     fetchModels();
@@ -112,13 +105,13 @@ export const useChatManager = () => {
       prev!.map(s => s.id === sessionId ? { ...s, messages: updater(s.messages) } : s)
     );
   };
-
+  
   const startNewChat = () => {
     const newSession: ChatSession = {
       id: Date.now() + Math.random(),
       title: `Percakapan ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`,
       messages: [],
-      model: activeChat?.model || 'openai',
+      model: activeChat?.model || 'Gemini',
     };
     setSessions(prev => [newSession, ...(prev ?? [])]);
     setActiveSessionId(newSession.id);
@@ -130,130 +123,159 @@ export const useChatManager = () => {
             id: Date.now() + Math.random(),
             title: `Percakapan Baru`,
             messages: [],
-            model: activeChat?.model || 'openai',
+            model: 'Gemini',
         };
         setSessions([newSession]);
         setActiveSessionId(newSession.id);
         toast.success("Semua riwayat percakapan telah dihapus.");
     }
   };
-  
+
+  const setModelForImage = () => {
+    if (activeChat) {
+      setSessions(prev => 
+        prev!.map(s => s.id === activeChat.id ? { ...s, model: 'Flux' } : s)
+      );
+      toast('Mode Gambar Aktif!', { icon: '🎨' });
+    }
+  };
+
   const processAndSendMessage = async (newMessage: Message) => {
     if (isLoading || !activeChat) return;
 
+    if (typeof newMessage.content === 'string' && !newMessage.content.trim()) {
+        toast.error("Pesan tidak boleh kosong.");
+        return;
+    }
+
+    const currentActiveChatId = activeChat.id;
+    updateMessages(currentActiveChatId, prev => [...prev, newMessage]);
     setIsLoading(true);
-    abortControllerRef.current = new AbortController();
-    
-    updateMessages(activeChat.id, prevMessages => [...prevMessages, newMessage]);
 
-    const assistantMessagePlaceholder: Message = { role: 'assistant', content: '' };
-    updateMessages(activeChat.id, prevMessages => [...prevMessages, assistantMessagePlaceholder]);
-    
-    const apiMessages = [...activeChat.messages, newMessage].map(msg => {
-      if (typeof msg.content === 'string') {
-        return { role: msg.role, content: msg.content };
-      }
-      return { role: msg.role, content: [{ type: 'text', text: msg.content.text || 'Analisis gambar ini.' }, { type: 'image_url', image_url: msg.content.image_url }] };
-    });
+    const imageGenerationModels = ['Flux', 'gptimage'];
 
-    try {
-      const response = await fetch('https://text.pollinations.ai/openai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            model: activeChat.model, 
-            messages: apiMessages, 
-            max_tokens: 2000,
-            stream: true
-        }),
-        signal: abortControllerRef.current.signal,
-      });
+    if (imageGenerationModels.includes(activeChat.model)) {
+        let promptText = newMessage.content as string;
+        
+        const ratioMatch = promptText.match(/rasio\s+(\d+:\d+)/);
+        let width = 1024;
+        let height = 1024;
 
-      if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
-      if (!response.body) throw new Error("Response body tidak tersedia untuk streaming.");
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n').filter(line => line.trim() !== '');
-
-        for (const line of lines) {
-            if (line.startsWith('data: ')) {
-                const jsonString = line.substring(6);
-                if (jsonString === '[DONE]') break;
-                
-                try {
-                    const parsed = JSON.parse(jsonString);
-                    const textChunk = parsed.choices?.[0]?.delta?.content || '';
-                    if (textChunk) {
-                        fullResponse += textChunk;
-                        updateMessages(activeChat.id, prevMessages => {
-                           const newMessages = [...prevMessages];
-                           newMessages[newMessages.length - 1] = { ...newMessages[newMessages.length - 1], content: fullResponse };
-                           return newMessages;
-                        });
-                    }
-                } catch (e) {
-                    // Abaikan baris yang bukan JSON valid
-                }
-            }
+        if (ratioMatch) {
+            const ratio = ratioMatch[1];
+            if (ratio === '9:16') { width = 1024; height = 1792; } 
+            else if (ratio === '16:9') { width = 1792; height = 1024; }
+            promptText = promptText.replace(/rasio\s+\d+:\d+/, '').trim();
         }
-      }
 
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
-        toast.success('Pembuatan respons dihentikan.');
-        updateMessages(activeChat.id, prevMessages => {
-           const newMessages = [...prevMessages];
-           const lastMessageContent = newMessages[newMessages.length - 1].content;
-           newMessages[newMessages.length - 1] = { ...newMessages[newMessages.length - 1], content: lastMessageContent + '\n\n*Respons dihentikan oleh pengguna.*' };
-           return newMessages;
-        });
-      } else {
-        console.error('Error:', error);
-        toast.error('Gagal mendapatkan respons dari AI.');
-         updateMessages(activeChat.id, prevMessages => {
-           const newMessages = [...prevMessages];
-           newMessages[newMessages.length - 1] = { ...newMessages[newMessages.length - 1], content: '*Maaf, terjadi kesalahan.*' };
-           return newMessages;
-        });
+        try {
+            const params = new URLSearchParams({
+                model: activeChat.model,
+                nologo: 'true',
+                enhance: 'true',
+                safe: 'false',
+                referrer: 'ruangriung.my.id',
+                seed: Math.floor(Math.random() * 100000).toString(),
+                width: width.toString(),
+                height: height.toString()
+            });
+            if (activeChat.model === 'gptimage') {
+                params.append('transparent', 'true');
+            }
+
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?${params.toString()}`;
+            const imageResponse = await fetch(imageUrl);
+
+            if (!imageResponse.ok) throw new Error('Gagal saat menghubungi API gambar.');
+            
+            updateMessages(currentActiveChatId, prev => [...prev, {
+              role: 'assistant',
+              content: { type: 'image_url', image_url: { url: imageResponse.url }, text: `Gambar untuk: "${promptText}"` }
+            }]);
+        } catch (error: any) {
+            toast.error("Maaf, gagal membuat gambar.");
+            updateMessages(currentActiveChatId, prev => [...prev, { role: 'assistant', content: `Gagal membuat gambar: ${error.message}` }]);
+        } finally {
+            setIsLoading(false);
+        }
+    } else if (activeChat.model === 'DALL-E 3') {
+        if (!dalleApiKey) {
+            toast.error('API Key DALL-E 3 diperlukan.');
+            updateMessages(currentActiveChatId, prev => prev.slice(0, -1));
+            setIsLoading(false);
+            return;
+        }
+        try {
+            const response = await fetch('/api/dalle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: newMessage.content, apiKey: dalleApiKey })
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Gagal membuat gambar dengan DALL-E 3.");
+            }
+            const data = await response.json();
+            updateMessages(currentActiveChatId, prev => [...prev, {
+                role: 'assistant',
+                content: { type: 'image_url', image_url: { url: data.imageUrl }, text: `Gambar DALL-E 3 untuk: "${newMessage.content}"` }
+            }]);
+        } catch(error: any) {
+            toast.error(`Error: ${error.message}`);
+            updateMessages(currentActiveChatId, prev => [...prev, { role: 'assistant', content: `Gagal membuat gambar: ${error.message}` }]);
+        } finally {
+            setIsLoading(false);
+        }
+    } else {
+      if (!geminiApiKey) {
+        toast.error('API Key Gemini diperlukan untuk fitur chat ini.');
+        updateMessages(currentActiveChatId, prev => prev.slice(0, -1));
+        setIsLoading(false);
+        return;
       }
-    } finally {
-      setIsLoading(false);
-      abortControllerRef.current = null;
+      try {
+        const messagesForApi = [...activeChat.messages, newMessage];
+        const response = await fetch('/api/gemini', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: messagesForApi, apiKey: geminiApiKey })
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Respons API tidak baik.");
+        }
+        const data = await response.json();
+        updateMessages(currentActiveChatId, prev => [...prev, { role: 'assistant', content: data.text }]);
+      } catch (error: any) {
+        console.error("Gagal melakukan chat:", error);
+        toast.error(`Error: ${error.message}`);
+        updateMessages(currentActiveChatId, prev => [...prev, { role: 'assistant', content: `Maaf, terjadi kesalahan: ${error.message}` }]);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
-  const stopGenerating = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-  };
-
+  const stopGenerating = () => {};
+  
   const regenerateResponse = () => {
-      if (!activeChat || activeChat.messages.length === 0) return;
-      
-      const lastAssistantMessageIndex = activeChat.messages.map(m => m.role).lastIndexOf('assistant');
-      if (lastAssistantMessageIndex === -1) return;
-
-      const messagesToResend = activeChat.messages.slice(0, lastAssistantMessageIndex);
-      const lastUserMessage = messagesToResend.filter(m => m.role === 'user').pop();
-      
-      if (lastUserMessage) {
-          updateMessages(activeChat.id, () => messagesToResend);
-          processAndSendMessage(lastUserMessage);
-      }
+    if (!activeChat || activeChat.messages.length === 0) return;
+    const lastAssistantMessageIndex = activeChat.messages.map(m => m.role).lastIndexOf('assistant');
+    if (lastAssistantMessageIndex === -1) return;
+    const messagesToResend = activeChat.messages.slice(0, lastAssistantMessageIndex);
+    const lastUserMessage = messagesToResend.filter(m => m.role === 'user').pop();
+    if (lastUserMessage) {
+        updateMessages(activeChat.id, () => messagesToResend);
+        processAndSendMessage(lastUserMessage);
+    }
   };
-
+  
   return {
     sessions, setSessions, activeSessionId, setActiveSessionId,
     activeChat, isLoading, models, processAndSendMessage, startNewChat,
-    stopGenerating, regenerateResponse, deleteAllSessions
+    stopGenerating, regenerateResponse, deleteAllSessions,
+    geminiApiKey, setGeminiApiKey,
+    dalleApiKey, setDalleApiKey,
+    setModelForImage
   };
 };

@@ -1,5 +1,5 @@
 // components/chatbot/ChatInput.tsx
-import { useRef, useEffect } from 'react'; // Hapus useState
+import { useRef, useEffect } from 'react';
 import { Send, StopCircle, Paperclip, Expand } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -8,7 +8,6 @@ interface ChatInputProps {
   onSendMessage: (message: any) => void;
   onStop: () => void;
   onExpand: () => void;
-  // --- PERUBAHAN: Tambahkan props untuk mengontrol value dari luar ---
   value: string;
   onValueChange: (value: string) => void;
 }
@@ -25,19 +24,17 @@ export const ChatInput = ({
 
 useEffect(() => {
     if (textareaRef.current) {
-      // Atur tinggi ke auto untuk mengukur ulang
       textareaRef.current.style.height = 'auto'; 
       const scrollHeight = textareaRef.current.scrollHeight;
-      // Atur tinggi baru, dengan batas maksimal 200px
       textareaRef.current.style.height = `${Math.min(scrollHeight, 200)}px`;
     }
-  }, [value]);// <-- Gunakan value dari props
+  }, [value]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!value.trim()) return;
     onSendMessage({ role: 'user', content: value });
-    onValueChange(''); // <-- Kosongkan input melalui props
+    onValueChange('');
   };
   
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +52,7 @@ useEffect(() => {
         content: { type: 'image_url', image_url: { url: base64String }, text: value || `Analisis gambar ini.` }
       };
       onSendMessage(imageMessage);
-      onValueChange(''); // <-- Kosongkan input melalui props
+      onValueChange('');
     };
     reader.onerror = () => {
         toast.dismiss();
@@ -77,12 +74,15 @@ useEffect(() => {
       <form onSubmit={handleSubmit}>
         <div className="relative">
           <textarea 
+             id="chat-input-textarea" // ID ditambahkan untuk fokus
              ref={textareaRef}
-             value={value} // <-- Gunakan value dari props
-             onChange={(e) => onValueChange(e.target.value)} // <-- Panggil onValueChange dari props
+             value={value}
+             onChange={(e) => onValueChange(e.target.value)}
              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(e); }}} 
              placeholder="Kirim pesan atau unggah gambar..." 
-             className={`${formElementStyle} pr-28 sm:pr-32 resize-none overflow-y-auto`} 
+             // --- PERBAIKAN UTAMA DI SINI ---
+             // Padding kanan (pr) ditambah agar tombol tidak tertutup
+             className={`${formElementStyle} pr-32 sm:pr-36 resize-none overflow-y-auto`} 
              rows={1} 
              disabled={isLoading} 
           />

@@ -1,13 +1,15 @@
+// components/ApiKeyModal.tsx
 'use client';
 
 import { useState } from 'react';
 import { Key, X } from 'lucide-react';
+import toast from 'react-hot-toast'; // <-- PERBAIKAN: Tambahkan impor ini
 
 interface ApiKeyModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (apiKey: string) => void;
-  modelName: 'DALL-E 3' | 'Leonardo' | '';
+  modelName: 'DALL-E 3' | 'Leonardo' | 'Gemini' | '';
 }
 
 const instructions = {
@@ -34,6 +36,19 @@ const instructions = {
       </ol>
       <p className="text-xs mt-2 italic">Catatan: Penggunaan API key Anda akan dikenakan biaya atau menggunakan token sesuai ketentuan Leonardo.Ai.</p>
     </>
+  ),
+  'Gemini': (
+    <>
+      <p>Untuk menggunakan Google Gemini, Anda memerlukan API Key dari Google AI Studio.</p>
+      <ol className="list-decimal list-inside space-y-1 mt-2 text-sm">
+        <li>Buka <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-purple-500 underline">Google AI Studio</a>.</li>
+        <li>Login dengan akun Google Anda.</li>
+        <li>Klik "Create API key" untuk membuat kunci baru.</li>
+        <li>Salin key yang muncul.</li>
+        <li>Tempelkan (paste) key tersebut di bawah ini.</li>
+      </ol>
+      <p className="text-xs mt-2 italic">Catatan: Penggunaan API key Anda akan tunduk pada kuota dan ketentuan dari Google.</p>
+    </>
   )
 };
 
@@ -47,7 +62,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSubmit, modelName }: Ap
       onSubmit(apiKey);
       onClose();
     } else {
-      alert('API Key tidak boleh kosong.');
+      toast.error('API Key tidak boleh kosong.'); // Baris ini yang menyebabkan error
     }
   };
 
@@ -74,7 +89,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSubmit, modelName }: Ap
             type="password"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            placeholder={`sk-xxxxxxxx atau leonardo-key-xxxxxx`}
+            placeholder={`Masukkan API key Anda...`}
             className="w-full p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800 dark:text-gray-200"
           />
         </div>

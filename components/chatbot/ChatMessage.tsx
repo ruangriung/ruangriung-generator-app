@@ -1,6 +1,6 @@
 // components/chatbot/ChatMessage.tsx
 import { useState } from 'react';
-import { Bot, User, Copy, Check, RefreshCw } from 'lucide-react';
+import { Bot, User, Copy, Check, RefreshCw, Download } from 'lucide-react'; // Tambahkan ikon Download
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import toast from 'react-hot-toast';
@@ -14,16 +14,17 @@ interface ChatMessageProps {
 
 export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessageProps) => {
   const [isCopied, setIsCopied] = useState(false);
-
   const isAssistant = message.role === 'assistant';
 
   const handleCopy = () => {
     let textToCopy = '';
     
-    if (typeof message.content === 'object' && 'text' in message.content) {
-      textToCopy = message.content.text || '';
-    } else if (typeof message.content === 'string') {
+    // Hanya salin teks, bukan objek gambar
+    if (typeof message.content === 'string') {
       textToCopy = message.content;
+    } else if (typeof message.content === 'object' && message.content.text) {
+        // Jika ada teks deskripsi pada gambar, salin itu
+        textToCopy = message.content.text;
     }
     
     if (textToCopy) {
@@ -31,8 +32,43 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
         setIsCopied(true);
         toast.success("Teks berhasil disalin!");
         setTimeout(() => setIsCopied(false), 2000);
+    } else {
+        toast.error("Tidak ada teks untuk disalin.");
     }
   };
+
+  const handleDownload = async () => {
+    if (typeof message.content !== 'object' || !('image_url' in message.content)) return;
+
+    const imageUrl = message.content.image_url.url;
+    toast.loading('Mempersiapkan unduhan...');
+
+    try {
+      // Fetch gambar sebagai blob untuk memastikan unduhan berjalan di semua browser
+      const response = await fetch(imageUrl);
+      if (!response.ok) throw new Error('Gagal mengambil data gambar dari URL.');
+      const blob = await response.blob();
+      
+      const objectUrl = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = `ruangriung-ai-image-${Date.now()}.png`; // Nama file lebih deskriptif
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      URL.revokeObjectURL(objectUrl);
+      
+      toast.dismiss();
+      toast.success('Gambar berhasil diunduh!');
+    } catch (error: any) {
+      toast.dismiss();
+      toast.error(`Gagal mengunduh: ${error.message}`);
+      console.error('Download error:', error);
+    }
+  };
+
 
   const renderContent = () => {
     if (typeof message.content === 'object' && message.content !== null && 'type' in message.content && message.content.type === 'image_url') {
@@ -40,17 +76,13 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
         <div className="flex flex-col gap-2">
           <img 
             src={message.content.image_url.url} 
-            alt="Uploaded content" 
-            // --- PERBAIKAN DI SINI ---
-            // Mengubah max-w-xs menjadi max-w-full agar gambar selalu pas di dalam bubble chat
+            alt={message.content.text || "Generated AI image"} 
             className="rounded-lg max-w-full object-contain"
-            // --- AKHIR PERBAIKAN ---
           />
-          {message.content.text && <p>{message.content.text}</p>}
+          {message.content.text && <p className="text-sm italic opacity-80 mt-1">{message.content.text}</p>}
         </div>
       );
     }
-
     return (
       <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
         {String(message.content)}
@@ -73,6 +105,11 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
         
         {isAssistant && (
             <div className="flex items-center justify-end gap-2 mt-2">
+                {typeof message.content === 'object' && message.content?.type === 'image_url' && (
+                    <button onClick={handleDownload} className="p-1.5 text-gray-500 hover:text-purple-600 transition-colors" aria-label="Unduh Gambar">
+                        <Download size={16} />
+                    </button>
+                )}
                 <button onClick={handleCopy} className="p-1.5 text-gray-500 hover:text-purple-600 transition-colors" aria-label="Salin">
                     {isCopied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
                 </button>
