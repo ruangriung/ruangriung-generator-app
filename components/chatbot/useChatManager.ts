@@ -18,7 +18,7 @@ export const useChatManager = () => {
   const [sessions, setSessions] = useState<ChatSession[] | null>(null);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [models, setModels] = useState<string[]>([]); // <-- KEMBALIKAN STATE MODEL
+  const [models, setModels] = useState<string[]>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const activeChat = sessions?.find((s) => s.id === activeSessionId);
@@ -47,7 +47,6 @@ export const useChatManager = () => {
     }
   }, [sessions]);
 
-  // --- KEMBALIKAN LOGIKA FETCH MODEL ---
   useEffect(() => {
     const fetchModels = async () => {
       try {
@@ -73,24 +72,37 @@ export const useChatManager = () => {
     };
     fetchModels();
   }, []);
-  // --- AKHIR LOGIKA FETCH MODEL ---
 
-
-  const updateMessages = (sessionId: number, messages: Message[]) => {
+  const updateMessages = (sessionId: number, updater: (prevMessages: Message[]) => Message[]) => {
     setSessions(prev => 
-      prev!.map(s => s.id === sessionId ? { ...s, messages } : s)
+      prev!.map(s => s.id === sessionId ? { ...s, messages: updater(s.messages) } : s)
     );
   };
 
   const startNewChat = () => {
     const newSession: ChatSession = {
-      id: Date.now(),
+      id: Date.now() + Math.random(),
       title: `Percakapan ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`,
       messages: [],
       model: activeChat?.model || 'openai',
     };
     setSessions(prev => [newSession, ...(prev ?? [])]);
     setActiveSessionId(newSession.id);
+  };
+
+  // --- FUNGSI UNTUK MENGHAPUS SEMUA SESI ---
+  const deleteAllSessions = () => {
+    if (window.confirm("Apakah Anda yakin ingin menghapus semua riwayat percakapan? Tindakan ini tidak dapat diurungkan.")) {
+        const newSession: ChatSession = {
+            id: Date.now() + Math.random(),
+            title: `Percakapan Baru`,
+            messages: [],
+            model: activeChat?.model || 'openai',
+        };
+        setSessions([newSession]);
+        setActiveSessionId(newSession.id);
+        toast.success("Semua riwayat percakapan telah dihapus.");
+    }
   };
   
   const processAndSendMessage = async (newMessage: Message) => {
@@ -99,10 +111,12 @@ export const useChatManager = () => {
     setIsLoading(true);
     abortControllerRef.current = new AbortController();
     
-    const updatedMessages = [...activeChat.messages, newMessage];
-    updateMessages(activeChat.id, updatedMessages);
+    updateMessages(activeChat.id, prevMessages => [...prevMessages, newMessage]);
+
+    const assistantMessagePlaceholder: Message = { role: 'assistant', content: '' };
+    updateMessages(activeChat.id, prevMessages => [...prevMessages, assistantMessagePlaceholder]);
     
-    const apiMessages = updatedMessages.map(msg => {
+    const apiMessages = [...activeChat.messages, newMessage].map(msg => {
       if (typeof msg.content === 'string') {
         return { role: msg.role, content: msg.content };
       }
@@ -116,25 +130,66 @@ export const useChatManager = () => {
         body: JSON.stringify({ 
             model: activeChat.model, 
             messages: apiMessages, 
-            max_tokens: 2000 
+            max_tokens: 2000,
+            stream: true
         }),
         signal: abortControllerRef.current.signal,
       });
 
       if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
-      
-      const result = await response.json();
-      const assistantMessage: Message = result.choices[0].message;
-      updateMessages(activeChat.id, [...updatedMessages, assistantMessage]);
+      if (!response.body) throw new Error("Response body tidak tersedia untuk streaming.");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n').filter(line => line.trim() !== '');
+
+        for (const line of lines) {
+            if (line.startsWith('data: ')) {
+                const jsonString = line.substring(6);
+                if (jsonString === '[DONE]') break;
+                
+                try {
+                    const parsed = JSON.parse(jsonString);
+                    const textChunk = parsed.choices?.[0]?.delta?.content || '';
+                    if (textChunk) {
+                        fullResponse += textChunk;
+                        updateMessages(activeChat.id, prevMessages => {
+                           const newMessages = [...prevMessages];
+                           newMessages[newMessages.length - 1] = { ...newMessages[newMessages.length - 1], content: fullResponse };
+                           return newMessages;
+                        });
+                    }
+                } catch (e) {
+                    // Abaikan baris yang bukan JSON valid
+                }
+            }
+        }
+      }
 
     } catch (error: any) {
       if (error.name === 'AbortError') {
         toast.success('Pembuatan respons dihentikan.');
-        const finalMessages = [...updatedMessages, {role: 'assistant', content: '*Respons dihentikan oleh pengguna.*'} as Message];
-        updateMessages(activeChat.id, finalMessages);
+        updateMessages(activeChat.id, prevMessages => {
+           const newMessages = [...prevMessages];
+           const lastMessageContent = newMessages[newMessages.length - 1].content;
+           newMessages[newMessages.length - 1] = { ...newMessages[newMessages.length - 1], content: lastMessageContent + '\n\n*Respons dihentikan oleh pengguna.*' };
+           return newMessages;
+        });
       } else {
         console.error('Error:', error);
         toast.error('Gagal mendapatkan respons dari AI.');
+         updateMessages(activeChat.id, prevMessages => {
+           const newMessages = [...prevMessages];
+           newMessages[newMessages.length - 1] = { ...newMessages[newMessages.length - 1], content: '*Maaf, terjadi kesalahan.*' };
+           return newMessages;
+        });
       }
     } finally {
       setIsLoading(false);
@@ -150,17 +205,22 @@ export const useChatManager = () => {
 
   const regenerateResponse = () => {
       if (!activeChat || activeChat.messages.length === 0) return;
-      const lastUserMessage = [...activeChat.messages].reverse().find(m => m.role === 'user');
+      
+      const lastAssistantMessageIndex = activeChat.messages.map(m => m.role).lastIndexOf('assistant');
+      if (lastAssistantMessageIndex === -1) return;
+
+      const messagesToResend = activeChat.messages.slice(0, lastAssistantMessageIndex);
+      const lastUserMessage = messagesToResend.filter(m => m.role === 'user').pop();
+      
       if (lastUserMessage) {
-          const messagesWithoutLastResponse = activeChat.messages.slice(0, -1);
-          updateMessages(activeChat.id, messagesWithoutLastResponse);
-          processAndSendMessage(lastUserMessage as Message);
+          updateMessages(activeChat.id, () => messagesToResend);
+          processAndSendMessage(lastUserMessage);
       }
   };
 
   return {
     sessions, setSessions, activeSessionId, setActiveSessionId,
     activeChat, isLoading, models, processAndSendMessage, startNewChat,
-    stopGenerating, regenerateResponse
+    stopGenerating, regenerateResponse, deleteAllSessions // Pastikan ini diekspor
   };
 };

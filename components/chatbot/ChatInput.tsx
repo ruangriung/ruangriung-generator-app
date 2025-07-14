@@ -23,13 +23,15 @@ export const ChatInput = ({
 }: ChatInputProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
+useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+      // Atur tinggi ke auto untuk mengukur ulang
+      textareaRef.current.style.height = 'auto'; 
       const scrollHeight = textareaRef.current.scrollHeight;
+      // Atur tinggi baru, dengan batas maksimal 200px
       textareaRef.current.style.height = `${Math.min(scrollHeight, 200)}px`;
     }
-  }, [value]); // <-- Gunakan value dari props
+  }, [value]);// <-- Gunakan value dari props
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

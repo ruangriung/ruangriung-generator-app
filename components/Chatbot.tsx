@@ -12,10 +12,10 @@ export default function Chatbot() {
   const { 
     sessions, setSessions, activeSessionId, setActiveSessionId,
     activeChat, isLoading, models, processAndSendMessage, startNewChat,
-    stopGenerating, regenerateResponse
+    stopGenerating, regenerateResponse, deleteAllSessions // Ambil fungsi deleteAllSessions
   } = useChatManager();
   
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState<number | null>(null);
@@ -25,11 +25,21 @@ export default function Chatbot() {
   const [isTextareaModalOpen, setIsTextareaModalOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
 
+  // --- PERBAIKAN FINAL LOGIKA AUTOSCROLL ---
   useEffect(() => {
-    if (activeChat?.messages) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollContainerRef.current) {
+      const timer = setTimeout(() => {
+        const container = scrollContainerRef.current;
+        // Penambahan pengecekan untuk mengatasi error 'null'
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+      }, 0);
+
+      return () => clearTimeout(timer);
     }
-  }, [activeChat?.messages]);
+  }, [activeChat?.messages.length, activeChat?.messages[activeChat.messages.length - 1]?.content]);
+  // --- AKHIR PERBAIKAN ---
 
   useEffect(() => {
     if (isRenaming !== null) {
@@ -95,10 +105,20 @@ export default function Chatbot() {
     <>
       <div className="w-full flex h-[90vh] bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic overflow-hidden relative">
         <aside className={`absolute top-0 left-0 h-full z-20 md:static md:z-auto w-full md:w-1/4 md:min-w-[280px] p-2 sm:p-4 border-r border-gray-300 dark:border-gray-700 flex flex-col bg-light-bg dark:bg-dark-bg transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-            <div className="flex justify-between items-center mb-4">
-                <button onClick={startNewChat} className="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg font-semibold text-gray-700 dark:text-gray-200 bg-light-bg dark:bg-dark-bg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset"><Plus size={18} /> Chat Baru</button>
+            {/* --- KEMBALIKAN TOMBOL HAPUS SEMUA --- */}
+            <div className="flex justify-between items-center mb-4 gap-2">
+                <button onClick={startNewChat} className="flex-grow flex items-center justify-center gap-2 p-3 rounded-lg font-semibold text-gray-700 dark:text-gray-200 bg-light-bg dark:bg-dark-bg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset"><Plus size={18} /> Chat Baru</button>
+                <button
+                    onClick={deleteAllSessions}
+                    title="Hapus semua riwayat"
+                    className="p-3 text-red-500 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset"
+                >
+                    <Trash2 size={18} />
+                </button>
                 <button onClick={() => setIsSidebarOpen(false)} className="md:hidden ml-2 p-2 text-gray-600 dark:text-gray-300"><X size={20}/></button>
             </div>
+            {/* --- AKHIR PERUBAHAN TOMBOL --- */}
+
             <div className="flex-1 overflow-y-auto space-y-2 pr-2">
               {sessions.map(session => (
                   <div key={session.id} onClick={() => handleSelectSession(session.id)} className={`p-2 rounded-lg cursor-pointer group ${activeSessionId === session.id ? 'bg-purple-100 dark:bg-purple-900/50' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
@@ -115,7 +135,7 @@ export default function Chatbot() {
               <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 truncate flex-1">{activeChat.title}</h2>
           </header>
 
-          <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-6">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-6">
               {activeChat.messages.length === 0 && !isLoading && (
                   <div className="flex flex-col items-center justify-center h-full text-gray-500">
                       <MessageSquare size={48} />
@@ -131,7 +151,6 @@ export default function Chatbot() {
                   />
               ))}
               {isLoading && <div className="flex items-start gap-4"><div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white shrink-0"><Bot size={22} /></div><div className="max-w-xl p-4 rounded-xl bg-white dark:bg-gray-800 shadow-md flex items-center"><div className="dot-flashing"></div></div></div>}
-              <div ref={messagesEndRef} />
           </div>
           
           <div className="p-2 sm:p-4 border-t border-gray-300 dark:border-gray-700 space-y-2">
@@ -146,7 +165,6 @@ export default function Chatbot() {
                     {models.map(m => <option key={m} value={m}>{m}</option>)}
                   </select>
               </div>
-              {/* --- PERUBAHAN: Teruskan state dan handler ke ChatInput --- */}
               <ChatInput 
                   isLoading={isLoading}
                   onSendMessage={handleSendMessage}
