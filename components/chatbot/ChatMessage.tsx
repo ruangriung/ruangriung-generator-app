@@ -20,8 +20,8 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
   const handleCopy = () => {
     let textToCopy = '';
     
-    if (typeof message.content === 'object' && message.content.text) {
-      textToCopy = message.content.text;
+    if (typeof message.content === 'object' && 'text' in message.content) {
+      textToCopy = message.content.text || '';
     } else if (typeof message.content === 'string') {
       textToCopy = message.content;
     }
@@ -35,28 +35,27 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
   };
 
   const renderContent = () => {
-    // Pengecekan tipe yang aman untuk pesan gambar
     if (typeof message.content === 'object' && message.content !== null && 'type' in message.content && message.content.type === 'image_url') {
       return (
         <div className="flex flex-col gap-2">
           <img 
             src={message.content.image_url.url} 
             alt="Uploaded content" 
-            className="rounded-lg max-w-xs object-contain"
+            // --- PERBAIKAN DI SINI ---
+            // Mengubah max-w-xs menjadi max-w-full agar gambar selalu pas di dalam bubble chat
+            className="rounded-lg max-w-full object-contain"
+            // --- AKHIR PERBAIKAN ---
           />
           {message.content.text && <p>{message.content.text}</p>}
         </div>
       );
     }
 
-    // --- PERBAIKAN UTAMA DI SINI ---
-    // Jika bukan objek gambar, kita pastikan itu adalah string sebelum diberikan ke ReactMarkdown
     return (
       <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
         {String(message.content)}
       </ReactMarkdown>
     );
-    // --- AKHIR PERBAIKAN ---
   };
 
   return (

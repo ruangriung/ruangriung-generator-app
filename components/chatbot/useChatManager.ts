@@ -23,6 +23,40 @@ export const useChatManager = () => {
 
   const activeChat = sessions?.find((s) => s.id === activeSessionId);
 
+  // Fungsi untuk menyimpan sesi dengan penanganan error kuota
+  const saveSessionsToLocalStorage = (sessionsToSave: ChatSession[]) => {
+    try {
+      localStorage.setItem('ruangriung_chatbot_sessions_v3', JSON.stringify(sessionsToSave));
+    } catch (error: any) {
+      if (error.name === 'QuotaExceededError' || error.code === 22) {
+        console.warn("Penyimpanan lokal penuh. Menghapus sesi terlama...");
+        
+        // --- PERBAIKAN DI SINI ---
+        // Mengganti toast.warn dengan toast() dan ikon kustom
+        toast("Penyimpanan penuh, sesi terlama akan dihapus.", {
+          duration: 4000,
+          icon: '⚠️',
+        });
+        // --- AKHIR PERBAIKAN ---
+        
+        // Hapus sesi paling lama (yang ada di akhir array)
+        const prunedSessions = sessionsToSave.slice(0, -1);
+        
+        // Coba simpan lagi setelah menghapus satu sesi
+        if (prunedSessions.length > 0) {
+          saveSessionsToLocalStorage(prunedSessions);
+          // Perbarui state aplikasi dengan sesi yang sudah dihapus
+          setSessions(prunedSessions);
+        } else {
+            console.error("Tidak bisa menyimpan bahkan setelah menghapus sesi. Semua sesi dihapus.");
+            localStorage.removeItem('ruangriung_chatbot_sessions_v3');
+        }
+      } else {
+        console.error("Gagal menyimpan sesi ke localStorage:", error);
+      }
+    }
+  };
+
   useEffect(() => {
     let initialSessions: ChatSession[] = [];
     try {
@@ -43,7 +77,7 @@ export const useChatManager = () => {
 
   useEffect(() => {
     if (sessions !== null) {
-      localStorage.setItem('ruangriung_chatbot_sessions_v3', JSON.stringify(sessions));
+      saveSessionsToLocalStorage(sessions);
     }
   }, [sessions]);
 
@@ -90,7 +124,6 @@ export const useChatManager = () => {
     setActiveSessionId(newSession.id);
   };
 
-  // --- FUNGSI UNTUK MENGHAPUS SEMUA SESI ---
   const deleteAllSessions = () => {
     if (window.confirm("Apakah Anda yakin ingin menghapus semua riwayat percakapan? Tindakan ini tidak dapat diurungkan.")) {
         const newSession: ChatSession = {
@@ -221,6 +254,6 @@ export const useChatManager = () => {
   return {
     sessions, setSessions, activeSessionId, setActiveSessionId,
     activeChat, isLoading, models, processAndSendMessage, startNewChat,
-    stopGenerating, regenerateResponse, deleteAllSessions // Pastikan ini diekspor
+    stopGenerating, regenerateResponse, deleteAllSessions
   };
 };
