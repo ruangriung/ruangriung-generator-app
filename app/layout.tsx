@@ -12,6 +12,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ruangriung.my.id'),
+
   title: "RuangRiung AI Generator - Buat Gambar, Video, Audio dengan Teknologi AI Canggih",
   description: "Ruang Riung AI Generator adalah aplikasi Next.js modern yang memungkinkan Anda membuat gambar, ide video, dan audio menggunakan AI. Didukung oleh NextAuth.js (Google & Facebook Login), Tailwind CSS, dan Pollinations.ai API dan DALLE-3 untuk generasi gambar, serta ElevenLabs API untuk audio. Aplikasi ini dirancang untuk memberikan pengalaman pengguna yang cepat dan responsif dengan performa tinggi",
   keywords: "AI generator, image generator, video creator, audio generator, Next.js, React, NextAuth.js, Google login, Facebook login, Pollinations.ai, Tailwind CSS, Vercel, Ruang Riung, AI art, text to image, text to audio, AI video prompt, aplikasi gambar AI, aplikasi video AI, aplikasi audio AI, teknologi AI, generasi gambar AI, generasi video AI, generasi audio AI, aplikasi Next.js, aplikasi React, aplikasi modern, aplikasi web, aplikasi AI, aplikasi generasi konten, aplikasi kreatif, aplikasi inovatif, aplikasi produktivitas, aplikasi teknologi, aplikasi berbasis AI, aplikasi generasi konten AI, aplikasi generasi gambar AI, aplikasi generasi video AI, aplikasi generasi audio AI, aplikasi AI modern, aplikasi AI canggih, aplikasi AI produktif, aplikasi AI kreatif, aplikasi AI inovatif, aplikasi AI generatif, aplikasi AI generasi konten, aplikasi AI generasi gambar, aplikasi AI generasi video, aplikasi AI generasi audio, aplikasi AI berbasis web, aplikasi AI berbasis React, aplikasi AI berbasis Next.js, aplikasi AI berbasis Tailwind CSS, aplikasi AI berbasis Pollinations.ai, aplikasi AI berbasis ElevenLabs, aplikasi AI berbasis Vercel, aplikasi AI berbasis cloud, aplikasi AI berbasis OpenAI, aplikasi AI berbasis OpenAI API, aplikasi AI berbasis OpenAI SDK",
@@ -58,13 +59,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Ini adalah ID Penayang Anda yang sudah benar
+  const YOUR_AD_PUBLISHER_ID = "ca-pub-1439044724518446";
+
   return (
     <html lang="en">
       <head>
-        {/* --- LETAKKAN SKRIP ADSENSE ANDA DI SINI --- */}
+        {/* Tag verifikasi AdSense */}
+        <meta name="google-adsense-account" content={YOUR_AD_PUBLISHER_ID}></meta>
+        
+        {/* Skrip utama AdSense menggunakan ID Penayang */}
         <Script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1439044724518446"
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${YOUR_AD_PUBLISHER_ID}`}
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
@@ -84,7 +91,7 @@ export default function RootLayout({
         <Toaster />
         <CookieConsent />
 
-        {/* Google Analytics Script sudah dioptimalkan */}
+        {/* Google Analytics Script */}
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-PWFT2SQWNZ" />
         <Script
           id="google-analytics-script"
