@@ -136,10 +136,16 @@ export default function Generator() {
         imageDisplayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
 
-    const currentSeed = isVariation ? Math.floor(Math.random() * 1000000) : settings.seed;
-    if (isVariation) {
-        setSettings(prev => ({...prev, seed: currentSeed}));
+    // --- PERUBAHAN UTAMA DI SINI ---
+    let currentSeed = settings.seed;
+    // Jika ini adalah variasi ATAU jika model yang dipilih adalah 'gptimage',
+    // buat seed baru yang acak.
+    if (isVariation || settings.model === 'gptimage') {
+      currentSeed = Math.floor(Math.random() * 1000000);
+      // Perbarui state agar seed baru ini tersimpan dan ditampilkan di UI
+      setSettings(prev => ({...prev, seed: currentSeed}));
     }
+    // --- AKHIR PERUBAHAN ---
 
     const { model, prompt, width, height, imageQuality, batchSize, artStyle, private: isPrivate, safe, transparent, inputImage } = settings;
     const fullPrompt = `${prompt}${artStyle}`;
@@ -198,7 +204,6 @@ export default function Generator() {
           onImageQualityChange={onImageQualityChange}
           onModelSelect={handleModelSelect}
         />
-        {/* --- PERBAIKAN: Menghapus prop onDownloadClick yang tidak perlu --- */}
         <ImageDisplay
           ref={imageDisplayRef}
           isLoading={isLoading}
