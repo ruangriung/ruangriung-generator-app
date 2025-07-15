@@ -90,7 +90,7 @@ export default function Home() {
       
       {/* --- SLOT IKLAN 1 DIPERBAIKI --- */}
       <div className="w-full max-w-4xl mb-8">
-        <AdBanner dataAdSlot="7376156314" />
+        <AdBanner dataAdSlot="6897039624" />
       </div>
 
       <div className="w-full max-w-4xl flex justify-between items-center mb-4">
