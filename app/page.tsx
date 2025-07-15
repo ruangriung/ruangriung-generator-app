@@ -1,3 +1,4 @@
+// app/page.tsx
 'use client';
 
 import { Wand2, Sparkles, Download, X } from 'lucide-react';
@@ -6,6 +7,7 @@ import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useState, useEffect } from 'react';
 import FAQ from '@/components/FAQ'; // Pastikan komponen FAQ diimpor
+import { AdBanner } from '@/components/AdBanner'; // <-- IMPOR BARU
 
 export default function Home() {
   const [deferredPrompt, setDeferredPrompt] = useState<any | null>(null);
@@ -92,6 +94,11 @@ export default function Home() {
         </p>
       </header>
       
+      {/* --- SLOT IKLAN 1 --- */}
+      <div className="w-full max-w-4xl mb-8">
+        <AdBanner type="banner" />
+      </div>
+
       <div className="w-full max-w-4xl flex justify-between items-center mb-4">
         <AuthButton />
         <ThemeToggle />

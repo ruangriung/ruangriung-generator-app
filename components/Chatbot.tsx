@@ -9,6 +9,7 @@ import { ChatInput } from './chatbot/ChatInput';
 import TextareaModal from './TextareaModal';
 import ApiKeyModal from './ApiKeyModal';
 import toast from 'react-hot-toast';
+import { AdBanner } from './AdBanner'; // <-- IMPOR BARU
 
 export default function Chatbot() {
   const { 
@@ -165,6 +166,10 @@ export default function Chatbot() {
                       ) : ( <div className="flex justify-between items-center"><p className="text-sm text-gray-700 dark:text-gray-300 truncate">{session.title}</p><div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity"><button onClick={(e) => { e.stopPropagation(); handleRename(session); }} className="p-1 text-gray-500 hover:text-purple-600"><Edit size={14}/></button><button onClick={(e) => { e.stopPropagation(); handleDeleteSession(session.id); }} className="p-1 text-gray-500 hover:text-red-500"><Trash2 size={14}/></button></div></div> )}
                   </div>
               ))}
+            </div>
+            {/* --- SLOT IKLAN 2 --- */}
+            <div className="mt-4">
+              <AdBanner type="square" />
             </div>
         </aside>
 
