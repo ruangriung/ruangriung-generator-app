@@ -65,6 +65,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* --- KODE VERIFIKASI ADSENSE ANDA --- */}
+        <meta name="google-adsense-account" content="ca-pub-1439044724518446"></meta>
+        
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
@@ -94,10 +97,6 @@ export default function RootLayout({
             `,
           }}
         />
-
-        {/* Skrip Histats telah dihapus dari sini untuk meningkatkan performa. 
-          Jika Anda benar-benar membutuhkan analitik, pertimbangkan alternatif yang lebih ringan.
-        */}
       </body>
     </html>
   );
