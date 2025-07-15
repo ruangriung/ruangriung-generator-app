@@ -25,7 +25,6 @@ export interface GeneratorSettings {
   artStyle: string;
   batchSize: number;
   imageQuality: 'Standar' | 'HD' | 'Ultra';
-  // --- TAMBAHKAN PROPERTI BARU DI SINI ---
   private: boolean;
   safe: boolean;
   transparent: boolean;
@@ -42,7 +41,7 @@ interface ControlPanelProps {
   onAspectRatioChange: (preset: 'Kotak' | 'Portrait' | 'Lansekap') => void;
   onManualDimensionChange: (width: number, height: number) => void;
   onImageQualityChange: (quality: 'Standar' | 'HD' | 'Ultra') => void;
-  onModelSelect: (model: string) => void; // Prop untuk menangani pemilihan model
+  onModelSelect: (model: string) => void;
 }
 
 export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, onModelSelect }: ControlPanelProps) {
@@ -76,7 +75,8 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: '' }));
   };
 
-  const callPromptApi = async (promptForApi: string) => {
+  // --- PERUBAHAN 1: Tambahkan parameter temperature ---
+  const callPromptApi = async (promptForApi: string, temperature = 0.5) => {
     const urlWithToken = `https://text.pollinations.ai/openai?token=${process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN}`;
     
     try {
@@ -88,6 +88,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
         body: JSON.stringify({
           model: 'openai', 
           messages: [{ role: 'user', content: promptForApi }],
+          temperature: temperature, // Gunakan temperature di sini
         }),
       });
 
@@ -110,8 +111,27 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
   const handleRandomPrompt = async () => {
     setIsRandomizing(true);
+
+    // --- PERUBAHAN UTAMA DI SINI ---
+    // 1. Buat daftar tema acak
+    const randomThemes = [
+        'fiksi ilmiah', 'spiderman', 'olahraga','surealis', 'vintage', 'alam liar', 'fantasi', 'fotografi', 'karikatur', 'seni digital', 'steampunk', 'cyberpunk', 'retro futuristik', 'abstrak', 'minimalis', 'horor kosmik', 'dongeng', 'surealis', 'distopia', 'utopia', 'mitologi', 'kuno', 'modern', 'post-apokaliptik', 'perang galaksi', 'seni lukis klasik', 'seni pop', 'seni jalanan', 'seni tradisional', 'seni kontemporer', 'seni konseptual', 'seni instalasi', 'seni patung', 'seni tekstil', 'seni keramik', 'seni grafis', 'seni kolase', 'seni mixed media', 'seni digital', 'seni 3D', 'seni VR', 'seni AR', 'seni AI', 'seni generatif', 'seni partisipatif', 'seni', 'graffiti', 'seni mural', 'seni lukis dinding', 'seni seni rupa', 'seni patung modern', 'seni patung klasik', 'seni patung abstrak', 'seni patung figuratif', 'seni patung instalasi', 'seni patung kinetik', 'seni patung interaktif', 'seni patung digital', 'seni patung VR', 'seni patung AR', 'seni patung AI', 'seni patung generatif', 'seni patung partisipatif'
+    ];
+    
+    // 2. Pilih satu tema secara acak dari daftar
+    const selectedTheme = randomThemes[Math.floor(Math.random() * randomThemes.length)];
+
+    // 3. Masukkan tema acak ke dalam instruksi prompt
+    const randomPromptInstruction = `
+        Anda adalah seorang seniman konseptual yang memberikan ide-ide tak terduga.
+        Berikan saya SATU ide prompt gambar yang benar-benar acak, dengan sentuhan tema "${selectedTheme}".
+        Gabungkan dua atau lebih konsep yang tidak biasa.
+        Buatlah deskriptif secara visual, ringkas, dan JANGAN gunakan tanda kutip dalam respons Anda.
+    `;
+    // --- AKHIR PERUBAHAN ---
+
     toast.promise(
-      callPromptApi("Berikan saya satu prompt gambar yang acak, kreatif, dan deskriptif secara visual. Jadilah ringkas dan jangan gunakan tanda kutip."),
+      callPromptApi(randomPromptInstruction, 0.10), // Gunakan temperature tinggi (0.9) untuk hasil yang lebih acak
       {
         loading: 'Mencari ide prompt acak...',
         success: 'Prompt acak berhasil dibuat!',
@@ -126,6 +146,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       return;
     }
     setIsEnhancing(true);
+    // Gunakan temperature rendah (default 0.5) untuk hasil yang lebih fokus dan relevan
     toast.promise(
       callPromptApi(`Sempurnakan dan tambahkan lebih banyak detail visual ke prompt gambar berikut, tetapi tetap ringkas: "${settings.prompt}". Jangan gunakan atau hapus tanda kutip dalam respons Anda.`),
       {
