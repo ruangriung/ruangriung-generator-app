@@ -1,28 +1,59 @@
 // components/AdBanner.tsx
-import { Megaphone } from 'lucide-react';
+'use client';
+
+import { useEffect } from 'react';
+
+// Tipe ini ditambahkan agar TypeScript tidak error saat mengakses window.adsbygoogle
+declare global {
+  interface Window {
+    adsbygoogle?: { [key: string]: unknown }[];
+  }
+}
 
 interface AdBannerProps {
   className?: string;
   style?: React.CSSProperties;
-  type?: 'banner' | 'square';
+  dataAdSlot: string; // Prop untuk ID slot iklan
+  dataAdFormat?: string;
+  dataFullWidthResponsive?: string;
 }
 
-export const AdBanner = ({ className = '', style, type = 'banner' }: AdBannerProps) => {
-  const adContainerStyle = `
-    w-full bg-gray-200 dark:bg-gray-800 
-    border-2 border-dashed border-gray-400 dark:border-gray-600 
-    rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400
-    ${type === 'banner' ? 'min-h-[90px]' : 'aspect-square'}
-    ${className}
-  `;
+export const AdBanner = ({ 
+  className = '', 
+  style = { display: 'block' }, 
+  dataAdSlot, // ID slot dari AdSense
+  dataAdFormat = 'auto',
+  dataFullWidthResponsive = 'true'
+}: AdBannerProps) => {
+  
+  useEffect(() => {
+    // Fungsi ini akan mendorong iklan untuk dimuat setiap kali komponen ditampilkan
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (err) {
+      console.error("AdSense error:", err);
+    }
+  }, []);
+
+  // Ganti dengan Publisher ID Anda
+  const YOUR_AD_CLIENT_ID = "ca-pub-1439044724518446";
 
   return (
-    <div style={style} className={adContainerStyle}>
-      <div className="text-center">
-        <Megaphone className="mx-auto h-8 w-8" />
-        <p className="text-sm font-semibold mt-2">Slot Iklan</p>
-        <p className="text-xs">{type === 'banner' ? '728x90' : '300x300'}</p>
-      </div>
+    <div className={`w-full text-center ${className}`}>
+      {/* Komponen <ins> ini adalah unit iklan AdSense yang sebenarnya.
+        Atributnya diisi secara dinamis dari props.
+      */}
+      <ins 
+        className="adsbygoogle"
+        style={style}
+        data-ad-client={YOUR_AD_CLIENT_ID}
+        data-ad-slot={dataAdSlot}
+        data-ad-format={dataAdFormat}
+        data-full-width-responsive={dataFullWidthResponsive}
+      ></ins>
     </div>
   );
 };
+
+// Pastikan untuk mengekspor komponen jika Anda belum melakukannya
+export default AdBanner;
