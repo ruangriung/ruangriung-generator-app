@@ -9,10 +9,10 @@ import { ChatInput } from './chatbot/ChatInput';
 import TextareaModal from './TextareaModal';
 import ApiKeyModal from './ApiKeyModal';
 import toast from 'react-hot-toast';
-import { AdBanner } from './AdBanner'; // <-- IMPOR BARU
+import { AdBanner } from './AdBanner'; // Impor komponen AdBanner
 
 export default function Chatbot() {
-  const { 
+  const {
     sessions, setSessions, activeSessionId, setActiveSessionId,
     activeChat, isLoading, models, processAndSendMessage, startNewChat,
     stopGenerating, regenerateResponse, deleteAllSessions,
@@ -20,9 +20,9 @@ export default function Chatbot() {
     dalleApiKey, setDalleApiKey,
     setModelForImage
   } = useChatManager();
-  
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState<number | null>(null);
   const [renameInput, setRenameInput] = useState('');
@@ -30,7 +30,7 @@ export default function Chatbot() {
 
   const [isTextareaModalOpen, setIsTextareaModalOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
-  
+
   const [isGeminiKeyModalOpen, setIsGeminiKeyModalOpen] = useState(false);
   const [isDalleKeyModalOpen, setIsDalleKeyModalOpen] = useState(false);
 
@@ -50,12 +50,12 @@ export default function Chatbot() {
       renameInputRef.current?.focus();
     }
   }, [isRenaming]);
-  
+
   const handleSelectSession = (id: number) => {
     setActiveSessionId(id);
     setIsSidebarOpen(false);
   };
-  
+
   const handleDeleteSession = (idToDelete: number) => {
     if (!window.confirm("Yakin ingin menghapus percakapan ini?")) return;
     setSessions(prev => {
@@ -76,7 +76,7 @@ export default function Chatbot() {
     setIsRenaming(session.id);
     setRenameInput(session.title);
   };
-  
+
   const handleSaveRename = (idToRename: number) => {
     if (!renameInput.trim()) return;
     setSessions(prev => prev!.map(s => s.id === idToRename ? { ...s, title: renameInput } : s));
@@ -96,7 +96,7 @@ export default function Chatbot() {
       setSessions(prev => prev!.map(s => s.id === activeSessionId ? {...s, model: newModel} : s));
     }
   };
-  
+
   const handleGeminiApiKeySubmit = (apiKey: string) => {
     setGeminiApiKey(apiKey);
     localStorage.setItem('gemini_api_key', apiKey);
@@ -104,7 +104,7 @@ export default function Chatbot() {
       setSessions(prev => prev!.map(s => s.id === activeSessionId ? {...s, model: 'Gemini'} : s));
     }
     toast.success('API Key Gemini disimpan!');
-    setIsGeminiKeyModalOpen(false); // Tutup modal setelah submit
+    setIsGeminiKeyModalOpen(false);
   };
 
   const handleDalleApiKeySubmit = (apiKey: string) => {
@@ -114,14 +114,14 @@ export default function Chatbot() {
       setSessions(prev => prev!.map(s => s.id === activeSessionId ? {...s, model: 'DALL-E 3'} : s));
     }
     toast.success('API Key DALL-E 3 disimpan!');
-    setIsDalleKeyModalOpen(false); // Tutup modal setelah submit
+    setIsDalleKeyModalOpen(false);
   };
-  
+
   const handleSendMessage = (message: any) => {
       processAndSendMessage(message);
-      setChatInput(''); 
+      setChatInput('');
   };
-  
+
   const handleImageShortcutClick = () => {
     setModelForImage();
     const textarea = document.getElementById('chat-input-textarea');
@@ -138,9 +138,9 @@ export default function Chatbot() {
         </div>
     );
   }
-  
+
   const formElementStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow text-gray-800 dark:text-gray-200";
-  
+
   const imageGenerationModels = ['Flux', 'gptimage', 'DALL-E 3'];
   const isImageModeActive = imageGenerationModels.includes(activeChat.model);
 
@@ -167,9 +167,8 @@ export default function Chatbot() {
                   </div>
               ))}
             </div>
-            {/* --- SLOT IKLAN 2 --- */}
             <div className="mt-4">
-              <AdBanner type="square" />
+              <AdBanner dataAdSlot="ID_SLOT_IKLAN_PERSEGI_ANDA" />
             </div>
         </aside>
 
@@ -187,8 +186,8 @@ export default function Chatbot() {
                   </div>
               )}
               {activeChat.messages.map((msg, index) => (
-                  <ChatMessage 
-                      key={`${activeChat.id}-${index}`} 
+                  <ChatMessage
+                      key={`${activeChat.id}-${index}`}
                       message={msg}
                       messageId={`${activeChat.id}-${index}`}
                       onRegenerate={index === activeChat.messages.length - 1 && !isLoading && msg.role === 'assistant' ? regenerateResponse : undefined}
@@ -205,23 +204,23 @@ export default function Chatbot() {
                 </div>
               )}
           </div>
-          
+
           <div className="p-2 sm:p-4 border-t border-gray-300 dark:border-gray-700 space-y-2">
             <div className="flex items-center gap-2 sm:gap-4 px-1">
                 <label htmlFor="model-select" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300"><Cpu size={16}/> Model:</label>
-                <select 
-                    id="model-select" 
-                    value={activeChat.model} 
-                    onChange={(e) => handleModelChange(e.target.value)} 
+                <select
+                    id="model-select"
+                    value={activeChat.model}
+                    onChange={(e) => handleModelChange(e.target.value)}
                     className={`${formElementStyle} flex-1 text-sm appearance-none`}
                 >
                   {models.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
                 <div className="flex flex-col items-center">
-                    <button 
+                    <button
                       onClick={handleImageShortcutClick}
                       className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg font-semibold bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-200 transition-all duration-150
-                          ${isImageModeActive 
+                          ${isImageModeActive
                               ? 'shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset text-purple-600'
                               : 'shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset'
                           }`}
@@ -235,7 +234,7 @@ export default function Chatbot() {
                     )}
                 </div>
             </div>
-            <ChatInput 
+            <ChatInput
                 isLoading={isLoading}
                 onSendMessage={handleSendMessage}
                 onStop={stopGenerating}
@@ -254,14 +253,14 @@ export default function Chatbot() {
         value={chatInput}
         onChange={(newValue) => setChatInput(newValue)}
       />
-      
+
       <ApiKeyModal
         isOpen={isGeminiKeyModalOpen}
         onClose={() => setIsGeminiKeyModalOpen(false)}
         onSubmit={handleGeminiApiKeySubmit}
         modelName="Gemini"
       />
-      
+
       <ApiKeyModal
         isOpen={isDalleKeyModalOpen}
         onClose={() => setIsDalleKeyModalOpen(false)}

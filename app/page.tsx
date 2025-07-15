@@ -6,8 +6,8 @@ import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useState, useEffect } from 'react';
-import FAQ from '@/components/FAQ'; // Pastikan komponen FAQ diimpor
-import { AdBanner } from '@/components/AdBanner'; // <-- IMPOR BARU
+import FAQ from '@/components/FAQ';
+import { AdBanner } from '@/components/AdBanner'; // Pastikan ini sudah diimpor
 
 export default function Home() {
   const [deferredPrompt, setDeferredPrompt] = useState<any | null>(null);
@@ -15,23 +15,20 @@ export default function Home() {
   const [showBanner, setShowBanner] = useState(true);
 
   useEffect(() => {
-    // Tangani event 'beforeinstallprompt' untuk PWA
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setShowInstallButton(true); // Tampilkan tombol instal
+      setShowInstallButton(true);
     };
 
-    // Tangani event 'appinstalled' jika PWA sudah diinstal
     const handleAppInstalled = () => {
-      setShowInstallButton(false); // Sembunyikan tombol setelah diinstal
+      setShowInstallButton(false);
       setDeferredPrompt(null);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // Cleanup listener saat komponen di-unmount
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
@@ -43,12 +40,9 @@ export default function Home() {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
-        console.log('User accepted the install prompt.');
+        setDeferredPrompt(null);
         setShowInstallButton(false);
-      } else {
-        console.log('User dismissed the install prompt.');
       }
-      setDeferredPrompt(null);
     }
   };
 
@@ -94,9 +88,9 @@ export default function Home() {
         </p>
       </header>
       
-      {/* --- SLOT IKLAN 1 --- */}
+      {/* --- SLOT IKLAN 1 DIPERBAIKI --- */}
       <div className="w-full max-w-4xl mb-8">
-        <AdBanner type="banner" />
+        <AdBanner dataAdSlot="ID_SLOT_IKLAN_HORIZONTAL_ANDA" />
       </div>
 
       <div className="w-full max-w-4xl flex justify-between items-center mb-4">
