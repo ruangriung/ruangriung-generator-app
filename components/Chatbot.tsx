@@ -168,7 +168,7 @@ export default function Chatbot() {
               ))}
             </div>
             <div className="mt-4">
-              <AdBanner dataAdSlot="ID_SLOT_IKLAN_PERSEGI_ANDA" />
+              <AdBanner dataAdSlot="7376156314" />
             </div>
         </aside>
 
