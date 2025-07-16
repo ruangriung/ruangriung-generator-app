@@ -69,6 +69,7 @@ export default function Footer() {
               <li><Link href="/kebijakan-privasi" className="hover:text-purple-600 dark:hover:text-purple-400">Kebijakan Privasi</Link></li>
               <li><Link href="/penghapusan-data" className="hover:text-purple-600 dark:hover:text-purple-400">Prosedur Penghapusan Data</Link></li>
               <li><Link href="/kontak" className="hover:text-purple-600 dark:hover:text-purple-400">Kontak</Link></li>
+              <li><Link href="/artikel" className="hover:text-purple-600 dark:hover:text-purple-400">Artikel</Link></li>
             </ul>
           </div>
         </div>

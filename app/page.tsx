@@ -1,13 +1,14 @@
 // app/page.tsx
 'use client';
 
-import { Wand2, Sparkles, Download, X } from 'lucide-react';
+import { Wand2, Sparkles, Download, X, BookOpen, Rss, Facebook } from 'lucide-react'; // Impor ikon baru
 import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useState, useEffect } from 'react';
 import FAQ from '@/components/FAQ';
-import { AdBanner } from '@/components/AdBanner'; // Pastikan ini sudah diimpor
+import { AdBanner } from '@/components/AdBanner';
+import Link from 'next/link'; // Impor komponen Link
 
 export default function Home() {
   const [deferredPrompt, setDeferredPrompt] = useState<any | null>(null);
@@ -88,7 +89,19 @@ export default function Home() {
         </p>
       </header>
       
-      {/* --- SLOT IKLAN 1 DIPERBAIKI --- */}
+      {/* === TOMBOL AJAKAN DITAMBAHKAN DI SINI === */}
+      <div className="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-4">
+        <Link href="/artikel" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
+          <Rss size={18} />
+          <span>Baca Tips & Trik</span>
+        </Link>
+        <a href="https://www.facebook.com/groups/1182261482811767/?ref=share&mibextid=lOuIew" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-colors">
+          <Facebook size={18} />
+          <span>Gabung Grup</span>
+        </a>
+      </div>
+      {/* ======================================= */}
+      
       <div className="w-full max-w-4xl mb-8">
         <AdBanner dataAdSlot="6897039624" />
       </div>
