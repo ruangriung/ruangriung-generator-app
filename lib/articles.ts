@@ -29,7 +29,7 @@ export const articles: Article[] = [
   {
     slug: 'tips-membuat-prompt-efektif',
     title: '5 Tips Membuat Prompt Gambar yang Efektif',
-    author: 'Jane Doe',
+    author: 'Tim RuangRiung',
     date: '18 Juli 2025',
     summary: 'Dapatkan hasil gambar terbaik dengan mempelajari cara membuat prompt yang detail dan deskriptif. Kuasai seni berkomunikasi dengan AI.',
     content: `
@@ -40,6 +40,7 @@ export const articles: Article[] = [
       <p class="mb-4">AI mampu meniru berbagai gaya seni. Manfaatkan ini untuk mengarahkan output sesuai keinginan Anda. Apakah Anda ingin hasilnya terlihat seperti lukisan cat minyak, seni digital, foto realistis, atau gaya anime tahun 90-an? Tambahkan kata kunci ini ke prompt Anda. Contoh: "...gaya seni digital fantasi, sangat detail, cinematic lighting" atau "...gaya foto 8k photorealistic".</p>
       <h3 class="text-xl font-bold mt-6 mb-2">3. Arahkan Komposisi dan Pencahayaan</h3>
       <p class="mb-4">Gunakan istilah fotografi dan sinematografi untuk mengontrol bagaimana subjek ditampilkan. Kata kunci seperti "wide-angle shot" akan memberikan pemandangan yang luas, sementara "close-up portrait" akan fokus pada wajah. Anda juga bisa mengatur pencahayaan dengan frasa seperti "cinematic lighting", "dramatic lighting", atau "soft volumetric light" untuk menciptakan suasana yang spesifik.</p>
+      <p>Cara terbaik adalah dengan bereksperimen! Coba ajukan pertanyaan yang sama ke kedua model di chatbot RuangRiung dan bandingkan hasilnya. Dengan begitu, Anda akan segera memahami model mana yang paling cocok untuk gaya kerja Anda.</p>
       <h3 class="text-xl font-bold mt-6 mb-2">4. Jangan Takut untuk Bereksperimen dan Beriterasi</h3>
       <p class="mb-4">Prompt pertama Anda jarang sekali menjadi yang terakhir. Anggap proses ini sebagai dialog. Jika hasil pertama kurang memuaskan, analisis apa yang kurang dan perbaiki prompt Anda. Tambahkan detail, ganti kata sifat, atau bahkan coba gabungkan ide-ide yang kontras. Misalnya, "astronot di taman bunga gaya Van Gogh". Eksperimen adalah kunci untuk menemukan hasil yang unik dan menakjubkan. Gunakan tombol 'Acak' dan 'Sempurnakan' di RuangRiung untuk membantu proses ini.</p>
     `,
@@ -47,7 +48,7 @@ export const articles: Article[] = [
   {
     slug: 'memahami-model-ai-chatbot',
     title: 'Memahami Model AI di Chatbot: OpenAI vs Gemini',
-    author: 'Alex Ray',
+    author: 'Tim RuangRiung',
     date: '19 Juli 2025',
     summary: 'Kenali perbedaan antara model AI terkemuka seperti OpenAI (GPT) dan Google (Gemini) yang tersedia di chatbot kami.',
     content: `
@@ -64,7 +65,7 @@ export const articles: Article[] = [
   {
     slug: 'etika-seni-ai',
     title: 'Etika dan Hak Cipta dalam Seni AI',
-    author: 'Dr. Evelyn Reed',
+    author: 'Tim RuangRiung',
     date: '20 Juli 2025',
     summary: 'Siapa pemilik gambar yang dibuat oleh AI? Bolehkah digunakan untuk komersial? Jelajahi pertanyaan penting seputar etika di dunia seni AI.',
     content: `
@@ -99,6 +100,39 @@ export const articles: Article[] = [
       <h3 class="text-xl font-bold mt-6 mb-2">Bagaimana Cara Menginstalnya?</h3>
       <p class="mb-4">Sangat mudah! Jika Anda melihat banner instalasi, cukup klik tombol tersebut. Jika tidak, pada browser Chrome di desktop, cari ikon instalasi (biasanya berupa layar dengan panah ke bawah) di ujung kanan bilah alamat. Di browser seluler, cari opsi "Add to Home Screen" atau "Install App" di menu browser.</p>
       <p>Dengan PWA, kami berupaya memberikan pengalaman terbaik bagi Anda, menggabungkan aksesibilitas web dengan kenyamanan aplikasi modern. Selamat mencoba!</p>
+    `
+  },
+  {
+    slug: 'memaksimalkan-asisten-prompt',
+    title: 'Cara Kreatif Menggunakan Asisten Prompt',
+    author: 'Tim RuangRiung',
+    date: '22 Juli 2025',
+    summary: 'Asisten Prompt lebih dari sekadar penyempurna. Temukan cara-cara kreatif untuk brainstorming dan menemukan ide-ide tak terduga.',
+    content: `
+      <p class="mb-4">Fitur "Asisten Prompt" di RuangRiung dirancang untuk menjadi partner kreatif Anda. Banyak pengguna hanya memanfaatkannya untuk menyempurnakan ide yang sudah ada, padahal potensinya jauh lebih besar dari itu. Dengan pendekatan yang tepat, asisten ini bisa menjadi sumber inspirasi tak terbatas untuk proyek visual Anda.</p>
+      <h3 class="text-xl font-bold mt-6 mb-2">1. Brainstorming dengan Konsep Abstrak</h3>
+      <p class="mb-4">Cobalah memberikan input yang bukan berupa deskripsi objek, melainkan perasaan atau konsep abstrak. Masukkan kata-kata seperti "kesepian di tengah keramaian", "ketenangan setelah badai", atau "euforia kemenangan" pada kolom subjek. Biarkan AI menginterpretasikan konsep tersebut menjadi sebuah narasi visual yang deskriptif. Anda akan terkejut dengan bagaimana AI mampu menerjemahkan emosi menjadi elemen-elemen gambar yang konkret.</p>
+      <h3 class="text-xl font-bold mt-6 mb-2">2. Menggabungkan Dua Hal yang Tidak Berhubungan</h3>
+      <p class="mb-4">Salah satu cara terbaik untuk mendapatkan hasil yang unik adalah dengan memaksa AI berpikir di luar kebiasaan. Gabungkan dua subjek atau gaya yang sangat kontras. Misalnya, masukkan "Paus di luar angkasa" pada subjek dan "gaya lukisan Renaissance" pada detail tambahan. Kombinasi yang tidak biasa ini akan mendorong model untuk menciptakan visual yang benar-benar baru dan tak terduga, yang mungkin tidak akan pernah Anda pikirkan sebelumnya.</p>
+      <h3 class="text-xl font-bold mt-6 mb-2">3. Gunakan Sebagai Generator Cerita Mikro</h3>
+      <p class="mb-4">Daripada hanya memikirkan satu gambar, gunakan asisten untuk membuat sebuah adegan. Berikan subjek berupa karakter dan tujuan singkat. Contoh: "Seorang penjelajah waktu yang tersesat mencari jalan pulang". AI akan mengembangkan ini menjadi sebuah prompt yang menceritakan sebuah adegan, lengkap dengan latar, suasana, dan detail visual yang kaya, memberikan Anda sebuah prompt yang terasa seperti cuplikan dari sebuah film.</p>
+      <p>Dengan memperlakukan Asisten Prompt sebagai partner dialog, bukan sekadar alat, Anda akan membuka potensi kreativitas yang jauh lebih luas. Jangan ragu untuk memberikan input yang aneh dan lihat keajaiban apa yang bisa diciptakannya untuk Anda.</p>
+    `
+  },
+  {
+    slug: 'analisis-gambar-untuk-inspirasi',
+    title: 'Mengubah Gambar Menjadi Prompt: Kekuatan Analisis Gambar',
+    author: 'Tim RuangRiung',
+    date: '23 Juli 2025',
+    summary: 'Punya gambar yang Anda sukai? Gunakan fitur Analisis Gambar kami untuk mengubahnya menjadi prompt deskriptif yang bisa Anda kembangkan lebih lanjut.',
+    content: `
+      <p class="mb-4">Terkadang, inspirasi terbaik datang dari visual yang sudah ada. Mungkin Anda menemukan sebuah foto dengan pencahayaan yang sempurna, atau lukisan dengan palet warna yang memukau. Fitur "Asisten Analisis Gambar" di RuangRiung memungkinkan Anda untuk memanfaatkan inspirasi tersebut dan mengubahnya menjadi prompt AI yang bisa diedit dan dikembangkan.</p>
+      <h3 class="text-xl font-bold mt-6 mb-2">Bagaimana Cara Kerjanya?</h3>
+      <p class="mb-4">Saat Anda mengunggah sebuah gambar, kami mengirimkannya ke model AI vision canggih (seperti GPT-4o atau Mistral). Model ini tidak hanya "melihat" objek di dalam gambar, tetapi juga menganalisis komposisi, gaya seni, pencahayaan, suasana, dan detail-detail halus lainnya. Hasilnya adalah deskripsi teks yang kaya, yang dirancang khusus untuk bisa digunakan kembali sebagai prompt di generator gambar.</p>
+      <h3 class="text-xl font-bold mt-6 mb-2">Studi Kasus: Dari Foto Pemandangan ke Lukisan Fantasi</h3>
+      <p class="mb-4">Bayangkan Anda mengunggah foto pemandangan matahari terbenam di pantai. AI mungkin akan menghasilkan prompt seperti: "Pemandangan pantai yang tenang saat matahari terbenam, dengan langit berwarna oranye dan ungu, ombak lembut memecah di pasir keemasan, siluet beberapa pohon kelapa di kejauhan, gaya foto realistis." Ini sudah menjadi prompt yang bagus.</p>
+      <p class="mb-4">Namun, keajaiban sebenarnya terjadi saat Anda mulai memodifikasinya. Anda bisa mengambil prompt hasil analisis tersebut dan menambahkan sentuhan Anda sendiri. Ubah menjadi: "Pemandangan pantai <strong>alien</strong> yang tenang saat <strong>dua matahari</strong> terbenam, dengan langit berwarna <strong>hijau dan ungu</strong>, ombak lembut memecah di pasir <strong>bercahaya</strong>, siluet beberapa pohon <strong>kristal</strong> di kejauhan, <strong>gaya seni digital fantasi</strong>." Anda baru saja mengubah foto biasa menjadi konsep seni fiksi ilmiah yang unik.</p>
+      <p>Fitur ini adalah alat yang sangat kuat untuk dekonstruksi dan rekonstruksi ide. Gunakan untuk mempelajari mengapa Anda menyukai sebuah gambar, lalu gunakan elemen-elemen tersebut sebagai fondasi untuk menciptakan sesuatu yang sepenuhnya milik Anda. Ini adalah cara sempurna untuk belajar membuat prompt yang lebih baik sambil terus berkarya.</p>
     `
   }
 ];
