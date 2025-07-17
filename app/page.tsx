@@ -114,6 +114,9 @@ export default function Home() {
       <main className="w-full flex flex-col items-center">
         <Tabs />
       </main>
+      <div className="w-full max-w-4xl mt-16">
+        <AdBanner dataAdSlot="5961316189" />
+      </div>
 
       <div className="w-full mt-16">
         <FAQ />
