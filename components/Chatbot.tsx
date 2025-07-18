@@ -9,7 +9,7 @@ import { ChatInput } from './chatbot/ChatInput';
 import TextareaModal from './TextareaModal';
 import ApiKeyModal from './ApiKeyModal';
 import toast from 'react-hot-toast';
-import { AdBanner } from './AdBanner'; // Impor komponen AdBanner
+import { AdBanner } from './AdBanner';
 
 export default function Chatbot() {
   const {
@@ -167,9 +167,11 @@ export default function Chatbot() {
                   </div>
               ))}
             </div>
-            <div className="mt-4">
+            {/* === IKLAN DINONAKTIFKAN DENGAN KOMENTAR === */}
+            {/* <div className="mt-4">
               <AdBanner dataAdSlot="6897039624" />
-            </div>
+            </div> */}
+            {/* ========================================= */}
         </aside>
 
         <main className="flex-1 flex flex-col h-full">
