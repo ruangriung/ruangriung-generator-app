@@ -1,8 +1,5 @@
-// next.config.ts
-import type { NextConfig } from 'next';
-
-// Impor dari paket PWA yang baru
-import withPWAInit from '@ducanh2912/next-pwa';
+import type { NextConfig } from 'next'
+import withPWA from '@ducanh2912/next-pwa'
 
 const nextConfig: NextConfig = {
   images: {
@@ -21,15 +18,21 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Tidak ada konfigurasi 'zones' sama sekali.
-  // Struktur folder app/premium sudah cukup.
-};
+  async rewrites() {
+    return [
+      {
+        source: '/v1/:path*',
+        destination: '/v1/:path*',
+      }
+    ]
+  }
+}
 
-// Cara baru untuk menginisialisasi PWA
-const withPWA = withPWAInit({
+const pwaConfig = {
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
   register: true,
-});
+  exclude: [/\/v1\/.*$/] // Ganti buildExcludes menjadi exclude
+}
 
-export default withPWA(nextConfig);
+export default withPWA(pwaConfig)(nextConfig)

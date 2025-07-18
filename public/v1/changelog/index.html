@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Meta Description -->
+    <meta name="description" content="RuangRiung AI Image Generator changelog - History of updates and improvements to our AI art generation tool">
+    
+    <!-- Meta Theme Color -->
+    <meta name="theme-color" content="#6c5ce7">
+    <meta name="msapplication-navbutton-color" content="#6c5ce7">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#6c5ce7">
+
+    <!-- Open Graph / Social Media Meta -->
+    <meta property="og:title" content="RuangRiung AI - Changelog">
+    <meta property="og:description" content="History of updates and improvements to RuangRiung AI Image Generator">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ruangriung.my.id/changelog.html">
+    <meta property="og:image" content="https://ruangriung.my.id/assets/ruangriung.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="logo.png">
+    
+    <title>RuangRiung AI - Changelog</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5649c0;
+            --primary-light: #a29bfe;
+            --bg: #e0e5ec;
+            --shadow-light: #ffffff;
+            --shadow-dark: #a3b1c6;
+            --text: #2d3436;
+            --text-light: #636e72;
+            --success: #00b894;
+            --danger: #d63031;
+            --warning: #fdcb6e;
+        }
+        
+        .dark-mode {
+            --primary: #a29bfe;
+            --primary-dark: #847bd1;
+            --primary-light: #6c5ce7;
+            --bg: #2d3436;
+            --shadow-light: #3c4245;
+            --shadow-dark: #1e2224;
+            --text: #dfe6e9;
+            --text-light: #b2bec3;
+            --success: #55efc4;
+            --danger: #ff7675;
+            --warning: #ffeaa7;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+        
+        h1 {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+            text-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+        }
+        
+        .subtitle {
+            color: var(--text-light);
+            font-weight: 300;
+            margin-bottom: 20px;
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+        }
+        
+        .back-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+        }
+        
+        .changelog-container {
+            background: var(--bg);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 8px 8px 15px var(--shadow-dark), -8px -8px 15px var(--shadow-light);
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .version {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--shadow-dark);
+        }
+        
+        .version:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .version-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .version-date {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .changes-list {
+            list-style-type: none;
+        }
+        
+        .change-item {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .change-item:before {
+            content: "•";
+            color: var(--primary);
+            font-size: 1.5rem;
+            position: absolute;
+            left: 0;
+            top: -5px;
+        }
+        
+        .change-type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        
+        .new {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .improved {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .fixed {
+            background-color: var(--warning);
+            color: var(--text);
+        }
+        
+        .removed {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .dark-mode-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 15px;
+            background: var(--bg);
+            box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+        
+        .dark-mode-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 8px 8px 15px var(--shadow-dark), -8px -8px 15px var(--shadow-light);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        .footer-link {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+        
+        .dark-mode .footer-link {
+            color: var(--primary-light);
+        }
+        
+        .dark-mode .footer-link:hover {
+            color: var(--primary);
+        }
+        
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+        }
+        
+        /* Pulse Animation */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(108, 92, 231, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(108, 92, 231, 0);
+            }
+        }
+        
+        .back-to-top.pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .version-title {
+                font-size: 1.3rem;
+            }
+            
+            .changelog-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-clipboard-list"></i> RuangRiung Changelog</h1>
+            <p class="subtitle">History of updates and improvements</p>
+            <a href="https://ruangriung.my.id/" class="back-button"><i class="fas fa-arrow-left"></i> Back to Generator</a>
+            
+            <div class="dark-mode-toggle" id="dark-mode-toggle">
+                <i class="fas fa-moon"></i>
+                <span>Dark Mode</span>
+            </div>
+        </header>
+        
+        <div class="changelog-container">
+            <div class="version">
+                <div class="version">
+    <h2 class="version-title"><i class="fas fa-star"></i> Version 5.2.0</h2>
+    <div class="version-date">April 25, 2025</div>
+    <ul class="changes-list">
+        <li class="change-item">
+            <span class="change-type new">NEW</span> Enhanced image analysis with compression and streaming results
+        </li>
+        <li class="change-item">
+            <span class="change-type new">NEW</span> Improved coin management with visual feedback and animations
+        </li>
+        <li class="change-item">
+            <span class="change-type new">NEW</span> Redesigned textarea expansion for mobile devices
+        </li>
+        <li class="change-item">
+            <span class="change-type improved">IMPROVED</span> Optimized image generation flow with better error handling
+        </li>
+        <li class="change-item">
+            <span class="change-type fixed">FIXED</span> Resolved mobile layout issues with image analysis
+        </li>
+        <li class="change-item">
+            <span class="change-type fixed">FIXED</span> Fixed textarea expansion bugs on iOS devices
+        </li>
+    </ul>
+                </div>
+                <h2 class="version-title"><i class="fas fa-globe"></i> Version 5.1.0</h2>
+                <div class="version-date">April 21, 2025</div>
+                <ul class="changes-list">
+                    <li class="change-item">
+                        <span class="change-type new">NEW</span> Added real-time image filters with adjustable parameters
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type new">NEW</span> Implemented AI-powered image enhancement options
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type improved">IMPROVED</span> Optimized language switching for faster transitions
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type fixed">FIXED</span> Resolved mobile textarea expansion issues
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="version">
+                <h2 class="version-title"><i class="fas fa-language"></i> Version 5.0.2</h2>
+                <div class="version-date">April 18, 2025</div>
+                <ul class="changes-list">
+                    <li class="change-item">
+                        <span class="change-type new">NEW</span> Added 40+ specialized art techniques (etching, lithography, etc.)
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type improved">IMPROVED</span> Enhanced prompt suggestions with more diverse examples
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type fixed">FIXED</span> Fixed aspect ratio calculation for non-square images
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="version">
+                <h2 class="version-title"><i class="fas fa-globe"></i> Version 5.0.0</h2>
+                <div class="version-date">April 14, 2025</div>
+                <ul class="changes-list">
+                    <li class="change-item">
+                        <span class="change-type new">NEW</span> Added bilingual support (English & Bahasa)
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type new">NEW</span> Expanded textarea with adjustable height for better prompt editing
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type new">NEW</span> Added 60 new art styles covering various contemporary techniques
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type improved">IMPROVED</span> Optimized language switching performance
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="version">
+                <h2 class="version-title"><i class="fas fa-rocket"></i> Version 4.2.0</h2>
+                <div class="version-date">April 10, 2025</div>
+                <ul class="changes-list">
+                    <li class="change-item">
+                        <span class="change-type new">NEW</span> Added batch generation feature (generate multiple variations at once)
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type improved">IMPROVED</span> Enhanced prompt suggestions with AI-generated creative prompts
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type fixed">FIXED</span> Fixed mobile layout issues with new batch controls
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="version">
+                <h2 class="version-title"><i class="fas fa-star"></i> Version 4.1.0</h2>
+                <div class="version-date">April 5, 2025</div>
+                <ul class="changes-list">
+                    <li class="change-item">
+                        <span class="change-type new">NEW</span> Added prompt history with thumbnail previews
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type improved">IMPROVED</span> Redesigned settings panel with better organization
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type fixed">FIXED</span> Resolved dark mode transition flickering
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="version">
+                <h2 class="version-title"><i class="fas fa-magic"></i> Version 4.0.0</h2>
+                <div class="version-date">March 28, 2025</div>
+                <ul class="changes-list">
+                    <li class="change-item">
+                        <span class="change-type new">NEW</span> Complete UI redesign with neumorphic styling
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type new">NEW</span> Added dark mode support
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type improved">IMPROVED</span> Optimized image generation performance by 30%
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="version">
+                <h2 class="version-title"><i class="fas fa-paint-brush"></i> Version 3.5.0</h2>
+                <div class="version-date">March 20, 2025</div>
+                <ul class="changes-list">
+                    <li class="change-item">
+                        <span class="change-type new">NEW</span> Added 50+ regional and ethnic art styles
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type improved">IMPROVED</span> Enhanced prompt enhancement algorithm
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type fixed">FIXED</span> Fixed image quality issues with certain aspect ratios
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="version">
+                <h2 class="version-title"><i class="fas fa-bug"></i> Version 3.2.1</h2>
+                <div class="version-date">March 14, 2025</div>
+                <ul class="changes-list">
+                    <li class="change-item">
+                        <span class="change-type fixed">FIXED</span> Resolved mobile keyboard covering textarea issue
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type fixed">FIXED</span> Fixed seed randomization not working properly
+                    </li>
+                    <li class="change-item">
+                        <span class="change-type improved">IMPROVED</span> Better error handling for failed generations
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <footer>
+            &copy; <span id="current-year"></span> RuangRiung AI Image Generator. All rights reserved | 
+            powered by <a href="https://pollinations.ai" target="_blank" class="footer-link">Pollinations.ai</a> | 
+            Develop with ♥️ by <a href="https://ariftirtana.my.id" target="_blank" class="footer-link">Arif Tirtana</a>
+        </footer>
+    </div>
+
+    <!-- Back to Top Button -->
+    <div class="back-to-top" id="backToTop" title="Back to Top">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current year in footer
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            
+            // Dark mode toggle
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i><span>Light Mode</span>';
+            }
+            
+            darkModeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                
+                if (isDarkMode) {
+                    darkModeToggle.innerHTML = '<i class="fas fa-sun"></i><span>Light Mode</span>';
+                } else {
+                    darkModeToggle.innerHTML = '<i class="fas fa-moon"></i><span>Dark Mode</span>';
+                }
+                
+                localStorage.setItem('darkMode', isDarkMode);
+            });
+            
+            // Back to top button
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    document.getElementById('backToTop').classList.add('visible');
+                    setTimeout(() => document.getElementById('backToTop').classList.add('pulse'), 500);
+                } else {
+                    document.getElementById('backToTop').classList.remove('visible', 'pulse');
+                }
+            });
+            
+            document.getElementById('backToTop').addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+                this.classList.remove('pulse');
+            });
+        });
+    </script>
+</body>
+</html>

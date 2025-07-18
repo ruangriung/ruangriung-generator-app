@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuangRiung AI - Wujudkan Imajinasi Anda</title>
+    
+    <meta name="description" content="Selamat datang di RuangRiung AI Image Generator. Platform canggih untuk mengubah teks menjadi karya seni visual yang menakjubkan dengan kekuatan AI.">
+    <meta name="theme-color" content="#6c5ce7">
+    
+    <meta property="og:title" content="RuangRiung AI Image Generator - Wujudkan Imajinasi Anda">
+    <meta property="og:description" content="Ubah imajinasi Anda menjadi visual menakjubkan dengan kekuatan AI.">
+    <meta property="og:image" content="https://ruangriung.my.id/assets/ruangriung.png">
+    <meta property="og:url" content="https://ruangriung.my.id/generator.html">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://ruangriung.my.id/generator.html">
+
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="logo.png">
+
+    <link rel="preload" href="fonts/poppins-v23-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/poppins-v23-latin-700.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="assets/lp-min.css">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "RuangRiung AI Image Generator",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Web",
+      "description": "Platform canggih untuk mengubah deskripsi teks menjadi karya seni visual yang menakjubkan dengan kekuatan kecerdasan buatan (AI).",
+      "url": "https://ruangriung.my.id/generator.html",
+      "author": {
+        "@type": "Person",
+        "name": "Arif Tirtana",
+        "url": "https://ariftirtana.my.id"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0"
+      }
+    }
+    </script>
+</head>
+<body class="light-mode">
+    <div class="background-animation">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    
+    <div class="container">
+        <header>
+            <a href="/" class="logo">RuangRiung AI</a>
+            <div class="header-actions">
+                <a href="generator.html" class="btn btn-primary btn-desktop">Luncurkan Aplikasi</a>
+                <a href="generator.html" class="btn btn-primary btn-mobile">Buka App</a>
+            </div>
+        </header>
+
+        <main>
+            <section class="hero">
+                <h1>Ubah Ide Menjadi <span class="highlight">Karya Seni</span></h1>
+                <p>Cukup tuliskan imajinasi Anda, dan biarkan kecerdasan buatan kami mengubahnya menjadi visual yang unik dan menakjubkan dalam hitungan detik.</p>
+                <form class="hero-form" onsubmit="event.preventDefault();">
+                    <label for="landing-prompt-input" class="sr-only">Masukkan deskripsi gambar</label>
+                    <input type="text" id="landing-prompt-input" placeholder="Contoh: Hutan ajaib di malam hari..." aria-label="Deskripsi gambar yang ingin dibuat">
+                    <button id="landing-generate-btn" class="btn btn-primary">
+                        <img class="icon" src="img/wand.svg" alt="" aria-hidden="true">
+                        Coba Gratis
+                    </button>
+                </form>
+            </section>
+            
+            <section class="showcase reveal">
+                <h2>Galeri Kreasi Tanpa Batas</h2>
+                <div class="image-marquee" aria-label="Galeri contoh gambar buatan AI">
+                    <div class="marquee-inner">
+                        <img src="img/showcase-1.webp" width="300" height="200" loading="lazy" decoding="async" alt="Seni AI seekor panda merah berkacamata hitam">
+                        <img src="img/showcase-2.webp" width="300" height="200" loading="lazy" decoding="async" alt="Seni AI pemandangan kota cyberpunk">
+                        <img src="img/showcase-3.webp" width="300" height="200" loading="lazy" decoding="async" alt="Seni AI perpustakaan yang nyaman dengan gaya Studio Ghibli">
+                        <img src="img/showcase-4.webp" width="300" height="200" loading="lazy" decoding="async" alt="Seni AI lukisan cat minyak galaksi abstrak">
+                        <img src="img/showcase-5.webp" width="300" height="200" loading="lazy" decoding="async" alt="Seni AI logo minimalis untuk kedai kopi">
+                        <img src="img/showcase-6.webp" width="300" height="200" loading="lazy" decoding="async" alt="Seni AI monster lucu berbulu halus dengan gaya Pixar">
+                        <img src="img/showcase-7.webp" width="300" height="200" loading="lazy" decoding="async" alt="Seni AI sebuah kerajaan bawah laut">
+                        <img src="img/showcase-1.webp" width="300" height="200" loading="lazy" decoding="async" alt="" aria-hidden="true">
+                        <img src="img/showcase-2.webp" width="300" height="200" loading="lazy" decoding="async" alt="" aria-hidden="true">
+                        <img src="img/showcase-3.webp" width="300" height="200" loading="lazy" decoding="async" alt="" aria-hidden="true">
+                        <img src="img/showcase-4.webp" width="300" height="200" loading="lazy" decoding="async" alt="" aria-hidden="true">
+                        <img src="img/showcase-5.webp" width="300" height="200" loading="lazy" decoding="async" alt="" aria-hidden="true">
+                        <img src="img/showcase-6.webp" width="300" height="200" loading="lazy" decoding="async" alt="" aria-hidden="true">
+                        <img src="img/showcase-7.webp" width="300" height="200" loading="lazy" decoding="async" alt="" aria-hidden="true">
+                    </div>
+                </div>
+            </section>
+            
+            <section class="features">
+                <div class="features-grid">
+                    <div class="feature-item reveal">
+                        <div class="icon">
+                            <img src="img/bolt.svg" alt="" aria-hidden="true">
+                        </div>
+                        <h3>Generasi Cepat</h3>
+                        <p>Dapatkan hasil gambar berkualitas tinggi dalam hitungan detik, bukan jam.</p>
+                    </div>
+                    <div class="feature-item reveal">
+                        <div class="icon">
+                            <img src="img/pallete.svg" alt="" aria-hidden="true">
+                        </div>
+                        <h3>Ratusan Gaya Seni</h3>
+                        <p>Dari fotorealistik, anime, hingga lukisan abstrak. Pilih gaya yang paling sesuai dengan visi Anda.</p>
+                    </div>
+                    <div class="feature-item reveal">
+                        <div class="icon">
+                            <img src="img/setting.svg" alt="" aria-hidden="true">
+                        </div>
+                        <h3>Kontrol Penuh</h3>
+                        <p>Sesuaikan setiap detail, mulai dari pencahayaan hingga komposisi, untuk hasil yang sempurna.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="final-cta reveal">
+                <h2>Siap untuk Mencipta?</h2>
+                <p>Mulai perjalanan kreatif Anda sekarang. Tidak perlu kartu kredit, tidak perlu pengalaman.</p>
+                <a href="generator.html" class="btn btn-primary">Luncurkan Generator AI 
+                    <img src="img/link.svg" alt="" aria-hidden="true">
+                </a>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        &copy; <span id="current-year"></span> RuangRiung AI. All rights reserved. |
+        Powered by <a href="https://pollinations.ai" target="_blank" rel="noopener noreferrer" class="footer-link">Pollinations.ai</a> | 
+        Developed by <a href="https://ariftirtana.my.id" target="_blank" rel="noopener noreferrer" class="footer-link">Arif Tirtana</a>
+    </footer>
+
+    <script src="assets/lp.js" defer></script>
+</body>
+</html>
