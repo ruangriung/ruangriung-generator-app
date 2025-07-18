@@ -7,28 +7,26 @@
       name="google-site-verification"
       content="3Mybm59m8--LyAZpVYIGHrVk1fSkYemj33bq5RBBdxA"
     />
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-PWFT2SQWNZ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1439044724518446"
+     crossorigin="anonymous"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PWFT2SQWNZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
 
-  gtag('config', 'G-PWFT2SQWNZ');
-</script>
-    <!-- Meta Description -->
+      gtag('config', 'G-PWFT2SQWNZ');
+    </script>
     <meta
       name="description"
       content="Generate stunning AI art with multiple styles - from photorealistic to anime, cyberpunk to Studio Ghibli. Create professional photography, digital art, oil paintings and more with advanced AI image generation."
     />
 
-    <!-- Meta Theme Color (sesuai warna primary di CSS) -->
     <meta name="theme-color" content="#6c5ce7" />
     <meta name="msapplication-navbutton-color" content="#6c5ce7" />
     <meta name="apple-mobile-web-app-status-bar-style" content="#6c5ce7" />
 	<meta name="keywords" content="AI image generator, pembuat gambar AI, seni digital AI, generator gambar Indonesia, RuangRiung, AI kreatif, text to image Indonesia, ai Indonesia, gambar AI realistis, ilustrasi AI, fotografi AI, seni AI Indonesia, gambar anime AI, AI artistik, teknologi kreatif, AI untuk desain, pembuat konten AI, AI lokal Indonesia, seni digital, gambar berkualitas tinggi, AI painting, generator gambar online, AI untuk UMKM, kreasi visual AI, AI untuk konten media sosial, gambar unik AI, AI untuk pemasaran, seni generatif, AI untuk bisnis, teknologi AI Indonesia, inovasi kreatif, AI untuk pengusaha">
 
-    <!-- Open Graph / Social Media Meta (opsional tapi recommended) -->
     <meta
       property="og:title"
       content="RuangRiung AI Image Generator - Create Stunning Digital Art" />
@@ -37,7 +35,6 @@
     <meta property="og:url" content="https://ruangriung.my.id" />
     <meta property="og:image"
       content="https://ruangriung.my.id/assets/ruangriung.png" />
-    <!-- Favicon -->
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <link rel="apple-touch-icon" sizes="180x180" href="logo.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="logo.png" />
@@ -58,7 +55,7 @@
 <div id="add-to-home-banner" style="display: none; position: fixed; top: 0; left: 0; right: 0; background-color: #6c5ce7; color: white; padding: 10px; text-align: center; z-index: 1000;">
   <span style="padding-right: 30px;">Install RuangRiung AI Image Generator untuk akses yang lebih cepat!</span>
   <button id="add-to-home" style="background-color: #ffffff; color: #6c5ce7; border: none; padding: 5px 10px; cursor: pointer; font-weight: bold;">Install</button>
-  <button id="close-banner" style="background: none; color: white; border: none; font-size: 20px; font-weight: bold; cursor: pointer; position: absolute; top: 10px; bottom; 10px; right: 10px;">X</button>
+  <button id="close-banner" style="background: none; color: white; border: none; font-size: 20px; font-weight: bold; cursor: pointer; position: absolute; top: 10px; bottom: 10px; right: 10px">X</button>
 </div>
     <div class="container">
       <header>
@@ -75,7 +72,6 @@
         <span id="statusText">Menyiapkan sistem...</span>
       </div>
 
-      <!-- Coin System -->
       <div class="coin-controls">
         <div class="coin-display-container">
           <div class="coin-display">
@@ -92,7 +88,6 @@
         </div>
       </div>
 
-      <!-- Existing dark mode and language toggles remain unchanged -->
       <div class="dark-mode-toggle" id="dark-mode-toggle">
         <i class="fas fa-moon"></i>
         <span>Dark Mode</span>
@@ -107,16 +102,16 @@
         </div>
       </div>
 
-      <!-- Ad Banner Module 1 - Below Language Toggle -->
       <div class="ad-banner-module" id="adBanner1">
-        <div class="ad-loading">
-          <div class="spinner"></div>
-          <span class="ad-loading-text">Loading ad...</span>
-        </div>
-        <div class="ad-image-container">
-          <img class="ad-image" id="adImage1" alt="ruangriung" />
-          <div class="ad-overlay">Iklan by RuangRiung</div>
-        </div>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-1439044724518446"
+             data-ad-slot="6897039624"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
       </div>
 
       <div class="card">
@@ -151,7 +146,6 @@
             <i class="fas fa-expand"></i>
           </button>
 
-          <!-- Add after the prompt textarea -->
           <div class="textarea-overlay" id="textarea-overlay"></div>
           <button class="done-expanding-btn" id="done-expanding-btn">
             <i class="fas fa-check"></i> Done
@@ -166,7 +160,6 @@
             </button>
           </div>
         </div>
-<!-- Negative Prompt Section -->
 <button id="negative-prompt-toggle" class="negative-prompt-toggle">
     <i class="fas fa-eye-slash"></i> <span class="toggle-text">Show Negative Prompt</span>
 </button>
@@ -182,10 +175,8 @@
     </div>
     
     <div class="common-negative-prompts">
-        <!-- Common prompts will be added by JavaScript -->
-    </div>
+        </div>
 </div>
-<!-- Add this where you want the translation module to appear in your HTML -->
 <div class="translation-module">
   <div class="translation-toggle" id="translation-toggle">
     <span><i class="fas fa-language"></i> Translation Assistant</span>
@@ -218,7 +209,6 @@
         <i class="fas fa-external-link"></i>
   </a>
 </div>
-<!-- Add this to your HTML where the TTS module is defined -->
 <div class="tts-module">
   <div class="tts-toggle" id="tts-toggle">
     <span><i class="fas fa-volume-up"></i>   Text-to-Audio</span>
@@ -268,22 +258,20 @@
           </button>
         </div>
 
-        <!-- Ad Banner Module 2 - Below AI Text Generator -->
         <div class="ad-banner-module" id="adBanner2">
-          <div class="ad-loading">
-            <div class="spinner"></div>
-            <span class="ad-loading-text">Loading ad...</span>
-          </div>
-          <div class="ad-image-container">
-            <img class="ad-image" id="adImage2" alt="ruangriung" />
-            <div class="ad-overlay">Iklan by RuangRiung</div>
-          </div>
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-1439044724518446"
+                 data-ad-slot="6897039624"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
         </div>
         <div class="input-group">
-          <!-- Existing input group code -->
-        </div>
+          </div>
 
-        <!-- Add this right after the input group -->
         <div class="batch-controls">
           <label for="batch-count"
             ><i class="fas fa-copy"></i> Batch Count</label
@@ -331,8 +319,7 @@
             <div class="aspect-ratio-display" id="aspect-ratio-display">
               Aspect Ratio: 1:1
             </div>
-                        	<!-- Tambahkan ini setelah div aspect-ratio-display -->
-<div class="size-preset-container">
+                        	<div class="size-preset-container">
   <label for="size-preset"><i class="fas fa-ruler-combined"></i> Size Preset</label>
   <div class="select-container">
     <i class="fas fa-ruler-combined"></i>
@@ -393,7 +380,6 @@
                 <option value="" selected disabled>
                   -- Select art Style (Optional) --
                 </option>
-                <!-- Ultra Realism -->
                 <optgroup label="Ultra Realism">
                   <option value="">Hyper Realistic</option>
                   <option value="photorealistic">8K Photorealistic</option>
@@ -405,7 +391,6 @@
                   </option>
                 </optgroup>
 
-                <!-- Tambahkan setelah optgroup yang sudah ada -->
                 <optgroup label="Specialized Techniques">
                   <option value="airbrush">Airbrush Art</option>
                   <option value="scratchboard">Scratchboard Art</option>
@@ -479,7 +464,6 @@
                   <option value="thai art">Thai Art</option>
                 </optgroup>
 
-                <!-- Photography -->
                 <optgroup label="Photography Styles">
                   <option value="professional photography">
                     Professional Photography
@@ -492,7 +476,6 @@
                   <option value="kodak portra">Kodak Portra</option>
                   <option value="leica m">Leica M-Series</option>
 
-                  <!-- Sub-genres -->
                   <option value="street photography">Street Photography</option>
                   <option value="urban exploration">Urban Exploration</option>
                   <option value="fashion photography">Fashion Editorial</option>
@@ -509,7 +492,6 @@
                   <option value="infrared">Infrared Photography</option>
                 </optgroup>
 
-                <!-- Anime/Manga -->
                 <optgroup label="Anime & Manga">
                   <option value="anime">Modern Anime</option>
                   <option value="studio ghibli">Studio Ghibli</option>
@@ -525,7 +507,6 @@
                   <option value="shoujo anime">Shoujo Anime</option>
                 </optgroup>
 
-                <!-- Digital Painting -->
                 <optgroup label="Digital Painting">
                   <option value="digital painting">Digital Painting</option>
                   <option value="concept art">Concept Art</option>
@@ -539,7 +520,6 @@
                   <option value="children book">Children's Book</option>
                 </optgroup>
 
-                <!-- Traditional Media -->
                 <optgroup label="Traditional Media">
                   <option value="oil painting">Oil Painting</option>
                   <option value="watercolor">Watercolor</option>
@@ -550,7 +530,6 @@
                   <option value="fresco">Fresco</option>
                   <option value="tempera">Tempera</option>
 
-                  <!-- Historical Periods -->
                   <option value="renaissance">Renaissance</option>
                   <option value="baroque">Baroque</option>
                   <option value="rococo">Rococo</option>
@@ -563,7 +542,6 @@
                   <option value="socialist realism">Socialist Realism</option>
                 </optgroup>
 
-                <!-- Drawing Techniques -->
                 <optgroup label="Drawing Techniques">
                   <option value="pencil sketch">Pencil Sketch</option>
                   <option value="charcoal sketch">Charcoal Sketch</option>
@@ -578,7 +556,6 @@
                   <option value="stippling">Stippling</option>
                 </optgroup>
 
-                <!-- 3D & CGI -->
                 <optgroup label="3D & CGI">
                   <option value="3d render">3D Render</option>
                   <option value="blender">Blender</option>
@@ -593,7 +570,6 @@
                   <option value="voxel art">Voxel Art</option>
                 </optgroup>
 
-                <!-- Game Art Styles -->
                 <optgroup label="Game Art Styles">
                   <option value="low poly">Low Poly</option>
                   <option value="pixel art">Pixel Art</option>
@@ -609,7 +585,6 @@
                   <option value="honkai star rail">Honkai: Star Rail</option>
                 </optgroup>
 
-                <!-- Cyberpunk & Futuristic -->
                 <optgroup label="Cyberpunk & Futuristic">
                   <option value="cyberpunk">Cyberpunk 2077</option>
                   <option value="cyberpunk anime">Cyberpunk Anime</option>
@@ -624,7 +599,6 @@
                   <option value="ghost in the shell">Ghost in the Shell</option>
                 </optgroup>
 
-                <!-- Cartoon & Comics -->
                 <optgroup label="Cartoon & Comics">
                   <option value="disney style">Disney</option>
                   <option value="pixar style">Pixar</option>
@@ -640,7 +614,6 @@
                   <option value="french ligne claire">Ligne Claire</option>
                 </optgroup>
 
-                <!-- Abstract & Experimental -->
                 <optgroup label="Abstract & Experimental">
                   <option value="abstract">Abstract</option>
                   <option value="cubism">Cubism</option>
@@ -656,7 +629,6 @@
                   <option value="data bending">Data Bending</option>
                 </optgroup>
 
-                <!-- Special Effects -->
                 <optgroup label="Special Effects">
                   <option value="holographic">Holographic</option>
                   <option value="neon glow">Neon Glow</option>
@@ -672,7 +644,6 @@
                   <option value="cross processing">Cross Processing</option>
                 </optgroup>
 
-                <!-- Cultural & Historical -->
                 <optgroup label="Cultural & Historical">
                   <option value="ukiyo-e">Ukiyo-e</option>
                   <option value="chinese painting">Chinese Painting</option>
@@ -933,16 +904,16 @@
             <i class="fas fa-download"></i>
             <span class="download-text">Download</span>
           </button>
-          <!-- Ad Banner 3 - Below Download Button -->
           <div class="ad-banner-module" id="adBanner3">
-            <div class="ad-loading">
-              <div class="spinner"></div>
-              <span class="ad-loading-text">Loading ad...</span>
-            </div>
-            <div class="ad-image-container">
-              <img class="ad-image" id="adImage3" alt="Advertisement" />
-              <div class="ad-overlay">Iklan by RuangRiung</div>
-            </div>
+              <ins class="adsbygoogle"
+                   style="display:block"
+                   data-ad-client="ca-pub-1439044724518446"
+                   data-ad-slot="6897039624"
+                   data-ad-format="auto"
+                   data-full-width-responsive="true"></ins>
+              <script>
+                   (adsbygoogle = window.adsbygoogle || []).push({});
+              </script>
           </div>
           <button class="btn btn-secondary" id="share-btn">
             <i class="fas fa-share-alt"></i>
@@ -993,7 +964,6 @@
       </div>
     </div>
   
-    <!-- Textarea Expansion Modal -->
     <div class="modal" id="textarea-modal">
       <div
         class="modal-content"
@@ -1030,11 +1000,9 @@
       </div>
     </div>
 
-    <!-- Back to Top Button -->
     <div class="back-to-top" id="backToTop" title="Back to Top">
       <i class="fas fa-arrow-up"></i>
     </div>
-    <!-- Add this modal before the footer -->
     <div class="modal" id="api-key-modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -1069,7 +1037,6 @@
       </div>
     </div>
 
-    <!-- Add this modal before the footer -->
     <div class="modal" id="image-analysis-modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -1111,8 +1078,7 @@
       </div>
     </div>
     <footer>
-	    <!-- PWA Install Button - Above Footer -->
-<div class="pwa-install-container" style="text-align: center; margin: 20px 0;">
+	    <div class="pwa-install-container" style="text-align: center; margin: 20px 0;">
   <button id="pwa-install-btn" class="btn btn-primary" style="display: none;">
     <i class="fas fa-download"></i> Install
   </button>
@@ -1145,9 +1111,7 @@
         <i class="fas fa-trash"></i>
         <span class="reset-all-text">Reset All Settings</span>
       </button>
-      <!-- Histats.com  (div with counter) -->
       <div id="histats_counter"></div>
-      <!-- Histats.com  START  (aync)-->
       <script type="text/javascript">
         var _Hasync = _Hasync || [];
         _Hasync.push(["Histats.start", "1,4944741,4,4012,112,61,00011111"]);
@@ -1171,8 +1135,7 @@
             alt=""
             border="0" /></a
       ></noscript>
-      <!-- Histats.com  END  -->
-    </footer>
+      </footer>
 <a
   href="https://www.facebook.com/groups/1182261482811767/?ref=share&mibextid=lOuIew"
   target="_blank"
@@ -1206,7 +1169,6 @@
         </div>
       </div>
     </div>
-    <!-- Add this before other script tags -->
     <div id="notification-container"></div>
     
 <div id="battleModal" class="modal">
@@ -1349,8 +1311,7 @@
     <script src="assets/negatif.js"></script>
     <script src="assets/ruangriung.js"></script>
     <script src="assets/translationModule.js"></script>
-        <!-- script src="assets/faqModule.js"></script -->
-    <script src="assets/promptTranslate.js"></script>
+        <script src="assets/promptTranslate.js"></script>
     <script src="assets/consent-cookies.js"></script>
     <script src="assets/status-indicator.js"></script>
 	<script src="assets/size-preset.js"></script>
