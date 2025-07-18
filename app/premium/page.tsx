@@ -1,13 +1,14 @@
+// app/page.tsx
 'use client';
 
-import { Wand2, Sparkles, Download, X, Rss, Facebook, Star } from 'lucide-react';
-import Tabs from '../components/Tabs';
+import { Wand2, Sparkles, Download, X, Rss, Facebook } from 'lucide-react'; // Impor ikon baru
+import Tabs from '@/components/Tabs';
 import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useState, useEffect } from 'react';
 import FAQ from '@/components/FAQ';
-import { AdBanner } from '@/components/AdBanner';
-import Link from 'next/link';
+//import { AdBanner } from '@/components/AdBanner';
+import Link from 'next/link'; // Impor komponen Link
 
 export default function Home() {
   const [deferredPrompt, setDeferredPrompt] = useState<any | null>(null);
@@ -88,6 +89,7 @@ export default function Home() {
         </p>
       </header>
       
+      {/* === TOMBOL AJAKAN DITAMBAHKAN DI SINI === */}
       <div className="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-4">
         <Link href="/artikel" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
           <Rss size={18} />
@@ -98,37 +100,20 @@ export default function Home() {
           <span>Gabung Grup</span>
         </a>
       </div>
+      {/* ======================================= */}
       
-      <div className="w-full max-w-4xl mb-4">
-        <AdBanner dataAdSlot="6897039624" />
-      </div>
+      
+  
 
-       {/* === TOMBOL PREMIUM SEMENTARA DINONAKTIFKAN DENGAN KOMENTAR === */}
-      {/* <div className="w-full max-w-4xl mb-8">
-          <Link 
-              href="/premium" 
-              className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-lg hover:bg-purple-700 transition-colors active:shadow-inner"
-          >
-            <Star size={18} />
-            <span>Go Premium (Ad-Free)</span>
-          </Link>
-        </div>
-      */}
-      {/* ============================================================= */}
-
-      {/* === PERUBAHAN TATA LETAK DI SINI === */}
-      <div className="w-full max-w-4xl flex flex-col gap-4 mb-4">
+      <div className="w-full max-w-4xl flex justify-between items-center mb-4">
         <AuthButton />
         <ThemeToggle />
       </div>
-      {/* ==================================== */}
       
       <main className="w-full flex flex-col items-center">
         <Tabs />
       </main>
-      <div className="w-full max-w-4xl mt-16">
-        <AdBanner dataAdSlot="5961316189" />
-      </div>
+      
 
       <div className="w-full mt-16">
         <FAQ />

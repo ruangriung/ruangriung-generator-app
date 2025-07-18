@@ -1,8 +1,10 @@
-import type { NextConfig } from 'next'
-import withPWA from 'next-pwa'
+// next.config.ts
+import type { NextConfig } from 'next';
+
+// Impor dari paket PWA yang baru
+import withPWAInit from '@ducanh2912/next-pwa';
 
 const nextConfig: NextConfig = {
-  // Tambahkan konfigurasi ini
   images: {
     remotePatterns: [
       {
@@ -11,27 +13,23 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-        { // Tambahkan pola ini untuk avatar Facebook
+      {
         protocol: 'https',
         hostname: 'platform-lookaside.fbsbx.com',
         port: '',
         pathname: '/**',
-        },
+      },
     ],
   },
-  // Anda bisa menambahkan konfigurasi i18n di sini jika ada, misalnya:
-  // i18n: {
-  //   locales: ['en', 'id'],
-  //   defaultLocale: 'en',
-  // },
-}
+  // Tidak ada konfigurasi 'zones' sama sekali.
+  // Struktur folder app/premium sudah cukup.
+};
 
-const pwaConfig = withPWA({
-  dest: 'public', // Direktori output untuk service worker dan file terkait
-  register: true, // Daftarkan service worker secara otomatis
-  skipWaiting: true, // Pastikan service worker baru segera mengambil alih
-  disable: process.env.NODE_ENV === 'development', // Nonaktifkan PWA di mode development
+// Cara baru untuk menginisialisasi PWA
+const withPWA = withPWAInit({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  register: true,
 });
 
-// Perbaiki baris ekspor dengan melakukan type assertion (casting) ke 'any'
-export default pwaConfig(nextConfig as any);
+export default withPWA(nextConfig);

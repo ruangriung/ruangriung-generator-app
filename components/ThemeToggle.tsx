@@ -1,4 +1,3 @@
-// components/ThemeToggle.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -17,7 +16,6 @@ export default function ThemeToggle() {
   }, []);
 
   useEffect(() => {
-    // ... (logika tema tidak berubah)
     if (!mounted) return;
 
     localStorage.setItem('theme', theme);
@@ -43,14 +41,14 @@ export default function ThemeToggle() {
 
 
   if (!mounted) {
-    // Berikan placeholder dengan ukuran yang sama untuk mencegah layout shift
-    return <div className="h-[52px] w-[136px] bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset animate-pulse"></div>;
+    return <div className="h-[52px] w-full bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset animate-pulse"></div>;
   }
 
   const getButtonStyle = (buttonTheme: 'light' | 'dark' | 'system') => {
     const isActive = theme === buttonTheme;
-    // Mengubah padding tombol agar lebih besar dan seragam
-    return `p-3 rounded-lg transition-all duration-200 mx-0.5 ${
+    // --- PERUBAHAN DI SINI ---
+    // Menambahkan flex-1 agar tombol melebar dan justify-center untuk menengahkan ikon
+    return `flex-1 flex justify-center items-center p-3 rounded-lg transition-all duration-200 mx-0.5 ${
       isActive
         ? 'bg-purple-600 text-white shadow-neumorphic-button dark:shadow-dark-neumorphic-button'
         : 'bg-light-bg dark:bg-dark-bg text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-500'
@@ -58,8 +56,9 @@ export default function ThemeToggle() {
   };
 
   return (
-    // Mengubah padding container dan menambahkan min-h- (tinggi minimum)
-    <div className="flex items-center p-1 bg-light-bg dark:bg-dark-bg rounded-xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset min-h-[52px]">
+    // --- PERUBAHAN DI SINI ---
+    // Menambahkan w-full agar container mengambil lebar penuh
+    <div className="w-full flex items-center p-1 bg-light-bg dark:bg-dark-bg rounded-xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset min-h-[52px]">
       <button onClick={() => setTheme('light')} className={getButtonStyle('light')} aria-label="Set Light Theme">
         <Sun size={20} />
       </button>
