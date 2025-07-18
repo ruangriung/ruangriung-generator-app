@@ -1,4 +1,4 @@
-// components/Footer.tsx
+// app/components/Footer.tsx
 import Link from 'next/link';
 import { Zap, Hexagon, Key, Palette, Sparkles, Cloud, Github, Brain, CloudLightning, Feather, Move, Server, Code, Package, ClipboardList, Brush } from 'lucide-react';
 import Image from 'next/image';
@@ -84,6 +84,18 @@ export default function Footer() {
             </noscript>
         </div>
         {/* --- AKHIR PENAMBAHAN --- */}
+        
+        {/* --- PERBAIKAN DI SINI --- */}
+        <div className="mt-4 text-center">
+          <Link 
+            href="/v1/index.html" 
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm py-2 px-4 border border-gray-600 rounded-md hover:bg-purple-600 hover:border-purple-600"
+          >
+            <i className="fas fa-magic-wand-sparkles"></i>
+            Versi UI V1
+          </Link>
+        </div>
+        {/* --- AKHIR PERBAIKAN --- */}
 
       </div>
     </footer>
