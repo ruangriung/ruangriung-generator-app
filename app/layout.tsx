@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import Script from 'next/script';
 import { Toaster } from 'react-hot-toast';
 import CookieConsent from '@/components/CookieConsent';
+import ThemeScript from '@/components/ThemeScript';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -63,8 +64,9 @@ export default function RootLayout({
   const YOUR_AD_PUBLISHER_ID = "ca-pub-1439044724518446";
 
   return (
-    <html lang="en">
+      <html lang="en" suppressHydrationWarning>
       <head>
+        <ThemeScript />
         {/* Tag verifikasi AdSense */}
         <meta name="google-adsense-account" content={YOUR_AD_PUBLISHER_ID}></meta>
         

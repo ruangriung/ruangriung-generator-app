@@ -1,26 +1,34 @@
-// Lokasi file: app/premium/login/page.tsx
-
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Key } from 'lucide-react';
+import { Key, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Turnstile } from '@marsidev/react-turnstile'; // <-- 1. Impor Turnstile
 
 export default function PremiumLoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string>(''); // <-- 2. State untuk token
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
+    if (!turnstileToken) {
+      toast.error('Verifikasi keamanan belum selesai. Mohon tunggu.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('/premium/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
+        // <-- 3. Kirim token bersama password
+        body: JSON.stringify({ password, token: turnstileToken }),
       });
 
       if (res.ok) {
@@ -29,7 +37,9 @@ export default function PremiumLoginPage() {
         router.refresh();
       } else {
         const data = await res.json();
-        toast.error(data.message || 'Kata sandi salah.');
+        toast.error(data.message || 'Kata sandi atau verifikasi keamanan salah.');
+        // Reset token agar pengguna bisa mencoba verifikasi lagi
+        setTurnstileToken(''); 
       }
     } catch (error) {
       toast.error('Terjadi kesalahan saat mencoba login.');
@@ -38,7 +48,7 @@ export default function PremiumLoginPage() {
     }
   };
   
-  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow text-gray-800 dark:text-gray-200";
+  const inputStyle = "w-full p-3 pr-10 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow text-gray-800 dark:text-gray-200";
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-light-bg dark:bg-dark-bg">
@@ -53,12 +63,12 @@ export default function PremiumLoginPage() {
           </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+          <div className="relative">
             <label htmlFor="password" className="sr-only">Kata Sandi</label>
             <input
               id="password"
               name="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
               required
               value={password}
@@ -67,10 +77,27 @@ export default function PremiumLoginPage() {
               placeholder="Kata Sandi Premium"
               disabled={isLoading}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-purple-500"
+              aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
+          
+          {/* 4. Tambahkan komponen Turnstile */}
+          <Turnstile
+            siteKey={process.env.CLOUDFLARE_TURNSTILE_SITE_KEY!}
+            onSuccess={setTurnstileToken}
+            options={{ theme: 'light' }} // atau 'dark' sesuai tema default Anda
+          />
+
           <button
             type="submit"
-            disabled={isLoading}
+            // Tombol dinonaktifkan jika sedang loading atau token belum ada
+            disabled={isLoading || !turnstileToken}
             className="w-full px-6 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 transition-colors disabled:bg-purple-400 disabled:cursor-not-allowed"
           >
             {isLoading ? 'Memeriksa...' : 'Masuk'}

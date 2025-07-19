@@ -1,6 +1,6 @@
 'use client';
 
-import { Wand2, Sparkles, Download, X, Rss, Facebook, Star } from 'lucide-react';
+import { Wand2, Sparkles, Download, X, Rss, Crown, Facebook, Star } from 'lucide-react';
 import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -109,11 +109,11 @@ export default function Home() {
               href="/premium" 
               className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-lg hover:bg-purple-700 transition-colors active:shadow-inner"
           >
-            <Star size={18} />
+            <Crown size={18} />
             <span>Go Premium (Ad-Free)</span>
           </Link>
-        </div>
-      */}
+        </div> */}
+      
       {/* ============================================================= */}
 
       {/* === PERUBAHAN TATA LETAK DI SINI === */}

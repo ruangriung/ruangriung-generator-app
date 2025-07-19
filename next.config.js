@@ -1,7 +1,8 @@
-import type { NextConfig } from 'next'
-import withPWA from '@ducanh2912/next-pwa'
+// Perhatikan .default di akhir baris ini
+const withPWA = require('@ducanh2912/next-pwa').default;
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     remotePatterns: [
       {
@@ -23,16 +24,14 @@ const nextConfig: NextConfig = {
       {
         source: '/v1/:path*',
         destination: '/v1/:path*',
-      }
-    ]
-  }
-}
+      },
+    ];
+  },
+};
 
-const pwaConfig = {
+module.exports = withPWA({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
   register: true,
-  exclude: [/\/v1\/.*$/] // Ganti buildExcludes menjadi exclude
-}
-
-export default withPWA(pwaConfig)(nextConfig)
+  exclude: [/\/v1\/.*$/],
+})(nextConfig);

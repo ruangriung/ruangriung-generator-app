@@ -1,11 +1,15 @@
-// Lokasi: app/premium/layout.tsx
+// app/premium/layout.tsx
 
-// Layout ini hanya perlu meneruskan children (konten halaman)
-// ke layout root (app/layout.tsx) yang akan menampilkannya.
+// Di sini, kita hanya merender "children" tanpa membungkusnya
+// dengan komponen lain seperti Navbar atau Footer dari layout utama.
 export default function PremiumLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+    </>
+  );
 }
