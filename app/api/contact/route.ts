@@ -37,29 +37,28 @@ export async function POST(request: Request) {
     }
 
     // Jika verifikasi Turnstile berhasil, lanjutkan mengirim email
+    // Konfigurasi Gmail (gunakan app password, bukan password biasa)
     const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT),
-        secure: process.env.SMTP_SECURE === 'true',
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-        },
+      service: 'gmail',
+      auth: {
+        user: process.env.NODEMAILER_EMAIL, // alamat Gmail dari env Vercel
+        pass: process.env.NODEMAILER_APP_PASSWORD, // app password Gmail dari env Vercel
+      },
     });
 
     await transporter.sendMail({
-        from: `"${name}" <${process.env.SMTP_USER}>`,
-        to: process.env.CONTACT_EMAIL_RECIPIENT, // Pastikan var ini ada di .env.local
-        replyTo: email,
-        subject: `Kontak: ${subject}`,
-        html: `
-            <h3>Pesan baru dari Formulir Kontak</h3>
-            <p><strong>Nama:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Subjek:</strong> ${subject}</p>
-            <p><strong>Pesan:</strong></p>
-            <p>${message.replace(/\n/g, '<br>')}</p>
-        `,
+      from: `"${name}" <${process.env.NODEMAILER_EMAIL}>`,
+      to: process.env.CONTACT_EMAIL_RECIPIENT || process.env.NODEMAILER_EMAIL, // fallback ke user jika tidak diisi
+      replyTo: email,
+      subject: `Kontak: ${subject}`,
+      html: `
+        <h3>Pesan baru dari Formulir Kontak</h3>
+        <p><strong>Nama:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Subjek:</strong> ${subject}</p>
+        <p><strong>Pesan:</strong></p>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+      `,
     });
 
     return NextResponse.json({ message: 'Pesan Anda telah berhasil dikirim!' }, { status: 200 });
