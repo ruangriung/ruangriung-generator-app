@@ -1,6 +1,6 @@
 'use client';
 
-import { Wand2, Sparkles, Download, X, Rss, Crown, Facebook, Star } from 'lucide-react';
+import { Wand2, Sparkles, Download, X, Rss, Crown, Facebook, Star, Mail } from 'lucide-react';
 import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -97,6 +97,11 @@ export default function Home() {
           <Facebook size={18} />
           <span>Gabung Grup</span>
         </a>
+        {/* PENAMBAHAN TOMBOL EMAIL DI SINI */}
+        <Link href="/kontak" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
+          <Mail size={18} />
+          <span>Email Kami</span>
+        </Link>
       </div>
       
       <div className="w-full max-w-4xl mb-4">
