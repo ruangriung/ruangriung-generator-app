@@ -2,33 +2,9 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    // 1. Ambil password DAN token dari request body
-    const { password, token } = await request.json();
-
-    // 2. Verifikasi token Turnstile
-    const turnstileSecretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
-    if (!turnstileSecretKey) {
-      console.error("CLOUDFLARE_TURNSTILE_SECRET_KEY tidak diatur.");
-      return NextResponse.json({ message: 'Kesalahan konfigurasi server.' }, { status: 500 });
-    }
-
-    const turnstileResponse = await fetch('https://challenges.cloudflare.com/turnstile/v2/siteverify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `secret=${encodeURIComponent(turnstileSecretKey)}&response=${encodeURIComponent(token)}`,
-    });
-
-    const turnstileData = await turnstileResponse.json();
-
-    if (!turnstileData.success) {
-      console.warn('Verifikasi Turnstile gagal:', turnstileData['error-codes']);
-      return NextResponse.json({ message: 'Verifikasi keamanan gagal. Silakan coba lagi.' }, { status: 401 });
-    }
-    // --- Akhir dari Verifikasi Turnstile ---
-
-
-    // 3. Jika Turnstile berhasil, lanjutkan cek password (logika yang sudah ada)
+    const { password } = await request.json(); // Hanya ambil password
     const protectedPassword = process.env.PREMIUM_PASSWORD;
+
     if (!protectedPassword) {
       console.error("PREMIUM_PASSWORD tidak diatur di environment variables.");
       return NextResponse.json({ message: 'Kesalahan konfigurasi server.' }, { status: 500 });

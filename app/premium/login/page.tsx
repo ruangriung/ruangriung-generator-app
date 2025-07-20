@@ -4,31 +4,22 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Key, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { Turnstile } from '@marsidev/react-turnstile'; // <-- 1. Impor Turnstile
 
 export default function PremiumLoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<string>(''); // <-- 2. State untuk token
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (!turnstileToken) {
-      toast.error('Verifikasi keamanan belum selesai. Mohon tunggu.');
-      setIsLoading(false);
-      return;
-    }
-
     try {
       const res = await fetch('/premium/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // <-- 3. Kirim token bersama password
-        body: JSON.stringify({ password, token: turnstileToken }),
+        body: JSON.stringify({ password }), // Hanya kirim password
       });
 
       if (res.ok) {
@@ -37,9 +28,7 @@ export default function PremiumLoginPage() {
         router.refresh();
       } else {
         const data = await res.json();
-        toast.error(data.message || 'Kata sandi atau verifikasi keamanan salah.');
-        // Reset token agar pengguna bisa mencoba verifikasi lagi
-        setTurnstileToken(''); 
+        toast.error(data.message || 'Kata sandi salah.');
       }
     } catch (error) {
       toast.error('Terjadi kesalahan saat mencoba login.');
@@ -86,18 +75,9 @@ export default function PremiumLoginPage() {
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
-          
-          {/* 4. Tambahkan komponen Turnstile */}
-          <Turnstile
-            siteKey={process.env.CLOUDFLARE_TURNSTILE_SITE_KEY!}
-            onSuccess={setTurnstileToken}
-            options={{ theme: 'light' }} // atau 'dark' sesuai tema default Anda
-          />
-
           <button
             type="submit"
-            // Tombol dinonaktifkan jika sedang loading atau token belum ada
-            disabled={isLoading || !turnstileToken}
+            disabled={isLoading}
             className="w-full px-6 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 transition-colors disabled:bg-purple-400 disabled:cursor-not-allowed"
           >
             {isLoading ? 'Memeriksa...' : 'Masuk'}

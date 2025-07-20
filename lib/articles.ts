@@ -7,6 +7,14 @@ import { article as mengenalFiturPwa } from './articles/data/mengenal-fitur-pwa'
 import { article as memaksimalkanAsistenPrompt } from './articles/data/memaksimalkan-asisten-prompt';
 import { article as analisisGambarUntukInspirasi } from './articles/data/analisis-gambar-untuk-inspirasi';
 
+// --- ARTIKEL BARU DITAMBAHKAN DI SINI ---
+import { article as menguasaiKomposisiGambarAi } from './articles/data/menguasai-komposisi-gambar-ai';
+import { article as panduanMemilihModelAi } from './articles/data/panduan-memilih-model-ai';
+import { article as menghidupkanNarasiDenganAudioAi } from './articles/data/menghidupkan-narasi-dengan-audio-ai';
+import { article as tipsFiturEditGambarRealTime } from './articles/data/tips-fitur-edit-gambar-real-time';
+import { article as alurKerjaKreatifMenyimpanPrompt } from './articles/data/alur-kerja-kreatif-menyimpan-prompt';
+// -----------------------------------------
+
 // Interface ini tetap dibutuhkan agar komponen lain tahu bentuk data artikel
 export interface Article {
   slug: string;
@@ -20,6 +28,13 @@ export interface Article {
 // Gabungkan semua artikel yang diimpor ke dalam satu array
 // Urutan di sini akan menentukan urutan di halaman daftar artikel Anda
 export const articles: Article[] = [
+  // --- ARTIKEL BARU ---
+  alurKerjaKreatifMenyimpanPrompt,
+  tipsFiturEditGambarRealTime,
+  menghidupkanNarasiDenganAudioAi,
+  panduanMemilihModelAi,
+  menguasaiKomposisiGambarAi,
+  // --- ARTIKEL LAMA ---
   analisisGambarUntukInspirasi,
   memaksimalkanAsistenPrompt,
   mengenalFiturPwa,
@@ -27,7 +42,7 @@ export const articles: Article[] = [
   memahamiModelAiChatbot,
   tipsMembuatPromptEfektif,
   pengenalanAiGenerator,
-].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // <-- Opsional: Mengurutkan artikel berdasarkan tanggal terbaru
+].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // <-- Mengurutkan artikel berdasarkan tanggal terbaru
 
 
 // Fungsi untuk mendapatkan satu artikel berdasarkan slug-nya
