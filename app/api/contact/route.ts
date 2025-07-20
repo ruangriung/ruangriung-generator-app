@@ -1,47 +1,71 @@
+// app/api/contact/route.ts
+
 import { NextResponse } from 'next/server';
+import nodemailer from 'nodemailer'; // Pastikan nodemailer sudah terinstal
 
 export async function POST(request: Request) {
   try {
-    // 1. Ambil data formulir DAN token dari request
-    const { name, email, message, token } = await request.json();
+    const { name, email, subject, message, token } = await request.json();
 
-    // Pastikan semua data ada
-    if (!name || !email || !message || !token) {
-      return NextResponse.json({ message: 'Semua kolom harus diisi.' }, { status: 400 });
+    if (!name || !email || !subject || !message || !token) {
+      return NextResponse.json({ message: 'Semua kolom, termasuk verifikasi, harus diisi.' }, { status: 400 });
     }
 
-    // 2. Verifikasi token Turnstile (logika yang sama seperti login premium)
     const turnstileSecretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
     if (!turnstileSecretKey) {
       console.error("CLOUDFLARE_TURNSTILE_SECRET_KEY tidak diatur.");
       return NextResponse.json({ message: 'Kesalahan konfigurasi server.' }, { status: 500 });
     }
-
-    const turnstileResponse = await fetch('https://challenges.cloudflare.com/turnstile/v2/siteverify', {
+    
+    // Perbaikan: Mengirim payload sebagai JSON, bukan form-urlencoded
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `secret=${encodeURIComponent(turnstileSecretKey)}&response=${encodeURIComponent(token)}`,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret: turnstileSecretKey,
+        response: token,
+        remoteip: request.headers.get('x-forwarded-for'), // Header IP dari Vercel/Netlify
+      }),
     });
 
-    const turnstileData = await turnstileResponse.json();
+    const turnstileData = await response.json();
 
     if (!turnstileData.success) {
+      // Log error dari Cloudflare untuk debugging
+      console.error("Verifikasi Turnstile Gagal:", turnstileData['error-codes']);
       return NextResponse.json({ message: 'Verifikasi keamanan gagal. Silakan coba lagi.' }, { status: 401 });
     }
-    // --- Akhir dari Verifikasi Turnstile ---
 
+    // Jika verifikasi Turnstile berhasil, lanjutkan mengirim email
+    const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT),
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
+    });
 
-    // 3. Jika Turnstile berhasil, proses pesan kontak Anda
-    // TODO: Ganti bagian ini dengan logika pengiriman email Anda (misalnya menggunakan Nodemailer, Resend, dll.)
-    console.log('Pesan Diterima (setelah verifikasi berhasil):');
-    console.log({ name, email, message });
-    // Simulasi pengiriman email berhasil
-    
+    await transporter.sendMail({
+        from: `"${name}" <${process.env.SMTP_USER}>`,
+        to: process.env.CONTACT_EMAIL_RECIPIENT, // Pastikan var ini ada di .env.local
+        replyTo: email,
+        subject: `Kontak: ${subject}`,
+        html: `
+            <h3>Pesan baru dari Formulir Kontak</h3>
+            <p><strong>Nama:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Subjek:</strong> ${subject}</p>
+            <p><strong>Pesan:</strong></p>
+            <p>${message.replace(/\n/g, '<br>')}</p>
+        `,
+    });
 
     return NextResponse.json({ message: 'Pesan Anda telah berhasil dikirim!' }, { status: 200 });
-    
+
   } catch (error) {
-    console.error('API Kontak Error:', error);
+    console.error('Terjadi kesalahan di API contact:', error);
     return NextResponse.json({ message: 'Terjadi kesalahan pada server.' }, { status: 500 });
   }
 }
