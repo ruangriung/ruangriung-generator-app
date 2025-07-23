@@ -145,7 +145,7 @@ export default function KontakPage() {
             </div>
           </Accordion>
 
-          {/* Bagian Media Sosial */}
+          
           <Accordion title={<h2 className="text-xl font-semibold flex items-center gap-2"><MessageSquare size={20}/>Media Sosial</h2>}>
             <div className="flex items-start gap-4 pt-2"> {/* Added pt-2 for spacing inside accordion */}
               <MessageSquare className="w-6 h-6 text-purple-600 mt-1" />
