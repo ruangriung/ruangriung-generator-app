@@ -1,6 +1,6 @@
 'use client';
 
-import { Wand2, Sparkles, Download, X, Rss, Crown, Facebook, Star, Mail } from 'lucide-react';
+import { Wand2, Sparkles, Download, X, Rss, Crown, Facebook, Star, Mail, LayoutGrid, EarthIcon } from 'lucide-react';
 import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -89,6 +89,15 @@ export default function Home() {
       </header>
       
       <div className="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-4">
+        <Link href="/artikel" 
+          // Ubah class untuk menyamakan dengan tombol Tutorial
+          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all relative"
+        >
+          <LayoutGrid size={18} />
+          <span>Koleksi Prompt AI</span>
+          {/* Teks "Segera Hadir" disamakan dengan tombol Tutorial */}
+          <span className="absolute top-0 right-1 text-[0.6rem] text-white font-normal opacity-80 bg-red-700 px-1 rounded">Segera Hadir</span>
+        </Link>
         <Link href="/artikel" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
           <Rss size={18} />
           <span>Baca Tips & Trik</span>
@@ -97,13 +106,26 @@ export default function Home() {
           <Facebook size={18} />
           <span>Gabung Grup</span>
         </a>
-        {/* PENAMBAHAN TOMBOL EMAIL DI SINI */}
         <Link href="/kontak" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
           <Mail size={18} />
           <span>Email Kami</span>
         </Link>
       </div>
-      
+       {/* TOMBOL BARU DERY-LAU.MY.ID DITEMPATKAN DI SINI */}
+       <div className="w-full max-w-4xl mb-8">
+        <a
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-gray-800 text-white font-bold rounded-lg shadow-lg hover:bg-gray-950 transition-colors active:shadow-inner relative"
+        >
+          <EarthIcon size={18} />
+          <span>Tutorial</span>
+          {/* Teks "Segera Hadir" sebagai overlay atau posisi absolut */}
+          <span className="absolute top-1 right-2 text-[0.6rem] text-white font-normal opacity-80 bg-red-700 px-1 rounded">Segera Hadir</span>
+        </a>
+      </div>
+      {/* AKHIR TOMBOL BARU */}
       <div className="w-full max-w-4xl mb-4">
         <AdBanner dataAdSlot="6897039624" />
       </div>

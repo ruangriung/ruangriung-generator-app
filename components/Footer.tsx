@@ -1,6 +1,6 @@
 // app/components/Footer.tsx
 import Link from 'next/link';
-import { Zap, Hexagon, Key, Palette, Sparkles, Cloud, Github, Brain, CloudLightning, Feather, Move, Server, Code, Package, ClipboardList, Brush } from 'lucide-react';
+import { Zap, Hexagon, Key, Palette, Sparkles, Cloud, Github, Brain, CloudLightning, Feather, Move, Server, Code, Package, ClipboardList, Brush, Star } from 'lucide-react';
 import Image from 'next/image';
 
 export default function Footer() {
