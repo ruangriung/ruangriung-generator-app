@@ -89,7 +89,7 @@ export default function Home() {
       </header>
       
       <div className="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-4">
-        <Link href="https://dery-ai.my.id/" 
+        <Link href="#" 
           // Ubah class untuk menyamakan dengan tombol Tutorial
           className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all relative"
         >
@@ -111,18 +111,16 @@ export default function Home() {
           <span>Email Kami</span>
         </Link>
       </div>
-       {/* TOMBOL BARU DERY-LAU.MY.ID DITEMPATKAN DI SINI */}
        <div className="w-full max-w-4xl mb-8">
         <a
-          href="#"
+          href="https://dery-ai.my.id" // URL diubah ke https://dery-ai.my.id
           target="_blank"
           rel="noopener noreferrer"
           className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-gray-800 text-white font-bold rounded-lg shadow-lg hover:bg-gray-950 transition-colors active:shadow-inner relative"
         >
           <EarthIcon size={18} />
           <span>Tutorial</span>
-          {/* Teks "Segera Hadir" sebagai overlay atau posisi absolut */}
-          <span className="absolute top-1 right-2 text-[0.6rem] text-white font-normal opacity-80 bg-red-700 px-1 rounded">Segera Hadir</span>
+          {/* Teks "Segera Hadir" dihapus */}
         </a>
       </div>
       {/* AKHIR TOMBOL BARU */}
