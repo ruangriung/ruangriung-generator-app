@@ -89,7 +89,7 @@ export default function Home() {
       </header>
       
       <div className="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-4">
-        <Link href="/artikel" 
+        <Link href="#" 
           // Ubah class untuk menyamakan dengan tombol Tutorial
           className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all relative"
         >
