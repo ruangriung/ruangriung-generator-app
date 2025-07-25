@@ -111,7 +111,7 @@ export default function Home() {
       </div>
       <div className="w-full max-w-4xl mb-8">
         <a
-          href="https://dery-lau.my.id"
+          href="https://dery-ai.my.id"
           target="_blank"
           rel="noopener noreferrer"
           className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-gray-800 text-white font-bold rounded-lg shadow-lg hover:bg-gray-950 transition-colors active:shadow-inner relative"
