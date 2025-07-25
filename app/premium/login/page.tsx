@@ -1,3 +1,4 @@
+// ruangriung/ruangriung-generator-app/app/premium/login/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -24,8 +25,8 @@ export default function PremiumLoginPage() {
 
       if (res.ok) {
         toast.success('Akses Premium Diberikan!');
-        router.push('/premium');
-        router.refresh();
+        router.push('/premium'); // Kembali ke perilaku asli
+        router.refresh(); // Kembali ke perilaku asli
       } else {
         const data = await res.json();
         toast.error(data.message || 'Kata sandi salah.');

@@ -1,19 +1,21 @@
 // lib/prompts.ts
 export interface Prompt {
+  id?: string; // ID opsional
   slug: string;
   title: string;
   author: string;
   date: string; // Tanggal publikasi prompt
-  category: string; // Contoh: "Gambar", "Teks", "Audio"
-  toolsUsed: string[]; // Contoh: ["DALL-E", "Midjourney", "Stable Diffusion"]
-  thumbnailUrl: string; // URL gambar thumbnail
-  shortDescription: string; // Deskripsi singkat untuk tampilan daftar
-  fullPrompt: string; // Isi prompt lengkap
-  negativePrompt?: string; // Prompt negatif opsional
-  notes?: string; // Catatan tambahan tentang prompt
+  category: string;
+  toolsUsed: string[];
+  thumbnailUrl: string;
+  shortDescription: string;
+  fullPrompt: string;
+  negativePrompt?: string | null; // Perbaikan: Izinkan null
+  notes?: string | null; // Perbaikan: Izinkan null
 }
 
-// Impor prompt individual di sini
+// Catatan: Impor prompt individual di bawah ini mungkin akan dihapus
+// setelah Anda memigrasikan semua data ke database dan mengandalkan API.
 import { prompt as contohPrompt1 } from '@/lib/prompts/data/contoh-prompt-1';
 import { prompt as contohPromptGambarPembandangan } from '@/lib/prompts/data/contoh-prompt-gambar-pemandangan';
 import { prompt as promptCeritaFiksiIlmiah } from '@/lib/prompts/data/prompt-cerita-fiksi-ilmiah';
@@ -46,7 +48,7 @@ export const prompts: Prompt[] = [
   promptYayoiKusamaTokyoFashionDream,
   promptSaksanaStreetwearPoster,
 
-].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Mengurutkan prompt berdasarkan tanggal terbaru
+].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 export function getPrompt(slug: string): Prompt | undefined {
   return prompts.find((prompt) => prompt.slug === slug);

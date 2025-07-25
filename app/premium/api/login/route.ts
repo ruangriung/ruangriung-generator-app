@@ -1,9 +1,13 @@
+// ruangriung/ruangriung-generator-app/app/premium/api/login/route.ts
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
     const { password } = await request.json(); // Hanya ambil password
-    const protectedPassword = process.env.PREMIUM_PASSWORD;
+    // Catatan: PREMIUM_PASSWORD ini adalah kata sandi plaintext asli Anda
+    // yang digunakan oleh sistem login premium lama.
+    // Jika Anda ingin ini aman, Anda harus menerapkan hashing di sini juga.
+    const protectedPassword = process.env.PREMIUM_PASSWORD; // Ini adalah variabel lingkungan asli Anda
 
     if (!protectedPassword) {
       console.error("PREMIUM_PASSWORD tidak diatur di environment variables.");

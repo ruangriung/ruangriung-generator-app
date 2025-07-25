@@ -1,24 +1,50 @@
-// app/prompt/page.tsx
+// ruangriung/ruangriung-generator-app/app/prompt/page.tsx
 "use client";
 
-import { useState, Fragment } from 'react';
+import { useState, Fragment, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { prompts, Prompt } from '@/lib/prompts';
+import { Prompt } from '@/lib/prompts'; // Hanya impor interface Prompt, bukan array prompts
 import { authors, Author } from '@/lib/authors/authors';
 import { ArrowLeft, ExternalLink, Copy, User, Home, Mail, Eye, Facebook, Instagram, Twitter, InstagramIcon, FacebookIcon, TwitterIcon, LinkedinIcon, MessageCircleHeartIcon, MessageCircleMore, GithubIcon, Music2, Youtube, Earth, AtSign, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AdBanner } from '@/components/AdBanner'; // Import AdBanner component
-import LinkedIn from 'next-auth/providers/linkedin';
-import Github from 'next-auth/providers/github';
 
 export default function DaftarPromptPage() {
+    const [promptsData, setPromptsData] = useState<Prompt[]>([]); // State untuk menyimpan prompt yang diambil dari API
+    const [loading, setLoading] = useState(true); // State untuk indikator loading
+    const [error, setError] = useState<string | null>(null); // State untuk error
+
     const [currentPage, setCurrentPage] = useState(1);
     const promptsPerPage = 9;
-    const totalPages = Math.ceil(prompts.length / promptsPerPage);
+    const totalPages = Math.ceil(promptsData.length / promptsPerPage); // Gunakan promptsData.length
     const indexOfLastPrompt = currentPage * promptsPerPage;
     const indexOfFirstPrompt = indexOfLastPrompt - promptsPerPage;
-    const currentPrompts = prompts.slice(indexOfFirstPrompt, indexOfLastPrompt);
+    const currentPrompts = promptsData.slice(indexOfFirstPrompt, indexOfLastPrompt); // Perbaikan: Menggunakan indexOfLastPrompt
+
+    useEffect(() => {
+        const fetchPrompts = async () => {
+            try {
+                setLoading(true);
+                // Ini adalah endpoint API yang akan Anda buat/sediakan.
+                // Pastikan untuk menyesuaikan URL jika API Anda berada di tempat lain.
+                const response = await fetch('/api/prompts'); 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data: Prompt[] = await response.json();
+                // Urutkan prompt berdasarkan tanggal terbaru (sesuai logika sebelumnya)
+                setPromptsData(data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())); 
+            } catch (err) {
+                setError('Gagal memuat prompt. Silakan coba lagi nanti.');
+                console.error("Failed to fetch prompts: ", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPrompts();
+    }, []); // Array dependensi kosong agar useEffect hanya berjalan sekali saat komponen dimuat
 
     const handleNextPage = () => {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
@@ -39,6 +65,23 @@ export default function DaftarPromptPage() {
 
     const AD_SLOT_ID_PROMPT_GRID = "9876543210";
     const AD_INTERVAL_PROMPT_GRID = 3;
+
+    // Tampilkan pesan loading atau error
+    if (loading) {
+        return (
+            <main className="min-h-screen bg-light-bg dark:bg-dark-bg p-4 sm:p-8 flex justify-center items-center">
+                <p className="text-gray-700 dark:text-gray-300">Memuat prompt...</p>
+            </main>
+        );
+    }
+
+    if (error) {
+        return (
+            <main className="min-h-screen bg-light-bg dark:bg-dark-bg p-4 sm:p-8 flex justify-center items-center">
+                <p className="text-red-500 dark:text-red-400">Error: {error}</p>
+            </main>
+        );
+    }
 
     return (
         <main className="min-h-screen bg-light-bg dark:bg-dark-bg p-4 sm:p-8">

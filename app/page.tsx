@@ -90,12 +90,10 @@ export default function Home() {
       
       <div className="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-4">
         <Link href="#" 
-          // Ubah class untuk menyamakan dengan tombol Tutorial
           className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all relative"
         >
           <LayoutGrid size={18} />
           <span>Koleksi Prompt AI</span>
-          {/* Teks "Segera Hadir" disamakan dengan tombol Tutorial */}
           <span className="absolute top-0 right-1 text-[0.6rem] text-white font-normal opacity-80 bg-red-700 px-1 rounded">Segera Hadir</span>
         </Link>
         <Link href="/artikel" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
@@ -111,16 +109,15 @@ export default function Home() {
           <span>Email Kami</span>
         </Link>
       </div>
-       <div className="w-full max-w-4xl mb-8">
+      <div className="w-full max-w-4xl mb-8">
         <a
-          href="https://dery-ai.my.id/ruang-riung-tutorial/" // URL diubah ke https://dery-ai.my.id
+          href="https://dery-lau.my.id"
           target="_blank"
           rel="noopener noreferrer"
           className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-gray-800 text-white font-bold rounded-lg shadow-lg hover:bg-gray-950 transition-colors active:shadow-inner relative"
         >
           <EarthIcon size={18} />
           <span>Tutorial</span>
-          {/* Teks "Segera Hadir" dihapus */}
         </a>
       </div>
       {/* AKHIR TOMBOL BARU */}

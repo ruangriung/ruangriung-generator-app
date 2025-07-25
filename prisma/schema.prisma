@@ -1,0 +1,27 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // Pastikan ini "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Prompt {
+  id               String    @id @default(uuid()) @map("id") @db.Uuid // ID unik untuk setiap prompt
+  slug             String    @unique // Slug harus unik untuk URL detail prompt
+  title            String
+  author           String
+  date             DateTime  @default(now()) // Tanggal publikasi prompt, otomatis diisi saat dibuat
+  category         String
+  toolsUsed        String[] // Array string untuk alat yang digunakan
+  thumbnailUrl     String // URL gambar thumbnail
+  shortDescription String // Deskripsi singkat
+  fullPrompt       String // Isi prompt lengkap
+  negativePrompt   String? // Prompt negatif opsional (gunakan '?' untuk menjadikannya opsional)
+  notes            String?   // Catatan tambahan opsional
+
+  @@map("prompts") // Memetakan model ke nama tabel di database
+}
