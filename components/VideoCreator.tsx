@@ -46,7 +46,23 @@ export default function VideoCreator() {
     fullPrompt += `- Pergerakan Kamera: ${inputs.pergerakanKamera}\n`;
     if (inputs.efekVisual !== 'Tidak Ada') fullPrompt += `- Efek Visual: ${inputs.efekVisual}\n`;
     fullPrompt += `- Mood dan Suasana: ${inputs.mood}\n\n`;
-    fullPrompt += `Berikan hasilnya dalam format naratif yang mendeskripsikan adegan per adegan secara sinematik.`;
+    fullPrompt += `Berikan hasilnya dalam format JSON. JSON harus memiliki struktur berikut:
+{
+  "title": "Judul video yang menarik",
+  "scenes": [
+    {
+      "scene_number": 1,
+      "description": "Deskripsi singkat adegan ini",
+      "narration": "Narasi atau dialog untuk adegan ini (jika ada, kosongkan jika tidak)",
+      "shot_size": "Ukuran pengambilan gambar untuk adegan ini",
+      "camera_movement": "Pergerakan kamera untuk adegan ini",
+      "visual_effects": "Efek visual yang diterapkan (jika ada, kosongkan jika tidak)",
+      "mood": "Mood atau suasana adegan ini"
+    }
+  ],
+  "overall_notes": "Catatan tambahan atau rekomendasi umum untuk produksi video"
+}
+Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain sebelum atau sesudahnya.`;
 
     const generatePromise = new Promise<string>(async (resolve, reject) => {
       try {
@@ -68,7 +84,17 @@ export default function VideoCreator() {
         }
 
         const result = await response.json();
-        const idea = result.choices[0].message.content;
+        let idea = result.choices[0].message.content;
+
+        try {
+          // Attempt to parse the idea as JSON
+          const parsedIdea = JSON.parse(idea);
+          // If successful, stringify it with pretty printing for display
+          idea = JSON.stringify(parsedIdea, null, 2);
+        } catch (parseError) {
+          console.warn("Failed to parse AI response as JSON, using raw text.", parseError);
+          // If parsing fails, use the raw text as is
+        }
         setVideoIdea(idea);
         resolve('Ide video berhasil dibuat!');
       } catch (error: any) {
@@ -98,11 +124,16 @@ export default function VideoCreator() {
   const handleDownloadJson = () => {
     if (!videoIdea) return;
     
-    const dataToSave = {
-      inputs: inputs,
-      generatedIdea: videoIdea,
-      timestamp: new Date().toISOString()
-    };
+    let dataToSave;
+    try {
+      dataToSave = JSON.parse(videoIdea); // Try to parse if it's already JSON stringified
+    } catch (e) {
+      dataToSave = {
+        inputs: inputs,
+        generatedIdea: videoIdea,
+        timestamp: new Date().toISOString()
+      };
+    }
     
     const jsonString = JSON.stringify(dataToSave, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
