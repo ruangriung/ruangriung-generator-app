@@ -2,7 +2,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Film, Type, Clapperboard, Settings, Camera, Wand, Smile, ClipboardCopy, Check, X, Expand, Download, ChevronDown } from 'lucide-react';
+// Import ikon baru yang mungkin dibutuhkan
+import { Sparkles, Film, Type, Clapperboard, Settings, Camera, Wand, Smile, ClipboardCopy, Check, X, Expand, Download, ChevronDown, Clock, Aperture, SlidersHorizontal, Palette } from 'lucide-react';
 import ButtonSpinner from './ButtonSpinner';
 import Accordion from './Accordion';
 import TextareaModal from './TextareaModal';
@@ -14,10 +15,41 @@ export default function VideoCreator() {
     narasi: '',
     model: 'Sora',
     gayaVisual: 'Sinematik',
+    durasiVideo: '10s', // Opsi baru: Durasi video
+    aspekRasio: '16:9', // Opsi baru: Aspek rasio
+    frameRate: '24', // Opsi baru: Frame rate
     shotSize: 'Medium Shot',
     pergerakanKamera: 'Statis',
-    efekVisual: 'Tidak Ada',
+    angleKamera: 'Eye-level', // Opsi baru: Angle kamera
+    tipeLensa: 'Standard', // Opsi baru: Tipe lensa
+    kedalamanBidang: 'Shallow', // Opsi baru: Kedalaman bidang
+    gradasiWarna: 'Neutral', // Opsi baru: Gradasi warna
+    rentangDinamis: 'Standard', // Opsi baru: Rentang dinamis
+    // Mengganti efekVisual menjadi objek untuk checkbox individual
+    efekCeklist: {
+      motionBlur: false,
+      lensFlare: false,
+      lightLeaks: false,
+      filmScratches: false,
+      vhsGlitch: false,
+      montage: false,
+      datamosh: false,
+      scanlines: false,
+      vignette: false,
+      doubleExposure: false,
+      splitScreen: false,
+      reverseMotion: false,
+      timeFreeze: false,
+      parallax: false,
+      jCut: false,
+      lCut: false,
+      matchCut: false,
+      contrastCut: false,
+    },
     mood: 'Misterius',
+    nilaiSeed: '-1', // Opsi baru: Nilai Seed
+    konsistensi: 75, // Opsi baru: Konsistensi (nilai numerik untuk slider)
+    intensitasGerakan: 50, // Opsi baru: Intensitas Gerakan (nilai numerik untuk slider)
   });
   
   const [videoIdea, setVideoIdea] = useState('');
@@ -25,8 +57,20 @@ export default function VideoCreator() {
   const [isCopied, setIsCopied] = useState(false);
   const [editingField, setEditingField] = useState<null | 'konsep' | 'narasi'>(null);
 
-  const handleInputChange = (field: keyof typeof inputs, value: string) => {
+  // Handler umum untuk semua input teks/select
+  const handleInputChange = (field: keyof typeof inputs, value: string | number | boolean) => {
     setInputs(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Handler khusus untuk checkbox efek
+  const handleEffectChange = (effectName: keyof typeof inputs['efekCeklist'], isChecked: boolean) => {
+    setInputs(prev => ({
+      ...prev,
+      efekCeklist: {
+        ...prev.efekCeklist,
+        [effectName]: isChecked,
+      },
+    }));
   };
 
   const handleGenerateIdea = async () => {
@@ -37,15 +81,36 @@ export default function VideoCreator() {
     setIsLoading(true);
     setVideoIdea('');
 
+    // Mengumpulkan efek yang dipilih menjadi string
+    const selectedEffects = Object.entries(inputs.efekCeklist)
+      .filter(([, isChecked]) => isChecked)
+      .map(([effectName]) => `- ${effectName.replace(/([A-Z])/g, ' $1').toLowerCase().replace('j cut', 'J-Cut').replace('l cut', 'L-Cut').replace('vhs glitch', 'VHS Glitch').replace('film scratches', 'Film Scratches').replace('lens flare', 'Lens Flare').replace('motion blur', 'Motion Blur')}`); // Format nama efek agar lebih rapi
+
     let fullPrompt = `Buatkan saya ide skrip video pendek berdasarkan informasi berikut:\n`;
     fullPrompt += `- Konsep Utama: ${inputs.konsep}\n`;
     if (inputs.narasi) fullPrompt += `- Narasi/Dialog: ${inputs.narasi}\n`;
     fullPrompt += `- Model/Gaya Video: ${inputs.model}\n`;
     fullPrompt += `- Gaya Visual: ${inputs.gayaVisual}\n`;
+    fullPrompt += `- Durasi: ${inputs.durasiVideo}\n`;
+    fullPrompt += `- Aspek Rasio: ${inputs.aspekRasio}\n`;
+    fullPrompt += `- Frame Rate (FPS): ${inputs.frameRate}\n`;
     fullPrompt += `- Ukuran Pengambilan Gambar (Shot): ${inputs.shotSize}\n`;
     fullPrompt += `- Pergerakan Kamera: ${inputs.pergerakanKamera}\n`;
-    if (inputs.efekVisual !== 'Tidak Ada') fullPrompt += `- Efek Visual: ${inputs.efekVisual}\n`;
-    fullPrompt += `- Mood dan Suasana: ${inputs.mood}\n\n`;
+    fullPrompt += `- Angle Kamera: ${inputs.angleKamera}\n`;
+    fullPrompt += `- Tipe Lensa: ${inputs.tipeLensa}\n`;
+    fullPrompt += `- Kedalaman Bidang: ${inputs.kedalamanBidang}\n`;
+    fullPrompt += `- Gradasi Warna: ${inputs.gradasiWarna}\n`;
+    fullPrompt += `- Rentang Dinamis: ${inputs.rentangDinamis}\n`;
+    if (selectedEffects.length > 0) {
+      fullPrompt += `- Efek Visual: ${selectedEffects.join(', ')}\n`;
+    } else {
+      fullPrompt += `- Efek Visual: Tidak Ada\n`;
+    }
+    fullPrompt += `- Mood dan Suasana: ${inputs.mood}\n`;
+    fullPrompt += `- Nilai Seed: ${inputs.nilaiSeed}\n`;
+    fullPrompt += `- Konsistensi: ${inputs.konsistensi}%\n`;
+    fullPrompt += `- Intensitas Gerakan: ${inputs.intensitasGerakan}%\n\n`;
+    
     fullPrompt += `Berikan hasilnya dalam format JSON. JSON harus memiliki struktur berikut:
 {
   "title": "Judul video yang menarik",
@@ -57,12 +122,27 @@ export default function VideoCreator() {
       "shot_size": "Ukuran pengambilan gambar untuk adegan ini",
       "camera_movement": "Pergerakan kamera untuk adegan ini",
       "visual_effects": "Efek visual yang diterapkan (jika ada, kosongkan jika tidak)",
-      "mood": "Mood atau suasana adegan ini"
+      "mood": "Mood atau suasana adegan ini",
+      "details": {
+        "visualStyle": "Gaya visual umum",
+        "duration": "Durasi adegan (e.g., '5s')",
+        "aspectRatio": "Aspek rasio (e.g., '16:9')",
+        "frameRate": "Frame rate (e.g., '24fps')",
+        "cameraAngle": "Angle kamera",
+        "lensType": "Tipe lensa",
+        "depthOfField": "Kedalaman bidang",
+        "colorGrading": "Gradasi warna",
+        "dynamicRange": "Rentang dinamis",
+        "seedValue": "Nilai seed (jika spesifik adegan)",
+        "consistency": "Tingkat konsistensi (%)",
+        "motionIntensity": "Intensitas gerakan (%)"
+      }
     }
   ],
   "overall_notes": "Catatan tambahan atau rekomendasi umum untuk produksi video"
 }
 Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain sebelum atau sesudahnya.`;
+
 
     const generatePromise = new Promise<string>(async (resolve, reject) => {
       try {
@@ -126,8 +206,10 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
     
     let dataToSave;
     try {
-      dataToSave = JSON.parse(videoIdea); // Try to parse if it's already JSON stringified
+      dataToSave = JSON.parse(videoIdea); // Coba parse jika sudah berupa string JSON
     } catch (e) {
+      // Jika gagal parse, artinya videoIdea mungkin masih dalam format teks biasa
+      // Buat objek data dari inputs dan videoIdea mentah
       dataToSave = {
         inputs: inputs,
         generatedIdea: videoIdea,
@@ -150,10 +232,12 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
     toast.success("File JSON berhasil diunduh!");
   };
 
+  // Gaya CSS umum
   const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
   const textareaStyle = `${inputStyle} pr-20 cursor-pointer resize-none`;
   const actionButtonStyle = "flex items-center gap-x-1.5 px-3 py-1.5 text-sm rounded-md transition-colors duration-200 bg-light-bg dark:bg-dark-bg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700";
   const selectStyleWithIcon = `${inputStyle} appearance-none pr-10`;
+  const checkboxContainerStyle = "flex items-center justify-between p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset text-gray-800 dark:text-gray-200";
 
   return (
     <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
@@ -166,6 +250,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
             <p className="text-gray-500 dark:text-gray-400 mt-1">Masukkan topik, dan biarkan AI membuatkan ide video untuk Anda.</p>
         </div>
         
+        {/* Konsep Utama Video */}
         <div>
           <label htmlFor="konsep" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Type size={16} className="text-purple-600"/>Konsep Utama Video *</label>
           <div className="relative w-full">
@@ -176,6 +261,8 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
             </div>
           </div>
         </div>
+        
+        {/* Narasi (Opsional) */}
         <div>
           <label htmlFor="narasi" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Type size={16} className="text-purple-600"/>Narasi (Opsional)</label>
           <div className="relative w-full">
@@ -186,6 +273,8 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
             </div>
           </div>
         </div>
+        
+        {/* Model Video AI */}
         <div>
           <label htmlFor="model" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Clapperboard size={16} className="text-purple-600"/>Model Video AI</label>
           <div className="relative">
@@ -206,27 +295,113 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
         </div>
 
         <div className="space-y-2 pt-4">
-          <Accordion title={<div className="flex items-center gap-2"><Settings size={16} /> <span className="text-gray-700 dark:text-gray-300">Gaya Visual</span></div>}>
-            <div className="relative mt-2">
-              <select value={inputs.gayaVisual} onChange={(e) => handleInputChange('gayaVisual', e.target.value)} className={selectStyleWithIcon}>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Sinematik</option>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Vlog</option>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Dokumenter</option>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Animasi 3D</option>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Anime</option>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Retro/Vintage</option>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Futuristik</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+          {/* Pengaturan Teknis */}
+          <Accordion title={<div className="flex items-center gap-2"><Settings size={16} /> <span className="text-gray-700 dark:text-gray-300">Pengaturan Teknis</span></div>}>
+            <div className="space-y-4 mt-2">
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-300">Durasi Video</label>
+                <div className="relative mt-1">
+                  <select value={inputs.durasiVideo} onChange={(e) => handleInputChange('durasiVideo', e.target.value)} className={selectStyleWithIcon}>
+                    <option value="5s">5 detik</option>
+                    <option value="10s">10 detik</option>
+                    <option value="15s">15 detik</option>
+                    <option value="30s">30 detik</option>
+                    <option value="1m">1 menit</option>
+                    <option value="2m">2 menit</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-300">Aspek Rasio</label>
+                <div className="relative mt-1">
+                  <select value={inputs.aspekRasio} onChange={(e) => handleInputChange('aspekRasio', e.target.value)} className={selectStyleWithIcon}>
+                    <option value="16:9">16:9 (Lanskap)</option>
+                    <option value="9:16">9:16 (Potret/Reels)</option>
+                    <option value="1:1">1:1 (Persegi/Square)</option>
+                    <option value="4:3">4:3 (Klasik)</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-300">Frame Rate (FPS)</label>
+                <div className="relative mt-1">
+                  <select value={inputs.frameRate} onChange={(e) => handleInputChange('frameRate', e.target.value)} className={selectStyleWithIcon}>
+                    <option value="24">24 (Sinematik)</option>
+                    <option value="30">30 (Standar Video)</option>
+                    <option value="60">60 (Gerakan Halus)</option>
+                    <option value="120">120 (Slow Motion)</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Accordion>
+
+          {/* Gaya Visual */}
+          <Accordion title={<div className="flex items-center gap-2"><Palette size={16} /> <span className="text-gray-700 dark:text-gray-300">Gaya Visual</span></div>}>
+            <div className="space-y-4 mt-2">
+              <div className="relative">
+                <label className="text-sm text-gray-600 dark:text-gray-300">Gaya Visual Utama</label>
+                <select value={inputs.gayaVisual} onChange={(e) => handleInputChange('gayaVisual', e.target.value)} className={selectStyleWithIcon}>
+                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Sinematik</option>
+                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Vlog</option>
+                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Dokumenter</option>
+                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Animasi 3D</option>
+                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Anime</option>
+                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Retro/Vintage</option>
+                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Futuristik</option>
+                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Fotorealistik</option>
+                  <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Abstrak</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                  <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                </div>
+              </div>
+              {/* Gradasi Warna */}
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-300">Gradasi Warna</label>
+                <div className="relative mt-1">
+                  <select value={inputs.gradasiWarna} onChange={(e) => handleInputChange('gradasiWarna', e.target.value)} className={selectStyleWithIcon}>
+                    <option value="Neutral">Netral</option>
+                    <option value="Warm">Hangat</option>
+                    <option value="Cool">Dingin</option>
+                    <option value="Desaturated">Desaturasi</option>
+                    <option value="High Contrast">Kontras Tinggi</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                  </div>
+                </div>
+              </div>
+              {/* Rentang Dinamis */}
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-300">Rentang Dinamis</label>
+                <div className="relative mt-1">
+                  <select value={inputs.rentangDinamis} onChange={(e) => handleInputChange('rentangDinamis', e.target.value)} className={selectStyleWithIcon}>
+                    <option value="Standard">Standar</option>
+                    <option value="High Dynamic Range (HDR)">High Dynamic Range (HDR)</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                  </div>
+                </div>
               </div>
             </div>
           </Accordion>
           
+          {/* Sinematografi */}
           <Accordion title={<div className="flex items-center gap-2"><Camera size={16} /> <span className="text-gray-700 dark:text-gray-300">Sinematografi</span></div>}>
             <div className="space-y-4 mt-2">
               <div>
-                <label className="text-sm text-gray-600 dark:text-gray-300">Shot Size</label>
+                <label className="text-sm text-gray-600 dark:text-gray-300">Ukuran Pengambilan Gambar (Shot Size)</label>
                 <div className="relative mt-1">
                   <select value={inputs.shotSize} onChange={(e) => handleInputChange('shotSize', e.target.value)} className={selectStyleWithIcon}>
                     <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Wide Shot</option>
@@ -260,27 +435,75 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
                   </div>
                 </div>
               </div>
-            </div>
-          </Accordion>
-          
-          <Accordion title={<div className="flex items-center gap-2"><Wand size={16} /> <span className="text-gray-700 dark:text-gray-300">Efek Visual</span></div>}>
-            <div className="relative mt-2">
-              <select value={inputs.efekVisual} onChange={(e) => handleInputChange('efekVisual', e.target.value)} className={selectStyleWithIcon}>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Tidak Ada</option>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Slow Motion</option>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Timelapse</option>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Vignette</option>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Light Leaks</option>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Glitch</option>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Film Grain</option>
-                <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Color Grading (Hangat/Dingin)</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+              {/* Angle Kamera */}
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-300">Angle Kamera</label>
+                <div className="relative mt-1">
+                  <select value={inputs.angleKamera} onChange={(e) => handleInputChange('angleKamera', e.target.value)} className={selectStyleWithIcon}>
+                    <option value="Eye-level">Eye-level (Mata Manusia)</option>
+                    <option value="Low-angle">Low-angle (Sudut Rendah)</option>
+                    <option value="High-angle">High-angle (Sudut Tinggi)</option>
+                    <option value="Dutch Angle">Dutch Angle (Miring)</option>
+                    <option value="Overhead">Overhead (Atas Kepala)</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                  </div>
+                </div>
+              </div>
+              {/* Tipe Lensa */}
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-300">Tipe Lensa</label>
+                <div className="relative mt-1">
+                  <select value={inputs.tipeLensa} onChange={(e) => handleInputChange('tipeLensa', e.target.value)} className={selectStyleWithIcon}>
+                    <option value="Standard">Standar</option>
+                    <option value="Wide">Wide-angle</option>
+                    <option value="Telephoto">Telefoto</option>
+                    <option value="Fisheye">Fisheye</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                  </div>
+                </div>
+              </div>
+              {/* Kedalaman Bidang */}
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-300">Kedalaman Bidang (Depth of Field)</label>
+                <div className="relative mt-1">
+                  <select value={inputs.kedalamanBidang} onChange={(e) => handleInputChange('kedalamanBidang', e.target.value)} className={selectStyleWithIcon}>
+                    <option value="Shallow">Dangkal (latar blur)</option>
+                    <option value="Deep">Dalam (semua fokus)</option>
+                    <option value="Rack Focus">Rack Focus (pergeseran fokus)</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                  </div>
+                </div>
               </div>
             </div>
           </Accordion>
           
+          {/* Efek Visual (Diubah menjadi checkboxes) */}
+          <Accordion title={<div className="flex items-center gap-2"><Wand size={16} /> <span className="text-gray-700 dark:text-gray-300">Efek Visual</span></div>}>
+            <div className="space-y-3 mt-2">
+              {Object.entries(inputs.efekCeklist).map(([key, value]) => (
+                <div key={key} className={checkboxContainerStyle}>
+                  <label htmlFor={key} className="flex-grow cursor-pointer text-sm font-medium capitalize">
+                    {key.replace(/([A-Z])/g, ' $1').replace('j cut', 'J-Cut').replace('l cut', 'L-Cut').replace('vhs glitch', 'VHS Glitch').replace('film scratches', 'Film Scratches').replace('lens flare', 'Lens Flare').replace('motion blur', 'Motion Blur')}
+                  </label>
+                  <input
+                    type="checkbox"
+                    id={key}
+                    checked={value}
+                    onChange={(e) => handleEffectChange(key as keyof typeof inputs['efekCeklist'], e.target.checked)}
+                    className="h-4 w-4 text-purple-600 bg-light-bg dark:bg-dark-bg border-gray-300 rounded focus:ring-purple-500"
+                  />
+                </div>
+              ))}
+            </div>
+          </Accordion>
+          
+          {/* Mood & Suasana */}
           <Accordion title={<div className="flex items-center gap-2"><Smile size={16} /> <span className="text-gray-700 dark:text-gray-300">Mood & Suasana</span></div>}>
             <div className="relative mt-2">
               <select value={inputs.mood} onChange={(e) => handleInputChange('mood', e.target.value)} className={selectStyleWithIcon}>
@@ -296,6 +519,47 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
                 <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+              </div>
+            </div>
+          </Accordion>
+
+          {/* Pengaturan AI Lanjutan */}
+          <Accordion title={<div className="flex items-center gap-2"><SlidersHorizontal size={16} /> <span className="text-gray-700 dark:text-gray-300">Pengaturan AI Lanjutan</span></div>}>
+            <div className="space-y-4 mt-2">
+              <div>
+                <label htmlFor="nilaiSeed" className="text-sm text-gray-600 dark:text-gray-300">Nilai Seed (-1 untuk acak)</label>
+                <input
+                  type="number"
+                  id="nilaiSeed"
+                  value={inputs.nilaiSeed}
+                  onChange={(e) => handleInputChange('nilaiSeed', e.target.value)}
+                  className={inputStyle}
+                  placeholder="-1"
+                />
+              </div>
+              <div>
+                <label htmlFor="konsistensi" className="text-sm text-gray-600 dark:text-gray-300">Konsistensi: <span className="font-medium">{inputs.konsistensi}%</span></label>
+                <input
+                  type="range"
+                  id="konsistensi"
+                  min="0"
+                  max="100"
+                  value={inputs.konsistensi}
+                  onChange={(e) => handleInputChange('konsistensi', parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-purple-600"
+                />
+              </div>
+              <div>
+                <label htmlFor="intensitasGerakan" className="text-sm text-gray-600 dark:text-gray-300">Intensitas Gerakan: <span className="font-medium">{inputs.intensitasGerakan}%</span></label>
+                <input
+                  type="range"
+                  id="intensitasGerakan"
+                  min="0"
+                  max="100"
+                  value={inputs.intensitasGerakan}
+                  onChange={(e) => handleInputChange('intensitasGerakan', parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-purple-600"
+                />
               </div>
             </div>
           </Accordion>
