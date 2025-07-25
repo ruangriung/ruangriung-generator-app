@@ -6,7 +6,7 @@ import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useState, useEffect } from 'react';
 import FAQ from '@/components/FAQ';
-import { AdBanner } from '@/components/AdBanner';
+import { AdBanner } from '@/components/AdBanner'; // Pastikan AdBanner diimpor dengan benar
 import Link from 'next/link';
 
 export default function Home() {
@@ -88,41 +88,54 @@ export default function Home() {
         </p>
       </header>
       
-      <div className="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-4">
-        <Link href="#" 
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all relative"
+      {/* Grouping for Main Features/Content */}
+      <div className="w-full max-w-4xl mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Link href="#"
+          className="flex items-center justify-center gap-2 p-4 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all relative group"
         >
-          <LayoutGrid size={18} />
-          <span>Koleksi Prompt AI</span>
-          <span className="absolute top-0 right-1 text-[0.6rem] text-white font-normal opacity-80 bg-red-700 px-1 rounded">Segera Hadir</span>
+          <LayoutGrid size={20} className="text-purple-600 group-hover:scale-110 transition-transform" />
+          <span className="text-lg">Koleksi Prompt AI</span>
+          <span className="absolute top-1 right-2 text-[0.6rem] text-white font-normal opacity-90 bg-red-700 px-1.5 py-0.5 rounded-full">Segera Hadir</span>
         </Link>
-        <Link href="/artikel" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
-          <Rss size={18} />
-          <span>Baca Tips & Trik</span>
+
+        <Link href="/artikel"
+          className="flex items-center justify-center gap-2 p-4 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all group"
+        >
+          <Rss size={20} className="text-purple-600 group-hover:scale-110 transition-transform" />
+          <span className="text-lg">Baca Tips & Trik</span>
         </Link>
-        <a href="https://www.facebook.com/groups/1182261482811767/?ref=share&mibextid=lOuIew" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-colors">
-          <Facebook size={18} />
-          <span>Gabung Grup</span>
-        </a>
-        <Link href="/kontak" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
-          <Mail size={18} />
-          <span>Email Kami</span>
-        </Link>
-      </div>
-      <div className="w-full max-w-4xl mb-8">
+        
         <a
           href="https://dery-ai.my.id"
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-gray-800 text-white font-bold rounded-lg shadow-lg hover:bg-gray-950 transition-colors active:shadow-inner relative"
+          className="flex items-center justify-center gap-2 p-4 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all group sm:col-span-2 lg:col-span-1"
         >
-          <EarthIcon size={18} />
-          <span>Tutorial</span>
+          <EarthIcon size={20} className="text-purple-600 group-hover:scale-110 transition-transform" />
+          <span className="text-lg">Tutorial</span>
         </a>
       </div>
+
+      {/* Grouping for Community/Contact */}
+      <div className="w-full max-w-4xl mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <a href="https://www.facebook.com/groups/1182261482811767/?ref=share&mibextid=lOuIew" target="_blank" rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 p-4 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-colors group"
+        >
+          <Facebook size={20} className="group-hover:scale-110 transition-transform" />
+          <span className="text-lg">Gabung Grup</span>
+        </a>
+
+        <Link href="/kontak"
+          className="flex items-center justify-center gap-2 p-4 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all group"
+        >
+          <Mail size={20} className="text-purple-600 group-hover:scale-110 transition-transform" />
+          <span className="text-lg">Email Kami</span>
+        </Link>
+      </div>
+
       {/* AKHIR TOMBOL BARU */}
       <div className="w-full max-w-4xl mb-4">
-        <AdBanner dataAdSlot="6897039624" />
+        <AdBanner dataAdSlot="8254616654" />
       </div>
 
        {/* === TOMBOL PREMIUM SEMENTARA DINONAKTIFKAN DENGAN KOMENTAR === */}
@@ -149,6 +162,7 @@ export default function Home() {
         <Tabs />
       </main>
       <div className="w-full max-w-4xl mt-16">
+        {/* PERBAIKAN DI SINI: dataAdAdSlot diubah menjadi dataAdSlot */}
         <AdBanner dataAdSlot="5961316189" />
       </div>
 
