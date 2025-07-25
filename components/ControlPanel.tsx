@@ -123,10 +123,11 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
     // 3. Masukkan tema acak ke dalam instruksi prompt
     const randomPromptInstruction = `
-        Anda adalah seorang seniman konseptual yang memberikan ide-ide tak terduga.
-        Berikan saya SATU ide prompt gambar yang benar-benar acak, dengan sentuhan tema "${selectedTheme}".
-        Gabungkan dua atau lebih konsep yang tidak biasa.
-        Buatlah deskriptif secara visual, ringkas, dan JANGAN gunakan tanda kutip dalam respons Anda.
+      You are a conceptual artist who provides unexpected ideas.
+      Give me ONE truly random image prompt idea, with a touch of the theme "${selectedTheme}".
+      Combine two or more unusual concepts.
+      Make it visually descriptive, concise, and DO NOT use quotation marks in your response.
+      Please respond in English.
     `;
     // --- AKHIR PERUBAHAN ---
 
@@ -148,11 +149,13 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     setIsEnhancing(true);
     // Gunakan temperature rendah (default 0.5) untuk hasil yang lebih fokus dan relevan
     toast.promise(
-      callPromptApi(`Sempurnakan dan tambahkan lebih banyak detail visual ke prompt gambar berikut, tetapi tetap ringkas: "${settings.prompt}". Jangan gunakan atau hapus tanda kutip dalam respons Anda.`),
+      callPromptApi(
+      `Enhance and add more visual details to the following image prompt, but keep it concise: "${settings.prompt}". Do not use or remove quotation marks in your response. Please respond in English.`,
+      ),
       {
-        loading: 'Menyempurnakan prompt...',
-        success: 'Prompt berhasil disempurnakan!',
-        error: 'Gagal menyempurnakan prompt.',
+      loading: 'Enhancing prompt...',
+      success: 'Prompt enhanced successfully!',
+      error: 'Failed to enhance prompt.',
       }
     ).finally(() => setIsEnhancing(false));
   };
