@@ -1,3 +1,4 @@
+// commit: fix: TinyMCE cursor bug by using only initialValue on mount and setting editor content manually
 // ruangriung/ruangriung-generator-app/app/admin/page.tsx
 "use client";
 
@@ -100,6 +101,8 @@ export default function AdminPromptPage() {
         // Ini hanya akan berjalan di sisi klien setelah komponen terpasang
         if (typeof window !== 'undefined') {
             setTinymceInit({
+                // Pindahkan directionality ke awal untuk memastikan prioritas
+                directionality: 'ltr', // Memastikan arah teks dari kiri ke kanan
                 height: 300,
                 menubar: false,
                 plugins: [
@@ -107,7 +110,8 @@ export default function AdminPromptPage() {
                     'insertdatetime', 'media', 'table', 'paste', 'help', 'wordcount'
                 ],
                 toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
-                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                // Tentukan content_style yang juga menyertakan direction: ltr
+                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px; direction: ltr; }', // Tambahkan direction: ltr di sini
                 skin: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oxide-dark' : 'oxide',
                 content_css: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default',
             });
@@ -546,17 +550,23 @@ export default function AdminPromptPage() {
                     <div>
                         <label htmlFor="fullPrompt" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Isi Prompt Lengkap</label>
                         {/* Implementasi TinyMCE Editor dengan dynamic import dan inisialisasi yang aman */}
-                        {mounted && tinymceInit ? (
-                            <DynamicEditor
-                                apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
-                                onInit={(evt, editor) => (editorRef.current = editor)}
-                                initialValue={formData.fullPrompt}
-                                onEditorChange={handleEditorChange}
-                                init={tinymceInit}
-                            />
-                        ) : (
-                            <p className="text-gray-500 dark:text-gray-400">Memuat editor...</p>
-                        )}
+        {mounted && tinymceInit ? (
+            <DynamicEditor
+                apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
+                onInit={(evt, editor) => {
+                    editorRef.current = editor;
+                    // Set isi editor saat pertama kali mount
+                    if (formData.fullPrompt) {
+                        editor.setContent(formData.fullPrompt);
+                    }
+                }}
+                initialValue=""
+                onEditorChange={handleEditorChange}
+                init={tinymceInit}
+            />
+        ) : (
+            <p className="text-gray-500 dark:text-gray-400">Memuat editor...</p>
+        )}
                     </div>
                     <div>
                         <label htmlFor="negativePrompt" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prompt Negatif (Opsional)</label>
