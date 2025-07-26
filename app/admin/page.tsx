@@ -75,6 +75,11 @@ export default function AdminPromptPage() {
     const [deletionReason, setDeletionReason] = useState('');
     const [sendingDeleteRequest, setSendingDeleteRequest] = useState(false);
 
+    // --- State baru untuk Link Generator Thumbnail ---
+    const [promptInput, setPromptInput] = useState('');
+    const [thumbnailUrl, setThumbnailUrl] = useState('');
+    const [copySuccess, setCopySuccess] = useState('');
+    // -------------------------------------------------
 
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [customCategory, setCustomCategory] = useState<string>('');
@@ -85,9 +90,13 @@ export default function AdminPromptPage() {
     const editorRef = useRef<any>(null);
 
     // Perbaikan: Inisialisasi tinymceInit sebagai null/objek kosong yang aman
-    const [tinymceInit, setTinymceInit] = useState<any | null>(null); 
+    const [tinymceInit, setTinymceInit] = useState<any | null>(null);
+
+    // --- State baru untuk Hydration (mounted) ---
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        setMounted(true); // Komponen telah terpasang di sisi klien
         // Ini hanya akan berjalan di sisi klien setelah komponen terpasang
         if (typeof window !== 'undefined') {
             setTinymceInit({
@@ -131,6 +140,9 @@ export default function AdminPromptPage() {
         if (editorRef.current) {
             editorRef.current.setContent('');
         }
+        setPromptInput(''); // Reset prompt input generator
+        setThumbnailUrl(''); // Reset thumbnail URL generator
+        setCopySuccess(''); // Reset copy success message
         toast.success("Formulir telah direset!");
     };
 
@@ -238,11 +250,40 @@ export default function AdminPromptPage() {
         }
     };
 
+    // --- Fungsi baru untuk Link Generator Thumbnail ---
+    const generateThumbnailLink = () => {
+        if (!promptInput.trim()) {
+            toast.error('Mohon masukkan prompt terlebih dahulu untuk menghasilkan link.');
+            return;
+        }
+
+        const encodedPrompt = encodeURIComponent(promptInput.trim());
+        const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=gptimage&nologo=true`;
+        setThumbnailUrl(url);
+        setCopySuccess(''); // Reset status salin
+        toast.success('Link thumbnail berhasil dihasilkan!');
+    };
+
+    const copyToClipboard = () => {
+        if (thumbnailUrl) {
+            navigator.clipboard.writeText(thumbnailUrl).then(() => {
+                setCopySuccess('Link berhasil disalin!');
+                toast.success('Link disalin ke clipboard!');
+            }).catch(err => {
+                setCopySuccess('Gagal menyalin link.');
+                toast.error('Gagal menyalin link.');
+                console.error('Failed to copy: ', err);
+            });
+        }
+    };
+    // -------------------------------------------------
+
+
     return (
         <main className="min-h-screen bg-light-bg dark:bg-dark-bg p-4 sm:p-8">
             <div className="max-w-4xl mx-auto bg-light-bg dark:bg-dark-bg p-6 md:p-8 rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
                 <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">Tambah Prompt Baru</h1>
-                
+
                 <div className="mb-8 flex flex-wrap justify-center gap-4">
                     <Link
                         href="/prompt"
@@ -397,6 +438,73 @@ export default function AdminPromptPage() {
                             placeholder="Alat kustom (pisahkan dengan koma)"
                         />
                     </div>
+
+                    {/* --- Bagian Generator Link Thumbnail Baru --- */}
+                    <div className="border border-gray-300 dark:border-gray-700 p-4 rounded-lg shadow-inner-neumorphic dark:shadow-inner-dark-neumorphic bg-gray-50 dark:bg-gray-850">
+                        <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white flex items-center gap-2">
+                            <ImageIcon size={20} className="text-blue-500" /> Generator Link Thumbnail Otomatis
+                        </h2>
+                        <div className="mb-4">
+                            <label htmlFor="promptForThumbnail" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Masukkan Prompt untuk Thumbnail:
+                            </label>
+                            <textarea
+                                id="promptForThumbnail"
+                                rows={3}
+                                className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                placeholder="Contoh: seekor kucing berbulu pelangi, gaya seni lukisan minyak"
+                                value={promptInput}
+                                onChange={(e) => setPromptInput(e.target.value)}
+                            ></textarea>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={generateThumbnailLink}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-700 dark:hover:bg-blue-800 font-bold"
+                        >
+                            Hasilkan Link Thumbnail
+                        </button>
+
+                        {thumbnailUrl && (
+                            <div className="mt-4 p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900">
+                                <h3 className="text-md font-medium mb-2 text-gray-800 dark:text-white">Link Thumbnail Dihasilkan:</h3>
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="text"
+                                        readOnly
+                                        value={thumbnailUrl}
+                                        className="flex-grow p-2 border border-gray-300 rounded-md bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 text-sm"
+                                        onClick={(e) => (e.target as HTMLInputElement).select()} // Memilih semua teks saat diklik
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={copyToClipboard}
+                                        className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:bg-green-700 dark:hover:bg-green-800 text-sm font-medium"
+                                    >
+                                        Salin Link
+                                    </button>
+                                </div>
+                                {copySuccess && <p className="text-green-600 dark:text-green-400 text-sm mt-2">{copySuccess}</p>}
+                                <p className="text-gray-600 dark:text-gray-400 text-xs mt-2">
+                                    Anda dapat menyalin link di atas dan menempelkannya ke kolom "URL Thumbnail" di bawah.
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Opsional: Pratinjau gambar yang dihasilkan */}
+                        {thumbnailUrl && (
+                            <div className="mt-4">
+                                <h3 className="text-md font-medium mb-2 text-gray-800 dark:text-white">Pratinjau Gambar:</h3>
+                                <img
+                                    src={thumbnailUrl}
+                                    alt="Generated Thumbnail Preview"
+                                    className="max-w-full h-auto rounded-md shadow-lg border border-gray-200 dark:border-gray-700"
+                                />
+                            </div>
+                        )}
+                    </div>
+                    {/* --- Akhir Bagian Generator Link Thumbnail Baru --- */}
+
                     <div>
                         <label htmlFor="thumbnailUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL Thumbnail</label>
                         <input
@@ -421,7 +529,7 @@ export default function AdminPromptPage() {
                                 1. Buka <a href="https://imgbb.com/" target="_blank" rel="noopener noreferrer" className="underline">imgbb.com</a>.<br />
                                 2. Unggah gambar.<br />
                                 3. Salin <span className="italic">Direct Link</span> yang muncul setelah upload.
-                            </span>
+                             </span>
                             <span className="block mb-1">
                                 <strong>Flickr</strong>: <br />
                                 1. Login dan upload foto di <a href="https://flickr.com/" target="_blank" rel="noopener noreferrer" className="underline">flickr.com</a>.<br />
@@ -445,7 +553,7 @@ export default function AdminPromptPage() {
                     <div>
                         <label htmlFor="fullPrompt" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Isi Prompt Lengkap</label>
                         {/* Implementasi TinyMCE Editor dengan dynamic import dan inisialisasi yang aman */}
-                        {tinymceInit ? (
+                        {mounted && tinymceInit ? (
                             <DynamicEditor
                                 apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
                                 onInit={(evt, editor) => (editorRef.current = editor)}
@@ -518,7 +626,7 @@ export default function AdminPromptPage() {
                             </h2>
                             <div className="text-gray-700 dark:text-gray-300 space-y-4">
                                 <p className="mb-4 text-base">Selamat datang di panduan pengisian prompt! Ikuti langkah-langkah ini untuk membuat prompt AI yang efektif dan menarik.</p>
-                                
+
                                 {TUTORIAL_STEPS.map((step, index) => (
                                     <div key={index} style={{ display: index === currentTutorialStep ? 'block' : 'none' }} className="space-y-2">
                                         <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
