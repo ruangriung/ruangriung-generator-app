@@ -4,37 +4,34 @@
 import { useState, Fragment, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Prompt } from '@/lib/prompts'; // Hanya impor interface Prompt, bukan array prompts
+import { Prompt } from '@/lib/prompts';
 import { authors, Author } from '@/lib/authors/authors';
 import { ArrowLeft, ExternalLink, Copy, User, Home, Mail, Eye, Facebook, Instagram, Twitter, InstagramIcon, FacebookIcon, TwitterIcon, LinkedinIcon, MessageCircleHeartIcon, MessageCircleMore, GithubIcon, Music2, Youtube, Earth, AtSign, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AdBanner } from '@/components/AdBanner'; // Import AdBanner component
 
 export default function DaftarPromptPage() {
-    const [promptsData, setPromptsData] = useState<Prompt[]>([]); // State untuk menyimpan prompt yang diambil dari API
-    const [loading, setLoading] = useState(true); // State untuk indikator loading
-    const [error, setError] = useState<string | null>(null); // State untuk error
+    const [promptsData, setPromptsData] = useState<Prompt[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const [currentPage, setCurrentPage] = useState(1);
     const promptsPerPage = 9;
-    const totalPages = Math.ceil(promptsData.length / promptsPerPage); // Gunakan promptsData.length
+    const totalPages = Math.ceil(promptsData.length / promptsPerPage);
     const indexOfLastPrompt = currentPage * promptsPerPage;
     const indexOfFirstPrompt = indexOfLastPrompt - promptsPerPage;
-    const currentPrompts = promptsData.slice(indexOfFirstPrompt, indexOfLastPrompt); // Perbaikan: Menggunakan indexOfLastPrompt
+    const currentPrompts = promptsData.slice(indexOfFirstPrompt, indexOfLastPrompt);
 
     useEffect(() => {
         const fetchPrompts = async () => {
             try {
                 setLoading(true);
-                // Ini adalah endpoint API yang akan Anda buat/sediakan.
-                // Pastikan untuk menyesuaikan URL jika API Anda berada di tempat lain.
-                const response = await fetch('/api/prompts'); 
+                const response = await fetch('/api/prompts');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data: Prompt[] = await response.json();
-                // Urutkan prompt berdasarkan tanggal terbaru (sesuai logika sebelumnya)
-                setPromptsData(data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())); 
+                setPromptsData(data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
             } catch (err) {
                 setError('Gagal memuat prompt. Silakan coba lagi nanti.');
                 console.error("Failed to fetch prompts: ", err);
@@ -44,7 +41,7 @@ export default function DaftarPromptPage() {
         };
 
         fetchPrompts();
-    }, []); // Array dependensi kosong agar useEffect hanya berjalan sekali saat komponen dimuat
+    }, []);
 
     const handleNextPage = () => {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
@@ -66,7 +63,6 @@ export default function DaftarPromptPage() {
     const AD_SLOT_ID_PROMPT_GRID = "9876543210";
     const AD_INTERVAL_PROMPT_GRID = 3;
 
-    // Tampilkan pesan loading atau error
     if (loading) {
         return (
             <main className="min-h-screen bg-light-bg dark:bg-dark-bg p-4 sm:p-8 flex justify-center items-center">
@@ -267,7 +263,7 @@ export default function DaftarPromptPage() {
                                     )}
                                     {author.location && (
                                         <span className="text-gray-500 dark:text-gray-400 text-sm"> {author.location}</span>
-                                        
+
                                     )}
                                 </div>
                             </div>
@@ -289,13 +285,25 @@ export default function DaftarPromptPage() {
                                     className="block p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow group"
                                 >
                                     <div className="relative w-full h-48 mb-4 rounded-md overflow-hidden">
-                                        <Image
-                                            src={prompt.thumbnailUrl}
-                                            alt={prompt.title}
-                                            fill
-                                            style={{ objectFit: 'cover' }}
-                                            className="transition-transform duration-300 group-hover:scale-105"
-                                        />
+                                        {/* PERUBAHAN DI SINI UNTUK MENGGUNAKAN GAMBAR PLACEHOLDER */}
+                                        {prompt.thumbnailUrl ? (
+                                            <Image
+                                                src={prompt.thumbnailUrl}
+                                                alt={prompt.title}
+                                                fill
+                                                style={{ objectFit: 'cover' }}
+                                                className="transition-transform duration-300 group-hover:scale-105"
+                                            />
+                                        ) : (
+                                            // Render gambar placeholder jika thumbnailUrl kosong atau null
+                                            <Image
+                                                src="/v1/img/placeholder-thumb.png" // Path ke gambar placeholder Anda
+                                                alt="Gambar tidak tersedia"
+                                                fill
+                                                style={{ objectFit: 'cover' }}
+                                                className="transition-transform duration-300 group-hover:scale-105"
+                                            />
+                                        )}
                                     </div>
                                     <h2 className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-2">{prompt.title}</h2>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1 mb-2">
@@ -304,7 +312,6 @@ export default function DaftarPromptPage() {
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Kategori: <span className="font-medium text-gray-700 dark:text-gray-300">{prompt.category}</span></p>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Tools: <span className="font-medium text-gray-700 dark:text-gray-300">{prompt.toolsUsed.join(', ')}</span></p>
                                     <p className="text-gray-700 dark:text-gray-300 text-sm mb-4">{prompt.shortDescription}</p>
-                                    {/* Tidak ada <a> di dalam Link, hanya konten biasa */}
                                     <div
                                         className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-500 text-white font-bold rounded-lg shadow-md hover:bg-green-600 transition-colors cursor-pointer"
                                     >
