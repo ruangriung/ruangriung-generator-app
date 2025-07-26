@@ -516,27 +516,20 @@ export default function AdminPromptPage() {
                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-inner-neumorphic dark:shadow-inner-dark-neumorphic bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
                         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            <code>https://i.imgur.com/yourimageid.jpg</code> (contoh: <code>https://i.imgur.com/abcd1234.png</code>)<br />
-                            <span className="font-semibold">Cara mendapatkan URL gambar gratis:</span><br />
+                            Gunakan URL gambar yang dapat diakses publik, seperti dari GitHub atau Google Drive.<br />
+                            <span className="font-semibold">Cara mendapatkan URL gambar:</span><br />
                             <span className="block mb-1">
-                                <strong>Imgur</strong>: <br />
-                                1. Kunjungi <a href="https://imgur.com/upload" target="_blank" rel="noopener noreferrer" className="underline">imgur.com/upload</a>.<br />
-                                2. Unggah gambar Anda.<br />
-                                3. Setelah selesai, klik gambar dan salin <span className="italic">Direct Link</span> (biasanya berakhiran .jpg/.png).
+                                <strong>GitHub</strong>: <br />
+                                1. Unggah gambar ke repositori GitHub Anda.<br />
+                                2. Buka gambar di GitHub, klik tombol "Download" atau "Raw", lalu salin URL yang muncul di browser.
                             </span>
                             <span className="block mb-1">
-                                <strong>ImgBB</strong>: <br />
-                                1. Buka <a href="https://imgbb.com/" target="_blank" rel="noopener noreferrer" className="underline">imgbb.com</a>.<br />
-                                2. Unggah gambar.<br />
-                                3. Salin <span className="italic">Direct Link</span> yang muncul setelah upload.
+                                <strong>Google Drive</strong>: <br />
+                                1. Unggah gambar ke Google Drive.<br />
+                                2. Klik kanan gambar, pilih "Bagikan" atau "Share", pastikan akses diatur ke "Siapa saja dengan tautan" atau "Anyone with the link".<br />
+                                3. Salin tautan yang diberikan dan ubah formatnya untuk akses langsung: Ganti `view?usp=sharing` dengan `uc?export=download` atau `thumbnail?id=FILE_ID` (ganti `FILE_ID` dengan ID dari tautan yang Anda salin).
                              </span>
-                            <span className="block mb-1">
-                                <strong>Flickr</strong>: <br />
-                                1. Login dan upload foto di <a href="https://flickr.com/" target="_blank" rel="noopener noreferrer" className="underline">flickr.com</a>.<br />
-                                2. Buka foto, klik ikon <span className="italic">Share</span> (panah).<br />
-                                3. Pilih ukuran, lalu salin <span className="italic">Direct link</span>.
-                            </span>
-                            Anda juga bisa menggunakan gambar yang sudah ada di folder <code>public</code> aplikasi Anda.
+                            Anda juga bisa menggunakan gambar yang sudah ada di folder <code>public</code> aplikasi Anda, contoh: <code>/v1/img/showcase-1.webp</code>.
                         </p>
                     </div>
                     <div>
