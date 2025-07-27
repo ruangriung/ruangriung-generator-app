@@ -15,7 +15,7 @@ import { authors } from '@/lib/authors/authors';
 import ImageModal from '../../components/ImageModal';
 import Accordion from '../../components/Accordion';
 import TextareaModal from '../../components/TextareaModal';
-// --- MENGHAPUS: import { useSession } from 'next-auth/react'; ---
+import { Turnstile } from '@marsidev/react-turnstile';
 import { AdBanner } from '@/components/AdBanner';
 
 
@@ -62,8 +62,6 @@ const PREDEFINED_TOOLS = ['DALL-E 3', 'Midjourney', 'Stable Diffusion', 'Gemini'
 
 export default function AdminPromptPage() {
     const router = useRouter();
-    // --- MENGHAPUS: const { data: session, status } = useSession(); ---
-
     const [formData, setFormData] = useState<NewPromptForm>(INITIAL_FORM_DATA);
     const [loading, setLoading] = useState(false);
 
@@ -85,6 +83,9 @@ export default function AdminPromptPage() {
     const [showZoomModal, setShowZoomModal] = useState(false);
     const [showFullPromptModal, setShowFullPromptModal] = useState(false);
 
+    // State untuk token Turnstile
+    const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [customCategory, setCustomCategory] = useState<string>('');
     const [selectedTools, setSelectedTools] = useState<string[]>([]);
@@ -95,14 +96,6 @@ export default function AdminPromptPage() {
         // Logika lain jika ada yang perlu dijalankan saat mount
     }, []);
 
-    // --- MENGHAPUS: useEffect untuk memeriksa sesi pengguna ---
-    // useEffect(() => {
-    //     if (status === 'loading') return;
-    //     if (!session || session.user?.role !== 'admin') {
-    //         router.push('/api/auth/signin');
-    //     }
-    // }, [session, status, router]);
-    // ----------------------------------------------------
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -131,12 +124,20 @@ export default function AdminPromptPage() {
         setUploadingDirectFile(false);
         setShowZoomModal(false);
         setShowFullPromptModal(false);
+        setTurnstileToken(null); // Reset Turnstile token on form reset
         toast.success("Formulir telah direset!");
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+
+        // Validasi Turnstile Token
+        if (!turnstileToken) {
+            toast.error("Mohon selesaikan tantangan keamanan.");
+            setLoading(false);
+            return;
+        }
 
         try {
             const fullPromptContent = formData.fullPrompt;
@@ -162,7 +163,7 @@ export default function AdminPromptPage() {
                 });
             }
 
-            const dataToSend: Prompt = {
+            const dataToSend: Prompt & { turnstileToken?: string | null } = {
                 ...formData,
                 slug: cleanSlug,
                 category: finalCategories.join(', '),
@@ -171,6 +172,7 @@ export default function AdminPromptPage() {
                 date: new Date(formData.date).toISOString(),
                 negativePrompt: formData.negativePrompt?.trim() === '' ? null : formData.negativePrompt,
                 notes: formData.notes?.trim() === '' ? null : formData.notes,
+                turnstileToken: turnstileToken, // Sertakan token Turnstile
             };
 
             const response = await fetch('/api/prompts', {
@@ -194,6 +196,7 @@ export default function AdminPromptPage() {
             toast.error(`Error: ${(error as Error).message}`);
         } finally {
             setLoading(false);
+            setTurnstileToken(null); // Reset token setelah submission
         }
     };
 
@@ -207,6 +210,8 @@ export default function AdminPromptPage() {
                 setSendingDeleteRequest(false);
                 return;
             }
+            // Jika Anda ingin Turnstile melindungi form ini juga, tambahkan pengecekan token di sini
+            // dan sertakan token dalam body permintaan.
 
             const response = await fetch('/api/delete-request', {
                 method: 'POST',
@@ -217,6 +222,7 @@ export default function AdminPromptPage() {
                     email: requesterEmail,
                     slug: promptSlugToDelete,
                     reason: deletionReason,
+                    // turnstileToken: turnstileToken, // Sertakan token jika Turnstile juga melindungi form ini
                 }),
             });
 
@@ -235,6 +241,7 @@ export default function AdminPromptPage() {
             toast.error(`Error: ${(error as Error).message}`);
         } finally {
             setSendingDeleteRequest(false);
+            setTurnstileToken(null); // Reset token setelah submission
         }
     };
 
@@ -302,25 +309,6 @@ export default function AdminPromptPage() {
             setUploadingDirectFile(false);
         }
     };
-
-
-    // --- MENGHAPUS: Kondisional rendering untuk autentikasi ---
-    // if (status === 'loading') {
-    //     return (
-    //         <div className="min-h-screen flex items-center justify-center bg-light-bg dark:bg-dark-bg text-gray-800 dark:text-gray-100">
-    //             <p>Memuat autentikasi...</p>
-    //         </div>
-    //     );
-    // }
-
-    // if (!session || session.user?.role !== 'admin') {
-    //     return (
-    //         <div className="min-h-screen flex items-center justify-center bg-light-bg dark:bg-dark-bg text-gray-800 dark:text-gray-100">
-    //             <p>Akses ditolak. Anda tidak memiliki izin untuk melihat halaman ini. Silakan masuk sebagai administrator.</p>
-    //         </div>
-    //     );
-    // }
-    // ----------------------------------------------------
 
 
     return (
@@ -516,10 +504,10 @@ export default function AdminPromptPage() {
                     {/* --- Bagian Unggah Gambar Langsung ke Cloudinary --- */}
                     <div className="border border-gray-300 dark:border-gray-700 p-4 rounded-lg shadow-inner-neumorphic dark:shadow-inner-dark-neumorphic bg-gray-50 dark:bg-gray-850 mt-6">
                         <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white flex items-center gap-2">
-                            <ImageIcon size={20} className="text-purple-500" /> Unggah Gambar sebagai thumbnails
+                            <ImageIcon size={20} className="text-purple-500" /> Unggah Gambar Langsung (ke Cloudinary)
                         </h2>
                         <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                            Unggah file gambar langsung dari komputer Anda, untuk digunakan sebagai thumbnail.
+                            Unggah file gambar langsung dari komputer Anda ke Cloudinary untuk digunakan sebagai thumbnail.
                         </p>
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                             <input
@@ -618,7 +606,7 @@ export default function AdminPromptPage() {
                                 value={formData.fullPrompt}
                                 onChange={handleFullPromptTextareaChange}
                                 rows={6}
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-inner-neumorphic dark:shadow-inner-dark-neumorphic bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none overflow-y-auto" // Diubah dari overflow-hidden menjadi overflow-y-auto
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-inner-neumorphic dark:shadow-inner-dark-neumorphic bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none overflow-y-auto"
                                 placeholder="Tuliskan instruksi prompt utama di sini. Tulis sejelas dan sedetail mungkin untuk hasil terbaik. Sertakan parameter spesifik AI jika ada."
                             ></textarea>
                             <button
@@ -665,7 +653,7 @@ export default function AdminPromptPage() {
 
                     <button
                         type="submit"
-                        disabled={loading || uploadingDirectFile}
+                        disabled={loading || uploadingDirectFile || !turnstileToken}
                         className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-dark-bg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? 'Menambahkan...' : (
@@ -675,13 +663,29 @@ export default function AdminPromptPage() {
                             </>
                         )}
                     </button>
+                    {/* --- Komponen Turnstile --- */}
+                    <div className="flex justify-center mt-4">
+                        <Turnstile
+                            siteKey={process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY as string}
+                            onSuccess={setTurnstileToken} // Menggunakan onSuccess
+                            onError={() => {
+                                setTurnstileToken(null);
+                                toast.error("Turnstile error. Mohon coba lagi.");
+                            }}
+                            onExpire={() => {
+                                setTurnstileToken(null);
+                                toast.error("Turnstile expired. Mohon selesaikan lagi.");
+                            }}
+                        />
+                    </div>
+                    {/* ------------------------- */}
                     <button
                         type="button"
                         onClick={() => setShowDeleteRequestModal(true)}
                         className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 mt-4 bg-red-500 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 dark:focus:ring-offset-dark-bg"
                     >
                         <HelpCircle size={20} />
-                        <span>Ajukan Penghapusan Prompt</span>
+                        <span>Minta Penghapusan Prompt</span>
                     </button>
                 </form>
 
@@ -731,7 +735,7 @@ export default function AdminPromptPage() {
                                 <X size={24} />
                             </button>
                             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-                                <HelpCircle size={24} className="text-red-600" /> Ajukan Hapus Prompt
+                                <HelpCircle size={24} className="text-red-600" /> Permintaan Hapus Prompt
                             </h2>
                             <p className="text-gray-700 dark:text-gray-300 mb-4 text-sm">
                                 Jika Anda ingin prompt yang telah Anda unggah dihapus, mohon isi formulir di bawah ini. Admin akan meninjau permintaan Anda.
@@ -821,9 +825,9 @@ export default function AdminPromptPage() {
                     />
                 )}
             </div>
-             <div className="w-full max-w-4xl mb-4">
-                    <AdBanner dataAdSlot="8254616654" />
-                  </div>
+            <div className="w-full max-w-4xl mt-16">
+        <AdBanner dataAdSlot="5961316189" />
+      </div>
         </main>
     );
 }

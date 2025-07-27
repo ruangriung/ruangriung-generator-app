@@ -106,7 +106,7 @@ export default function Home() {
         </Link>
         
         <a
-          href="https://dery-ai.my.id"
+          href="http://dery-ai.my.id/ruang-riung-tutorial/"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 p-4 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all group sm:col-span-2 lg:col-span-1"
