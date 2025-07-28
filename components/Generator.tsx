@@ -17,7 +17,7 @@ export default function Generator() {
     model: 'flux',
     width: 1024,
     height: 1792,
-    seed: Math.floor(Math.random() * 1000000),
+    seed: Math.floor(Math.random() * 1000000), // Inisialisasi awal dengan seed acak
     artStyle: '',
     batchSize: 1,
     imageQuality: 'Ultra',
@@ -137,25 +137,34 @@ export default function Generator() {
     }, 100);
 
     // --- PERUBAHAN UTAMA DI SINI ---
-    let currentSeed = settings.seed;
+    // Selalu hasilkan seed baru yang acak untuk setiap generasi baru
+    const newRandomSeed = Math.floor(Math.random() * 1000000);
+    // Perbarui state `settings` dengan seed baru ini
+    setSettings(prev => ({...prev, seed: newRandomSeed}));
+    
+    // Gunakan newRandomSeed untuk generasi saat ini
+    let currentSeed = newRandomSeed; 
+    
     // Jika ini adalah variasi ATAU jika model yang dipilih adalah 'gptimage',
-    // buat seed baru yang acak.
-    if (isVariation || settings.model === 'gptimage') {
-      currentSeed = Math.floor(Math.random() * 1000000);
-      // Perbarui state agar seed baru ini tersimpan dan ditampilkan di UI
-      setSettings(prev => ({...prev, seed: currentSeed}));
-    }
+    // buat seed baru yang acak. (Logika ini kini menjadi opsional atau bisa disesuaikan lebih lanjut
+    // jika Anda ingin seed yang sangat spesifik untuk variasi, namun untuk "generate baru"
+    // seed acak sudah cukup.)
+    // if (isVariation || settings.model === 'gptimage') {
+    //   currentSeed = Math.floor(Math.random() * 1000000);
+    //   setSettings(prev => ({...prev, seed: currentSeed}));
+    // }
     // --- AKHIR PERUBAHAN ---
 
     const { model, prompt, width, height, imageQuality, batchSize, artStyle, private: isPrivate, safe, transparent, inputImage } = settings;
     const fullPrompt = `${prompt}${artStyle}`;
     
     const generatePromises = Array(batchSize).fill(0).map(async (_, i) => {
-      const newSeed = currentSeed + i;
+      // Gunakan currentSeed + i untuk batching, memastikan setiap gambar dalam batch memiliki seed berbeda
+      const batchSeed = currentSeed + i; 
       let finalUrl = '';
       try {
         const params = new URLSearchParams({
-          model, width: width.toString(), height: height.toString(), seed: newSeed.toString(),
+          model, width: width.toString(), height: height.toString(), seed: batchSeed.toString(),
           enhance: imageQuality !== 'Standar' ? 'true' : 'false', nologo: 'true', referrer: 'ruangriung.my.id'
         });
         if (isPrivate) params.append('private', 'true');
