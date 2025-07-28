@@ -1,14 +1,13 @@
 // app/admin/page.tsx
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Prompt } from '@/lib/prompts';
 import toast from 'react-hot-toast';
 import {
-    Home, Send, Lightbulb, RotateCcw, X, Info, LayoutTemplate, LinkIcon,
-    User, Calendar, Tag, WrenchIcon, Image as ImageIcon, Text, MessageSquareOff,
-    NotebookText, HelpCircle, Mail, Hash, MessageSquareText, Maximize
+    Home, Send, Lightbulb, RotateCcw, X, LinkIcon, User, Image as ImageIcon, HelpCircle, Mail, MessageSquareText, Maximize,
+    Info, LayoutTemplate, Calendar, Tag, WrenchIcon, Text, MessageSquareOff, NotebookText
 } from 'lucide-react';
 import Link from 'next/link';
 import { authors } from '@/lib/authors/authors';
@@ -35,6 +34,9 @@ const INITIAL_FORM_DATA: NewPromptForm = {
     notes: undefined,
 };
 
+const PREDEFINED_CATEGORIES = ['Gambar', 'Teks', 'Audio', 'Desain', 'Fantasi', 'Edukasi', 'Video', 'Seni Digital', 'Mode'];
+const PREDEFINED_TOOLS = ['DALL-E 3', 'Midjourney', 'Stable Diffusion', 'Gemini', 'ChatGPT', 'Adobe Photoshop', 'RunwayML', 'ElevenLabs', 'Canva AI'];
+
 const TUTORIAL_STEPS = [
     { title: "Selamat Datang di Panduan Prompt!", description: "Ikuti panduan langkah demi langkah ini untuk membuat prompt AI yang efektif dan menarik. Pastikan setiap kolom diisi dengan benar untuk hasil terbaik.", icon: <Lightbulb size={24} className="text-blue-500" /> },
     { title: "1. Judul Prompt", description: "Berikan judul yang jelas dan menarik untuk prompt Anda. Judul ini akan terlihat oleh semua pengguna. Contoh: `Prompt Gambar Pemandangan Fantasi`.", icon: <Text size={24} className="text-purple-500" /> },
@@ -56,17 +58,12 @@ const TUTORIAL_STEPS = [
     { title: "Selesai!", description: "Anda telah menyelesaikan panduan pengisian prompt. Klik 'Tutup' untuk kembali ke formulir dan mulai berkontribusi!", icon: <Lightbulb size={24} className="text-blue-500" /> }
 ];
 
-const PREDEFINED_CATEGORIES = ['Gambar', 'Teks', 'Audio', 'Desain', 'Fantasi', 'Edukasi', 'Video', 'Seni Digital', 'Mode'];
-const PREDEFINED_TOOLS = ['DALL-E 3', 'Midjourney', 'Stable Diffusion', 'Gemini', 'ChatGPT', 'Adobe Photoshop', 'RunwayML', 'ElevenLabs', 'Canva AI'];
-
-
 export default function AdminPromptPage() {
     const router = useRouter();
     const [formData, setFormData] = useState<NewPromptForm>(INITIAL_FORM_DATA);
     const [loading, setLoading] = useState(false);
 
     const [showTutorialModal, setShowTutorialModal] = useState(false);
-    const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
 
     const [showDeleteRequestModal, setShowDeleteRequestModal] = useState(false);
     const [requesterEmail, setRequesterEmail] = useState('');
@@ -99,11 +96,11 @@ export default function AdminPromptPage() {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev: NewPromptForm) => ({ ...prev, [name]: value }));
     };
 
     const handleFullPromptTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setFormData(prev => ({ ...prev, fullPrompt: e.target.value }));
+        setFormData((prev: NewPromptForm) => ({ ...prev, fullPrompt: e.target.value }));
     };
 
 
@@ -151,14 +148,14 @@ export default function AdminPromptPage() {
 
             const finalCategories = [...selectedCategories];
             if (customCategory.trim()) {
-                customCategory.split(',').map(c => c.trim()).filter(c => c !== '').forEach(c => {
+                customCategory.split(',').map((c: string) => c.trim()).filter((c: string) => c !== '').forEach((c: string) => {
                     if (!finalCategories.includes(c)) finalCategories.push(c);
                 });
             }
 
             const finalTools = [...selectedTools];
             if (customTools.trim()) {
-                customTools.split(',').map(t => t.trim()).filter(t => t !== '').forEach(t => {
+                customTools.split(',').map((t: string) => t.trim()).filter((t: string) => t !== '').forEach((t: string) => {
                     if (!finalTools.includes(t)) finalTools.push(t);
                 });
             }
@@ -253,7 +250,7 @@ export default function AdminPromptPage() {
 
         const encodedPrompt = encodeURIComponent(promptInputForGenerator.trim());
         const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=gptimage&nologo=true`;
-        setFormData(prev => ({ ...prev, thumbnailUrl: url }));
+        setFormData((prev: NewPromptForm) => ({ ...prev, thumbnailUrl: url }));
         setCopySuccess('');
         toast.success('Link thumbnail berhasil dihasilkan dan diterapkan!');
     };
@@ -274,7 +271,7 @@ export default function AdminPromptPage() {
     const handleDirectFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedUploadFile(e.target.files?.[0] || null);
         setCopySuccess('');
-        setFormData(prev => ({ ...prev, thumbnailUrl: '' }));
+        setFormData((prev: NewPromptForm) => ({ ...prev, thumbnailUrl: '' }));
     };
 
     const handleUploadDirectFileToCloudinary = async () => {
@@ -299,7 +296,7 @@ export default function AdminPromptPage() {
             }
 
             const data = await response.json();
-            setFormData(prev => ({ ...prev, thumbnailUrl: data.url }));
+            setFormData((prev: NewPromptForm) => ({ ...prev, thumbnailUrl: data.url }));
             toast.success('Gambar berhasil diunggah langsung ke Cloudinary!');
             setSelectedUploadFile(null);
         } catch (error) {
@@ -820,7 +817,7 @@ export default function AdminPromptPage() {
                         isOpen={showFullPromptModal}
                         value={formData.fullPrompt}
                         onClose={() => setShowFullPromptModal(false)}
-                        onChange={(newValue: string) => setFormData(prev => ({ ...prev, fullPrompt: newValue }))}
+                        onChange={(newValue: string) => setFormData((prev: NewPromptForm) => ({ ...prev, fullPrompt: newValue }))}
                         title="Edit Isi Prompt Lengkap"
                     />
                 )}

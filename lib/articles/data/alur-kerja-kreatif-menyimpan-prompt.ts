@@ -1,11 +1,15 @@
 import type { Article } from '@/lib/articles';
 
-export const article: Article = {
+const AlurKerjaKreatifMenyimpanPrompt: Article = {
     slug: 'alur-kerja-kreatif-menyimpan-prompt',
     title: 'Alur Kerja Kreatif: Mengelola dan Menyimpan Prompt',
-    author: 'Tim RuangRiung',
-    date: '29 Juli 2025',
-    summary: 'Prompt yang bagus adalah aset berharga. Pelajari cara menggunakan fitur simpan, muat, dan hapus prompt di RuangRiung untuk mempercepat proses kreatif Anda.',
+    authorSlug: 'Tim RuangRiung',
+    lastUpdatedDate: '29 Juli 2025',
+    publishedDate: '29 Juli 2025', // Added publishedDate
+    category: 'Panduan Fitur', // Added category
+    tags: ['prompt', 'manajemen', 'workflow'], // Added tags
+    image: '/v1/img/ruangriung.webp',
+    description: 'Prompt yang bagus adalah aset berharga. Pelajari cara menggunakan fitur simpan, muat, dan hapus prompt di RuangRiung untuk mempercepat proses kreatif Anda.',
     content: `
       <p class="mb-4">
         Dalam proses menciptakan seni AI, Anda pasti akan menemukan beberapa "prompt ajaib" yang secara konsisten menghasilkan gambar yang luar biasa. Kehilangan prompt tersebut bisa sangat disayangkan. Untungnya, RuangRiung dilengkapi dengan fitur untuk menyimpan dan mengelola prompt favorit Anda, menciptakan alur kerja yang lebih efisien.
@@ -39,3 +43,5 @@ export const article: Article = {
     `
 ,
 };
+
+export default AlurKerjaKreatifMenyimpanPrompt;

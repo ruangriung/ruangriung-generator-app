@@ -1,84 +1,121 @@
 // app/artikel/page.tsx
-"use client";
+"use client"; 
 
-import { useState, Fragment } from 'react'; // Impor Fragment
+import { useState, useEffect, Fragment } from 'react';
 import Link from 'next/link';
-import { articles } from '@/lib/articles';
 import { ArrowLeft } from 'lucide-react';
-import AdBanner from '@/components/AdBanner'; // Impor komponen AdBanner Anda
-
-// Fungsi untuk mengurutkan artikel (opsional tapi praktik yang baik)
-const sortedArticles = [...articles].sort((a, b) => {
-    const convertDate = (dateStr: string) => {
-        const parts = dateStr.split(' ');
-        const day = parts[0];
-        const month = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'].indexOf(parts[1]);
-        const year = parts[2];
-        return new Date(`${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
-    };
-    return convertDate(b.date).getTime() - convertDate(a.date).getTime();
-});
+import AdBanner from '@/components/AdBanner'; 
+import { Article } from '@/lib/articles'; 
 
 export default function DaftarArtikelPage() {
-    // --- Logika Paginasi (Tetap Sama) ---
+    const [articles, setArticles] = useState<Article[]>([]); 
+    const [loading, setLoading] = useState(true); 
+    const [error, setError] = useState<string | null>(null); 
+
+    useEffect(() => {
+        async function fetchArticles() {
+            try {
+                setLoading(true);
+                setError(null); 
+
+                // --- DEBUGGING LOGS (PASTIKAN INI ADA DI KONSOL BROWSER ANDA) ---
+                console.log('Memulai fetch dari /api/articles'); 
+                const response = await fetch('/api/articles'); 
+                console.log('Respons fetch diterima:', response.ok); 
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data: Article[] = await response.json();
+                console.log('Data artikel dari API:', data); 
+                setArticles(data); 
+            } catch (err: any) {
+                setError(err.message);
+                console.error("Gagal mengambil artikel:", err);
+            } finally {
+                setLoading(false); 
+            }
+        }
+
+        fetchArticles();
+    }, []); // Array dependensi kosong agar hanya berjalan sekali saat komponen mount
+
+    // --- Logika Paginasi (PASTIKAN INI ADA) ---
     const [currentPage, setCurrentPage] = useState(1);
     const postsPerPage = 6;
-    const totalPages = Math.ceil(sortedArticles.length / postsPerPage);
+    
+    const totalPages = articles.length > 0 ? Math.ceil(articles.length / postsPerPage) : 1;
     const indexOfLastPost = currentPage * postsPerPage;
     const indexOfFirstPost = indexOfLastPost - postsPerPage;
-    const currentPosts = sortedArticles.slice(indexOfFirstPost, indexOfLastPost);
+    const currentPosts = articles.slice(indexOfFirstPost, indexOfLastPost);
+
+    const handlePrevPage = () => {
+        setCurrentPage(prev => Math.max(1, prev - 1));
+    };
 
     const handleNextPage = () => {
-        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+        setCurrentPage(prev => Math.min(totalPages, prev + 1));
     };
-    const handlePrevPage = () => {
-        if (currentPage > 1) setCurrentPage(currentPage - 1);
-    };
-    // --- Akhir Logika Paginasi ---
 
-    // --- PENGATURAN IKLAN ---
-    const AD_SLOT_ID_ARTIKEL = "6897039624"; // GANTI DENGAN ID SLOT IKLAN ANDA
-    const AD_INTERVAL = 3; // Tampilkan iklan setelah setiap 3 artikel
+    if (loading) {
+        return <div className="text-center p-8">Memuat artikel...</div>;
+    }
+
+    if (error) {
+        return <div className="text-center p-8 text-red-500">Error saat memuat artikel: {error}</div>;
+    }
+    
+    const displayArticles = currentPosts; 
+
+    // --- DEBUGGING LOGS (PASTIKAN INI ADA DI KONSOL BROWSER ANDA) ---
+    console.log('Artikel yang akan ditampilkan:', displayArticles); 
+    console.log('Jumlah artikel yang akan ditampilkan:', displayArticles.length); 
 
     return (
-        <main className="min-h-screen bg-light-bg dark:bg-dark-bg p-4 sm:p-8">
-            <div className="max-w-4xl mx-auto">
-                <div className="bg-light-bg dark:bg-dark-bg p-6 md:p-8 rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
-                    <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">Artikel Terbaru</h1>
+        <main className="min-h-screen bg-light-bg dark:bg-dark-bg text-gray-800 dark:text-gray-200 py-8">
+            <div className="container mx-auto px-4">
+                <div className="flex flex-col items-center">
+                    <Link href="/" className="flex items-center text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-600 mb-8">
+                        <ArrowLeft className="mr-2" size={20} /> Kembali ke Beranda
+                    </Link>
 
-                    <div className="mb-8 flex justify-center">
-                        <Link href="/" className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
-                            <ArrowLeft size={18} />
-                            <span>Kembali ke Beranda</span>
-                        </Link>
+                    <div className="w-full mb-8">
+                        <AdBanner dataAdSlot="5961316189" /> 
                     </div>
 
-                    <div className="space-y-6">
-                        {currentPosts.map((article, index) => (
-                            // Gunakan Fragment agar bisa merender artikel dan iklan dalam satu loop
-                            <Fragment key={article.slug}>
-                                <Link
-                                    href={`/artikel/${article.slug}`}
-                                    className="block p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow"
-                                >
-                                    <h2 className="text-2xl font-bold text-purple-600 dark:text-purple-400">{article.title}</h2>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Oleh {article.author} - {article.date}</p>
-                                    <p className="text-gray-700 dark:text-gray-300 mt-3">{article.summary}</p>
-                                </Link>
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-center mb-10 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+                        Blog & Artikel
+                    </h1>
 
-                                {/* === LOGIKA UNTUK MENAMPILKAN IKLAN === */}
-                                {/* Iklan akan muncul setelah artikel ke-3, ke-6, dst. */}
-                                {(index + 1) % AD_INTERVAL === 0 && (
-                                    <div className="my-6"> {/* Wrapper untuk memberi jarak */}
-                                        <AdBanner dataAdSlot={AD_SLOT_ID_ARTIKEL} />
-                                    </div>
-                                )}
+                    <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl">
+                        {displayArticles.map((article) => (
+                            <Fragment key={article.slug}>
+                                <div className="bg-light-surface dark:bg-dark-surface rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105 duration-300">
+                                    <Link href={`/artikel/${article.slug}`}>
+                                        <img
+                                            src={article.image}
+                                            alt={article.title}
+                                            className="w-full h-48 object-cover"
+                                        />
+                                        <div className="p-6">
+                                            <h2 className="text-2xl font-bold mb-2 text-primary-light dark:text-primary-dark">
+                                                {article.title}
+                                            </h2>
+                                            <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">
+                                                {article.description}
+                                            </p>
+                                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                                                Dipublikasikan: {article.publishedDate}
+                                            </div>
+                                        </div>
+                                    </Link>
+                                </div>
                             </Fragment>
                         ))}
-                    </div>
+                    </section>
 
-                    {/* --- Tombol Paginasi (Tetap Sama) --- */}
-                    <div className="flex justify-between items-center mt-12">
+                    <div className="flex justify-between items-center mt-12 w-full max-w-6xl">
                         <button
                             onClick={handlePrevPage}
                             disabled={currentPage === 1}

@@ -1,11 +1,15 @@
 import type { Article } from '@/lib/articles';
 
-export const article: Article = {
+const memaksimalkanAsistenPrompt: Article = {
 slug: 'memaksimalkan-asisten-prompt',
     title: 'Cara Kreatif Menggunakan Asisten Prompt',
-    author: 'Tim RuangRiung',
-    date: '22 Juli 2025',
-    summary: 'Asisten Prompt lebih dari sekadar penyempurna. Temukan cara-cara kreatif untuk brainstorming dan menemukan ide-ide tak terduga.',
+    authorSlug: 'Tim RuangRiung',
+    publishedDate: '2025-07-22',
+    description: 'Pelajari cara memanfaatkan fitur Asisten Prompt di RuangRiung untuk menghasilkan ide-ide visual yang unik dan tak terduga.',
+    image: '/v1/img/ruangriung.webp',
+    lastUpdatedDate: '2025-07-22',
+    category: 'Panduan Fitur',
+    tags: ['prompt', 'AI', 'kreativitas'],
     content: `
       <p class="mb-4">Fitur "Asisten Prompt" di RuangRiung dirancang untuk menjadi partner kreatif Anda. Banyak pengguna hanya memanfaatkannya untuk menyempurnakan ide yang sudah ada, padahal potensinya jauh lebih besar dari itu. Dengan pendekatan yang tepat, asisten ini bisa menjadi sumber inspirasi tak terbatas untuk proyek visual Anda.</p>
       <h3 class="text-xl font-bold mt-6 mb-2">1. Brainstorming dengan Konsep Abstrak</h3>
@@ -18,3 +22,4 @@ slug: 'memaksimalkan-asisten-prompt',
     `
 ,
 };
+export default memaksimalkanAsistenPrompt;

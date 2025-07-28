@@ -1,11 +1,16 @@
-import type { Article } from '@/lib/articles';
+// lib/articles/data/tips-membuat-prompt-efektif.ts
+import { Article } from '@/lib/articles'; // Path relatif ke interface Article
 
-export const article: Article = {
-  slug: 'tips-membuat-prompt-efektif',
-  title: '5 Tips Membuat Prompt Gambar yang Efektif',
-  author: 'Tim RuangRiung',
-  date: '18 Juli 2025',
-  summary: 'Dapatkan hasil gambar terbaik dengan mempelajari cara membuat prompt yang detail dan deskriptif. Kuasai seni berkomunikasi dengan AI.',
+const tipsMembuatPromptEfektifData: Article = {
+  slug: 'tips-membuat-prompt-efektif', // Pastikan slug sesuai dengan nama file (tanpa .ts)
+  title: 'Tips Membuat Prompt Efektif untuk AI Image Generator',
+  description: 'Pelajari cara menyusun prompt yang kuat untuk menghasilkan gambar AI yang menakjubkan.',
+  authorSlug: 'Tim RuangRiung',
+  publishedDate: '2023-01-15',
+  lastUpdatedDate: '2023-03-10',
+  category: 'Prompt Engineering',
+  tags: ['prompt', 'AI Image', 'generative AI'],
+  image: '/v1/img/ruangriung.webp',
   content: `
     <p class="mb-4">Di dunia seni AI, prompt adalah kuas Anda. Kualitas hasil gambar yang Anda dapatkan sangat bergantung pada seberapa baik Anda merumuskan perintah. Prompt yang efektif adalah jembatan antara imajinasi Anda dan "pemahaman" AI. Semakin jelas dan deskriptif prompt Anda, semakin besar kemungkinan AI akan menghasilkan gambar yang sesuai dengan visi Anda. Anggaplah Anda sedang memberikan arahan kepada seorang seniman yang sangat terampil namun tidak bisa membaca pikiran Anda.</p>
     <h3 class="text-xl font-bold mt-6 mb-2">1. Jadilah Sangat Spesifik dan Detail</h3>
@@ -19,3 +24,5 @@ export const article: Article = {
     <p class="mb-4">Prompt pertama Anda jarang sekali menjadi yang terakhir. Anggap proses ini sebagai dialog. Jika hasil pertama kurang memuaskan, analisis apa yang kurang dan perbaiki prompt Anda. Tambahkan detail, ganti kata sifat, atau bahkan coba gabungkan ide-ide yang kontras. Misalnya, "astronot di taman bunga gaya Van Gogh". Eksperimen adalah kunci untuk menemukan hasil yang unik dan menakjubkan. Gunakan tombol 'Acak' dan 'Sempurnakan' di RuangRiung untuk membantu proses ini.</p>
   `,
 };
+
+export default tipsMembuatPromptEfektifData;

@@ -1,72 +1,67 @@
-'use client'; 
-    
-import { articles } from '@/lib/articles';
-import { notFound, useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import type { Article } from '@/lib/articles';
-import Link from 'next/link';
-import { ArrowLeft, Home } from 'lucide-react';
-// Impor AdBanner tetap ada agar tidak error, meskipun tidak digunakan
+// app/premium/artikel/[slug]/page.tsx
+// Hapus "use client"; dari sini. Ini harus menjadi Server Component.
+
+import React from 'react';
+import { getAllArticles } from '@/lib/articles/utils'; // Import server-side utility
+import { notFound } from 'next/navigation'; // Untuk menampilkan halaman 404
 import AdBanner from '@/components/AdBanner'; 
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
-export default function ArtikelDetailPage() {
-  const params = useParams();
-  const [article, setArticle] = useState<Article | null>(null);
+// generateStaticParams akan memberitahu Next.js slug mana saja yang harus di-pre-render pada waktu build.
+export async function generateStaticParams() {
+  const articles = await getAllArticles(); 
+  return articles.map((article) => ({
+    slug: article.slug,
+  }));
+}
 
-  useEffect(() => {
-    if (params.slug) {
-      const foundArticle = articles.find((a) => a.slug === String(params.slug));
-      if (foundArticle) {
-        setArticle(foundArticle);
-      } else {
-        notFound();
-      }
-    }
-  }, [params.slug]);
+// Komponen halaman detail artikel
+export default async function PremiumArticleDetailPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
+
+  const articles = await getAllArticles();
+  const article = articles.find((art) => art.slug === slug);
 
   if (!article) {
-    return <div className="text-center p-10">Memuat artikel...</div>;
+    notFound(); 
   }
 
   return (
-    <main className="min-h-screen bg-light-bg dark:bg-dark-bg p-4 sm:p-8">
-      <div className="max-w-4xl mx-auto">
-        <article className="bg-light-bg dark:bg-dark-bg p-6 md:p-8 rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
-          <h1 className="text-4xl font-extrabold text-gray-800 dark:text-gray-100 mb-3">
-            {article.title}
-          </h1>
-          <p className="text-md text-gray-600 dark:text-gray-400 mb-6">
-            Oleh {article.author} | Diterbitkan pada {article.date}
-          </p>
-          
-          <hr className="my-6 border-gray-300 dark:border-gray-600"/>
+    <main className="min-h-screen bg-light-bg dark:bg-dark-bg text-gray-800 dark:text-gray-200 py-8">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <div className="flex flex-col items-center">
+          <Link href="/premium/artikel" className="flex items-center text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-600 mb-8">
+            <ArrowLeft className="mr-2" size={20} /> Kembali ke Daftar Artikel Premium
+          </Link>
 
-          {/* Menampilkan seluruh konten artikel tanpa dibelah */}
-          <div
-            className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300"
-            dangerouslySetInnerHTML={{ __html: article.content }}
-          />
-
-          {/* Blok iklan sengaja dikomentari untuk versi premium.
-            <div className="my-8 flex justify-center">
-              <AdBanner dataAdSlot="ID_SLOT_IKLAN_ARTIKEL_ANDA" /> 
-            </div>
-          */}
-
-          <hr className="my-8 border-gray-300 dark:border-gray-600"/>
-          <div className="flex flex-wrap justify-center gap-4">
-            {/* Pastikan link mengarah ke path /premium yang benar */}
-            <Link href="/premium/artikel" className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
-              <ArrowLeft size={18} />
-              <span>Semua Artikel</span>
-            </Link>
-            <Link href="/premium" className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
-              <Home size={18} />
-              <span>Beranda Premium</span>
-            </Link>
+          {/* Anda bisa menggunakan AdBanner yang berbeda atau tidak sama sekali untuk bagian premium */}
+          <div className="w-full mb-8">
+            <AdBanner dataAdSlot="8254616654" /> 
           </div>
-          
-        </article>
+
+          <article className="bg-light-surface dark:bg-dark-surface rounded-lg shadow-lg p-8 w-full">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-center mb-6 text-primary-light dark:text-primary-dark">
+              {article.title}
+            </h1>
+            <div className="text-center text-gray-500 dark:text-gray-400 text-sm mb-6">
+              Dipublikasikan pada: {article.publishedDate}
+              {article.lastUpdatedDate && ` | Diperbarui: ${article.lastUpdatedDate}`}
+              {article.authorSlug && ` | Penulis: ${article.authorSlug}`}
+            </div>
+
+            <img
+              src={article.image}
+              alt={article.title}
+              className="w-full h-64 md:h-96 object-cover rounded-lg mb-8"
+            />
+
+            <div 
+              className="prose dark:prose-invert max-w-none" 
+              dangerouslySetInnerHTML={{ __html: article.content }} 
+            />
+          </article>
+        </div>
       </div>
     </main>
   );

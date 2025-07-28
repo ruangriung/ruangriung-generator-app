@@ -8,7 +8,7 @@ type PromptFromPrisma = Awaited<ReturnType<typeof prisma.prompt.findUnique>>;
 
 // Endpoint GET: Mengambil prompt tunggal berdasarkan slug
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
@@ -49,7 +49,7 @@ export async function GET(
 
 // Implementasi fungsi DELETE untuk menghapus prompt berdasarkan slug (Sekarang publik)
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;

@@ -1,11 +1,15 @@
 import type { Article } from '@/lib/articles';
 
-export const article: Article = {
+const panduanMemilihModelAi: Article = {
     slug: 'panduan-memilih-model-ai',
     title: 'Panduan Lengkap Memilih Model AI di RuangRiung',
-    author: 'Tim RuangRiung',
-    date: '26 Juli 2025',
-    summary: 'Flux, DALL-E 3, Gemini, atau OpenAI? Setiap model punya keajaibannya sendiri. Pelajari kapan harus menggunakan masing-masing model untuk hasil yang maksimal.',
+    authorSlug: 'Tim RuangRiung',
+    publishedDate: '2025-07-26',
+    lastUpdatedDate: '2025-07-26',
+    category: 'Panduan Fitur',
+    tags: ['AI', 'model AI', 'chatbot', 'image generation'],
+    image: '/v1/img/ruangriung.webp',
+    description: 'Flux, DALL-E 3, Gemini, atau OpenAI? Setiap model punya keajaibannya sendiri. Pelajari kapan harus menggunakan masing-masing model untuk hasil yang maksimal.',
     content: `
       <p class="mb-4">
         Di RuangRiung, kami menyediakan akses ke berbagai "otak" AI yang canggih. Memilih model yang tepat untuk tugas yang tepat adalah kunci untuk membuka potensi penuh kreativitas Anda. Baik Anda sedang mengobrol dengan chatbot atau menciptakan mahakarya visual, panduan ini akan membantu Anda menentukan pilihan.
@@ -33,3 +37,4 @@ export const article: Article = {
     `
 ,
 };
+export default panduanMemilihModelAi;

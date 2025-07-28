@@ -1,11 +1,15 @@
 import type { Article } from '@/lib/articles';
 
-export const article: Article = {
+const analisisGambarUntukInspirasi: Article = {
 slug: 'analisis-gambar-untuk-inspirasi',
     title: 'Mengubah Gambar Menjadi Prompt: Kekuatan Analisis Gambar',
-    author: 'Tim RuangRiung',
-    date: '23 Juli 2025',
-    summary: 'Punya gambar yang Anda sukai? Gunakan fitur Analisis Gambar kami untuk mengubahnya menjadi prompt deskriptif yang bisa Anda kembangkan lebih lanjut.',
+    authorSlug: 'Tim RuangRiung',
+    lastUpdatedDate: '23 Juli 2025',
+    publishedDate: '23 Juli 2025',
+    category: 'Panduan Fitur',
+    tags: ['prompt', 'analisis gambar', 'inspirasi'],
+    image: '/v1/img/ruangriung.webp',
+    description: 'Punya gambar yang Anda sukai? Gunakan fitur Analisis Gambar kami untuk mengubahnya menjadi prompt deskriptif yang bisa Anda kembangkan lebih lanjut.',
     content: `
       <p class="mb-4">Terkadang, inspirasi terbaik datang dari visual yang sudah ada. Mungkin Anda menemukan sebuah foto dengan pencahayaan yang sempurna, atau lukisan dengan palet warna yang memukau. Fitur "Asisten Analisis Gambar" di RuangRiung memungkinkan Anda untuk memanfaatkan inspirasi tersebut dan mengubahnya menjadi prompt AI yang bisa diedit dan dikembangkan.</p>
       <h3 class="text-xl font-bold mt-6 mb-2">Bagaimana Cara Kerjanya?</h3>
@@ -16,3 +20,5 @@ slug: 'analisis-gambar-untuk-inspirasi',
       <p>Fitur ini adalah alat yang sangat kuat untuk dekonstruksi dan rekonstruksi ide. Gunakan untuk mempelajari mengapa Anda menyukai sebuah gambar, lalu gunakan elemen-elemen tersebut sebagai fondasi untuk menciptakan sesuatu yang sepenuhnya milik Anda. Ini adalah cara sempurna untuk belajar membuat prompt yang lebih baik sambil terus berkarya.</p>
     `,
 };
+
+export default analisisGambarUntukInspirasi;

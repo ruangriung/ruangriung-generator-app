@@ -1,11 +1,14 @@
 import type { Article } from '@/lib/articles';
 
-export const article: Article = {
+const menghidupkan_narasi_dengan_audio_ai: Article = {
     slug: 'menghidupkan-narasi-dengan-audio-ai',
     title: 'Dari Teks ke Suara: Menghidupkan Narasi dengan Audio AI',
-    author: 'Tim RuangRiung',
-    date: '27 Juli 2025',
-    summary: 'Fitur Audio Generator kami lebih dari sekadar pembaca teks. Pelajari cara memilih suara yang tepat dan menyusun teks Anda untuk menghasilkan narasi audio yang hidup dan menarik.',
+    authorSlug: 'Tim RuangRiung',
+    publishedDate: '2025-07-27',
+    description: 'Fitur Audio Generator kami lebih dari sekadar pembaca teks. Pelajari cara memilih suara yang tepat dan menyusun teks Anda untuk menghasilkan narasi audio yang hidup dan menarik.',
+    category: 'Panduan Fitur',
+    tags: ['audio AI', 'narasi', 'text-to-speech'],
+    image: '/v1/img/ruangriung.webp',
     content: `
       <p class="mb-4">
         Pernahkah Anda membayangkan prompt video atau cerita pendek Anda dinarasikan dengan suara yang profesional? Fitur Audio Generator di RuangRiung memungkinkan Anda mengubah teks apa pun menjadi audio berkualitas tinggi. Namun, ada beberapa trik untuk mengubah output dari sekadar "robot pembaca" menjadi narasi yang terdengar alami.
@@ -42,3 +45,4 @@ export const article: Article = {
     `
 ,
 };
+export default menghidupkan_narasi_dengan_audio_ai;
