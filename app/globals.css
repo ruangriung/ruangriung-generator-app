@@ -87,11 +87,81 @@ input[type='number'] {
   @apply text-inherit p-0 m-0;
 }
 
-/* --- PERBAIKAN UTAMA: Warna Teks Respons AI di Mode Gelap --- */
-/* Aturan ini secara spesifik menargetkan elemen teks di dalam balon pesan AI 
-   ketika mode gelap aktif, dan mengubah warnanya menjadi lebih terang. */
-.dark .prose-invert p,
-.dark .prose-invert li,
-.dark .prose-invert strong {
-  @apply text-gray-300;
+/* Styling untuk input range track dengan warna mengisi */
+/* Gunakan class baru 'range-slider-colored-track' */
+input[type="range"].range-slider-colored-track {
+  /* Default background sebagai fallback, atau bisa dihilangkan jika yakin didukung browser */
+  background: transparent; /* Pastikan background asli transparan */
+}
+
+/* WebKit (Chrome, Safari, Edge) */
+input[type="range"].range-slider-colored-track::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8px; /* Tinggi track */
+  border-radius: 4px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Efek neumorphic inset */
+
+  /* Gradient dinamis untuk bagian yang terisi dan kosong */
+  /* --value akan diatur oleh JavaScript, e.g., '50%' */
+  background: linear-gradient(
+    to right,
+    #9333ea var(--value), /* Bagian yang terisi (purple-600) */
+    #e5e7eb var(--value)  /* Bagian yang kosong (warna abu-abu terang) */
+  );
+}
+
+input[type="range"].range-slider-colored-track::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 20px; /* Tinggi thumb */
+  width: 20px; /* Lebar thumb */
+  background-color: #9333ea; /* Warna thumb */
+  border-radius: 50%; /* Bentuk lingkaran */
+  margin-top: -6px; /* Pusatkan thumb secara vertikal pada track */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Firefox */
+input[type="range"].range-slider-colored-track::-moz-range-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  /* Gradient dinamis untuk bagian yang terisi dan kosong */
+  background: linear-gradient(
+    to right,
+    #9333ea var(--value), /* Bagian yang terisi (purple-600) */
+    #e5e7eb var(--value)  /* Bagian yang kosong (gray-200) */
+  );
+}
+
+input[type="range"].range-slider-colored-track::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  background-color: #9333ea; /* Warna thumb (purple-600) */
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Penyesuaian Dark Mode */
+.dark input[type="range"].range-slider-colored-track::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    #a855f7 var(--value), /* Ungu sedikit berbeda untuk dark mode (purple-500) */
+    #374151 var(--value)  /* Abu-abu gelap untuk bagian kosong di dark mode (gray-700) */
+  );
+}
+
+.dark input[type="range"].range-slider-colored-track::-moz-range-track {
+  background: linear-gradient(
+    to right,
+    #a855f7 var(--value), /* Ungu untuk dark mode (purple-500) */
+    #374151 var(--value)  /* Abu-abu gelap untuk dark mode (gray-700) */
+  );
+}
+
+.dark input[type="range"].range-slider-colored-track::-webkit-slider-thumb,
+.dark input[type="range"].range-slider-colored-track::-moz-range-thumb {
+  background-color: #a855f7; /* Warna thumb yang konsisten untuk dark mode (purple-500) */
 }

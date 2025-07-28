@@ -1,7 +1,7 @@
 // components/VideoCreator.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 // Import ikon baru yang mungkin dibutuhkan
 import { Sparkles, Film, Type, Clapperboard, Settings, Camera, Wand, Smile, ClipboardCopy, Check, X, Expand, Download, ChevronDown, Clock, Aperture, SlidersHorizontal, Palette } from 'lucide-react';
 import ButtonSpinner from './ButtonSpinner';
@@ -56,6 +56,24 @@ export default function VideoCreator() {
   const [isLoading, setIsLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [editingField, setEditingField] = useState<null | 'konsep' | 'narasi'>(null);
+
+  const konsistensiSliderRef = useRef<HTMLInputElement>(null);
+  const intensitasGerakanSliderRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const updateSliderFill = (slider: HTMLInputElement | null) => {
+      if (slider) {
+        const min = Number(slider.min) || 0;
+        const max = Number(slider.max) || 100;
+        const value = Number(slider.value);
+        const percentage = ((value - min) / (max - min)) * 100;
+        slider.style.setProperty('--value', `${percentage}%`);
+      }
+    };
+
+    updateSliderFill(konsistensiSliderRef.current);
+    updateSliderFill(intensitasGerakanSliderRef.current);
+  }, [inputs.konsistensi, inputs.intensitasGerakan]);
 
   // Handler umum untuk semua input teks/select
   const handleInputChange = (field: keyof typeof inputs, value: string | number | boolean) => {
@@ -540,25 +558,29 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
               <div>
                 <label htmlFor="konsistensi" className="text-sm text-gray-600 dark:text-gray-300">Konsistensi: <span className="font-medium">{inputs.konsistensi}%</span></label>
                 <input
+                  ref={konsistensiSliderRef}
                   type="range"
                   id="konsistensi"
                   min="0"
                   max="100"
                   value={inputs.konsistensi}
-                  onChange={(e) => handleInputChange('konsistensi', parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-purple-600"
+                  onChange={(e) => {
+                    handleInputChange('konsistensi', parseInt(e.target.value));
+                  }}
+                  className="w-full cursor-pointer range-slider-colored-track"
                 />
               </div>
               <div>
                 <label htmlFor="intensitasGerakan" className="text-sm text-gray-600 dark:text-gray-300">Intensitas Gerakan: <span className="font-medium">{inputs.intensitasGerakan}%</span></label>
                 <input
+                  ref={intensitasGerakanSliderRef}
                   type="range"
                   id="intensitasGerakan"
                   min="0"
                   max="100"
                   value={inputs.intensitasGerakan}
                   onChange={(e) => handleInputChange('intensitasGerakan', parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-purple-600"
+                  className="w-full cursor-pointer range-slider-colored-track"
                 />
               </div>
             </div>

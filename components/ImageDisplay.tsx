@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect, forwardRef } from 'react';
 import toast from 'react-hot-toast';
 import Spinner from './Spinner';
-import { ZoomIn, Download, Paintbrush, Shuffle, X, Sun, Contrast, Droplets } from 'lucide-react';
+import { ZoomIn, Download, Paintbrush, Shuffle, X, Sun, Contrast, Droplets, RefreshCw } from 'lucide-react'; // Import RefreshCw
 import { EditControls } from './EditControls';
 
 // Definisikan tipe data untuk pengaturan
@@ -33,22 +33,29 @@ interface ImageDisplayProps {
   onVariationsClick: () => void;
 }
 
-const ImageDisplay = forwardRef<HTMLDivElement, ImageDisplayProps>(({ 
-    isLoading, 
+// Definisikan pengaturan filter default
+const DEFAULT_FILTER_SETTINGS: FilterSettings = {
+  brightness: 100,
+  contrast: 100,
+  saturate: 100,
+};
+
+const ImageDisplay = forwardRef<HTMLDivElement, ImageDisplayProps>(({
+    isLoading,
     imageUrls,
-    prompt, 
+    prompt,
     onZoomClick,
-    onVariationsClick 
+    onVariationsClick
 }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isEditing, setIsEditing] = useState(false);
-  
-  const [filters, setFilters] = useState<FilterSettings>({ brightness: 100, contrast: 100, saturate: 100 });
+
+  const [filters, setFilters] = useState<FilterSettings>(DEFAULT_FILTER_SETTINGS); // Gunakan default settings
   const [watermark, setWatermark] = useState<WatermarkSettings>({
     text: 'RuangRiung', image: null, size: 48, opacity: 0.7,
-    color: '#FFFFFF', font: 'Arial', position: { x: 150, y: 150 },
+    color: '#FFFFFF', font: 'Arial', position: { x: 170, y: 150 },
   });
-  
+
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
 
@@ -56,7 +63,7 @@ const ImageDisplay = forwardRef<HTMLDivElement, ImageDisplayProps>(({
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!ctx || !canvas) return;
-    
+
     // Jika tidak ada gambar, bersihkan canvas dan jangan gambar apa-apa
     if (imageUrls.length === 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -66,16 +73,16 @@ const ImageDisplay = forwardRef<HTMLDivElement, ImageDisplayProps>(({
     const baseImage = new Image();
     baseImage.crossOrigin = 'anonymous';
     baseImage.src = imageUrls[0];
-    
+
     baseImage.onload = () => {
       canvas.width = baseImage.naturalWidth;
       canvas.height = baseImage.naturalHeight;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+
       ctx.filter = `brightness(${filters.brightness}%) contrast(${filters.contrast}%) saturate(${filters.saturate}%)`;
       ctx.drawImage(baseImage, 0, 0);
       ctx.filter = 'none';
-      
+
       ctx.globalAlpha = watermark.opacity;
       if (watermark.image) {
         const w = watermark.image.width * (watermark.size / 100);
@@ -107,9 +114,15 @@ const ImageDisplay = forwardRef<HTMLDivElement, ImageDisplayProps>(({
       reader.readAsDataURL(e.target.files[0]);
     }
   };
-  
+
   const handleWatermarkChange = (newSettings: Partial<WatermarkSettings>) => setWatermark(prev => ({ ...prev, ...newSettings }));
   const handleFilterChange = (newSettings: Partial<FilterSettings>) => setFilters(prev => ({ ...prev, ...newSettings }));
+
+  // Fungsi untuk mereset filter
+  const handleResetFilters = () => {
+    setFilters(DEFAULT_FILTER_SETTINGS);
+    toast.success("Filter berhasil direset!");
+  };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -161,7 +174,7 @@ const ImageDisplay = forwardRef<HTMLDivElement, ImageDisplayProps>(({
       <div className="relative aspect-square w-full bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset p-4 flex items-center justify-center">
         <canvas ref={canvasRef} className={`m-auto max-w-full max-h-full object-contain ${isEditing ? 'cursor-move touch-none' : 'cursor-auto'}`} onPointerDown={isEditing ? handlePointerDown : undefined} onPointerMove={isEditing ? handlePointerMove : undefined} onPointerUp={isEditing ? handlePointerUp : undefined} onPointerLeave={isEditing ? handlePointerUp : undefined} />
         {isLoading && <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-40 rounded-xl"><Spinner /></div>}
-        
+
         {/* --- PERBAIKAN: Placeholder dibuat menjadi overlay absolut --- */}
         {!isImageReady && !isLoading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400 p-4">
@@ -183,12 +196,13 @@ const ImageDisplay = forwardRef<HTMLDivElement, ImageDisplayProps>(({
       )}
 
       {isEditing && (
-        <EditControls 
-          watermark={watermark} 
-          filters={filters} 
+        <EditControls
+          watermark={watermark}
+          filters={filters}
           onWatermarkChange={handleWatermarkChange}
           onFilterChange={handleFilterChange}
-          onWatermarkFileChange={handleWatermarkFileChange}
+          onWatermarkFileChange={handleWatermarkFileChange} // eslint-disable-line
+          onResetFilters={handleResetFilters}
         />
       )}
     </div>
