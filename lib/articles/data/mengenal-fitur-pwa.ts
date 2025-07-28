@@ -1,15 +1,11 @@
 import type { Article } from '@/lib/articles';
 
-const mengenalFiturPwa: Article = {
+export const article: Article = {
 slug: 'mengenal-fitur-pwa',
-    title: 'Instal RuangRiung di Perangkat Anda dengan PWA', // Changed from 'author' to 'authorSlug'
-    authorSlug: 'Tim RuangRiung', // Changed from 'author' to 'authorSlug'
-    publishedDate: '2025-07-21', // Changed from 'date' to 'publishedDate'
-    lastUpdatedDate: '2025-07-21', // Changed from 'summary' to 'lastUpdatedDate'
-    description: 'Pelajari apa itu Progressive Web App (PWA) dan bagaimana Anda bisa menginstal RuangRiung langsung ke perangkat Anda untuk akses cepat dan pengalaman seperti aplikasi.',
-    image: '/v1/img/ruangriung.webp',
-    category: 'Panduan Fitur',
-    tags: ['PWA', 'instalasi', 'aplikasi web'],
+    title: 'Instal RuangRiung di Perangkat Anda dengan PWA',
+    author: 'Tim RuangRiung',
+    date: '21 Juli 2025',
+    summary: 'Tahukah Anda bahwa RuangRiung bisa diinstal seperti aplikasi asli? Kenali teknologi Progressive Web App (PWA) dan manfaatnya.',
     content: `
       <p class="mb-4">Anda mungkin melihat banner di bagian atas halaman yang menyarankan Anda untuk "Install App". Namun, ini bukanlah proses unduh dari App Store atau Play Store. RuangRiung dibangun sebagai <strong>Progressive Web App (PWA)</strong>, sebuah teknologi web modern yang memberikan pengalaman seperti aplikasi asli langsung dari browser Anda.</p>
       <h3 class="text-xl font-bold mt-6 mb-2">Apa Itu PWA?</h3>
@@ -28,4 +24,3 @@ slug: 'mengenal-fitur-pwa',
     `,
 
 };
-export default mengenalFiturPwa;

@@ -1,15 +1,11 @@
 import type { Article } from '@/lib/articles';
 
-const etikaSeniAI: Article = {
+export const article: Article = {
 slug: 'etika-seni-ai',
     title: 'Etika dan Hak Cipta dalam Seni AI',
-    authorSlug: 'Tim RuangRiung',
-    publishedDate: '2025-07-20',
-    lastUpdatedDate: '2025-07-20',
-    category: 'Etika & Hukum',
-    tags: ['etika', 'hak cipta', 'AI generatif', 'komersial'],
-    image: '/v1/img/ruangriung.webp',
-    description: 'Siapa pemilik gambar yang dibuat oleh AI? Bolehkah digunakan untuk komersial? Jelajahi pertanyaan penting seputar etika di dunia seni AI.',
+    author: 'Tim RuangRiung',
+    date: '20 Juli 2025',
+    summary: 'Siapa pemilik gambar yang dibuat oleh AI? Bolehkah digunakan untuk komersial? Jelajahi pertanyaan penting seputar etika di dunia seni AI.',
     content: `
       <p class="mb-4">Seiring dengan pesatnya perkembangan teknologi AI generatif, muncul pula pertanyaan-pertanyaan penting seputar etika, kepemilikan, dan hak cipta. Lanskap hukum di area ini masih berkembang, namun ada beberapa prinsip dan panduan umum yang penting untuk dipahami oleh setiap kreator.</p>
       <h3 class="text-xl font-bold mt-6 mb-2">Siapakah Pemilik Karya Seni AI?</h3>
@@ -23,4 +19,3 @@ slug: 'etika-seni-ai',
     ,
 
 };
-export default etikaSeniAI;

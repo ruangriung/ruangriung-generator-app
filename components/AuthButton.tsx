@@ -1,4 +1,3 @@
-// ruangriung/ruangriung-generator-app/components/AuthButton.tsx
 'use client';
 
 import { useSession, signIn, signOut } from "next-auth/react";
@@ -15,23 +14,20 @@ export default function AuthButton() {
   }
 
   if (status === "authenticated") {
-    // Tampilan untuk pengguna yang sudah login
+    // Tampilan untuk pengguna yang sudah login tetap sama (tidak lebar penuh)
     return (
       <div className={containerStyle}>
         <Image 
-          // PERBAIKAN: Berikan path gambar default jika session.user?.image kosong atau null
-          src={session.user?.image || '/v1/user.png'} // Menggunakan logo default dari public/v1/ruangriung.png
+          src={session.user?.image || ''} 
           alt={session.user?.name || 'User Avatar'}
           width={36}
           height={36}
           className="rounded-lg"
         />
-        <span className="font-semibold text-gray-700 dark:text-gray-200">
-          {session.user?.name || session.user?.email || 'Pengguna'} {/* Tampilkan nama atau email */}
-        </span>
+        <span className="font-semibold text-gray-700 dark:text-gray-200">{session.user?.name}</span>
         <button 
           onClick={() => signOut()} 
-          className="ml-auto p-2 text-gray-700 dark:text-gray-300 rounded-full hover:bg-white dark:hover:bg-gray-700"
+          className="ml-auto p-2 text-gray-600 dark:text-gray-300 hover:text-purple-600 transition-colors rounded-full hover:bg-white dark:hover:bg-gray-700"
           aria-label="Logout"
         >
           <LogOut size={20} />
@@ -40,7 +36,8 @@ export default function AuthButton() {
     );
   }
 
-  // Tampilan untuk pengguna yang belum login
+  // === PERUBAHAN UTAMA DI SINI ===
+  // Tampilan untuk pengguna yang belum login (tombol dibuat lebar penuh)
   return (
     <div className="w-full flex flex-col sm:flex-row gap-4">
       <button 
@@ -54,7 +51,7 @@ export default function AuthButton() {
         onClick={() => signIn('facebook')} 
         className="w-full inline-flex items-center justify-center px-4 py-2 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-200 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150 min-h-[52px]"
       >
-        <Image src="/facebook-icon.svg" alt="Facebook logo" width={20} height={20} className="mr-3" /> {/* Menggunakan icon facebook.svg */}
+        <Image src="/facebook-icon.svg" alt="Facebook logo" width={20} height={20} className="mr-3" />
         <span>Login with Facebook</span>
       </button>
     </div>

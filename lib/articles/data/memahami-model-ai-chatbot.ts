@@ -1,16 +1,12 @@
 import type { Article } from '@/lib/articles';
 
-const memahamiModelAi: Article = {
+export const article: Article = {
 
 slug: 'memahami-model-ai-chatbot',
     title: 'Memahami Model AI di Chatbot: OpenAI vs Gemini',
-    authorSlug: 'Tim RuangRiung',
-    publishedDate: '2025-07-19',
-    lastUpdatedDate: '2025-07-19',
-    category: 'Panduan Fitur',
-    tags: ['AI', 'chatbot', 'OpenAI', 'Gemini'],
-    image: '/v1/img/ruangriung.webp',
-    description: 'Kenali perbedaan antara model AI terkemuka seperti OpenAI (GPT) dan Google (Gemini) yang tersedia di chatbot kami.',
+    author: 'Tim RuangRiung',
+    date: '19 Juli 2025',
+    summary: 'Kenali perbedaan antara model AI terkemuka seperti OpenAI (GPT) dan Google (Gemini) yang tersedia di chatbot kami.',
     content: `
       <p class="mb-4">Chatbot di RuangRiung didukung oleh berbagai model AI canggih, memungkinkan Anda memilih "otak" yang paling sesuai untuk kebutuhan Anda. Dua nama terbesar di antaranya adalah model dari OpenAI (keluarga GPT) dan Google (Gemini). Meskipun keduanya sangat cerdas, mereka memiliki kekuatan dan karakteristik yang sedikit berbeda.</p>
       <h3 class="text-xl font-bold mt-6 mb-2">Model OpenAI (GPT Series)</h3>
@@ -24,4 +20,3 @@ slug: 'memahami-model-ai-chatbot',
     ,
 
 };
-export default memahamiModelAi;

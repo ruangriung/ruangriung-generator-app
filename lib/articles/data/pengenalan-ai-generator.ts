@@ -1,14 +1,11 @@
 import type { Article } from '@/lib/articles';
 
-const pengenalanAIGenerator: Article = {
+export const article: Article = {
   slug: 'pengenalan-ai-generator',
   title: 'Pengenalan Dunia AI Generator',
-  authorSlug: 'Tim RuangRiung', // Perbaikan: Menggunakan authorSlug sesuai interface Article
-  publishedDate: '2025-07-17',
-  category: 'Pengantar AI',
-  tags: ['AI', 'generatif', 'prompt', 'teknologi'],
-    image: '/v1/img/ruangriung.webp',
-  description: 'Mari kita selami apa itu AI generator, bagaimana cara kerjanya, dan mengapa teknologi ini menjadi revolusi di dunia kreatif.',
+  author: 'Tim RuangRiung',
+  date: '17 Juli 2025',
+  summary: 'Mari kita selami apa itu AI generator, bagaimana cara kerjanya, dan mengapa teknologi ini menjadi revolusi di dunia kreatif.',
   content: `
     <p class="mb-4">AI Generator, atau kecerdasan buatan generatif, adalah cabang dari AI yang berfokus pada penciptaan konten baru dan orisinal. Berbeda dengan AI analitis yang hanya mengolah data, AI generatif mampu menghasilkan karya seperti gambar, tulisan, musik, hingga video yang belum pernah ada sebelumnya. Cukup dengan memberikan instruksi berupa teks (dikenal sebagai "prompt"), teknologi ini membuka pintu kreativitas yang tak terbatas bagi siapa saja, dari seniman profesional hingga pengguna biasa.</p>
     <h3 class="text-xl font-bold mt-6 mb-2">Bagaimana Cara Kerjanya?</h3>
@@ -20,5 +17,3 @@ const pengenalanAIGenerator: Article = {
     <p>RuangRiung AI Generator hadir untuk mendemokratisasi akses terhadap teknologi canggih ini. Kami menyediakan berbagai model AI terkemuka dalam satu platform yang mudah digunakan, memungkinkan Anda untuk mengubah imajinasi menjadi kenyataan, tanpa memerlukan keahlian teknis yang mendalam. Selamat berkarya!</p>
   `,
 };
-
-export default pengenalanAIGenerator;

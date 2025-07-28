@@ -56,7 +56,7 @@ export default function Generator() {
         setModelList([...new Set([...fetchedModels, 'DALL-E 3', 'Leonardo'])]);
       } catch (error) {
         console.error("Error mengambil model gambar:", error);
-        setModelList(['flux', 'turbo', 'DALL-E 3', 'Leonardo']);
+        setModelList(['flux', 'turbo', 'gptimage', 'kontext', 'DALL-E 3', 'Leonardo']);
       }
     };
     fetchImageModels();

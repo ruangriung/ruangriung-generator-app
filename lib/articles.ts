@@ -1,17 +1,51 @@
 // lib/articles.ts
+import { article as pengenalanAiGenerator } from './articles/data/pengenalan-ai-generator';
+import { article as tipsMembuatPromptEfektif } from './articles/data/tips-membuat-prompt-efektif';
+import { article as memahamiModelAiChatbot } from './articles/data/memahami-model-ai-chatbot';
+import { article as etikaSeniAi } from './articles/data/etika-seni-ai';
+import { article as mengenalFiturPwa } from './articles/data/mengenal-fitur-pwa';
+import { article as memaksimalkanAsistenPrompt } from './articles/data/memaksimalkan-asisten-prompt';
+import { article as analisisGambarUntukInspirasi } from './articles/data/analisis-gambar-untuk-inspirasi';
 
+// --- ARTIKEL BARU DITAMBAHKAN DI SINI ---
+import { article as menguasaiKomposisiGambarAi } from './articles/data/menguasai-komposisi-gambar-ai';
+import { article as panduanMemilihModelAi } from './articles/data/panduan-memilih-model-ai';
+import { article as menghidupkanNarasiDenganAudioAi } from './articles/data/menghidupkan-narasi-dengan-audio-ai';
+import { article as tipsFiturEditGambarRealTime } from './articles/data/tips-fitur-edit-gambar-real-time';
+import { article as alurKerjaKreatifMenyimpanPrompt } from './articles/data/alur-kerja-kreatif-menyimpan-prompt';
+// -----------------------------------------
+
+// Interface ini tetap dibutuhkan agar komponen lain tahu bentuk data artikel
 export interface Article {
   slug: string;
   title: string;
-  description: string;
-  authorSlug: string;
-  publishedDate: string; // Format YYYY-MM-DD
-  lastUpdatedDate?: string; // Format YYYY-MM-DD, opsional
-  category: string;
-  tags: string[];
-  image: string; // Path ke gambar utama artikel
-  content: string; // Konten artikel dalam format HTML atau Markdown
+  author: string;
+  date: string;
+  summary: string;
+  content: string;
 }
 
-// Tidak ada lagi array 'articles' yang di-hardcode di sini.
-// Array artikel akan dikumpulkan secara dinamis oleh fungsi sisi server.
+// Gabungkan semua artikel yang diimpor ke dalam satu array
+// Urutan di sini akan menentukan urutan di halaman daftar artikel Anda
+export const articles: Article[] = [
+  // --- ARTIKEL BARU ---
+  alurKerjaKreatifMenyimpanPrompt,
+  tipsFiturEditGambarRealTime,
+  menghidupkanNarasiDenganAudioAi,
+  panduanMemilihModelAi,
+  menguasaiKomposisiGambarAi,
+  // --- ARTIKEL LAMA ---
+  analisisGambarUntukInspirasi,
+  memaksimalkanAsistenPrompt,
+  mengenalFiturPwa,
+  etikaSeniAi,
+  memahamiModelAiChatbot,
+  tipsMembuatPromptEfektif,
+  pengenalanAiGenerator,
+].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // <-- Mengurutkan artikel berdasarkan tanggal terbaru
+
+
+// Fungsi untuk mendapatkan satu artikel berdasarkan slug-nya
+export function getArticle(slug: string): Article | undefined {
+  return articles.find((article) => article.slug === slug);
+}

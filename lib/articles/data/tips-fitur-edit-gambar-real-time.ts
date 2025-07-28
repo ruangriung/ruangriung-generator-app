@@ -1,15 +1,11 @@
 import type { Article } from '@/lib/articles';
 
-const tipsFiturEditGambarRealTime: Article = {
+export const article: Article = {
     slug: 'tips-fitur-edit-gambar-real-time',
     title: 'Tips & Trik Menggunakan Fitur Edit Gambar Real-time',
-    authorSlug: 'Tim RuangRiung',
-    publishedDate: '2025-07-28',
-    lastUpdatedDate: '2025-07-28',
-    description: 'Jangan berhenti setelah gambar berhasil dibuat. Pelajari cara menyempurnakan karya Anda secara langsung dengan fitur filter, penyesuaian, dan watermarking di RuangRiung.',
-    category: 'Panduan Fitur',
-    tags: ['edit gambar', 'filter', 'watermark'],
-    image: '/v1/img/ruangriung.webp',
+    author: 'Tim RuangRiung',
+    date: '28 Juli 2025',
+    summary: 'Jangan berhenti setelah gambar berhasil dibuat. Pelajari cara menyempurnakan karya Anda secara langsung dengan fitur filter, penyesuaian, dan watermarking di RuangRiung.',
     content: `
       <p class="mb-4">
         Proses kreatif tidak berhenti saat AI selesai menghasilkan gambar. Di RuangRiung, kami menyediakan alat edit sederhana namun kuat yang memungkinkan Anda melakukan sentuhan akhir secara real-time tanpa perlu membuka aplikasi lain. Mari kita jelajahi cara memaksimalkannya.
@@ -44,4 +40,3 @@ const tipsFiturEditGambarRealTime: Article = {
     `
 ,
 };
-export default tipsFiturEditGambarRealTime;

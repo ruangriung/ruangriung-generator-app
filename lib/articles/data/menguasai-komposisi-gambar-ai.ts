@@ -1,15 +1,11 @@
 import type { Article } from '@/lib/articles';
 
-const menguasaiKomposisiGambarAi: Article = {
+export const article: Article = {
     slug: 'menguasai-komposisi-gambar-ai',
     title: 'Menguasai Seni Komposisi Gambar dengan AI',
-    authorSlug: 'Tim RuangRiung',
-    publishedDate: '2025-07-25',
-    lastUpdatedDate: '2025-07-25',
-    category: 'Prompt Engineering',
-    tags: ['komposisi', 'prompt', 'AI Image'],
-    image: '/v1/img/ruangriung.webp',
-    description: 'Lebih dari sekadar subjek, komposisi adalah kunci visual yang memukau. Pelajari cara mengarahkan AI untuk menggunakan shot, angle, dan pencahayaan layaknya seorang sutradara profesional.',
+    author: 'Tim RuangRiung',
+    date: '25 Juli 2025',
+    summary: 'Lebih dari sekadar subjek, komposisi adalah kunci visual yang memukau. Pelajari cara mengarahkan AI untuk menggunakan shot, angle, dan pencahayaan layaknya seorang sutradara profesional.',
     content: `
       <p class="mb-4">
         Banyak pengguna AI generator fokus pada "apa" yang ada di dalam gambar, namun seringkali melupakan "bagaimana" gambar itu disajikan. Padahal, komposisi, sudut pandang (angle), dan pencahayaan adalah elemen kunci yang membedakan gambar biasa dengan karya seni yang luar biasa. Di RuangRiung, Anda memiliki kekuatan untuk menjadi sutradara bagi karya visual Anda.
@@ -45,4 +41,3 @@ const menguasaiKomposisiGambarAi: Article = {
     `
 ,
 };
-export default menguasaiKomposisiGambarAi;

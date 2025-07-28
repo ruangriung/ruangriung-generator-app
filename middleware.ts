@@ -1,13 +1,10 @@
-// ruangriung/ruangriung-generator-app/middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-// Hapus import { getToken } from 'next-auth/jwt';
-// Hapus const ALLOWED_ADMIN_EMAILS = ...;
-// Hapus const NEXTAUTH_SECRET = ...;
 
-export function middleware(request: NextRequest) { // Kembali ke function middleware tanpa async
+export function middleware(request: NextRequest) {
   // Hanya jalankan middleware untuk path yang dimulai dengan /premium
   if (request.nextUrl.pathname.startsWith('/premium')) {
+    
     // Izinkan akses ke halaman login dan API-nya
     if (
       request.nextUrl.pathname.startsWith('/premium/login') ||
@@ -16,21 +13,20 @@ export function middleware(request: NextRequest) { // Kembali ke function middle
       return NextResponse.next();
     }
 
-    // Cek cookie otentikasi kustom
+    // Cek cookie otentikasi
     const authCookie = request.cookies.get('premium-auth');
 
     if (!authCookie || authCookie.value !== 'true') {
-      // Jika tidak ada cookie, alihkan ke halaman login premium
+      // Jika tidak ada cookie, alihkan ke halaman login
       const loginUrl = new URL('/premium/login', request.url);
       return NextResponse.redirect(loginUrl);
     }
   }
 
-  // Untuk semua rute lain yang tidak dicocokkan oleh matcher (termasuk /admin), lanjutkan
   return NextResponse.next();
 }
 
-// Konfigurasi matcher: Hanya melindungi jalur /premium
+// Konfigurasi ini memastikan middleware hanya berjalan pada path /premium
 export const config = {
   matcher: '/premium/:path*',
 };
