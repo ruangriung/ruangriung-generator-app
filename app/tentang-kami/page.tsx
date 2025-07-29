@@ -17,6 +17,8 @@ const teamMembers = [
   { name: 'Nadifa Family', role: 'Admin', profileUrl: 'https://web.facebook.com/nadifa.familly', imageUrl: '/author/img/nadifa.jpg' },
   { name: 'Nurul Sholehah Eka', role: 'Admin', profileUrl: 'https://web.facebook.com/uul.aja', imageUrl: '/author/img/uul.jpg' },
   { name: 'Arif Tirtana', role: 'Kontributor & Tukang Hore', profileUrl: 'https://web.facebook.com/ayicktigabelas', imageUrl: '/author/img/arif.jpg' },
+  { name: 'Hus', role: 'Admin', profileUrl: 'https://web.facebook.com/janseengan', imageUrl: '/author/img/hus.jpg' },
+
 ];
 
 export default function TentangKamiPage() {
