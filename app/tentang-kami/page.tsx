@@ -1,7 +1,7 @@
 // app/tentang-kami/page.tsx
 'use client';
 
-import { ArrowLeft, Users, Heart, FacebookIcon } from 'lucide-react';
+import { ArrowLeft, Users, Heart, FacebookIcon, ContactRound } from 'lucide-react';
 import Link from 'next/link';
 import { AdBanner } from '@/components/AdBanner';
 import Image from 'next/image';
@@ -12,7 +12,7 @@ const teamMembers = [
   { name: 'Yogi Arfianto', role: 'Admin', profileUrl: 'https://web.facebook.com/yogee.krib', imageUrl: '/author/img/yogi-profil.jpg' },
   { name: 'Famii', role: 'Admin', profileUrl: 'https://web.facebook.com/nengayu.hong', imageUrl: '/author/img/famii.jpg' },
   { name: 'Dery Lau', role: 'Admin', profileUrl: 'https://web.facebook.com/dery.megana', imageUrl: '/author/img/dery-lau.jpg' },
-  { name: 'Paijem Ardian Arip', role: 'Admin', profileUrl: 'https://web.facebook.com/ardian.arip.2025', imageUrl: '/v1/img/placeholder-thumb.png' },
+  { name: 'Paijem Ardian Arip', role: 'Admin', profileUrl: 'https://web.facebook.com/ardian.arip.2025', imageUrl: '/author/img/paijem.jpg' },
   { name: 'Mahidara Ratri', role: 'Admin', profileUrl: 'https://web.facebook.com/ruth.andanasari', imageUrl: '/author/img/mahidara.jpg' },
   { name: 'Nadifa Family', role: 'Admin', profileUrl: 'https://web.facebook.com/nadifa.familly', imageUrl: '/author/img/nadifa.jpg' },
   { name: 'Nurul Sholehah Eka', role: 'Admin', profileUrl: 'https://web.facebook.com/uul.aja', imageUrl: '/author/img/uul.jpg' },
@@ -37,7 +37,7 @@ export default function TentangKamiPage() {
           </div>
           
           <div className="flex justify-center mb-6">
-            <Heart size={48} className="text-red-500" />
+            <ContactRound size={48} className="text-red-500" />
           </div>
 
           <h1 className="text-4xl font-bold text-center mb-4 text-gray-800 dark:text-gray-100">
@@ -70,7 +70,7 @@ export default function TentangKamiPage() {
               className="inline-flex items-center justify-center gap-2 py-3 px-6 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <FacebookIcon size={20} />
-              Gabung Komunitas Facebook Kami
+              Gabung Komunitas Kami
             </a>
           </div>
           
