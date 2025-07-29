@@ -30,6 +30,9 @@ export default function KontakPage() {
   const [isSending, setIsSending] = useState(false);
   const [token, setToken] = useState('');
   
+  const inputStyle = "mt-1 block w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow text-gray-800 dark:text-gray-200";
+  const textareaStyle = `${inputStyle} resize-vertical`;
+
   const handleChange = ( e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -83,23 +86,19 @@ export default function KontakPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama</label>
-              {/* PERUBAHAN DI SINI */}
-              <input type="text" name="name" id="name" required value={formData.name} onChange={handleChange} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"/>
+              <input type="text" name="name" id="name" required value={formData.name} onChange={handleChange} className={inputStyle}/>
             </div>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-              {/* PERUBAHAN DI SINI */}
-              <input type="email" name="email" id="email" required value={formData.email} onChange={handleChange} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"/>
+              <input type="email" name="email" id="email" required value={formData.email} onChange={handleChange} className={inputStyle}/>
             </div>
             <div>
               <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Subjek</label>
-              {/* PERUBAHAN DI SINI */}
-              <input type="text" name="subject" id="subject" required value={formData.subject} onChange={handleChange} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"/>
+              <input type="text" name="subject" id="subject" required value={formData.subject} onChange={handleChange} className={inputStyle}/>
             </div>
             <div>
               <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Pesan</label>
-              {/* PERUBAHAN DI SINI */}
-              <textarea name="message" id="message" rows={5} required value={formData.message} onChange={handleChange} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"></textarea>
+              <textarea name="message" id="message" rows={5} required value={formData.message} onChange={handleChange} className={textareaStyle}></textarea>
             </div>
             
             <div className="flex justify-center items-center py-4">
@@ -114,8 +113,6 @@ export default function KontakPage() {
               {isSending ? 'Mengirim...' : 'Kirim Pesan'}
             </button>
           </form>
-          
-        
 
           <hr className="my-6 border-gray-300 dark:border-gray-600" />
 
@@ -134,10 +131,12 @@ export default function KontakPage() {
               <p className="text-gray-700 dark:text-gray-300">Ikuti kami untuk update terbaru.</p>
               <a href="#" className="text-purple-600 dark:text-purple-400 hover:underline">Kunjungi Profil Kami</a>
             </div>
-             <div className="w-full max-w-4xl my-6 flex justify-center">
-              <AdBanner dataAdSlot="6897039624" />
           </div>
+          
+          <div className="w-full my-6 flex justify-center">
+            <AdBanner dataAdSlot="6897039624" />
           </div>
+
         </div>
       </div>
     </main>

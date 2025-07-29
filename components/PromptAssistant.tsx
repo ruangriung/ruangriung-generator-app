@@ -2,10 +2,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Wand2, Copy, Check, Megaphone, Cpu, ChevronDown, Star } from 'lucide-react';
+import { Sparkles, Wand2, Copy, Check, Megaphone, Cpu, ChevronDown, Star, Expand, X } from 'lucide-react';
 import Accordion from './Accordion';
 import ButtonSpinner from './ButtonSpinner';
 import toast from 'react-hot-toast';
+import TextareaModal from './TextareaModal';
 
 interface PromptAssistantProps {
   onUsePrompt: (prompt: string) => void;
@@ -33,6 +34,7 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
   
   const [models, setModels] = useState<{name: string, description: string}[]>([]);
   const [selectedModel, setSelectedModel] = useState('openai');
+  const [editingField, setEditingField] = useState<null | 'subject' | 'details'>(null);
 
   // --- PERUBAHAN LOGIKA FETCH DIMULAI DI SINI ---
   useEffect(() => {
@@ -152,6 +154,7 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
   };
 
   return (
+    <>
     <Accordion title={<div className="flex items-center gap-2"><Megaphone className="text-purple-600" />Asisten Prompt</div>} className="mt-6">
       <div className="space-y-4">
         <div>
@@ -170,12 +173,36 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
 
         <div>
           <LabelWithIcon icon={Star} text="Subjek Utama Prompt (Wajib)" htmlFor="assistant-subject" colorClass="text-red-600" />
-          <input type="text" id="assistant-subject" value={assistantSubject} onChange={(e) => setAssistantSubject(e.target.value)} placeholder="Misal: Pemandangan kota futuristik" className={inputStyle} required />
+          <div className="relative w-full">
+            <textarea id="assistant-subject" value={assistantSubject} onChange={(e) => setAssistantSubject(e.target.value)} placeholder="Misal: Pemandangan kota futuristik" className={`${textareaStyle} h-24 pr-20`} required />
+            <div className="absolute top-2 right-2 flex gap-x-1">
+              {assistantSubject && (
+                <button onClick={() => setAssistantSubject('')} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus">
+                  <X size={18} />
+                </button>
+              )}
+              <button onClick={() => setEditingField('subject')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
+                <Expand size={18} />
+              </button>
+            </div>
+          </div>
         </div>
 
         <div>
           <LabelWithIcon icon={Sparkles} text="Detail Tambahan (Opsional)" htmlFor="assistant-details" />
-          <textarea id="assistant-details" rows={3} value={assistantDetails} onChange={(e) => setAssistantDetails(e.target.value)} placeholder="Misal: dengan mobil terbang, pencahayaan neon" className={textareaStyle} />
+          <div className="relative w-full">
+            <textarea id="assistant-details" rows={3} value={assistantDetails} onChange={(e) => setAssistantDetails(e.target.value)} placeholder="Misal: dengan mobil terbang, pencahayaan neon" className={`${textareaStyle} pr-20`} />
+            <div className="absolute top-2 right-2 flex gap-x-1">
+              {assistantDetails && (
+                <button onClick={() => setAssistantDetails('')} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus">
+                  <X size={18} />
+                </button>
+              )}
+              <button onClick={() => setEditingField('details')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
+                <Expand size={18} />
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="text-center pt-2">
@@ -201,5 +228,19 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
         )}
       </div>
     </Accordion>
+    <TextareaModal
+      isOpen={editingField !== null}
+      onClose={() => setEditingField(null)}
+      title={editingField === 'subject' ? 'Edit Subjek Utama' : 'Edit Detail Tambahan'}
+      value={editingField === 'subject' ? assistantSubject : editingField === 'details' ? assistantDetails : ''}
+      onChange={(newValue) => {
+        if (editingField === 'subject') {
+          setAssistantSubject(newValue);
+        } else if (editingField === 'details') {
+          setAssistantDetails(newValue);
+        }
+      }}
+    />
+    </>
   );
 }

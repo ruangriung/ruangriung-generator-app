@@ -42,6 +42,14 @@ export default function Generator() {
 
   useEffect(() => {
     try {
+      // --- PERUBAHAN: Memuat prompt yang belum disimpan dari localStorage ---
+      const unsavedPrompt = localStorage.getItem('ruangriung_unsaved_prompt');
+      if (unsavedPrompt) {
+        // Hanya muat jika prompt saat ini masih default atau kosong
+        if (settings.prompt === 'Spiderman di ruangriung, digital art, fantasy, vibrant colors' || settings.prompt === '') {
+          setSettings(prev => ({ ...prev, prompt: unsavedPrompt }));
+        }
+      }
       const savedHistory = localStorage.getItem('ruangriung_history');
       if (savedHistory) setHistory(JSON.parse(savedHistory));
     } catch (error) { console.error("Gagal memuat riwayat:", error); }
@@ -74,6 +82,23 @@ export default function Generator() {
       } catch (error) { console.error("Gagal menyimpan riwayat:", error); }
     }
   }, [history, isHistoryLoaded]);
+
+  // --- PERUBAHAN: Menyimpan prompt ke localStorage setiap kali berubah ---
+  useEffect(() => {
+    // Jangan simpan prompt default saat pertama kali render
+    if (settings.prompt !== 'Spiderman di ruangriung, digital art, fantasy, vibrant colors') {
+      try {
+        if (settings.prompt) {
+          localStorage.setItem('ruangriung_unsaved_prompt', settings.prompt);
+        } else {
+          // Jika prompt dikosongkan oleh pengguna, hapus dari storage
+          localStorage.removeItem('ruangriung_unsaved_prompt');
+        }
+      } catch (error) {
+        console.error("Gagal menyimpan prompt ke localStorage:", error);
+      }
+    }
+  }, [settings.prompt]);
 
   const addToHistory = (newItem: HistoryItem) => {
     setHistory(prev => [newItem, ...prev.filter(i => i.imageUrl !== newItem.imageUrl)].slice(0, 15));
