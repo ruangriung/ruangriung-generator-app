@@ -52,8 +52,8 @@ const ImageDisplay = forwardRef<HTMLDivElement, ImageDisplayProps>(({
 
   const [filters, setFilters] = useState<FilterSettings>(DEFAULT_FILTER_SETTINGS); // Gunakan default settings
   const [watermark, setWatermark] = useState<WatermarkSettings>({
-    text: 'RuangRiung AI Image', image: null, size: 48, opacity: 0.7,
-    color: '#FFFFFF', font: 'Arial', position: { x: 170, y: 150 },
+    text: 'RuangRiung', image: null, size: 48, opacity: 0.7,
+    color: '#FFFFFF', font: 'Arial', position: { x: 150, y: 150 },
   });
 
   const [isDragging, setIsDragging] = useState(false);
