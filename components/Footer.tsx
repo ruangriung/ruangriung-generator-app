@@ -64,7 +64,7 @@ export default function Footer() {
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <h3 className="font-bold text-gray-800 dark:text-gray-100 text-lg mb-2">Tautan Cepat</h3>
             <ul className="space-y-1">
-              <li><Link href="/" className="hover:text-purple-600 dark:hover:text-purple-400"> Beranda</Link></li>
+              <li><Link href="https://www.ruangriung.my.id" className="hover:text-purple-600 dark:hover:text-purple-400"> Beranda</Link></li>
               <li><Link href="/tentang-kami" className="hover:text-purple-600 dark:hover:text-purple-400"> Tentang Kami</Link></li>
               <li><Link href="/ketentuan-layanan" className="hover:text-purple-600 dark:hover:text-purple-400">Ketentuan Layanan</Link></li>
               <li><Link href="/kebijakan-privasi" className="hover:text-purple-600 dark:hover:text-purple-400">Kebijakan Privasi</Link></li>
