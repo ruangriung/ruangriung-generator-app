@@ -23,7 +23,7 @@ export default function KetentuanLayananPage() {
               Dengan mengakses dan menggunakan aplikasi Ruang Riung AI Generator (&quot;Layanan&quot;), Anda setuju untuk mematuhi dan terikat oleh Ketentuan Layanan ini. Jika Anda tidak setuju, mohon untuk tidak menggunakan Layanan kami.
             </p>
             <p className="mt-2">
-                Ketentuan ini berlaku untuk semua pengunjung, pengguna, dan pihak lain yang mengakses atau menggunakan Layanan.
+              Ketentuan ini berlaku untuk semua pengunjung, pengguna, dan pihak lain yang mengakses atau menggunakan Layanan.
             </p>
           </Accordion>
 
@@ -33,7 +33,7 @@ export default function KetentuanLayananPage() {
               Layanan kami menyediakan alat berbasis kecerdasan buatan (AI) untuk menghasilkan gambar, ide prompt video, dan audio. Layanan ini menggunakan API pihak ketiga, termasuk Google Authentication dan Pollinations.AI.
             </p>
             <p className="mt-2">
-                Tujuan utama Layanan ini adalah untuk memberdayakan kreativitas Anda dengan menyediakan alat AI yang mudah digunakan untuk berbagai kebutuhan konten digital.
+              Tujuan utama Layanan ini adalah untuk memberdayakan kreativitas Anda dengan menyediakan alat AI yang mudah digunakan untuk berbagai kebutuhan konten digital.
             </p>
           </Accordion>
 
@@ -43,7 +43,7 @@ export default function KetentuanLayananPage() {
               Untuk mengakses fitur tertentu seperti &quot;Creator Prompt Video&quot; dan &quot;Audio Generator&quot;, Anda harus mendaftar dan login menggunakan akun Google Anda. Anda bertanggung jawab untuk menjaga kerahasiaan informasi akun Anda.
             </p>
             <p className="mt-2">
-                Anda setuju untuk tidak membagikan kredensial akun Anda dengan pihak lain dan untuk segera memberitahu kami jika ada penggunaan akun Anda yang tidak sah.
+              Anda setuju untuk tidak membagikan kredensial akun Anda dengan pihak lain dan untuk segera memberitahu kami jika ada penggunaan akun Anda yang tidak sah.
             </p>
           </Accordion>
 
@@ -67,7 +67,7 @@ export default function KetentuanLayananPage() {
               Konten yang Anda hasilkan menggunakan Layanan ini adalah milik Anda. Namun, dengan menggunakan Layanan, Anda memberikan kami lisensi non-eksklusif untuk menggunakan, mereproduksi, dan menampilkan konten tersebut sebatas untuk keperluan operasional dan promosi Layanan.
             </p>
             <p className="mt-2">
-                Anda menyatakan dan menjamin bahwa Anda memiliki semua hak, kepemilikan, dan kepentingan atas konten yang Anda hasilkan atau bahwa Anda memiliki izin yang diperlukan untuk menggunakan konten tersebut.
+              Anda menyatakan dan menjamin bahwa Anda memiliki semua hak, kepemilikan, dan kepentingan atas konten yang Anda hasilkan atau bahwa Anda memiliki izin yang diperlukan untuk menggunakan konten tersebut.
             </p>
           </Accordion>
 
@@ -77,7 +77,7 @@ export default function KetentuanLayananPage() {
               Layanan disediakan &quot;sebagaimana adanya&quot; dan &quot;sebagaimana tersedia&quot;. Kami tidak menjamin bahwa Layanan akan selalu bebas dari kesalahan, gangguan, atau aman dari ancaman siber.
             </p>
             <p className="mt-2">
-                Sejauh diizinkan oleh hukum, Ruang Riung tidak akan bertanggung jawab atas segala kerusakan tidak langsung, insidental, khusus, konsekuensial, atau ganti rugi pun yang timbul dari penggunaan atau ketidakmampuan untuk menggunakan Layanan.
+              Sejauh diizinkan oleh hukum, Ruang Riung tidak akan bertanggung jawab atas segala kerusakan tidak langsung, insidental, khusus, konsekuensial, atau ganti rugi pun yang timbul dari penggunaan atau ketidakmampuan untuk menggunakan Layanan.
             </p>
           </Accordion>
 
@@ -87,7 +87,7 @@ export default function KetentuanLayananPage() {
               Kami dapat merevisi Ketentuan Layanan ini dari waktu ke waktu. Versi terbaru akan selalu diposting di halaman ini dengan tanggal &quot;Terakhir diperbarui&quot; yang direvisi.
             </p>
             <p className="mt-2">
-                Dengan terus menggunakan Layanan setelah perubahan berlaku, Anda setuju untuk terikat oleh ketentuan yang telah direvisi. Jika Anda tidak setuju dengan ketentuan baru, Anda harus berhenti menggunakan Layanan.
+              Dengan terus menggunakan Layanan setelah perubahan berlaku, Anda setuju untuk terikat oleh ketentuan yang telah direvisi. Jika Anda tidak setuju dengan ketentuan baru, Anda harus berhenti menggunakan Layanan.
             </p>
           </Accordion>
 
@@ -97,11 +97,19 @@ export default function KetentuanLayananPage() {
               Jika Anda memiliki pertanyaan tentang Ketentuan Layanan ini, silakan hubungi kami melalui halaman <Link href="/kontak" className="text-purple-600 dark:text-purple-400 hover:underline">Kontak</Link> kami.
             </p>
             <p className="mt-2">
-                Anda juga dapat mengirimkan email langsung ke: <a href="mailto:admin@ruangriung.my.id" className="text-purple-600 dark:text-purple-400 hover:underline">admin@ruangriung.my.id</a>
+              Anda juga dapat mengirimkan email langsung ke: <a href="mailto:admin@ruangriung.my.id" className="text-purple-600 dark:text-purple-400 hover:underline">admin@ruangriung.my.id</a>
             </p>
           </Accordion>
 
         </div>
+
+        {/* Tombol Kembali ke Beranda */}
+        <div className="mt-8 text-center">
+          <Link href="https://www.ruangriung.my.id" className="inline-block bg-purple-600 text-white px-8 py-3 rounded-full shadow-lg hover:bg-purple-700 transition-colors duration-300 dark:bg-purple-700 dark:hover:bg-purple-800">
+            Kembali ke Beranda
+          </Link>
+        </div>
+
       </div>
     </main>
   );
