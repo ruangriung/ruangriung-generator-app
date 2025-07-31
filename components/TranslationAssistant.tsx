@@ -2,10 +2,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Languages, Copy, Check, Sparkles } from 'lucide-react';
+import { Languages, Copy, Check, Sparkles, X, Expand } from 'lucide-react';
 import Accordion from './Accordion';
 import ButtonSpinner from './ButtonSpinner';
 import toast from 'react-hot-toast';
+import TextareaModal from './TextareaModal';
 
 interface TranslationAssistantProps {
   onUsePrompt: (prompt: string) => void;
@@ -18,10 +19,11 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
   const [targetLanguage, setTargetLanguage] = useState('en');
   const [isLoading, setIsLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [editingField, setEditingField] = useState<null | 'input' | 'output'>(null);
 
   // <--- PERUBAHAN: inputStyle, textareaStyle, selectStyle sekarang punya dark variant
-  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
-  const textareaStyle = `${inputStyle} resize-none`;
+  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow text-gray-800 dark:text-gray-200";
+  const textareaStyle = `${inputStyle} min-h-[150px] resize-y`; // Tinggi awal dan bisa di-resize vertikal
   const selectStyle = `${inputStyle} appearance-none`;
 
   // <--- PERUBAHAN: LabelWithIcon class text
@@ -58,7 +60,7 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
         body: JSON.stringify({
           model: 'openai',
           messages: [{ role: 'user', content: combinedPrompt }],
-          temperature: 0.2,
+          temperature: 0.7,
         }),
       });
 
@@ -158,14 +160,25 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
 
         <div>
           <LabelWithIcon icon={Sparkles} text="Teks yang Ingin Diterjemahkan" htmlFor="input-text" />
-          <textarea
-            id="input-text"
-            rows={4}
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder="Masukkan teks di sini..."
-            className={textareaStyle}
-          />
+          <div className="relative w-full">
+            <textarea
+              id="input-text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="Masukkan teks di sini..."
+              className={`${textareaStyle} pr-20`}
+            />
+            <div className="absolute top-2 right-2 flex gap-x-1">
+              {inputText && (
+                <button onClick={() => setInputText('')} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus">
+                  <X size={18} />
+                </button>
+              )}
+              <button onClick={() => setEditingField('input')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
+                <Expand size={18} />
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="text-center pt-2">
@@ -184,16 +197,23 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
           // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg dan dark:shadow-dark-neumorphic-inset
           <div className="mt-4 p-4 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset">
             <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Hasil Terjemahan:</label> {/* <--- PERUBAHAN */}
-            <textarea
-              readOnly
-              value={translatedText}
-              className={`${textareaStyle}`}
-            />
+            <div className="relative w-full">
+              <textarea
+                readOnly
+                value={translatedText}
+                className={`${textareaStyle} pr-20`}
+              />
+              <div className="absolute top-2 right-2 flex gap-x-1">
+                <button onClick={() => setEditingField('output')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
+                  <Expand size={18} />
+                </button>
+              </div>
+            </div>
             <div className="flex justify-end gap-3 mt-3">
               <button
                 onClick={handleCopyTranslatedPrompt}
                 // <--- PERUBAHAN: Tambahkan dark:bg-gray-700, dark:text-gray-200, dark:active:shadow-dark-neumorphic-inset, dark:hover:bg-gray-600
-                className={`inline-flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all ${isCopied ? '!bg-green-200 text-green-700' : ''} hover:bg-gray-400 dark:hover:bg-gray-600`}
+                className={`inline-flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all ${isCopied ? '!bg-gray-500 text-green-700' : ''} hover:bg-gray-400 dark:hover:bg-gray-600`}
               >
                 {isCopied ? <><Check size={16} className="mr-2" />Tersalin!</> : <><Copy size={16} className="mr-2" />Salin Teks</>}
               </button>
@@ -208,6 +228,18 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
           </div>
         )}
       </div>
+      <TextareaModal
+        isOpen={editingField !== null}
+        onClose={() => setEditingField(null)}
+        title={editingField === 'input' ? 'Edit Teks untuk Diterjemahkan' : 'Lihat Hasil Terjemahan'}
+        value={editingField === 'input' ? inputText : translatedText}
+        onChange={(newValue) => {
+          if (editingField === 'input') {
+            setInputText(newValue);
+          }
+        }}
+        readOnly={editingField === 'output'}
+      />
     </Accordion>
   );
 }

@@ -9,15 +9,18 @@ interface TextareaModalProps {
   value: string;
   onChange: (value: string) => void;
   title: string;
+  readOnly?: boolean;
 }
 
-export default function TextareaModal({ isOpen, onClose, value, onChange, title }: TextareaModalProps) {
+export default function TextareaModal({ isOpen, onClose, value, onChange, title, readOnly = false }: TextareaModalProps) {
   if (!isOpen) return null;
 
   const [internalValue, setInternalValue] = useState(value);
 
   const handleSave = () => {
-    onChange(internalValue);
+    if (!readOnly) {
+      onChange(internalValue);
+    }
     onClose();
   };
 
@@ -36,7 +39,8 @@ export default function TextareaModal({ isOpen, onClose, value, onChange, title 
         <div className="p-4 flex-grow">
           <textarea
             value={internalValue}
-            onChange={(e) => setInternalValue(e.target.value)}
+            onChange={(e) => !readOnly && setInternalValue(e.target.value)}
+            readOnly={readOnly}
             // <--- PERUBAHAN: Tambahkan dark:bg-gray-700, dark:border-gray-600, dark:text-gray-200
             className="w-full h-64 p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800 dark:text-gray-200"
           />
@@ -49,8 +53,8 @@ export default function TextareaModal({ isOpen, onClose, value, onChange, title 
             // <--- PERUBAHAN: Tambahkan dark:active:shadow-dark-neumorphic-button-active
             className="inline-flex items-center justify-center px-6 py-2 bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 transition-colors active:shadow-inner dark:active:shadow-dark-neumorphic-button-active"
           >
-            <Check size={20} className="mr-2" />
-            Simpan & Tutup
+            {readOnly ? <X size={20} className="mr-2" /> : <Check size={20} className="mr-2" />}
+            {readOnly ? 'Tutup' : 'Simpan & Tutup'}
           </button>
         </div>
       </div>
