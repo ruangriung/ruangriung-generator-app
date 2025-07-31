@@ -70,6 +70,7 @@ export default function KontakPage() {
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+          {/* Tombol Kembali ke Beranda yang sudah ada di bagian atas */}
           <div className="mb-8 flex justify-center">
             <Link 
               href="/" 
@@ -135,6 +136,13 @@ export default function KontakPage() {
           
           <div className="w-full my-6 flex justify-center">
             <AdBanner dataAdSlot="6897039624" />
+          </div>
+
+          {/* Tombol Kembali ke Beranda dengan URL lengkap di bagian bawah */}
+          <div className="mt-8 text-center">
+            <Link href="https://www.ruangriung.my.id" className="inline-block bg-purple-600 text-white px-8 py-3 rounded-full shadow-lg hover:bg-purple-700 transition-colors duration-300 dark:bg-purple-700 dark:hover:bg-purple-800">
+              Kembali ke Beranda
+            </Link>
           </div>
 
         </div>
