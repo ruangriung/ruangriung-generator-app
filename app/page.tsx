@@ -6,6 +6,7 @@ import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useState, useEffect } from 'react';
 import FAQ from '@/components/FAQ';
+import { articles } from '@/lib/articles'; // Impor data artikel
 import { AdBanner } from '@/components/AdBanner';
 import Link from 'next/link';
 
@@ -50,6 +51,8 @@ export default function Home() {
     setShowBanner(false);
   };
 
+  const latestArticle = articles[0]; // Ambil artikel terbaru
+
   return (
     <div className="flex min-h-screen flex-col items-center p-4 sm:p-8">
       {showBanner && (
@@ -88,27 +91,39 @@ export default function Home() {
         </p>
       </header>
       
-      <div className="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-4">
+      <div className="w-full max-w-4xl mb-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Link href="#" 
           // Ubah class untuk menyamakan dengan tombol Tutorial
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all relative"
+          className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all relative"
         >
           <LayoutGrid size={18} />
           <span>Koleksi Prompt AI</span>
           {/* Teks "Segera Hadir" disamakan dengan tombol Tutorial */}
           <span className="absolute top-0 right-1 text-[0.6rem] text-white font-normal opacity-80 bg-red-700 px-1 rounded">Segera Hadir</span>
         </Link>
-        <Link href="/artikel" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
+        <Link href="/artikel" className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
           <Rss size={18} />
           <span>Baca Tips & Trik</span>
         </Link>
-        <a href="https://www.facebook.com/groups/1182261482811767/?ref=share&mibextid=lOuIew" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-colors">
+        <a href="https://www.facebook.com/groups/1182261482811767/?ref=share&mibextid=lOuIew" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-blue-600 text-white font-semibold text-sm rounded-lg shadow-md hover:bg-blue-700 transition-colors">
           <Facebook size={18} />
           <span>Gabung Grup</span>
         </a>
-        <Link href="/kontak" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
+        <Link href="/kontak" className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
           <Mail size={18} />
           <span>Email Kami</span>
+        </Link>
+      </div>
+      {/* MARQUEE ARTIKEL TERBARU */}
+      <div className="w-full max-w-4xl mb-4">
+        <Link
+          href={`/artikel/${latestArticle.slug}`}
+          className="block w-full bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset p-4 text-center group transition-transform duration-200 hover:scale-[1.02]"
+        >
+          <p className="text-sm truncate">
+            <span className="font-bold text-purple-600 dark:text-purple-400 mr-2">ARTIKEL TERBARU:</span>
+            <span className="text-gray-700 dark:text-gray-300 group-hover:underline">{latestArticle.title}</span>
+          </p>
         </Link>
       </div>
        <div className="w-full max-w-4xl mb-8">
