@@ -126,7 +126,7 @@ export default function KebijakanPrivasiPage() {
 
         {/* Tombol Kembali ke Beranda */}
         <div className="mt-8 text-center">
-          <Link href="/" className="inline-block bg-purple-600 text-white px-8 py-3 rounded-full shadow-lg hover:bg-purple-700 transition-colors duration-300 dark:bg-purple-700 dark:hover:bg-purple-800">
+          <Link href="https://www.ruangriung.my.id" className="inline-block bg-purple-600 text-white px-8 py-3 rounded-full shadow-lg hover:bg-purple-700 transition-colors duration-300 dark:bg-purple-700 dark:hover:bg-purple-800">
             Kembali ke Beranda
           </Link>
         </div>
