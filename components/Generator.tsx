@@ -14,7 +14,9 @@ type AspectRatioPreset = 'Kotak' | 'Portrait' | 'Lansekap' | 'Custom';
 export default function Generator() {
   const [settings, setSettings] = useState<GeneratorSettings>({
     prompt: 'Spiderman di ruangriung, digital art, fantasy, vibrant colors',
+    negativePrompt: '', // Added missing property
     model: 'flux',
+    cfg_scale: 7, // Nilai default untuk Guidance Scale (CFG)
     width: 1024,
     height: 1792,
     seed: Math.floor(Math.random() * 1000000), // Inisialisasi awal dengan seed acak
@@ -180,7 +182,7 @@ export default function Generator() {
     // }
     // --- AKHIR PERUBAHAN ---
 
-    const { model, prompt, width, height, imageQuality, batchSize, artStyle, private: isPrivate, safe, transparent, inputImage } = settings;
+    const { model, prompt, negativePrompt, width, height, imageQuality, batchSize, artStyle, private: isPrivate, safe, transparent, inputImage, cfg_scale } = settings;
     const fullPrompt = `${prompt}${artStyle}`;
     
     const generatePromises = Array(batchSize).fill(0).map(async (_, i) => {
@@ -190,8 +192,10 @@ export default function Generator() {
       try {
         const params = new URLSearchParams({
           model, width: width.toString(), height: height.toString(), seed: batchSeed.toString(),
-          enhance: imageQuality !== 'Standar' ? 'true' : 'false', nologo: 'true', referrer: 'ruangriung.my.id'
+          enhance: imageQuality !== 'Standar' ? 'true' : 'false', nologo: 'true', referrer: 'ruangriung.my.id',
+          guidance_scale: cfg_scale.toString(), // Tambahkan CFG scale ke parameter API
         });
+        if (negativePrompt) params.append('negative_prompt', negativePrompt); // Tambahkan negative prompt ke API
         if (isPrivate) params.append('private', 'true');
         if (safe) params.append('safe', 'true');
         if (transparent && model === 'gptimage') params.append('transparent', 'true');

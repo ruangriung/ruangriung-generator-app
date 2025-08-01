@@ -18,7 +18,9 @@ import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
 
 export interface GeneratorSettings {
   prompt: string;
+  negativePrompt: string;
   model: string;
+  cfg_scale: number;
   width: number;
   height: number;
   seed: number;
@@ -46,7 +48,7 @@ interface ControlPanelProps {
 
 export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, onModelSelect }: ControlPanelProps) {
   const { status } = useSession();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingField, setEditingField] = useState<null | 'prompt' | 'negativePrompt'>(null);
   const [isRandomizing, setIsRandomizing] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -73,6 +75,10 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
   const handleClearPrompt = () => {
     setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: '' }));
+  };
+
+  const handleClearNegativePrompt = () => {
+    setSettings((prev: GeneratorSettings) => ({ ...prev, negativePrompt: '' }));
   };
 
   // --- PERUBAHAN 1: Tambahkan parameter temperature ---
@@ -115,7 +121,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     // --- PERUBAHAN UTAMA DI SINI ---
     // 1. Buat daftar tema acak
     const randomThemes = [
-        'fiksi ilmiah', 'spiderman', 'olahraga','surealis', 'vintage', 'alam liar', 'fantasi', 'fotografi', 'karikatur', 'seni digital', 'steampunk', 'cyberpunk', 'retro futuristik', 'abstrak', 'minimalis', 'horor kosmik', 'dongeng', 'surealis', 'distopia', 'utopia', 'mitologi', 'kuno', 'modern', 'post-apokaliptik', 'perang galaksi', 'seni lukis klasik', 'seni pop', 'seni jalanan', 'seni tradisional', 'seni kontemporer', 'seni konseptual', 'seni instalasi', 'seni patung', 'seni tekstil', 'seni keramik', 'seni grafis', 'seni kolase', 'seni mixed media', 'seni digital', 'seni 3D', 'seni VR', 'seni AR', 'seni AI', 'seni generatif', 'seni partisipatif', 'seni', 'graffiti', 'seni mural', 'seni lukis dinding', 'seni seni rupa', 'seni patung modern', 'seni patung klasik', 'seni patung abstrak', 'seni patung figuratif', 'seni patung instalasi', 'seni patung kinetik', 'seni patung interaktif', 'seni patung digital', 'seni patung VR', 'seni patung AR', 'seni patung AI', 'seni patung generatif', 'seni patung partisipatif'
+        'science fiction', 'spiderman', 'sports', 'surreal', 'vintage', 'wild nature', 'fantasy', 'photography', 'caricature', 'digital art', 'steampunk', 'cyberpunk', 'retro-futuristic', 'abstract', 'minimalist', 'cosmic horror', 'fairy tale', 'dystopian', 'utopian', 'mythology', 'ancient', 'modern', 'post-apocalyptic', 'galaxy war', 'classical painting', 'pop art', 'street art', 'traditional art', 'contemporary art', 'conceptual art', 'installation art', 'sculpture', 'textile art', 'ceramic art', 'graphic art', 'collage art', 'mixed media', '3D art', 'VR art', 'AR art', 'AI art', 'generative art', 'participatory art', 'art', 'graffiti', 'mural art', 'wall painting', 'fine art', 'modern sculpture', 'classical sculpture', 'abstract sculpture', 'figurative sculpture', 'installation sculpture', 'kinetic sculpture', 'interactive sculpture', 'digital sculpture'
     ];
     
     // 2. Pilih satu tema secara acak dari daftar
@@ -123,36 +129,36 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
     // 3. Masukkan tema acak ke dalam instruksi prompt
     const randomPromptInstruction = `
-        Anda adalah seorang seniman konseptual yang memberikan ide-ide tak terduga.
-        Berikan saya SATU ide prompt gambar yang benar-benar acak, dengan sentuhan tema "${selectedTheme}".
-        Gabungkan dua atau lebih konsep yang tidak biasa.
-        Buatlah deskriptif secara visual, ringkas, dan JANGAN gunakan tanda kutip dalam respons Anda.
+        You are a conceptual artist who provides unexpected ideas.
+        Give me ONE truly random image prompt idea, with a touch of the "${selectedTheme}" theme.
+        Combine two or more unusual concepts.
+        Make it visually descriptive, concise, and DO NOT use quotation marks in your response.
     `;
     // --- AKHIR PERUBAHAN ---
 
     toast.promise(
       callPromptApi(randomPromptInstruction, 0.10), // Gunakan temperature tinggi (0.9) untuk hasil yang lebih acak
       {
-        loading: 'Mencari ide prompt acak...',
-        success: 'Prompt acak berhasil dibuat!',
-        error: 'Gagal membuat prompt acak.',
+        loading: 'Finding a random prompt idea...',
+        success: 'Random prompt created successfully!',
+        error: 'Failed to create a random prompt.',
       }
     ).finally(() => setIsRandomizing(false));
   };
 
   const handleEnhancePrompt = async () => {
     if (!settings.prompt) {
-      toast.error("Tuliskan prompt terlebih dahulu untuk disempurnakan!");
+      toast.error("Write a prompt first to enhance it!");
       return;
     }
     setIsEnhancing(true);
     // Gunakan temperature rendah (default 0.5) untuk hasil yang lebih fokus dan relevan
     toast.promise(
-      callPromptApi(`Sempurnakan dan tambahkan lebih banyak detail visual ke prompt gambar berikut, tetapi tetap ringkas: "${settings.prompt}". Jangan gunakan atau hapus tanda kutip dalam respons Anda.`),
+      callPromptApi(`Enhance and add more visual details to the following image prompt, but keep it concise: "${settings.prompt}". Do not use or remove quotation marks in your response.`),
       {
-        loading: 'Menyempurnakan prompt...',
-        success: 'Prompt berhasil disempurnakan!',
-        error: 'Gagal menyempurnakan prompt.',
+        loading: 'Enhancing prompt...',
+        success: 'Prompt enhanced successfully!',
+        error: 'Failed to enhance prompt.',
       }
     ).finally(() => setIsEnhancing(false));
   };
@@ -196,6 +202,32 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     }
   };
   
+  const addNegativePreset = (preset: 'kualitas' | 'anatomi' | 'teks' | 'cacat') => {
+    const presetMap = {
+      kualitas: ['low quality', 'blurry', 'jpeg artifacts', 'worst quality', 'lowres'],
+      anatomi: ['deformed', 'disfigured', 'bad anatomy', 'extra limbs', 'missing fingers', 'bad hands', 'malformed limbs'],
+      teks: ['text', 'watermark', 'signature', 'username', 'logo', 'UI', 'user interface'],
+      cacat: ['duplicate', 'cloned face', 'cropped', 'out of frame', 'tiling', 'grid', 'mutilated']
+    };
+
+    const presetsToAdd = presetMap[preset];
+
+    setSettings(prev => {
+      const currentNegatives = prev.negativePrompt
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+      
+      const newNegatives = new Set([...currentNegatives, ...presetsToAdd]);
+      
+      return {
+        ...prev,
+        negativePrompt: Array.from(newNegatives).join(', ')
+      };
+    });
+    toast.success(`Preset negatif "${preset}" ditambahkan!`);
+  };
+
   const featureButtonStyle = "flex-1 inline-flex items-center justify-center gap-x-2 px-3 py-2 bg-light-bg dark:bg-dark-bg text-gray-600 dark:text-gray-300 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed";
   
   return (
@@ -234,26 +266,65 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
 
         {/* Textarea Prompt Utama */}
-        <div>
+        <div className="mb-4">
           <label htmlFor="prompt" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Describe your imagination</label>
           <div className="relative w-full">
             <textarea
               id="prompt"
-              className="w-full p-3 pr-20 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 h-24 resize-none text-gray-800 dark:text-gray-200"
+              className="w-full p-3 pr-20 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 resize-y h-[150px] text-gray-800 dark:text-gray-200"
               value={settings.prompt}
               onChange={(e) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: e.target.value }))}
               placeholder="Ketikkan imajinasimu atau gunakan tombol bantuan di bawah..."
             />
             <div className="absolute top-2 right-2 flex gap-x-1">
               {settings.prompt && (
-                <button onClick={handleClearPrompt} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus Prompt">
+                <button onClick={handleClearPrompt} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus">
                   <X size={18} />
                 </button>
               )}
-              <button onClick={() => setIsModalOpen(true)} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar Textarea">
+              <button onClick={() => setEditingField('prompt')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
                 <Expand size={18} />
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Textarea Negative Prompt */}
+        <div>
+          <label htmlFor="negative-prompt" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Negative Prompt (Hal yang ingin dihindari)</label>
+          <div className="relative w-full">
+            <textarea
+              id="negative-prompt"
+              className="w-full p-3 pr-20 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 resize-y h-[150px] text-gray-800 dark:text-gray-200"
+              value={settings.negativePrompt}
+              onChange={(e) => setSettings((prev: GeneratorSettings) => ({ ...prev, negativePrompt: e.target.value }))}
+              placeholder="Contoh: blurry, ugly, deformed hands, watermark..."
+            />
+            <div className="absolute top-2 right-2 flex gap-x-1">
+              {settings.negativePrompt && (
+                <button onClick={handleClearNegativePrompt} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus">
+                  <X size={18} />
+                </button>
+              )}
+              <button onClick={() => setEditingField('negativePrompt')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
+                <Expand size={18} />
+              </button>
+            </div>
+          </div>
+          {/* Tombol Preset Negative Prompt */}
+          <div className="flex flex-wrap gap-2 mt-2">
+            <button onClick={() => addNegativePreset('kualitas')} className="text-xs px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+              + Kualitas Buruk
+            </button>
+            <button onClick={() => addNegativePreset('anatomi')} className="text-xs px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+              + Anatomi Buruk
+            </button>
+            <button onClick={() => addNegativePreset('teks')} className="text-xs px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+              + Teks/UI
+            </button>
+            <button onClick={() => addNegativePreset('cacat')} className="text-xs px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+              + Cacat/Duplikat
+            </button>
           </div>
         </div>
 
@@ -343,11 +414,17 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
         )}
       </div>
       <TextareaModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        value={settings.prompt}
-        onChange={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
-        title="Edit Prompt Utama"
+        isOpen={editingField !== null}
+        onClose={() => setEditingField(null)}
+        value={editingField === 'prompt' ? settings.prompt : settings.negativePrompt || ''}
+        onChange={(newValue) => {
+          if (editingField === 'prompt') {
+            setSettings((prev) => ({ ...prev, prompt: newValue }));
+          } else if (editingField === 'negativePrompt') {
+            setSettings((prev) => ({ ...prev, negativePrompt: newValue }));
+          }
+        }}
+        title={editingField === 'prompt' ? 'Edit Prompt Utama' : 'Edit Negative Prompt'}
       />
     </>
   );

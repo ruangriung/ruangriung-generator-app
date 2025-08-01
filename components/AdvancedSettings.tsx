@@ -67,6 +67,23 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
         <hr className="my-6 border-gray-300 dark:border-gray-600" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
           <div>
+            <LabelWithIcon icon={Sparkles} text="Guidance Scale (CFG)" htmlFor="cfg-scale" />
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                id="cfg-scale"
+                min="1"
+                max="20"
+                step="0.5"
+                value={settings.cfg_scale}
+                onChange={(e) => handleSettingChange('cfg_scale', parseFloat(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 range-slider-colored-track"
+              />
+              <span className="font-bold text-purple-600 w-10 text-center">{settings.cfg_scale}</span>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Nilai rendah lebih kreatif, nilai tinggi lebih mengikuti prompt.</p>
+          </div>
+          <div>
             <LabelWithIcon icon={ArrowLeftRight} text="Lebar" htmlFor="width" />
             <input type="number" id="width" value={settings.width} onChange={(e) => handleSettingChange('width', e.target.value)} className={inputStyle} />
           </div>
