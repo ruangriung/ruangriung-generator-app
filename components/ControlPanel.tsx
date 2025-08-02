@@ -5,7 +5,7 @@ import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { useSession } from 'next-auth/react';
 import AdvancedSettings from './AdvancedSettings';
 import ButtonSpinner from './ButtonSpinner';
-import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon, ChevronDown, Languages, Megaphone } from 'lucide-react';
+import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon, ChevronDown, Languages, Megaphone, Braces } from 'lucide-react'; // Import Braces icon
 import TextareaModal from './TextareaModal';
 import Accordion from './Accordion';
 import PromptAssistant from './PromptAssistant';
@@ -53,6 +53,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [savedPrompts, setSavedPrompts] = useState<string[]>([]);
+  const [isGeneratingJson, setIsGeneratingJson] = useState(false); // New state for JSON generation
 
   useEffect(() => {
     try {
@@ -81,7 +82,6 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     setSettings((prev: GeneratorSettings) => ({ ...prev, negativePrompt: '' }));
   };
 
-  // --- PERUBAHAN 1: Tambahkan parameter temperature ---
   const callPromptApi = async (promptForApi: string, temperature = 0.5) => {
     const urlWithToken = `https://text.pollinations.ai/openai?token=${process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN}`;
     
@@ -94,7 +94,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
         body: JSON.stringify({
           model: 'openai', 
           messages: [{ role: 'user', content: promptForApi }],
-          temperature: temperature, // Gunakan temperature di sini
+          temperature: temperature,
         }),
       });
 
@@ -118,26 +118,21 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
   const handleRandomPrompt = async () => {
     setIsRandomizing(true);
 
-    // --- PERUBAHAN UTAMA DI SINI ---
-    // 1. Buat daftar tema acak
     const randomThemes = [
         'science fiction', 'spiderman', 'sports', 'surreal', 'vintage', 'wild nature', 'fantasy', 'photography', 'caricature', 'digital art', 'steampunk', 'cyberpunk', 'retro-futuristic', 'abstract', 'minimalist', 'cosmic horror', 'fairy tale', 'dystopian', 'utopian', 'mythology', 'ancient', 'modern', 'post-apocalyptic', 'galaxy war', 'classical painting', 'pop art', 'street art', 'traditional art', 'contemporary art', 'conceptual art', 'installation art', 'sculpture', 'textile art', 'ceramic art', 'graphic art', 'collage art', 'mixed media', '3D art', 'VR art', 'AR art', 'AI art', 'generative art', 'participatory art', 'art', 'graffiti', 'mural art', 'wall painting', 'fine art', 'modern sculpture', 'classical sculpture', 'abstract sculpture', 'figurative sculpture', 'installation sculpture', 'kinetic sculpture', 'interactive sculpture', 'digital sculpture'
     ];
     
-    // 2. Pilih satu tema secara acak dari daftar
     const selectedTheme = randomThemes[Math.floor(Math.random() * randomThemes.length)];
 
-    // 3. Masukkan tema acak ke dalam instruksi prompt
     const randomPromptInstruction = `
         You are a conceptual artist who provides unexpected ideas.
         Give me ONE truly random image prompt idea, with a touch of the "${selectedTheme}" theme.
         Combine two or more unusual concepts.
         Make it visually descriptive, concise, and DO NOT use quotation marks in your response.
     `;
-    // --- AKHIR PERUBAHAN ---
 
     toast.promise(
-      callPromptApi(randomPromptInstruction, 0.10), // Gunakan temperature tinggi (0.9) untuk hasil yang lebih acak
+      callPromptApi(randomPromptInstruction, 0.10),
       {
         loading: 'Finding a random prompt idea...',
         success: 'Random prompt created successfully!',
@@ -152,7 +147,6 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       return;
     }
     setIsEnhancing(true);
-    // Gunakan temperature rendah (default 0.5) untuk hasil yang lebih fokus dan relevan
     toast.promise(
       callPromptApi(`Enhance and add more visual details to the following image prompt, but keep it concise: "${settings.prompt}". Do not use or remove quotation marks in your response.`),
       {
@@ -227,6 +221,31 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     });
     toast.success(`Preset negatif "${preset}" ditambahkan!`);
   };
+
+  // New function to handle JSON prompt generation
+  const handleGenerateJsonPrompt = async () => {
+    if (!settings.prompt) {
+      toast.error("Tulis prompt utama terlebih dahulu untuk menghasilkan JSON!");
+      return;
+    }
+    setIsGeneratingJson(true);
+    const jsonInstruction = `
+      Based on the following prompt: "${settings.prompt}", generate a concise JSON object.
+      The JSON should describe key elements, themes, or attributes extracted from the prompt, suitable for data processing or further analysis.
+      For example, if the prompt is "A serene forest with magical creatures under a starry night", the JSON could be:
+      {"setting": "serene forest", "elements": ["magical creatures", "starry night"], "mood": "fantasy"}
+      Please ensure the output is valid JSON and nothing else.
+    `;
+    toast.promise(
+      callPromptApi(jsonInstruction, 0.2), // Use a lower temperature for more structured JSON output
+      {
+        loading: 'Generating JSON from prompt...',
+        success: 'JSON generated successfully!',
+        error: 'Failed to generate JSON.',
+      }
+    ).finally(() => setIsGeneratingJson(false));
+  };
+
 
   const featureButtonStyle = "flex-1 inline-flex items-center justify-center gap-x-2 px-3 py-2 bg-light-bg dark:bg-dark-bg text-gray-600 dark:text-gray-300 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed";
   
@@ -349,11 +368,14 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
           </button>
           
           <div className="flex flex-row flex-wrap justify-center items-center gap-3 w-full mt-3">
-            <button onClick={handleRandomPrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing}>
+            <button onClick={handleRandomPrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing || isGeneratingJson}>
                 {isRandomizing ? <ButtonSpinner /> : <Shuffle size={16} />} <span>Acak</span>
             </button>
-            <button onClick={handleEnhancePrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing || !settings.prompt}>
+            <button onClick={handleEnhancePrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}>
                 {isEnhancing ? <ButtonSpinner /> : <Wand2 size={16} />} <span>Sempurnakan</span>
+            </button>
+            <button onClick={handleGenerateJsonPrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}>
+                {isGeneratingJson ? <ButtonSpinner /> : <Braces size={16} />} <span>JSON</span>
             </button>
             <button onClick={handleSavePrompt} className={`${featureButtonStyle} ${isSaving ? '!text-green-500' : ''}`} disabled={isSaving || !settings.prompt}>
                 <Save size={16} /> <span>{isSaving ? 'Tersimpan!' : 'Simpan'}</span>
