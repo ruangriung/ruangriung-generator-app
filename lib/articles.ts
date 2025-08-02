@@ -18,6 +18,7 @@ import { article as menghidupkanNarasiDenganAudioAi } from './articles/data/meng
 import { article as tipsFiturEditGambarRealTime } from './articles/data/tips-fitur-edit-gambar-real-time';
 import { article as alurKerjaKreatifMenyimpanPrompt } from './articles/data/alur-kerja-kreatif-menyimpan-prompt';
 import { article as menggunakanNegativePrompt } from './articles/data/menggunakan-negative-prompt';
+import { article as menjadikanPromptAiTepatSasaran } from './articles/data/menjadikan-prompt-ai-tepat-sasaran';
 // -----------------------------------------
 
 // Interface ini tetap dibutuhkan agar komponen lain tahu bentuk data artikel
@@ -51,6 +52,7 @@ const convertDate = (dateStr: string): Date => {
 export const articles: Article[] = [
   // --- ARTIKEL BARU ---
   menggunakanNegativePrompt,
+  menjadikanPromptAiTepatSasaran,
   kolaborasiKreatifChatbotDanGambar,
   menjelajahiGayaSeniDiRuangriung,
   privasiDanKeamananDataDiRuangriung,
