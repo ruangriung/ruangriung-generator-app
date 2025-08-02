@@ -5,7 +5,7 @@ import type { Article } from '@/lib/articles'; // Memastikan path import sesuai 
 export const article: Article = {
   slug: 'menjadikan-prompt-ai-tepat-sasaran', // Slug unik untuk URL artikel
   title: 'Menjadikan Prompt AI Tepat Sasaran agar Gambar Sesuai Ekspektasi',
-  author: 'Gemini AI', // Anda bisa mengubah ini ke nama Anda
+  author: 'Tim RuangRiung', // Anda bisa mengubah ini ke nama Anda
   date: '2025-08-02', // Sesuaikan tanggal publikasi artikel ini
   summary: 'Panduan komprehensif untuk membuat prompt AI yang spesifik, deskriptif, dan terstruktur dengan baik agar hasil gambar AI sesuai dengan ekspektasi Anda.',
   content: `
