@@ -1,7 +1,7 @@
 // app/HomeClient.tsx
 'use client'; // Tandai sebagai Client Component
 
-import { Wand2, Sparkles, Download, X, Rss, Crown, Facebook, Star, Mail, LayoutGrid, EarthIcon } from 'lucide-react';
+import { Wand2, Sparkles, Download, X, Rss, Crown, Facebook, Star, Mail, LayoutGrid, EarthIcon, BookOpen } from 'lucide-react';
 import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -120,28 +120,41 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
           <span>Email Kami</span>
         </Link>
       </div>
-      {/* MARQUEE ARTIKEL TERBARU */}
+      {/* Tombol Artikel Terbaru */}
       <div className="w-full max-w-4xl mb-4">
         <Link
           href={`/artikel/${latestArticle.slug}`}
-          className="block w-full bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset p-4 text-center group transition-transform duration-200 hover:scale-[1.02]"
+          className="w-full inline-flex items-center justify-between gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset group transition-transform duration-200 hover:scale-[1.02]"
         >
           <p className="text-sm truncate">
             <span className="font-bold text-purple-600 dark:text-purple-400 mr-2">ARTIKEL TERBARU:</span>
             <span className="text-gray-700 dark:text-gray-300 group-hover:underline">{latestArticle.title}</span>
           </p>
+          <Rss size={18} className="text-orange-500" />
         </Link>
       </div>
-       <div className="w-full max-w-4xl mb-8">
+
+      {/* Area Tombol Fitur Utama */}
+      <div className="w-full max-w-4xl flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
+        {/* Tombol Tutorial */}
         <a
           href="https://dery-ai.my.id/ruang-riung-tutorial/"
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-gray-950 text-white font-bold rounded-lg shadow-lg hover:bg-gray-950 transition-colors active:shadow-inner relative"
+          className="flex-1 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-200 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset hover:text-purple-600 transition-colors"
         >
           <EarthIcon size={18} />
           <span>Tutorial</span>
         </a>
+
+        {/* Tombol Menuju Halaman Storyteller */}
+        <Link
+          href="/storyteller"
+          className="flex-1 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset hover:bg-purple-700 transition-colors"
+        >
+          <BookOpen size={18} />
+          <span>StoryTeller AI</span>
+        </Link>
       </div>
       {/* AKHIR TOMBOL BARU */}
       <div className="w-full max-w-4xl mb-4">
