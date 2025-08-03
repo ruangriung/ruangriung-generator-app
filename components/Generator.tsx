@@ -8,25 +8,45 @@ import ImageModal from './ImageModal';
 import ApiKeyModal from './ApiKeyModal';
 import HistoryPanel, { HistoryItem } from './HistoryPanel';
 import toast from 'react-hot-toast';
+import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles'; // Import artStyles
 
 type AspectRatioPreset = 'Kotak' | 'Portrait' | 'Lansekap' | 'Custom';
 
+const DEFAULT_PROMPTS = [
+  'A majestic dragon in a fantasy forest, cinematic lighting, digital painting',
+  'Cyberpunk city at night, neon reflections on wet streets, rain, photorealistic, 8k',
+  'A cute robot exploring Mars, Pixar style, vibrant colors, clear skies',
+  'Underwater alien landscape, bioluminescent plants, glowing fish, surreal, deep sea photography',
+  'An astronaut playing guitar on the moon, retro sci-fi art, vintage poster style',
+  'A magical library with floating books, intricate details, warm lighting, concept art',
+  'A serene Japanese garden with cherry blossoms, traditional ukiyo-e style, peaceful atmosphere',
+  'Victorian detective solving a mystery in a foggy London alley, oil painting, dramatic lighting',
+  'Floating islands with waterfalls in the sky, high fantasy, epic scale, digital art'
+];
+
+const getRandomDefaultPrompt = () => {
+  return DEFAULT_PROMPTS[Math.floor(Math.random() * DEFAULT_PROMPTS.length)];
+};
+
 export default function Generator() {
-  const [settings, setSettings] = useState<GeneratorSettings>({
-    prompt: 'Spiderman di ruangriung, digital art, fantasy, vibrant colors',
-    negativePrompt: '', // Added missing property
-    model: 'flux',
-    cfg_scale: 7, // Nilai default untuk Guidance Scale (CFG)
-    width: 1024,
-    height: 1792,
-    seed: Math.floor(Math.random() * 1000000), // Inisialisasi awal dengan seed acak
-    artStyle: '',
-    batchSize: 1,
-    imageQuality: 'Ultra',
-    private: false,
-    safe: false,
-    transparent: false,
-    inputImage: '',
+  const [settings, setSettings] = useState<GeneratorSettings>(() => {
+    const initialPrompt = getRandomDefaultPrompt();
+    return {
+      prompt: initialPrompt,
+      negativePrompt: '',
+      model: 'flux',
+      cfg_scale: 7,
+      width: 1024,
+      height: 1792,
+      seed: Math.floor(Math.random() * 1000000),
+      artStyle: '',
+      batchSize: 1,
+      imageQuality: 'Ultra',
+      private: false,
+      safe: false,
+      transparent: false,
+      inputImage: '',
+    };
   });
 
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
@@ -41,14 +61,13 @@ export default function Generator() {
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
 
   const imageDisplayRef = useRef<HTMLDivElement>(null);
+  const initialDefaultPromptRef = useRef(settings.prompt);
 
   useEffect(() => {
     try {
-      // --- PERUBAHAN: Memuat prompt yang belum disimpan dari localStorage ---
       const unsavedPrompt = localStorage.getItem('ruangriung_unsaved_prompt');
       if (unsavedPrompt) {
-        // Hanya muat jika prompt saat ini masih default atau kosong
-        if (settings.prompt === 'Spiderman di ruangriung, digital art, fantasy, vibrant colors' || settings.prompt === '') {
+        if (settings.prompt === initialDefaultPromptRef.current || settings.prompt === '') {
           setSettings(prev => ({ ...prev, prompt: unsavedPrompt }));
         }
       }
@@ -70,7 +89,7 @@ export default function Generator() {
       }
     };
     fetchImageModels();
-    
+
     const savedDalleKey = localStorage.getItem('dalle_api_key');
     const savedLeonardoKey = localStorage.getItem('leonardo_api_key');
     if (savedDalleKey) setApiKeys(prev => ({ ...prev, dalle: savedDalleKey }));
@@ -85,15 +104,12 @@ export default function Generator() {
     }
   }, [history, isHistoryLoaded]);
 
-  // --- PERUBAHAN: Menyimpan prompt ke localStorage setiap kali berubah ---
   useEffect(() => {
-    // Jangan simpan prompt default saat pertama kali render
-    if (settings.prompt !== 'Spiderman di ruangriung, digital art, fantasy, vibrant colors') {
+    if (settings.prompt !== initialDefaultPromptRef.current) {
       try {
         if (settings.prompt) {
           localStorage.setItem('ruangriung_unsaved_prompt', settings.prompt);
         } else {
-          // Jika prompt dikosongkan oleh pengguna, hapus dari storage
           localStorage.removeItem('ruangriung_unsaved_prompt');
         }
       } catch (error) {
@@ -109,7 +125,7 @@ export default function Generator() {
   const onAspectRatioChange = (preset: 'Kotak' | 'Portrait' | 'Lansekap') => {
     setAspectRatio(preset);
     let newWidth = 1024, newHeight = 1024;
-    if (preset === 'Portrait') { newWidth = 1024; newHeight = 1792; } 
+    if (preset === 'Portrait') { newWidth = 1024; newHeight = 1792; }
     else if (preset === 'Lansekap') { newWidth = 1792; newHeight = 1024; }
     setSettings(prev => ({ ...prev, width: newWidth, height: newHeight, imageQuality: 'Standar' }));
   };
@@ -125,7 +141,7 @@ export default function Generator() {
   const onImageQualityChange = (quality: 'Standar' | 'HD' | 'Ultra') => {
     setSettings(prev => ({ ...prev, imageQuality: quality }));
   };
-  
+
   const handleModelSelect = (model: string) => {
     if (model === 'DALL-E 3' || model === 'Leonardo') {
       setModelRequiringKey(model);
@@ -158,51 +174,35 @@ export default function Generator() {
 
     setIsLoading(true);
     setImageUrls([]);
-    
+
     setTimeout(() => {
         imageDisplayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
 
-    // --- PERUBAHAN UTAMA DI SINI ---
-    // Selalu hasilkan seed baru yang acak untuk setiap generasi baru
     const newRandomSeed = Math.floor(Math.random() * 1000000);
-    // Perbarui state `settings` dengan seed baru ini
     setSettings(prev => ({...prev, seed: newRandomSeed}));
-    
-    // Gunakan newRandomSeed untuk generasi saat ini
-    let currentSeed = newRandomSeed; 
-    
-    // Jika ini adalah variasi ATAU jika model yang dipilih adalah 'gptimage',
-    // buat seed baru yang acak. (Logika ini kini menjadi opsional atau bisa disesuaikan lebih lanjut
-    // jika Anda ingin seed yang sangat spesifik untuk variasi, namun untuk "generate baru"
-    // seed acak sudah cukup.)
-    // if (isVariation || settings.model === 'gptimage') {
-    //   currentSeed = Math.floor(Math.random() * 1000000);
-    //   setSettings(prev => ({...prev, seed: currentSeed}));
-    // }
-    // --- AKHIR PERUBAHAN ---
+    let currentSeed = newRandomSeed;
 
     const { model, prompt, negativePrompt, width, height, imageQuality, batchSize, artStyle, private: isPrivate, safe, transparent, inputImage, cfg_scale } = settings;
     const fullPrompt = `${prompt}${artStyle}`;
-    
+
     const generatePromises = Array(batchSize).fill(0).map(async (_, i) => {
-      // Gunakan currentSeed + i untuk batching, memastikan setiap gambar dalam batch memiliki seed berbeda
-      const batchSeed = currentSeed + i; 
+      const batchSeed = currentSeed + i;
       let finalUrl = '';
       try {
         const params = new URLSearchParams({
           model, width: width.toString(), height: height.toString(), seed: batchSeed.toString(),
           enhance: imageQuality !== 'Standar' ? 'true' : 'false', nologo: 'true', referrer: 'ruangriung.my.id',
-          guidance_scale: cfg_scale.toString(), // Tambahkan CFG scale ke parameter API
+          guidance_scale: cfg_scale.toString(),
         });
-        if (negativePrompt) params.append('negative_prompt', negativePrompt); // Tambahkan negative prompt ke API
+        if (negativePrompt) params.append('negative_prompt', negativePrompt);
         if (isPrivate) params.append('private', 'true');
         if (safe) params.append('safe', 'true');
         if (transparent && model === 'gptimage') params.append('transparent', 'true');
         if (inputImage && (model === 'kontext' || model === 'gptimage')) params.append('image', inputImage);
-        
+
         finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?${params.toString()}`;
-        
+
         const response = await fetch(finalUrl);
         if (!response.ok) throw new Error(`Gagal membuat gambar #${i + 1}`);
         return response.url;
@@ -215,7 +215,7 @@ export default function Generator() {
     });
 
     const generatedUrls = (await Promise.all(generatePromises)).filter((url): url is string => url !== null);
-    
+
     if(generatedUrls.length > 0) {
         setImageUrls(generatedUrls);
         generatedUrls.forEach(url => addToHistory({ imageUrl: url, prompt: settings.prompt, timestamp: Date.now() }));
@@ -226,11 +226,59 @@ export default function Generator() {
 
     setIsLoading(false);
   };
-  
+
+  // === PERUBAHAN BARU: Fungsi handleSurpriseMe ===
+  const handleSurpriseMe = () => {
+    if (modelList.length === 0) {
+        toast.error("Model AI belum dimuat. Coba lagi sebentar.");
+        return;
+    }
+
+    const randomPrompt = getRandomDefaultPrompt(); // Gunakan salah satu prompt default acak
+    const randomModel = modelList[Math.floor(Math.random() * modelList.length)];
+    const randomCfgScale = Math.floor(Math.random() * (15 - 5 + 1)) + 5; // CFG antara 5-15
+    const randomSeed = Math.floor(Math.random() * 1000000);
+
+    const aspectRatios = ['Kotak', 'Portrait', 'Lansekap'];
+    const randomAspectRatioPreset = aspectRatios[Math.floor(Math.random() * aspectRatios.length)] as AspectRatioPreset;
+    let newWidth = 1024, newHeight = 1024;
+    if (randomAspectRatioPreset === 'Portrait') { newWidth = 1024; newHeight = 1792; }
+    else if (randomAspectRatioPreset === 'Lansekap') { newWidth = 1792; newHeight = 1024; }
+
+    const imageQualities = ['Standar', 'HD', 'Ultra'];
+    const randomImageQuality = imageQualities[Math.floor(Math.random() * imageQualities.length)] as 'Standar' | 'HD' | 'Ultra';
+
+    // Ambil gaya seni acak dari kategori artStyles
+    const allArtStyles: ArtStyleOption[] = artStyles.flatMap((category: ArtStyleCategory) => category.options);
+    const randomArtStyleOption = allArtStyles[Math.floor(Math.random() * allArtStyles.length)];
+    const randomArtStyle = randomArtStyleOption ? randomArtStyleOption.value : '';
+
+    setSettings(prev => ({
+      ...prev,
+      prompt: randomPrompt,
+      negativePrompt: '', // Kosongkan negative prompt
+      model: randomModel,
+      cfg_scale: randomCfgScale,
+      width: newWidth,
+      height: newHeight,
+      seed: randomSeed,
+      artStyle: randomArtStyle,
+      imageQuality: randomImageQuality,
+      batchSize: 1, // Untuk surprise, biasanya 1 gambar saja dulu
+      private: false, // Reset ke default
+      safe: false, // Reset ke default
+      transparent: false, // Reset ke default
+      inputImage: '', // Kosongkan input image
+    }));
+    setAspectRatio(randomAspectRatioPreset);
+    toast.success("Pengaturan diacak! Tekan 'Buat Gambar' untuk melihat hasilnya.");
+  };
+  // =========================================================
+
   return (
     <>
       <div className="w-full flex flex-col items-center">
-        <ControlPanel 
+        <ControlPanel
           settings={settings}
           setSettings={setSettings}
           onGenerate={() => handleGenerate(false)}
@@ -241,6 +289,7 @@ export default function Generator() {
           onManualDimensionChange={onManualDimensionChange}
           onImageQualityChange={onImageQualityChange}
           onModelSelect={handleModelSelect}
+          onSurpriseMe={handleSurpriseMe} // Tambahkan fungsi surprise me
         />
         <ImageDisplay
           ref={imageDisplayRef}
@@ -250,21 +299,21 @@ export default function Generator() {
           onZoomClick={() => setIsModalOpen(true)}
           onVariationsClick={() => handleGenerate(true)}
         />
-        <ImageModal 
+        <ImageModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           imageUrl={imageUrls.length > 0 ? imageUrls[0] : ''}
         />
       </div>
 
-      <ApiKeyModal 
+      <ApiKeyModal
         isOpen={isApiKeyModalOpen}
         onClose={() => setIsApiKeyModalOpen(false)}
         onSubmit={handleApiKeySubmit}
         modelName={modelRequiringKey}
       />
 
-      <HistoryPanel 
+      <HistoryPanel
         history={history}
         onSelect={(item) => {
           setImageUrls([item.imageUrl]);

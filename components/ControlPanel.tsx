@@ -5,13 +5,13 @@ import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { useSession } from 'next-auth/react';
 import AdvancedSettings from './AdvancedSettings';
 import ButtonSpinner from './ButtonSpinner';
-import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon, ChevronDown, Languages, Megaphone, Braces } from 'lucide-react'; // Import Braces icon
+import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon, ChevronDown, Languages, Megaphone, Braces, FlaskConical } from 'lucide-react';
 import TextareaModal from './TextareaModal';
 import Accordion from './Accordion';
 import PromptAssistant from './PromptAssistant';
 import TranslationAssistant from './TranslationAssistant';
 import ImageAnalysisAssistant from './ImageAnalysisAssistant';
-import LockedAccordion from './LockedAccordion'; 
+import LockedAccordion from './LockedAccordion';
 import toast from 'react-hot-toast';
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
 
@@ -44,16 +44,17 @@ interface ControlPanelProps {
   onManualDimensionChange: (width: number, height: number) => void;
   onImageQualityChange: (quality: 'Standar' | 'HD' | 'Ultra') => void;
   onModelSelect: (model: string) => void;
+  onSurpriseMe: () => void;
 }
 
-export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, onModelSelect }: ControlPanelProps) {
+export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, onModelSelect, onSurpriseMe }: ControlPanelProps) {
   const { status } = useSession();
   const [editingField, setEditingField] = useState<null | 'prompt' | 'negativePrompt'>(null);
   const [isRandomizing, setIsRandomizing] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [savedPrompts, setSavedPrompts] = useState<string[]>([]);
-  const [isGeneratingJson, setIsGeneratingJson] = useState(false); // New state for JSON generation
+  const [isGeneratingJson, setIsGeneratingJson] = useState(false);
 
   useEffect(() => {
     try {
@@ -84,7 +85,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
   const callPromptApi = async (promptForApi: string, temperature = 0.5) => {
     const urlWithToken = `https://text.pollinations.ai/openai?token=${process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN}`;
-    
+
     try {
       const response = await fetch(urlWithToken, {
         method: 'POST',
@@ -92,7 +93,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'openai', 
+          model: 'openai',
           messages: [{ role: 'user', content: promptForApi }],
           temperature: temperature,
         }),
@@ -121,7 +122,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     const randomThemes = [
         'science fiction', 'spiderman', 'sports', 'surreal', 'vintage', 'wild nature', 'fantasy', 'photography', 'caricature', 'digital art', 'steampunk', 'cyberpunk', 'retro-futuristic', 'abstract', 'minimalist', 'cosmic horror', 'fairy tale', 'dystopian', 'utopian', 'mythology', 'ancient', 'modern', 'post-apocalyptic', 'galaxy war', 'classical painting', 'pop art', 'street art', 'traditional art', 'contemporary art', 'conceptual art', 'installation art', 'sculpture', 'textile art', 'ceramic art', 'graphic art', 'collage art', 'mixed media', '3D art', 'VR art', 'AR art', 'AI art', 'generative art', 'participatory art', 'art', 'graffiti', 'mural art', 'wall painting', 'fine art', 'modern sculpture', 'classical sculpture', 'abstract sculpture', 'figurative sculpture', 'installation sculpture', 'kinetic sculpture', 'interactive sculpture', 'digital sculpture'
     ];
-    
+
     const selectedTheme = randomThemes[Math.floor(Math.random() * randomThemes.length)];
 
     const randomPromptInstruction = `
@@ -156,7 +157,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       }
     ).finally(() => setIsEnhancing(false));
   };
-  
+
   const handleSavePrompt = () => {
     if (!settings.prompt) {
       toast.error("Tidak ada prompt untuk disimpan!");
@@ -195,7 +196,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       toast.success("Semua prompt tersimpan berhasil dihapus!");
     }
   };
-  
+
   const addNegativePreset = (preset: 'kualitas' | 'anatomi' | 'teks' | 'cacat') => {
     const presetMap = {
       kualitas: ['low quality', 'blurry', 'jpeg artifacts', 'worst quality', 'lowres'],
@@ -211,9 +212,9 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
         .split(',')
         .map(s => s.trim())
         .filter(Boolean);
-      
+
       const newNegatives = new Set([...currentNegatives, ...presetsToAdd]);
-      
+
       return {
         ...prev,
         negativePrompt: Array.from(newNegatives).join(', ')
@@ -222,7 +223,6 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     toast.success(`Preset negatif "${preset}" ditambahkan!`);
   };
 
-  // New function to handle JSON prompt generation
   const handleGenerateJsonPrompt = async () => {
     if (!settings.prompt) {
       toast.error("Tulis prompt utama terlebih dahulu untuk menghasilkan JSON!");
@@ -237,7 +237,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       Please ensure the output is valid JSON and nothing else.
     `;
     toast.promise(
-      callPromptApi(jsonInstruction, 0.2), // Use a lower temperature for more structured JSON output
+      callPromptApi(jsonInstruction, 0.2),
       {
         loading: 'Generating JSON from prompt...',
         success: 'JSON generated successfully!',
@@ -248,11 +248,11 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
 
   const featureButtonStyle = "flex-1 inline-flex items-center justify-center gap-x-2 px-3 py-2 bg-light-bg dark:bg-dark-bg text-gray-600 dark:text-gray-300 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed";
-  
+
   return (
     <>
       <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
-        
+
         {status === 'authenticated' ? (
           <details className="w-full group mb-6">
             <summary className="flex items-center justify-between p-4 bg-light-bg dark:bg-dark-bg rounded-lg cursor-pointer list-none shadow-neumorphic-button dark:shadow-dark-neumorphic-button transition-shadow">
@@ -277,9 +277,9 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
             />
           </details>
         ) : (
-          <LockedAccordion 
+          <LockedAccordion
             title="Pengaturan Lanjutan"
-            className="mb-6" 
+            className="mb-6"
           />
         )}
 
@@ -366,10 +366,13 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
               </>
             )}
           </button>
-          
-          <div className="flex flex-row flex-wrap justify-center items-center gap-3 w-full mt-3">
+
+          <div className="grid grid-cols-2 gap-3 w-full mt-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             <button onClick={handleRandomPrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing || isGeneratingJson}>
-                {isRandomizing ? <ButtonSpinner /> : <Shuffle size={16} />} <span>Acak</span>
+                {isRandomizing ? <ButtonSpinner /> : <Shuffle size={16} />} <span>Acak Prompt</span>
+            </button>
+            <button onClick={onSurpriseMe} className={featureButtonStyle} disabled={isLoading || isRandomizing || isEnhancing || isGeneratingJson}>
+                <FlaskConical size={16} /> <span>Surprise Me!</span>
             </button>
             <button onClick={handleEnhancePrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}>
                 {isEnhancing ? <ButtonSpinner /> : <Wand2 size={16} />} <span>Sempurnakan</span>
@@ -377,7 +380,12 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
             <button onClick={handleGenerateJsonPrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}>
                 {isGeneratingJson ? <ButtonSpinner /> : <Braces size={16} />} <span>JSON</span>
             </button>
-            <button onClick={handleSavePrompt} className={`${featureButtonStyle} ${isSaving ? '!text-green-500' : ''}`} disabled={isSaving || !settings.prompt}>
+            {/* PERUBAHAN DI SINI: Menambahkan kelas col-span-2 sm:col-span-1 */}
+            <button
+              onClick={handleSavePrompt}
+              className={`${featureButtonStyle} ${isSaving ? '!text-green-500' : ''} col-span-2 sm:col-span-1`}
+              disabled={isSaving || !settings.prompt}
+            >
                 <Save size={16} /> <span>{isSaving ? 'Tersimpan!' : 'Simpan'}</span>
             </button>
           </div>
@@ -385,16 +393,16 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
         {/* Asisten-asisten Prompt */}
         {status === 'authenticated' ? (
-          <PromptAssistant 
-            onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))} 
+          <PromptAssistant
+            onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
           />
         ) : (
-          <LockedAccordion 
-            title={<div className="flex items-center gap-2"><Megaphone className="text-purple-600" />Asisten Prompt</div>} 
-            className="mt-6" 
+          <LockedAccordion
+            title={<div className="flex items-center gap-2"><Megaphone className="text-purple-600" />Asisten Prompt</div>}
+            className="mt-6"
           />
         )}
-        
+
         <TranslationAssistant
           onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
         />
@@ -404,7 +412,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
             onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
           />
         ) : (
-          <LockedAccordion 
+          <LockedAccordion
             title={<div className="flex items-center gap-2"><ImageIcon className="text-purple-600" />Asisten Analisis Gambar</div>}
             className="mt-6"
           />

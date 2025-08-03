@@ -39,7 +39,7 @@ export default function AudioGenerator() {
     };
   }, []);
 
-  // Membuat URL dengan parameter yang benar (termasuk referrer dan token jika ada)
+  // Fungsi createApiUrl untuk preview suara (ini juga menggunakan GET)
   const createApiUrl = (prompt: string, voice: string) => {
     const baseUrl = `https://text.pollinations.ai/${encodeURIComponent(prompt)}`;
     const params = new URLSearchParams({
@@ -47,7 +47,6 @@ export default function AudioGenerator() {
       voice: voice,
       referrer: 'ruangriung.my.id'
     });
-    // Token ditambahkan melalui header, jadi tidak perlu di URL GET
     return `${baseUrl}?${params.toString()}`;
   };
 
@@ -62,7 +61,7 @@ export default function AudioGenerator() {
     }
     setPreviewingVoice(voice);
     const sampleText = "Ini adalah pratinjau dari suara yang dipilih.";
-    const previewUrl = createApiUrl(sampleText, voice); // Menggunakan fungsi helper
+    const previewUrl = createApiUrl(sampleText, voice);
 
     const audio = new Audio(previewUrl);
     audioPreviewRef.current = audio;
@@ -87,29 +86,32 @@ export default function AudioGenerator() {
     }
 
     try {
-      // Menggunakan metode POST agar bisa mengirim Authorization header dengan aman
-      const response = await fetch('https://text.pollinations.ai/openai', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Menambahkan Token sebagai Bearer
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN}`
-        },
-        body: JSON.stringify({
-          model: 'openai-audio',
-          messages: [{ role: 'user', content: text }],
-          voice: selectedVoice,
-          private: true, // Sesuai anjuran untuk menggunakan parameter private jika memungkinkan
-          referrer: 'ruangriung.my.id'
-        })
+      // === PERBAIKAN PENTING DI SINI ===
+      // Panggil rute API Next.js lokal Anda menggunakan metode GET
+      const params = new URLSearchParams({
+          text: text,
+          voice: selectedVoice
       });
+      const response = await fetch(`/api/generate-audio?${params.toString()}`, {
+        method: 'GET', // Ubah metode menjadi GET
+        headers: {
+          'Content-Type': 'application/json', // Header ini tidak terlalu relevan untuk GET request dengan body kosong
+        },
+        // Tidak ada body untuk permintaan GET
+      });
+      // ================================
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Gagal membuat audio: ${response.statusText} - ${errorText}`);
+        const errorText = await response.text(); // Baca respons error sebagai teks
+        // Coba parse sebagai JSON jika mungkin, jika tidak, gunakan teks mentah
+        try {
+            const errorJson = JSON.parse(errorText);
+            throw new Error(errorJson.message || `Gagal membuat audio: ${response.statusText}`);
+        } catch {
+            throw new Error(`Gagal membuat audio: ${response.statusText} - ${errorText}`);
+        }
       }
       
-      // Karena API ini mengembalikan file audio langsung, kita proses sebagai blob
       const audioBlob = await response.blob();
       const newAudioUrl = URL.createObjectURL(audioBlob);
       setAudioUrl(newAudioUrl);
@@ -128,14 +130,12 @@ export default function AudioGenerator() {
     setIsDownloading(true);
     toast.loading("Mempersiapkan unduhan...");
     try {
-      // Tidak perlu fetch ulang karena audioUrl sudah merupakan blob URL
       const downloadLink = document.createElement('a');
       downloadLink.href = audioUrl;
       downloadLink.download = `ruangriung-audio-${Date.now()}.mp3`;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-      // Tidak perlu revoke ObjectURL jika masih digunakan oleh <audio>
       toast.dismiss();
       toast.success("Audio berhasil diunduh!");
     } catch (error) {

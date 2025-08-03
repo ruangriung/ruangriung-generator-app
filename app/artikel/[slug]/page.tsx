@@ -1,89 +1,82 @@
-// app/artikel/[slug]/page.tsx
-'use client'; 
-    
-import { articles } from '@/lib/articles';
-import { notFound, useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import type { Article } from '@/lib/articles';
+import { getArticleBySlug, getArticleSlugs } from '@/lib/articles';
+import ReactMarkdown from 'react-markdown';
+import rehypeHighlight from 'rehype-highlight';
 import Link from 'next/link';
-import { ArrowLeft, Home } from 'lucide-react';
-// === LANGKAH 1: Impor komponen AdBanner ===
-import AdBanner from '@/components/AdBanner';
+import { ArrowLeft } from 'lucide-react';
 
-export default function ArtikelDetailPage() {
-  const params = useParams();
-  const [article, setArticle] = useState<Article | null>(null);
+// === PERBAIKAN DI SINI ===
+// Definisikan interface PageProps yang sesuai dengan ekspektasi error
+interface PageProps {
+  params: Promise<{ slug: string }>; // Mengharapkan 'params' adalah sebuah Promise
+}
+// =========================
 
-  useEffect(() => {
-    if (params.slug) {
-      const foundArticle = articles.find((a) => a.slug === String(params.slug));
-      if (foundArticle) {
-        setArticle(foundArticle);
-      } else {
-        notFound();
-      }
-    }
-  }, [params.slug]);
+export async function generateStaticParams() {
+  const slugs = getArticleSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
+
+// Perbarui tipe props komponen ArticlePage
+export default async function ArticlePage({ params }: PageProps) {
+  // === PERBAIKAN DI SINI ===
+  // Await 'params' itu sendiri untuk menyelesaikan Promise
+  const resolvedParams = await params;
+  const article = await getArticleBySlug(resolvedParams.slug);
+  // =========================
 
   if (!article) {
-    return <div className="text-center p-10">Memuat artikel...</div>;
+    // Handle 404 or redirect (optional: bisa diarahkan ke halaman 404 custom)
+    return (
+      <main className="min-h-screen bg-light-bg dark:bg-dark-bg p-4 sm:p-8 flex items-center justify-center">
+        <div className="text-center text-gray-700 dark:text-gray-300">
+          <h1 className="text-3xl font-bold mb-4">Artikel tidak ditemukan.</h1>
+          <Link href="/artikel" className="inline-flex items-center justify-center gap-2 py-2 px-4 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition-colors">
+            <ArrowLeft size={18} /> Kembali ke Daftar Artikel
+          </Link>
+        </div>
+      </main>
+    );
   }
-
-  // === LANGKAH 2: Logika untuk membelah konten artikel ===
-  // Memecah konten berdasarkan tag penutup paragraf </p> untuk menemukan titik tengah
-  const paragraphs = article.content.split('</p>');
-  const middleIndex = Math.floor(paragraphs.length / 2);
-
-  // Menggabungkan kembali paragraf sebelum dan sesudah titik tengah
-  const contentBeforeAd = paragraphs.slice(0, middleIndex).join('</p>') + '</p>';
-  const contentAfterAd = paragraphs.slice(middleIndex).join('</p>');
-  // =======================================================
 
   return (
     <main className="min-h-screen bg-light-bg dark:bg-dark-bg p-4 sm:p-8">
-      <div className="max-w-4xl mx-auto">
-        <article className="bg-light-bg dark:bg-dark-bg p-6 md:p-8 rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
-          <h1 className="text-4xl font-extrabold text-gray-800 dark:text-gray-100 mb-3">
-            {article.title}
-          </h1>
-          <p className="text-md text-gray-600 dark:text-gray-400 mb-6">
-            Oleh {article.author} | Diterbitkan pada {article.date}
-          </p>
-          
-          <hr className="my-6 border-gray-300 dark:border-gray-600"/>
+      <div className="max-w-4xl mx-auto bg-light-bg dark:bg-dark-bg p-6 md:p-8 rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
+        {/* Tombol Kembali ke Daftar Artikel */}
+        <div className="mb-8 flex justify-center">
+          <Link
+            href="/artikel" // Link kembali ke daftar artikel
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
+          >
+            <ArrowLeft size={18} />
+            <span>Kembali ke Artikel</span>
+          </Link>
+        </div>
 
-          {/* === LANGKAH 3: Tampilkan konten yang sudah dibelah dan sisipkan iklan === */}
-          <div
-            className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300"
-            dangerouslySetInnerHTML={{ __html: contentBeforeAd }}
-          />
+        {/* Header Artikel */}
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2 text-center">
+          {article.title}
+        </h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 text-center">
+          Oleh {article.author} - {new Date(article.date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}
+        </p>
 
-          {/* Pastikan ada setidaknya beberapa paragraf sebelum menampilkan iklan */}
-          {paragraphs.length > 2 && (
-            <div className="my-8 flex justify-center">
-              <AdBanner dataAdSlot="5961316189" /> 
-            </div>
-          )}
+        {/* Konten Artikel dengan styling prose */}
+        <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
+          <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+            {article.content}
+          </ReactMarkdown>
+        </div>
 
-          <div
-            className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300"
-            dangerouslySetInnerHTML={{ __html: contentAfterAd }}
-          />
-          {/* ======================================================================== */}
-
-          <hr className="my-8 border-gray-300 dark:border-gray-600"/>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/artikel" className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
-              <ArrowLeft size={18} />
-              <span>Semua Artikel</span>
-            </Link>
-            <Link href="/" className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
-              <Home size={18} />
-              <span>Beranda</span>
-            </Link>
-          </div>
-          
-        </article>
+        {/* Tombol Kembali ke Daftar Artikel di bagian bawah (opsional, bisa dihapus jika tidak mau dobel) */}
+        <div className="mt-8 flex justify-center">
+          <Link
+            href="/artikel"
+            className="inline-flex items-center justify-center gap-2 py-2 px-4 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
+          >
+            <ArrowLeft size={18} />
+            <span>Kembali ke Artikel</span>
+          </Link>
+        </div>
       </div>
     </main>
   );
