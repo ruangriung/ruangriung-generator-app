@@ -508,9 +508,9 @@ export default function StorytellerClient() {
     <div className="flex flex-col gap-8">
       {/* Bagian Input untuk Ide Cerita */}
       <div className="bg-light-bg dark:bg-dark-bg p-6 rounded-2xl shadow-neumorphic-card dark:shadow-dark-neumorphic-card">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 dark:text-gray-200 mb-8">
-          Buat Cerita Visual dengan AI
-        </h2>
+        {/* <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 dark:text-gray-200 mb-8">
+  Buat Cerita Visual dengan AI
+</h2> */}
         <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Ide Cerita Anda</h2>
         
         {/* Judul Cerita */}
