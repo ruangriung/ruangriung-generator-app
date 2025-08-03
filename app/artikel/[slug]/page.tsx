@@ -4,25 +4,18 @@ import rehypeHighlight from 'rehype-highlight';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
-// === PERBAIKAN DI SINI ===
-// Definisikan interface PageProps yang sesuai dengan ekspektasi error
 interface PageProps {
   params: Promise<{ slug: string }>; // Mengharapkan 'params' adalah sebuah Promise
 }
-// =========================
 
 export async function generateStaticParams() {
   const slugs = getArticleSlugs();
   return slugs.map((slug) => ({ slug }));
 }
 
-// Perbarui tipe props komponen ArticlePage
 export default async function ArticlePage({ params }: PageProps) {
-  // === PERBAIKAN DI SINI ===
-  // Await 'params' itu sendiri untuk menyelesaikan Promise
   const resolvedParams = await params;
   const article = await getArticleBySlug(resolvedParams.slug);
-  // =========================
 
   if (!article) {
     // Handle 404 or redirect (optional: bisa diarahkan ke halaman 404 custom)

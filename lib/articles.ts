@@ -16,7 +16,7 @@ export function getArticleBySlug(slug: string) {
   return {
     slug,
     content,
-    ...(data as { title: string; date: string; author: string }),
+    ...(data as { title: string; date: string; author: string; summary: string; }),
   };
 }
 

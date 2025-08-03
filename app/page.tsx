@@ -1,99 +1,11 @@
-import { Wand2, Rss, Facebook, Mail, LayoutGrid, EarthIcon } from 'lucide-react';
-import Tabs from '../components/Tabs';
-import AuthButton from '@/components/AuthButton';
-import ThemeToggle from '@/components/ThemeToggle';
-import FAQ from '@/components/FAQ';
 import { getAllArticles } from '@/lib/articles'; // Impor fungsi getAllArticles
-import { AdBanner } from '@/components/AdBanner';
-import Link from 'next/link';
+import HomeClient from '../app/HomeClient'; // Impor HomeClient
 
 export default async function Home() {
   const allArticles = getAllArticles();
   const latestArticle = allArticles[0]; // Ambil artikel terbaru
 
   return (
-    <div className="flex min-h-screen flex-col items-center p-4 sm:p-8">
-
-      <header className="w-full max-w-4xl mb-8 text-center">
-        <div className="flex items-center justify-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 dark:text-gray-100">
-            <Wand2 className="text-purple-600 inline-block align-middle h-8 w-8 sm:h-10 sm:w-10 -mt-1 mr-1" />
-            <span className="align-middle">RuangRiung AI Generator</span>
-          </h1>
-        </div>
-        <p className="text-gray-500 dark:text-gray-400 mt-2">
-          Transform your imagination into stunning visuals with AI
-        </p>
-      </header>
-      
-      <div className="w-full max-w-4xl mb-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <Link href="#" 
-          // Ubah class untuk menyamakan dengan tombol Tutorial
-          className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all relative"
-        >
-          <LayoutGrid size={18} />
-          <span>Koleksi Prompt AI</span>
-          {/* Teks "Segera Hadir" disamakan dengan tombol Tutorial */}
-          <span className="absolute top-0 right-1 text-[0.6rem] text-white font-normal opacity-80 bg-red-700 px-1 rounded">Segera Hadir</span>
-        </Link>
-        <Link href="/artikel" className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
-          <Rss size={18} />
-          <span>Baca Tips & Trik</span>
-        </Link>
-        <a href="https://www.facebook.com/groups/1182261482811767/?ref=share&mibextid=lOuIew" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-blue-600 text-white font-semibold text-sm rounded-lg shadow-md hover:bg-blue-700 transition-colors">
-          <Facebook size={18} />
-          <span>Gabung Grup</span>
-        </a>
-        <Link href="/kontak" className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
-          <Mail size={18} />
-          <span>Email Kami</span>
-        </Link>
-      </div>
-      {/* MARQUEE ARTIKEL TERBARU */}
-      <div className="w-full max-w-4xl mb-4">
-        <Link
-          href={`/artikel/${latestArticle.slug}`}
-          className="block w-full bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset p-4 text-center group transition-transform duration-200 hover:scale-[1.02]"
-        >
-          <p className="text-sm truncate">
-            <span className="font-bold text-purple-600 dark:text-purple-400 mr-2">ARTIKEL TERBARU:</span>
-            <span className="text-gray-700 dark:text-gray-300 group-hover:underline">{latestArticle.title}</span>
-          </p>
-        </Link>
-      </div>
-       <div className="w-full max-w-4xl mb-8">
-        <a
-          href="https://dery-ai.my.id/ruang-riung-tutorial/" 
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-gray-950 text-white font-bold rounded-lg shadow-lg hover:bg-gray-950 transition-colors active:shadow-inner relative"
-        >
-          <EarthIcon size={18} />
-          <span>Tutorial</span>
-          {/* Teks "Segera Hadir" dihapus */}
-        </a>
-      </div>
-      {/* AKHIR TOMBOL BARU */}
-      <div className="w-full max-w-4xl mb-4">
-        <AdBanner dataAdSlot="6897039624" />
-      </div>
-
-      <div className="w-full max-w-4xl flex flex-col gap-4 mb-4">
-        <AuthButton />
-        <ThemeToggle />
-      </div>
-      {/* ==================================== */}
-      
-      <main className="w-full flex flex-col items-center">
-        <Tabs />
-      </main>
-      <div className="w-full max-w-4xl mt-16">
-        <AdBanner dataAdSlot="6897039624" />
-      </div>
-
-      <div className="w-full mt-16">
-        <FAQ />
-      </div>
-    </div>
+    <HomeClient latestArticle={latestArticle} />
   );
 }
