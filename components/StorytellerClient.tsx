@@ -594,7 +594,7 @@ export default function StorytellerClient() {
               >
                 {availableTextModels.map(model => (
                   <option key={model} value={model}>
-                    {model === 'openai' ? 'OpenAI (via Pollinations.ai, Default)' : model}
+                    {model === 'openai' ? 'OpenAI' : model}
                   </option>
                 ))}
               </select>
