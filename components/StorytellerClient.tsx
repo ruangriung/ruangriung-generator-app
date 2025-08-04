@@ -13,7 +13,7 @@ import { AdBanner } from '@/components/AdBanner'; // <-- Import AdBanner
 // --- Konstanta API ---
 const POLLINATIONS_TEXT_API_BASE_URL = 'https://text.pollinations.ai/openai';
 const POLLINATIONS_IMAGE_MODELS_URL = 'https://image.pollinations.ai/models';
-const POLLINATIONS_TEXT_MODELS_LIST_URL = 'https://text.pollinations.ai/models'; 
+// POLLINATIONS_TEXT_MODELS_LIST_URL tidak lagi dibutuhkan karena kita tidak memuat model teks secara dinamis
 const POLLINATIONS_TOKEN = process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
 
 // --- Daftar Prompt Acak ---
@@ -42,7 +42,7 @@ interface StoryPart {
 }
 
 type ImageModelType = 'flux' | 'dall-e-3' | 'leonardo' | string;
-type TextModelType = 'openai' | 'gemini-1.5-flash' | string;
+type TextModelType = 'openai' | 'gemini-1.5-flash'; // Hanya dua model teks yang didukung sekarang
 type Dalle3Size = '1024x1024' | '1792x1024' | '1024x1792';
 type ApiKeyModelName = 'DALL-E 3' | 'Gemini' | 'Leonardo' | '';
 
@@ -84,7 +84,8 @@ export default function StorytellerClient() {
 
   // --- State untuk Model Dinamis ---
   const [availableImageModels, setAvailableImageModels] = useState<ImageModelType[]>(['flux', 'dall-e-3', 'leonardo']);
-  const [availableTextModels, setAvailableTextModels] = useState<TextModelType[]>(['openai', 'gemini-1.5-flash']);
+  // availableTextModels sekarang hanya berisi Gemini dan OpenAI secara default
+  const [availableTextModels, setAvailableTextModels] = useState<TextModelType[]>(['openai', 'gemini-1.5-flash']); 
 
   // --- State untuk Modal Zoom Gambar ---
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -107,7 +108,6 @@ export default function StorytellerClient() {
     if (!POLLINATIONS_TOKEN) {
       toast.error('Token Pollinations.ai (NEXT_PUBLIC_POLLINATIONS_TOKEN) tidak ditemukan. Pastikan sudah diatur di environment variables Anda.');
     }
-    // Tidak lagi auto-generate prompt awal. Pengguna harus mengklik tombol.
 
     // Periksa API key untuk model default saat mount
     if (imageModel === 'dall-e-3' && !savedDalleKey) {
@@ -118,9 +118,8 @@ export default function StorytellerClient() {
       checkAndOpenApiKeyModal('Gemini');
     }
 
-    // --- Muat Model AI Secara Dinamis ---
-    const fetchModels = async () => {
-      // Fetch Image Models
+    // --- Muat Model AI Secara Dinamis (Hanya Gambar) ---
+    const fetchImageModels = async () => { // Fungsi ini hanya untuk model gambar sekarang
       try {
         const imgResponse = await fetch(POLLINATIONS_IMAGE_MODELS_URL);
         const imgData = await imgResponse.json();
@@ -133,28 +132,11 @@ export default function StorytellerClient() {
         console.error("Error fetching image models:", error);
         setAvailableImageModels(['flux', 'dall-e-3', 'leonardo']); // Fallback
       }
-
-      // Fetch dan filter model teks secara dinamis seperti useChatManager.ts
-      try {
-        const textResponse = await fetch(POLLINATIONS_TEXT_MODELS_LIST_URL);
-        const allModels: any[] = await textResponse.json();
-        
-        let fetchedTxtModels: string[] = [];
-        if (Array.isArray(allModels)) {
-            fetchedTxtModels = allModels
-                .filter(m => Array.isArray(m.input_modalities) && m.input_modalities.length === 1 && m.input_modalities[0] === 'text')
-                .map(m => m.name)
-                .filter(name => typeof name === 'string');
-        }
-
-        setAvailableTextModels([...new Set([...fetchedTxtModels, 'openai', 'gemini-1.5-flash'])]);
-      } catch (error) {
-        console.error("Error fetching text models:", error);
-        setAvailableTextModels(['openai', 'gemini-1.5-flash']); // Fallback
-        toast.error("Gagal memuat daftar model teks terbaru, menggunakan daftar default.");
-      }
     };
-    fetchModels();
+    fetchImageModels();
+
+    // Logika fetch dan filter model teks secara dinamis dihapus di sini
+    // Karena sekarang kita hanya ingin menggunakan 'openai' dan 'gemini-1.5-flash'
 
   }, []);
 
@@ -177,7 +159,7 @@ export default function StorytellerClient() {
   const handleGenerateStory = async () => {
     // Validasi dasar
     if (!mainPrompt) { toast.error('Ide cerita tidak boleh kosong!'); return; }
-    if (!POLLINATIONS_TOKEN) {
+    if (!POLLINATIONS_TOKEN && textModel === 'openai') { // Hanya periksa jika model OpenAI dari Pollinations yang dipilih
       toast.error('Token Pollinations.ai untuk teks tidak ditemukan. Silakan atur NEXT_PUBLIC_POLLINATIONS_TOKEN.'); return;
     }
     
@@ -220,6 +202,7 @@ export default function StorytellerClient() {
           body: JSON.stringify({
             messages: [{ role: 'user', content: promptInstructionForImages }],
             apiKey: geminiApiKey,
+            model: textModel, // <-- PASTIKAN BARIS INI ADA
           }),
         });
         if (!imagePromptsResponse.ok) { const errorData = await imagePromptsResponse.json(); throw new Error(`Gagal membuat prompt gambar dari Gemini API: ${errorData.message || 'Unknown error'}`); }
@@ -234,15 +217,16 @@ export default function StorytellerClient() {
       const storyPromises = rawImagePrompts.slice(0, 5).map(async (imgPrompt: string, index: number) => {
         let finalImageUrl = '';
 
-        if (imageModel === 'flux' || imageModel === 'leonardo') {
+        if (imageModel === 'flux' || (imageModel === 'leonardo' && leonardoApiKey)) { // Pastikan Leonardo punya kunci
           const modelParam = imageModel;
+          const tokenParam = (imageModel === 'flux' && POLLINATIONS_TOKEN) ? `&token=${POLLINATIONS_TOKEN}` : ''; // <-- BARIS INI UNTUK FLUX
           const apiKeyParam = (imageModel === 'leonardo' && leonardoApiKey) ? `&key=${leonardoApiKey}` : '';
-          let url = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?model=${modelParam}&width=${imageWidth}&height=${imageHeight}&seed=${currentSeed + index}&nologo=true&referrer=ruangriung.my.id${apiKeyParam}`;
+          let url = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?model=${modelParam}&width=${imageWidth}&height=${imageHeight}&seed=${currentSeed + index}&nologo=true&referrer=ruangriung.my.id${apiKeyParam}${tokenParam}`; // <-- UBAH BARIS INI
           
           const imageResponse = await fetch(url);
           if (!imageResponse.ok) { throw new Error(`Gagal membuat gambar ${imageModel} #${index + 1}: ${imageResponse.statusText}`); }
           finalImageUrl = imageResponse.url;
-        } else if (imageModel === 'dall-e-3') {
+        } else if (imageModel === 'dall-e-3' && dalleApiKey) { // Pastikan DALL-E 3 punya kunci
           const dalleResponse = await fetch('/api/dalle', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -256,7 +240,13 @@ export default function StorytellerClient() {
           if (!dalleResponse.ok) { const errorData = await dalleResponse.json(); throw new Error(`Gagal membuat gambar DALL-E 3 #${index + 1}: ${errorData.message || 'Unknown error'}`); }
           const dalleData = await dalleResponse.json();
           finalImageUrl = dalleData.imageUrl;
+        } else {
+            // Jika model gambar memerlukan kunci dan kunci tidak ada, atau model tidak didukung
+            console.warn(`Model gambar ${imageModel} tidak dapat digunakan atau API key hilang.`);
+            toast.error(`API key untuk model gambar ${imageModel} hilang atau tidak didukung.`);
+            return { imagePrompt: imgPrompt, imageUrl: '', description: 'Gambar tidak dapat dihasilkan karena masalah konfigurasi.' };
         }
+
 
         // --- Minta AI Teks untuk deskripsi singkat gambar ---
         const promptInstructionForDescription = `Buatkan deskripsi singkat (sekitar 50-80 kata) yang menarik untuk gambar yang dihasilkan dari prompt AI berikut: '${imgPrompt}'. Fokus pada apa yang terlihat di gambar dan suasana yang diciptakan.`;
@@ -281,6 +271,7 @@ export default function StorytellerClient() {
             body: JSON.stringify({
               messages: [{ role: 'user', content: promptInstructionForDescription }],
               apiKey: geminiApiKey,
+              model: textModel, // <-- PASTIKAN BARIS INI ADA
             }),
           });
           if (!descriptionResponse.ok) { const errorData = await descriptionResponse.json(); console.warn(`Gagal membuat deskripsi dari Gemini API #${index + 1}: ${errorData.message || 'Unknown error'}`); descriptionText = 'Deskripsi gambar tidak dapat dihasilkan.'; }
@@ -310,7 +301,7 @@ export default function StorytellerClient() {
   // --- Fungsi Handle Random Prompt ---
   const handleRandomPrompt = async () => {
     if (isGeneratingRandomPrompt || isLoading || isGeneratingTitle) return; // Mencegah klik ganda atau konflik loading
-    if (!POLLINATIONS_TOKEN) {
+    if (!POLLINATIONS_TOKEN && textModel === 'openai') { // Hanya periksa jika model OpenAI dari Pollinations yang dipilih
       toast.error('Token Pollinations.ai untuk menghasilkan ide acak tidak ditemukan. Silakan atur NEXT_PUBLIC_POLLINATIONS_TOKEN.');
       return;
     }
@@ -350,6 +341,7 @@ export default function StorytellerClient() {
           body: JSON.stringify({
             messages: [{ role: 'user', content: promptInstruction }],
             apiKey: geminiApiKey,
+            model: textModel, // <-- PASTIKAN BARIS INI ADA
           }),
         });
         if (!response.ok) { const errorData = await response.json(); throw new Error(`Gagal membuat ide acak dari Gemini API: ${errorData.message || 'Unknown error'}`); }
@@ -371,7 +363,7 @@ export default function StorytellerClient() {
   // --- Fungsi untuk membuat Judul Cerita dengan AI ---
   const handleGenerateTitle = async () => {
     if (isGeneratingTitle || isLoading || isGeneratingRandomPrompt || !mainPrompt) return; // Mencegah klik ganda atau konflik loading
-    if (!POLLINATIONS_TOKEN) {
+    if (!POLLINATIONS_TOKEN && textModel === 'openai') { // Hanya periksa jika model OpenAI dari Pollinations yang dipilih
       toast.error('Token Pollinations.ai untuk menghasilkan judul tidak ditemukan. Silakan atur NEXT_PUBLIC_POLLINATIONS_TOKEN.');
       return;
     }
@@ -409,6 +401,7 @@ export default function StorytellerClient() {
           body: JSON.stringify({
             messages: [{ role: 'user', content: promptInstruction }],
             apiKey: geminiApiKey,
+            model: textModel, // <-- PASTIKAN BARIS INI ADA
           }),
         });
         if (!response.ok) { const errorData = await response.json(); throw new Error(`Gagal membuat judul dari Gemini API: ${errorData.message || 'Unknown error'}`); }
@@ -508,9 +501,6 @@ export default function StorytellerClient() {
     <div className="flex flex-col gap-8">
       {/* Bagian Input untuk Ide Cerita */}
       <div className="bg-light-bg dark:bg-dark-bg p-6 rounded-2xl shadow-neumorphic-card dark:shadow-dark-neumorphic-card">
-        {/* <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 dark:text-gray-200 mb-8">
-  Buat Cerita Visual dengan AI
-</h2> */}
         <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Ide Cerita Anda</h2>
         
         {/* Judul Cerita */}
@@ -724,7 +714,7 @@ export default function StorytellerClient() {
 
         <button
           onClick={handleGenerateStory}
-          disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle || !mainPrompt || !POLLINATIONS_TOKEN}
+          disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle || !mainPrompt || (textModel === 'openai' && !POLLINATIONS_TOKEN)}
           className="mt-6 w-full py-3 px-6 rounded-xl text-white font-semibold flex items-center justify-center transition-all duration-300
                      bg-purple-600 hover:bg-purple-700 shadow-neumorphic-button dark:shadow-dark-neumorphic-button
                      active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset disabled:opacity-50 disabled:cursor-not-allowed"
@@ -763,7 +753,7 @@ export default function StorytellerClient() {
             <h3 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-gray-100">{storyTitle || 'Cerita Visual AI'}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {generatedStoryParts.map((part, index) => (
-                <div key={index} className="bg-light-bg-secondary dark:bg-dark-bg-secondary p-4 rounded-xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset flex flex-col">
+                <div key={index} className="bg-light-bg-secondary dark:bg-dark-bg-secondary p-4 rounded-xl shadow-neumorphic-inset dark:shadow-neumorphic-inset flex flex-col">
                   <h4 className="font-semibold text-lg mb-3 text-gray-800 dark:text-gray-200 text-center">Adegan {index + 1}</h4>
                   {part.imageUrl ? (
                     <img

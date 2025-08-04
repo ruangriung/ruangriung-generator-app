@@ -17,7 +17,8 @@ function transformMessagesToGemini(messages: Message[]) {
 
 export async function POST(request: Request) {
   try {
-    const { messages, apiKey } = await request.json();
+    // Ambil model dari request body, dengan fallback ke 'gemini-1.5-flash'
+    const { messages, apiKey, model: clientModel } = await request.json();
 
     if (!apiKey) {
       return NextResponse.json({ message: 'API key Gemini tidak ditemukan.' }, { status: 400 });
@@ -26,11 +27,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Pesan tidak boleh kosong.' }, { status: 400 });
     }
     
-    // Model yang bagus untuk chat
-    const model = 'gemini-1.5-pro-latest';
+    // Gunakan model yang dikirim dari klien, atau fallback ke 'gemini-1.5-flash'
+    // Perhatikan bahwa model yang sebenarnya untuk Gemini adalah "gemini-1.5-flash-latest" atau "gemini-1.5-pro-latest"
+    // Pastikan nilai clientModel sesuai dengan yang didukung oleh Google Gemini API.
+    // Jika clientModel adalah 'gemini-1.5-flash', kita akan menggunakannya.
+    const modelToUse = clientModel || 'gemini-1.5-flash'; 
     const geminiContents = transformMessagesToGemini(messages);
 
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:generateContent?key=${apiKey}`;
 
     const response = await fetch(API_URL, {
       method: 'POST',
@@ -46,6 +50,7 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.error('Gemini API Error Response:', errorData); // Log detail error
       return NextResponse.json({ message: `Error dari Gemini API: ${errorData.error.message}` }, { status: response.status });
     }
 
@@ -61,6 +66,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ text });
 
   } catch (error: any) {
+    console.error('Internal Server Error:', error); // Log detail error
     return NextResponse.json({ message: 'Terjadi kesalahan internal pada server.', error: error.message }, { status: 500 });
   }
 }
