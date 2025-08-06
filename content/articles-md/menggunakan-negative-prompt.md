@@ -1,6 +1,6 @@
 ---
 title: Menggunakan Negative Prompt untuk Kontrol Lebih Baik dalam Generasi AI
-description: Pelajari cara memanfaatkan negative prompt untuk menyempurnakan hasil dari model AI generatif, menghilangkan elemen yang tidak diinginkan, dan mencapai output yang lebih presisi. Panduan ini mencakup konsep, contoh, dan praktik terbaik.
+summary: Pelajari cara memanfaatkan negative prompt untuk menyempurnakan hasil dari model AI generatif, menghilangkan elemen yang tidak diinginkan, dan mencapai output yang lebih presisi. Panduan ini mencakup konsep, contoh, dan praktik terbaik.
 date: 2025-08-06
 author: Tim Ruangriung
 image: /v1/img/showcase-1.webp
