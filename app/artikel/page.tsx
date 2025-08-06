@@ -1,31 +1,40 @@
-// app/artikel/page.tsx
-
 import { getAllArticles } from '@/lib/articles';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import AdBanner from '@/components/AdBanner';
-
 import ArticlePaginationClient from './ArticlePaginationClient';
+import { Metadata } from 'next';
 
-// Fungsi untuk mengurutkan artikel (dijalankan di server)
-const sortArticles = (articles: any[]) => {
-    return [...articles].sort((a, b) => {
-        // === PERBAIKAN DI SINI ===
-        // Sederhanakan fungsi convertDate karena Date constructor dapat langsung memparsing 'YYYY-MM-DD'
-        const convertDate = (dateStr: string) => {
-            return new Date(dateStr);
-        };
-        // =========================
-        
-        return convertDate(b.date).getTime() - convertDate(a.date).getTime();
-    });
+export const metadata: Metadata = {
+  title: 'Artikel - RuangRiung',
+  description: 'Kumpulan artikel, tips, dan tutorial seputar teknologi AI generatif, seni digital, dan pengembangan kreativitas.',
+  alternates: {
+    canonical: 'https://ruangriung.my.id/artikel',
+  },
+  openGraph: {
+    title: 'Artikel - RuangRiung',
+    description: 'Kumpulan artikel, tips, dan tutorial seputar teknologi AI generatif, seni digital, dan pengembangan kreativitas.',
+    url: 'https://ruangriung.my.id/artikel',
+    type: 'website',
+    images: [
+      {
+        url: 'https://ruangriung.my.id/assets/ruangriung.png',
+        width: 1200,
+        height: 630,
+        alt: 'Artikel RuangRiung',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Artikel - RuangRiung',
+    description: 'Kumpulan artikel, tips, dan tutorial seputar teknologi AI generatif, seni digital, dan pengembangan kreativitas.',
+    images: ['https://ruangriung.my.id/assets/ruangriung.png'],
+  },
 };
 
-export default async function DaftarArtikelPage() {
+export default function DaftarArtikelPage() {
     const allArticles = getAllArticles();
-    const sortedArticles = sortArticles(allArticles);
-
-    const AD_SLOT_ID_ARTIKEL = "6897039624"; // ID slot iklan Anda
+    const AD_SLOT_ID_ARTIKEL = "6897039624";
 
     return (
         <main className="min-h-screen bg-light-bg dark:bg-dark-bg p-4 sm:p-8">
@@ -40,7 +49,7 @@ export default async function DaftarArtikelPage() {
                         </Link>
                     </div>
 
-                    <ArticlePaginationClient initialArticles={sortedArticles} adSlotId={AD_SLOT_ID_ARTIKEL} />
+                    <ArticlePaginationClient initialArticles={allArticles} adSlotId={AD_SLOT_ID_ARTIKEL} />
                 </div>
             </div>
         </main>

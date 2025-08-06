@@ -1,4 +1,5 @@
 // app/api/generate-audio/route.ts
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) { // Ubah dari POST menjadi GET
