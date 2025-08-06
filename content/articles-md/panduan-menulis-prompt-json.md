@@ -1,7 +1,7 @@
 ---
 title: 'Panduan Lengkap: Menulis Prompt JSON untuk Hasil AI Maksimal'
 description: 'Maksimalkan potensi AI dengan belajar cara menyusun prompt yang terstruktur dan kompleks menggunakan format JSON. Panduan ini cocok untuk pemula hingga mahir, lengkap dengan contoh dan tips menghindari kesalahan.'
-date: '2024-08-07'
+date: '2025-08-07'
 author: 'Tim RuangRiung'
 image: '/v1/img/showcase-4.webp'
 tags: ['panduan', 'prompting', 'teknis', 'json', 'advanced']
