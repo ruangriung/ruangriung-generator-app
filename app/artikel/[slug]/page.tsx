@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import AdBanner from '@/components/AdBanner';
 
 interface PageProps {
   params: { slug: string };
@@ -109,9 +110,23 @@ export default async function ArticlePage({ params }: PageProps) {
         </p>
 
         <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
-          <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
-            {article.content}
-          </ReactMarkdown>
+          {(() => {
+            const paragraphs = article.content.split(/\n\n/);
+            const contentBeforeAd = paragraphs.slice(0, 3).join('\n\n');
+            const contentAfterAd = paragraphs.slice(3).join('\n\n');
+
+            return (
+              <>
+                <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+                  {contentBeforeAd}
+                </ReactMarkdown>
+                {paragraphs.length > 3 && <AdBanner dataAdSlot="5961316189" />}
+                <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+                  {contentAfterAd}
+                </ReactMarkdown>
+              </>
+            );
+          })()}
         </div>
 
         <div className="mt-8 flex justify-center">

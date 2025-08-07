@@ -103,6 +103,26 @@ Untuk chatbot atau simulasi peran, Anda bisa mendefinisikan persona dan konteks.
 }
 ```
 
+## **3. Generasi Gambar dengan Kontrol Detail**
+
+Ketika Anda ingin menghasilkan gambar dengan AI, prompt JSON memungkinkan Anda untuk mengontrol berbagai parameter visual dengan presisi, seperti gaya seni, ukuran, rasio aspek, dan bahkan elemen yang ingin dihindari (negative prompt).
+
+```json
+{
+  "tugas": "Buat gambar berdasarkan deskripsi berikut.",
+  "detail_gambar": {
+    "prompt": "Pemandangan kota futuristik di malam hari dengan mobil terbang dan gedung pencakar langit yang bercahaya neon.",
+    "gaya_seni": "Cyberpunk, realistis, dengan sentuhan neo-noir.",
+    "ukuran": "1024x768",
+    "rasio_aspek": "4:3",
+    "negative_prompt": "Kabut, hujan, orang-orang, bangunan rusak, warna kusam."
+  },
+  "instruksi_tambahan": "Pastikan pencahayaan dramatis dan detail arsitektur yang kompleks."
+}
+```
+
+Dalam contoh ini, setiap aspek dari gambar yang diinginkan didefinisikan secara eksplisit, memberikan AI instruksi yang sangat jelas untuk menghasilkan output yang sesuai.
+
 ### Tips dan Praktik Terbaik dalam Menulis Prompt JSON
 
 Untuk memaksimalkan efektivitas prompt JSON Anda, pertimbangkan tips berikut:
