@@ -1,10 +1,11 @@
 ---
 title: 'Panduan Lengkap: Menulis Prompt JSON untuk Hasil AI Maksimal'
-summary: 'Maksimalkan potensi AI dengan belajar cara menyusun prompt yang terstruktur dan kompleks menggunakan format JSON. Panduan ini cocok untuk pemula hingga mahir, lengkap dengan contoh dan tips menghindari kesalahan.'
 date: '2025-08-07'
 author: 'Tim RuangRiung'
-image: '/v1/img/showcase-4.webp'
+image: '/v1/assets/ruangriung.png'
+category: 'AI'
 tags: ['panduan', 'prompting', 'teknis', 'json', 'advanced']
+summary: 'Maksimalkan potensi AI dengan belajar cara menyusun prompt yang terstruktur dan kompleks menggunakan format JSON. Panduan ini cocok untuk pemula hingga mahir, lengkap dengan contoh dan tips menghindari kesalahan.'
 ---
 
 Saat berinteraksi dengan model kecerdasan buatan (AI), kejelasan dan presisi adalah kunci utama untuk mendapatkan hasil yang optimal. Meskipun Anda bisa menulis prompt dalam bentuk kalimat biasa yang naratif, penggunaan format JSON (JavaScript Object Notation) menawarkan serangkaian keuntungan signifikan, terutama untuk tugas-tugas yang kompleks, terstruktur, atau memerlukan interaksi yang lebih terdefinisi dengan model AI. Artikel ini akan memandu Anda dari dasar-dasar hingga praktik terbaik dalam menyusun prompt JSON yang efektif, memungkinkan Anda memaksimalkan potensi AI Anda.

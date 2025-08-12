@@ -2,6 +2,9 @@
 title: Instal RuangRiung di Perangkat Anda dengan PWA
 date: 2025-07-21
 author: Tim RuangRiung
+category: AI, Browser, Aplikasi
+image: /v1/assets/ruangriung.png
+tags: ['PWA', 'instalasi', 'aplikasi web', 'teknologi', 'aksesibilitas']
 summary: Tahukah Anda bahwa RuangRiung bisa diinstal seperti aplikasi asli? Kenali teknologi Progressive Web App (PWA) dan manfaatnya.
 ---
 

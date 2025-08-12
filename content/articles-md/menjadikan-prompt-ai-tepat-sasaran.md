@@ -2,6 +2,9 @@
 title: Menjadikan Prompt AI Tepat Sasaran agar Gambar Sesuai Ekspektasi
 date: 2025-08-02
 author: Tim RuangRiung
+image: /v1/assets/ruangriung.png
+category: AI
+tags: ['AI', 'prompt', 'gambar', 'spesifikasi', 'deskripsi']
 summary: Panduan komprehensif untuk membuat prompt AI yang spesifik, deskriptif, dan terstruktur dengan baik agar hasil gambar AI sesuai dengan ekspektasi Anda.
 ---
 

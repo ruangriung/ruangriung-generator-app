@@ -2,6 +2,9 @@
 title: Membangun Dunia Fantasi Anda dengan AI Storyteller RuangRiung
 date: 2025-08-04
 author: Tim RuangRiung
+category: AI
+tags: ['AI', 'storytelling', 'narasi', 'gambar', 'kreativitas']
+image: /v1/assets/ruangriung.png
 summary: Jelajahi fitur terbaru RuangRiung AI Generator yang memungkinkan Anda menciptakan cerita visual menawan lengkap dengan gambar dan narasi yang dihasilkan AI, hanya dari sebuah ide.
 ---
 

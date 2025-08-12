@@ -2,6 +2,9 @@
 title: Panduan Lengkap Memilih Model AI di RuangRiung
 date: 2025-07-26
 author: Tim RuangRiung
+category: AI
+tags: ['AI', 'model', 'generator', 'kreativitas', 'gambar']
+image: /v1/assets/ruangriung.png
 summary: Flux, DALL-E 3, Gemini, atau OpenAI? Setiap model punya keajaibannya sendiri. Pelajari kapan harus menggunakan masing-masing model untuk hasil yang maksimal.
 ---
 

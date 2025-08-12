@@ -2,6 +2,9 @@
 title: Privasi Anda, Prioritas Kami - Bagaimana RuangRiung Menjaga Data Anda
 date: 2025-08-01
 author: Tim RuangRiung
+image: /v1/assets/ruangriung.png
+tags: ['privasi, keamanan', 'data', 'transparansi', 'localStorage']
+category: AI
 summary: Transparansi adalah kunci. Pahami data apa yang kami gunakan, mengapa kami membutuhkannya, dan bagaimana kami berkomitmen untuk menjaga keamanan dan privasi Anda di setiap langkah.
 ---
 

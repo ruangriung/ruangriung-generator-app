@@ -1,5 +1,5 @@
-import { getArticleBySlug, getArticleSlugs } from '@/lib/articles';import ReactMarkdown from 'react-markdown';import rehypeHighlight from 'rehype-highlight';import Link from 'next/link';import { ArrowLeft } from 'lucide-react';import { Metadata } from 'next';import { notFound } from 'next/navigation';import AdBanner from '@/components/AdBanner';export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {  const article = getArticleBySlug(params.slug);  if (!article) {    return {};  }  const fullUrl = `https://ruangriung.my.id/artikel/${article.slug}`;  return {    title: `${article.title} - RuangRiung`,    description: article.summary,    keywords: article.title.split(' ').join(', '),    alternates: {      canonical: fullUrl,    },    openGraph: {      title: article.title,      description: article.summary,      url: fullUrl,      type: 'article',      publishedTime: new Date(article.date).toISOString(),      authors: [article.author],      images: [        {          url: 'https://ruangriung.my.id/assets/ruangriung.png',          width: 1200,          height: 630,          alt: article.title,        },      ],    },    twitter: {      card: 'summary_large_image',      title: article.title,      description: article.summary,      images: ['https://ruangriung.my.id/assets/ruangriung.png'],    },  };}export async function generateStaticParams() {  const slugs = getArticleSlugs();  return slugs.map((slug) => ({ slug }));}export default async function ArticlePage({ params }: { params: { slug: string } }) {
-  const article = getArticleBySlug(params.slug);
+import { type Article, getArticleBySlug, getArticleSlugs } from '@/lib/articles';import ReactMarkdown from 'react-markdown';import rehypeHighlight from 'rehype-highlight';import Link from 'next/link';import { ArrowLeft } from 'lucide-react';import { Metadata } from 'next';import { notFound } from 'next/navigation';import AdBanner from '@/components/AdBanner';export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {  const article: Article | undefined = getArticleBySlug(params.slug);  if (!article) {    return {};  }  const fullUrl = `https://ruangriung.my.id/artikel/${article.slug}`;  return {    title: `${article.title} - RuangRiung`,    description: article.summary,    keywords: article.title.split(' ').join(', '),    alternates: {      canonical: fullUrl,    },    openGraph: {      title: article.title,      description: article.summary,      url: fullUrl,      type: 'article',      publishedTime: new Date(article.date).toISOString(),      authors: [article.author],      images: [        {          url: 'https://ruangriung.my.id/assets/ruangriung.png',          width: 1200,          height: 630,          alt: article.title,        },      ],    },    twitter: {      card: 'summary_large_image',      title: article.title,      description: article.summary,      images: ['https://ruangriung.my.id/assets/ruangriung.png'],    },  };}export async function generateStaticParams() {  const slugs = getArticleSlugs();  return slugs.map((slug) => ({ slug }));}export default async function ArticlePage({ params }: { params: { slug: string } }) {
+  const article: Article | undefined = getArticleBySlug(params.slug);
 
   if (!article) {
     notFound();
@@ -38,7 +38,37 @@ import { getArticleBySlug, getArticleSlugs } from '@/lib/articles';import ReactM
         Kembali ke Artikel
       </Link>
       <h1 className="text-4xl font-bold mb-4 text-center">{article.title}</h1>
-      <p className="text-gray-600 text-center mb-6">By {article.author} on {new Date(article.date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+      <p className="text-gray-600 dark:text-gray-400 text-center mb-2">
+        Oleh {article.author} pada {new Date(article.date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}
+      </p>
+      <div className="flex justify-center items-center flex-wrap gap-4 mb-6">
+        <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900 rounded-full px-3 py-1">{article.category}</span>
+        <div className="flex flex-wrap justify-center gap-2">
+            {article.tags.map(tag => (
+                <span key={tag} className="text-xs font-semibold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-1">
+                    #{tag}
+                </span>
+            ))}
+        </div>
+      </div>
+      <p className="text-lg text-center text-gray-700 dark:text-gray-300 border-l-4 border-gray-500 pl-4 mb-8 italic">
+        {article.summary}
+      </p>
+      {article.image && (
+        <img
+          src={article.image}
+          alt={article.title}
+          className="mb-6 w-full h-64 object-cover rounded-lg"
+          loading="lazy"
+          width={1200}
+          height={630}
+          style={{ maxWidth: '100%', height: 'auto' }}
+          decoding="async"
+          fetchPriority="high"
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+        />
+      )}
       <div className="prose dark:prose-invert max-w-none">
         <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
           {article.content}

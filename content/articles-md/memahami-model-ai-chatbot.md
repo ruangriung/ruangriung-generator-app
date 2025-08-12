@@ -2,6 +2,10 @@
 title: Memahami Model AI di Chatbot - OpenAI vs Gemini
 date: 2025-07-19
 author: Tim RuangRiung
+category: AI
+tags: ['AI', 'chatbot', 'OpenAI', 'Gemini', 'perbandingan']
+image: /v1/assets/ruangriung.png
+
 summary: Kenali perbedaan antara model AI terkemuka seperti OpenAI (GPT) dan Google (Gemini) yang tersedia di chatbot kami.
 ---
 

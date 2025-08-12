@@ -2,6 +2,10 @@
 title: Studi Kasus - Dari Ide Video Viral ke Prompt Siap Pakai
 date: 2025-08-01
 author: Tim RuangRiung
+category: AI
+tags: ['AI', 'video', 'prompt', 'kreativitas', 'konten']
+image: /v1/assets/ruangriung.png
+
 summary: Bingung memulai konten video? Lihat bagaimana fitur Creator Prompt Video mengubah ide sederhana menjadi skrip visual yang terstruktur dan siap untuk dieksekusi.
 ---
 

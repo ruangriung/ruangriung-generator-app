@@ -2,6 +2,9 @@
 title: Kolaborasi Kreatif - Brainstorming Ide Gambar dengan Chatbot
 date: 2025-08-01
 author: Tim RuangRiung
+category: AI
+tags: ['AI', 'gambar', 'chatbot', 'kolaborasi', 'kreativitas']
+image: /v1/assets/ruangriung.png
 summary: Jangan hanya gunakan AI untuk mengeksekusi. Pelajari cara berdialog dengan Chatbot kami untuk menggali konsep, membangun narasi, dan menciptakan prompt gambar yang kaya cerita.
 ---
 

@@ -2,6 +2,9 @@
 title: Dari Teks ke Suara - Menghidupkan Narasi dengan Audio AI
 date: 2025-07-27
 author: Tim RuangRiung
+category: AI
+tags: ['AI', 'audio', 'narasi', 'teks ke suara', 'kreativitas']
+image: /v1/assets/ruangriung.png
 summary: Fitur Audio Generator kami lebih dari sekadar pembaca teks. Pelajari cara memilih suara yang tepat dan menyusun teks Anda untuk menghasilkan narasi audio yang hidup dan menarik.
 ---
 

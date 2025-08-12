@@ -7,9 +7,13 @@ import AdBanner from '@/components/AdBanner';
 interface Article {
     slug: string;
     title: string;
-    date: string; // Tetap string di sini karena ini adalah tipe data dari lib/articles.ts
+    date: string;
     author: string;
     summary: string;
+    category: string;
+    tags: string[];
+    image?: string;
+    content?: string;
 }
 
 interface ArticlePaginationClientProps {
@@ -24,7 +28,7 @@ export default function ArticlePaginationClient({ initialArticles, adSlotId }: A
     const indexOfLastPost = currentPage * postsPerPage;
     const indexOfFirstPost = indexOfLastPost - postsPerPage;
     const currentPosts = initialArticles.slice(indexOfFirstPost, indexOfLastPost);
-
+    
     const handleNextPage = () => {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
@@ -36,22 +40,30 @@ export default function ArticlePaginationClient({ initialArticles, adSlotId }: A
 
     return (
         <>
-            <div className="space-y-6">
+            <div className="space-y-8">
                 {currentPosts.map((article, index) => (
                     <Fragment key={article.slug}>
-                        <Link
-                            href={`/artikel/${article.slug}`}
-                            className="block p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow"
-                        >
-                            <h2 className="text-2xl font-bold text-purple-600 dark:text-purple-400">{article.title}</h2>
-                            {/* === PERBAIKAN DI SINI === */}
-                            {/* Ubah objek Date menjadi string yang diformat sebelum ditampilkan */}
+                        <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                            <div className="flex justify-between items-start mb-2">
+                                <Link href={`/artikel/${article.slug}`} className="block">
+                                    <h2 className="text-2xl font-bold text-purple-600 dark:text-purple-400 hover:underline">{article.title}</h2>
+                                </Link>
+                                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900 rounded-full px-3 py-1 whitespace-nowrap">{article.category}</span>
+                            </div>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                 Oleh {article.author} - {new Date(article.date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}
                             </p>
-                            {/* ========================= */}
-                            <p className="text-gray-700 dark:text-gray-300 mt-3">{article.summary}</p>
-                        </Link>
+                            <Link href={`/artikel/${article.slug}`} className="block">
+                                <p className="text-gray-700 dark:text-gray-300 mt-3">{article.summary}</p>
+                            </Link>
+                            <div className="mt-4 flex flex-wrap gap-2">
+                                {article.tags.map(tag => (
+                                    <span key={tag} className="text-xs font-semibold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-1">
+                                        #{tag}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
 
                         {(index + 1) % AD_INTERVAL === 0 && (
                             <div className="my-6">

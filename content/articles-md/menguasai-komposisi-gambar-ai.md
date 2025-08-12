@@ -2,6 +2,9 @@
 title: Menguasai Seni Komposisi Gambar dengan AI
 date: 2025-07-25
 author: Tim RuangRiung
+image: /v1/assets/ruangriung.png
+category: AI
+tags: ['AI', 'komposisi', 'gambar', 'sutradara', 'visual']
 summary: Lebih dari sekadar subjek, komposisi adalah kunci visual yang memukau. Pelajari cara mengarahkan AI untuk menggunakan shot, angle, dan pencahayaan layaknya seorang sutradara profesional.
 ---
 

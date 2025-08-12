@@ -2,6 +2,9 @@
 title: Alur Kerja Kreatif - Mengelola dan Menyimpan Prompt
 date: 2025-07-29
 author: Tim RuangRiung
+category: AI
+tags: ['alur kerja', 'prompt', 'kreatif', 'manajemen']
+image: /v1/assets/ruangriung.png
 summary: Prompt yang bagus adalah aset berharga. Pelajari cara menggunakan fitur simpan, muat, dan hapus prompt di RuangRiung untuk mempercepat proses kreatif Anda.
 ---
 

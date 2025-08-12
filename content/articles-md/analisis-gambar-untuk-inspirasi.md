@@ -1,6 +1,8 @@
 ---
 title: Mengubah Gambar Menjadi Prompt. Kekuatan Analisis Gambar
 date: 2025-07-23
+image: /v1/assets/ruangriung.png
+category: AI
 author: Tim RuangRiung
 summary: Punya gambar yang Anda sukai? Gunakan fitur Analisis Gambar kami untuk mengubahnya menjadi prompt deskriptif yang bisa Anda kembangkan lebih lanjut.
 ---

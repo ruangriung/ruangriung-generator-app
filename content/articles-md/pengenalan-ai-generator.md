@@ -3,6 +3,9 @@ title: Pengenalan Dunia AI Generator
 date: 2025-07-17
 author: Tim RuangRiung
 summary: Mari kita selami apa itu AI generator, bagaimana cara kerjanya, dan mengapa teknologi ini menjadi revolusi di dunia kreatif.
+category: AI
+tags: ['AI', 'generator', 'kreativitas', 'teknologi']
+image: /v1/assets/ruangriung.png
 ---
 
 AI Generator, atau kecerdasan buatan generatif, adalah cabang dari AI yang berfokus pada penciptaan konten baru dan orisinal. Berbeda dengan AI analitis yang hanya mengolah data, AI generatif mampu menghasilkan karya seperti gambar, tulisan, musik, hingga video yang belum pernah ada sebelumnya. Cukup dengan memberikan instruksi berupa teks (dikenal sebagai "prompt"), teknologi ini membuka pintu kreativitas yang tak terbatas bagi siapa saja, dari seniman profesional hingga pengguna biasa.

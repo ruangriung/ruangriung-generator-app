@@ -3,6 +3,9 @@ title: "Mengupas Tuntas Ragam Fitur Canggih di RuangRiung Generator"
 summary: "Selami lebih dalam setiap tools yang ditawarkan oleh RuangRiung Generator, mulai dari pembuatan gambar, asistensi prompt, hingga narasi audio AI untuk memaksimalkan potensi kreatif Anda."
 date: "2025-08-06"
 author: "Tim RuangRiung"
+category: "AI"
+tags: ['AI', 'generator', 'tools', 'kreativitas', 'gambar']
+image: /v1/assets/ruangriung.png
 ---
 
 Di era digital yang serba cepat, kreativitas menuntut alat yang tidak hanya canggih tetapi juga intuitif. RuangRiung Generator hadir sebagai jawaban atas kebutuhan tersebut, menyediakan sebuah ekosistem kreatif berbasis AI yang dirancang untuk memberdayakan para kreator, seniman, dan pencerita. Ini bukan sekadar aplikasi generator biasa; ini adalah sebuah studio mini yang dilengkapi dengan serangkaian *tools* canggih untuk mengubah imajinasi menjadi karya nyata.

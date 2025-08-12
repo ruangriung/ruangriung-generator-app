@@ -1,6 +1,9 @@
 ---
 title: Etika dan Hak Cipta dalam Seni AI
 date: 2025-07-20
+category: AI
+image: /v1/assets/ruangriung.png
+tags: ['AI', 'seni', 'etika', 'hak cipta', 'komersial']
 author: Tim RuangRiung
 summary: Siapa pemilik gambar yang dibuat oleh AI? Bolehkah digunakan untuk komersial? Jelajahi pertanyaan penting seputar etika di dunia seni AI.
 ---

@@ -2,6 +2,9 @@
 title: Tips & Trik Menggunakan Fitur Edit Gambar Real-time
 date: 2025-07-28
 author: Tim RuangRiung
+image: /v1/assets/ruangriung.png
+category: AI
+tags: ['AI', 'edit gambar', 'real-time', 'filter', 'watermark']
 summary: Jangan berhenti setelah gambar berhasil dibuat. Pelajari cara menyempurnakan karya Anda secara langsung dengan fitur filter, penyesuaian, dan watermarking di RuangRiung.
 ---
 

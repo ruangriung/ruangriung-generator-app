@@ -3,6 +3,9 @@ title: 5 Tips Membuat Prompt Gambar yang Efektif
 date: 2025-07-18
 author: Tim RuangRiung
 summary: Dapatkan hasil gambar terbaik dengan mempelajari cara membuat prompt yang detail dan deskriptif. Kuasai seni berkomunikasi dengan AI.
+image: /v1/assets/ruangriung.png
+category: AI
+tags: ['AI', 'prompt', 'gambar', 'deskriptif', 'kreativitas']
 ---
 
 Di dunia seni AI, prompt adalah kuas Anda. Kualitas hasil gambar yang Anda dapatkan sangat bergantung pada seberapa baik Anda merumuskan perintah. Prompt yang efektif adalah jembatan antara imajinasi Anda dan "pemahaman" AI. Semakin jelas dan deskriptif prompt Anda, semakin besar kemungkinan AI akan menghasilkan gambar yang sesuai dengan visi Anda. Anggaplah Anda sedang memberikan arahan kepada seorang seniman yang sangat terampil namun tidak bisa membaca pikiran Anda.

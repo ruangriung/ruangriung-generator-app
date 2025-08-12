@@ -2,6 +2,9 @@
 title: Menjelajahi Berbagai Gaya Seni di RuangRiung - Dari Fotorealistik hingga Anime
 date: 2025-08-01
 author: Tim RuangRiung
+image: /v1/assets/ruangriung.png
+tags: ['AI', 'seni', 'gaya seni', 'fotorealistik', 'anime', 'lukisan', 'fantasi']
+category: AI
 summary: Selami lautan gaya seni yang bisa Anda ciptakan dengan AI. Panduan ini akan menunjukkan cara membuat gambar fotorealistik, anime, cat minyak, dan lainnya dengan prompt yang tepat.
 ---
 

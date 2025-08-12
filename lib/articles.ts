@@ -20,6 +20,9 @@ export type Article = {
   date: string;
   author: string;
   summary: string;
+  image?: string;
+  category: string;
+  tags: string[];
 };
 
 export function getArticleBySlug(slug: string): Article | undefined {
@@ -31,7 +34,13 @@ export function getArticleBySlug(slug: string): Article | undefined {
     return {
       slug,
       content,
-      ...(data as { title: string; date: string; author: string; summary: string; }),
+      title: data.title,
+      date: data.date,
+      author: data.author,
+      summary: data.summary,
+      image: data.image || undefined,
+      category: data.category || 'Umum',
+      tags: data.tags || [],
     };
   } catch (error) {
     return undefined;

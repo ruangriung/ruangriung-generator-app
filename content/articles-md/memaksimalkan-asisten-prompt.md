@@ -2,6 +2,9 @@
 title: Cara Kreatif Menggunakan Asisten Prompt
 date: 2025-07-22
 author: Tim RuangRiung
+category: AI
+tags: ['AI', 'asisten', 'prompt', 'kreativitas', 'brainstorming']
+image: /v1/assets/ruangriung.png
 summary: Asisten Prompt lebih dari sekadar penyempurna. Temukan cara-cara kreatif untuk brainstorming dan menemukan ide-ide tak terduga.
 ---
 
