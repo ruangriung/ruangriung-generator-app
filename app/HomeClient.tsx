@@ -1,7 +1,7 @@
 // app/HomeClient.tsx
 'use client'; // Tandai sebagai Client Component
 
-import { Wand2, Sparkles, Download, X, Rss, Crown, Facebook, Star, Mail, LayoutGrid, EarthIcon, BookOpen } from 'lucide-react';
+import { Wand2, Sparkles, Download, X, Rss, Crown, Facebook, Star, QrCode, Mail, LayoutGrid, EarthIcon, BookOpen } from 'lucide-react';
 import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -156,11 +156,11 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
           <span>StoryTeller AI</span>
         </Link>
         <Link
-          href="/storyteller"
+          href="/id-card-generator"
           className="flex-1 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-200 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset hover:text-purple-600 transition-colors"
         >
-          <BookOpen size={18} />
-          <span>StoryTeller AI</span>
+          <QrCode size={18} />
+          <span>ID CARD Generator</span>
         </Link>
       </div>
       {/* AKHIR TOMBOL BARU */}
