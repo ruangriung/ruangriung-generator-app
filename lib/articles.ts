@@ -56,3 +56,48 @@ export function getAllArticles() {
   // Sort articles by date in descending order
   return articles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
+
+export function getRelatedArticles(currentSlug: string, count: number = 3): Article[] {
+  const allArticles = getAllArticles();
+  const currentArticle = allArticles.find(a => a.slug === currentSlug);
+
+  if (!currentArticle) {
+    return [];
+  }
+
+  // Cari artikel terkait berdasarkan skor (kategori & tag)
+  let related = allArticles
+    .filter(article => {
+      if (article.slug === currentSlug) {
+        return false; // Abaikan artikel saat ini
+      }
+      const hasSameCategory = article.category === currentArticle.category;
+      const hasSharedTags = article.tags.some(tag => currentArticle.tags.includes(tag));
+      return hasSameCategory || hasSharedTags;
+    })
+    .map(article => {
+      let score = 0;
+      if (article.category === currentArticle.category) {
+        score += 2;
+      }
+      score += article.tags.filter(tag => currentArticle.tags.includes(tag)).length;
+      return { ...article, score };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  // --- LOGIKA FALLBACK ---
+  // Jika tidak ada artikel terkait yang ditemukan, tampilkan artikel terbaru.
+  if (related.length < count) {
+    const latestArticles = allArticles.filter(article => 
+        article.slug !== currentSlug && !related.find(r => r.slug === article.slug)
+    );
+    const needed = count - related.length;
+    
+    // === PERBAIKAN DI SINI ===
+    // Tambahkan properti 'score' ke artikel fallback sebelum menambahkannya
+    const fallbackArticles = latestArticles.slice(0, needed).map(article => ({ ...article, score: 0 }));
+    related.push(...fallbackArticles);
+  }
+  
+  return related.slice(0, count);
+}

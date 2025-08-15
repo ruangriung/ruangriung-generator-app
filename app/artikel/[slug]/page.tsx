@@ -1,9 +1,65 @@
-import { type Article, getArticleBySlug, getArticleSlugs } from '@/lib/articles';import ReactMarkdown from 'react-markdown';import rehypeHighlight from 'rehype-highlight';import Link from 'next/link';import { ArrowLeft } from 'lucide-react';import { Metadata } from 'next';import { notFound } from 'next/navigation';import AdBanner from '@/components/AdBanner';export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {  const article: Article | undefined = getArticleBySlug(params.slug);  if (!article) {    return {};  }  const fullUrl = `https://ruangriung.my.id/artikel/${article.slug}`;  return {    title: `${article.title} - RuangRiung`,    description: article.summary,    keywords: article.title.split(' ').join(', '),    alternates: {      canonical: fullUrl,    },    openGraph: {      title: article.title,      description: article.summary,      url: fullUrl,      type: 'article',      publishedTime: new Date(article.date).toISOString(),      authors: [article.author],      images: [        {          url: 'https://ruangriung.my.id/assets/ruangriung.png',          width: 1200,          height: 630,          alt: article.title,        },      ],    },    twitter: {      card: 'summary_large_image',      title: article.title,      description: article.summary,      images: ['https://ruangriung.my.id/assets/ruangriung.png'],    },  };}export async function generateStaticParams() {  const slugs = getArticleSlugs();  return slugs.map((slug) => ({ slug }));}export default async function ArticlePage({ params }: { params: { slug: string } }) {
+import { type Article, getArticleBySlug, getArticleSlugs, getRelatedArticles } from '@/lib/articles';
+import ReactMarkdown from 'react-markdown';
+import rehypeHighlight from 'rehype-highlight';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import AdBanner from '@/components/AdBanner';
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const article: Article | undefined = getArticleBySlug(params.slug);
+  if (!article) {
+    return {};
+  }
+  const fullUrl = `https://ruangriung.my.id/artikel/${article.slug}`;
+  return {
+    title: `${article.title} - RuangRiung`,
+    description: article.summary,
+    keywords: article.title.split(' ').join(', '),
+    alternates: {
+      canonical: fullUrl,
+    },
+    openGraph: {
+      title: article.title,
+      description: article.summary,
+      url: fullUrl,
+      type: 'article',
+      publishedTime: new Date(article.date).toISOString(),
+      authors: [article.author],
+      images: [
+        {
+          url: 'https://ruangriung.my.id/assets/ruangriung.png',
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description: article.summary,
+      images: ['https://ruangriung.my.id/assets/ruangriung.png'],
+    },
+  };
+}
+
+export async function generateStaticParams() {
+  const slugs = getArticleSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
+
+export default async function ArticlePage({ params }: { params: { slug: string } }) {
   const article: Article | undefined = getArticleBySlug(params.slug);
 
   if (!article) {
     notFound();
   }
+
+  // === PERBAIKAN DI SINI ===
+  // Variabel relatedArticles didefinisikan di dalam komponen
+  const relatedArticles = getRelatedArticles(params.slug);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -74,6 +130,22 @@ import { type Article, getArticleBySlug, getArticleSlugs } from '@/lib/articles'
           {article.content}
         </ReactMarkdown>
       </div>
+
+      {relatedArticles.length > 0 && (
+        <div className="mt-12">
+          <h2 className="text-3xl font-bold mb-6 text-center">Artikel Terkait</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {relatedArticles.map(relatedArticle => (
+              <Link key={relatedArticle.slug} href={`/artikel/${relatedArticle.slug}`} className="block p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{relatedArticle.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">{relatedArticle.summary}</p>
+                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Baca Selengkapnya &rarr;</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="my-8">
         <AdBanner dataAdSlot="7992484013" />
       </div>
