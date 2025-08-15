@@ -7,9 +7,11 @@ import Draggable from 'react-draggable';
 import {
     Upload, Download, Image as ImageIcon, FileText, User, Building, Calendar,
     ToggleLeft, ToggleRight, Palette, Type, QrCode, Paintbrush, Link as LinkIcon,
-    RefreshCw, Save, FolderOpen, Wand2, Layers
+    RefreshCw, Save, FolderOpen, Wand2, Layers, ArrowLeft
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
+import ThemeToggle from '@/components/ThemeToggle'; // <-- 1. Import ThemeToggle
 
 // --- Tipe Data dan Nilai Default ---
 interface CardSettings {
@@ -24,7 +26,7 @@ interface CardSettings {
     logo: string | null;
     background: string | null;
     overlayColor: string;
-    overlayOpacity: number; // <-- State baru ditambahkan di sini
+    overlayOpacity: number;
     textColor: string;
     qrBgColor: string;
     qrFgColor: string;
@@ -50,7 +52,7 @@ const defaultSettings: CardSettings = {
     logo: null,
     background: null,
     overlayColor: '#000000',
-    overlayOpacity: 0.5, // <-- Nilai default untuk opacity
+    overlayOpacity: 0.5,
     textColor: '#FFFFFF',
     qrBgColor: '#FFFFFF',
     qrFgColor: '#000000',
@@ -114,7 +116,7 @@ const IdCardGeneratorClient = () => {
         const toastId = toast.loading("AI sedang membuat background...");
 
         try {
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(bgPrompt)}?model=flux&referrer=ruangriung.my.id&enhance=true&nologo=true&width=500&height=300&seed=${Date.now()}`;
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(bgPrompt)}?model=flux&width=500&height=300&seed=${Date.now()}`;
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`Gagal mengambil gambar dari API (Status: ${response.status})`);
@@ -183,96 +185,110 @@ const IdCardGeneratorClient = () => {
         fontFamily: settings.fontFamily,
     };
     
+    const inputBaseStyle = "w-full p-2 rounded-md bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500 focus:outline-none placeholder-gray-400 dark:placeholder-gray-500 text-gray-800 dark:text-gray-200";
+    
     return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-6 text-center">ID Card Mahasiswa Generator</h1>
+      {/* --- 2. Tambahkan Navigasi Atas --- */}
+      <div className="mb-8 flex justify-between items-center w-full max-w-lg mx-auto">
+        <Link
+          href="/"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
+        >
+          <ArrowLeft size={18} />
+          <span>Beranda</span>
+        </Link>
+        <div className="w-36">
+             <ThemeToggle />
+        </div>
+      </div>
+
+      <h1 className="text-4xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">ID Card Generator</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Controls Panel */}
         <div className="lg:col-span-1 bg-gray-100 dark:bg-gray-800 p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold mb-4">Pengaturan Kartu</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Pengaturan Kartu</h2>
           
           <div className="space-y-4">
-            <details className="space-y-2 p-2 border rounded-md" open>
-                <summary className="cursor-pointer font-medium">Desain & Tata Letak</summary>
-                 <div>
-                    <label className="block text-sm font-medium mb-1">Template</label>
+            <details className="space-y-2 p-2 border dark:border-gray-700 rounded-md" open>
+                <summary className="cursor-pointer font-medium text-gray-700 dark:text-gray-200">Desain & Tata Letak</summary>
+                 <div className="pt-2">
+                    <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-300">Template</label>
                     <div className="flex gap-2">
-                        <button onClick={() => applyTemplate('modern')} className="flex-1 p-2 text-sm bg-gray-200 rounded-md hover:bg-gray-300">Modern</button>
-                        <button onClick={() => applyTemplate('classic')} className="flex-1 p-2 text-sm bg-gray-200 rounded-md hover:bg-gray-300">Klasik</button>
+                        <button onClick={() => applyTemplate('modern')} className="flex-1 p-2 text-sm bg-gray-200 dark:bg-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600">Modern</button>
+                        <button onClick={() => applyTemplate('classic')} className="flex-1 p-2 text-sm bg-gray-200 dark:bg-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600">Klasik</button>
                     </div>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium mb-1">Layout</label>
+                    <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-300">Layout</label>
                     <div className="flex items-center gap-2">
                         <button onClick={() => handleSettingChange('layout', 'horizontal')} className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md transition-colors ${settings.layout === 'horizontal' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}><ToggleLeft size={20} /></button>
                         <button onClick={() => handleSettingChange('layout', 'vertical')} className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md transition-colors ${settings.layout === 'vertical' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}><ToggleRight size={20} /></button>
                     </div>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium mb-1">Jenis Font</label>
-                    <select value={settings.fontFamily} onChange={e => handleSettingChange('fontFamily', e.target.value)} className="w-full p-2 rounded-md bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600">
+                    <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-300">Jenis Font</label>
+                    <select value={settings.fontFamily} onChange={e => handleSettingChange('fontFamily', e.target.value)} className={inputBaseStyle}>
                         <option>Arial</option> <option>Verdana</option> <option>Georgia</option>
                         <option>Times New Roman</option> <option>Courier New</option>
                     </select>
                 </div>
             </details>
             
-             <details className="space-y-2 p-2 border rounded-md" open>
-                <summary className="cursor-pointer font-medium">Warna & Tampilan</summary>
+             <details className="space-y-2 p-2 border dark:border-gray-700 rounded-md" open>
+                <summary className="cursor-pointer font-medium text-gray-700 dark:text-gray-200">Warna & Tampilan</summary>
                  <div className="grid grid-cols-2 gap-2 mt-2">
-                    <div className="relative" title="Warna Teks"><Type size={20} className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none"/><input type="color" value={settings.textColor} onChange={e => handleSettingChange('textColor', e.target.value)} className="w-full pl-8 pr-1 py-1 h-10 bg-white dark:bg-gray-900 border rounded-md"/></div>
-                    <div className="relative" title="Warna Latar Kartu"><Palette size={20} className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none"/><input type="color" value={settings.cardBgColor} onChange={e => handleSettingChange('cardBgColor', e.target.value)} className="w-full pl-8 pr-1 py-1 h-10 bg-white dark:bg-gray-900 border rounded-md"/></div>
-                    <div className="relative" title="Gradien Atas 1"><Paintbrush size={20} className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none"/><input type="color" value={settings.headerColor1} onChange={e => handleSettingChange('headerColor1', e.target.value)} className="w-full pl-8 pr-1 py-1 h-10 bg-white dark:bg-gray-900 border rounded-md"/></div>
-                    <div className="relative" title="Gradien Atas 2"><Paintbrush size={20} className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none"/><input type="color" value={settings.headerColor2} onChange={e => handleSettingChange('headerColor2', e.target.value)} className="w-full pl-8 pr-1 py-1 h-10 bg-white dark:bg-gray-900 border rounded-md"/></div>
-                    <div className="relative" title="Warna Latar QR"><QrCode size={20} className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none"/><input type="color" value={settings.qrBgColor} onChange={e => handleSettingChange('qrBgColor', e.target.value)} className="w-full pl-8 pr-1 py-1 h-10 bg-white dark:bg-gray-900 border rounded-md"/></div>
-                    <div className="relative" title="Warna QR Code"><QrCode size={20} className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none"/><input type="color" value={settings.qrFgColor} onChange={e => handleSettingChange('qrFgColor', e.target.value)} className="w-full pl-8 pr-1 py-1 h-10 bg-white dark:bg-gray-900 border rounded-md"/></div>
+                    <div className="relative" title="Warna Teks"><Type size={20} className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 dark:text-gray-400"/><input type="color" value={settings.textColor} onChange={e => handleSettingChange('textColor', e.target.value)} className="w-full pl-8 pr-1 py-1 h-10 bg-white dark:bg-gray-900 border rounded-md"/></div>
+                    <div className="relative" title="Warna Latar Kartu"><Palette size={20} className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 dark:text-gray-400"/><input type="color" value={settings.cardBgColor} onChange={e => handleSettingChange('cardBgColor', e.target.value)} className="w-full pl-8 pr-1 py-1 h-10 bg-white dark:bg-gray-900 border rounded-md"/></div>
+                    <div className="relative" title="Gradien Atas 1"><Paintbrush size={20} className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 dark:text-gray-400"/><input type="color" value={settings.headerColor1} onChange={e => handleSettingChange('headerColor1', e.target.value)} className="w-full pl-8 pr-1 py-1 h-10 bg-white dark:bg-gray-900 border rounded-md"/></div>
+                    <div className="relative" title="Gradien Atas 2"><Paintbrush size={20} className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 dark:text-gray-400"/><input type="color" value={settings.headerColor2} onChange={e => handleSettingChange('headerColor2', e.target.value)} className="w-full pl-8 pr-1 py-1 h-10 bg-white dark:bg-gray-900 border rounded-md"/></div>
+                    <div className="relative" title="Warna Latar QR"><QrCode size={20} className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 dark:text-gray-400"/><input type="color" value={settings.qrBgColor} onChange={e => handleSettingChange('qrBgColor', e.target.value)} className="w-full pl-8 pr-1 py-1 h-10 bg-white dark:bg-gray-900 border rounded-md"/></div>
+                    <div className="relative" title="Warna QR Code"><QrCode size={20} className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 dark:text-gray-400"/><input type="color" value={settings.qrFgColor} onChange={e => handleSettingChange('qrFgColor', e.target.value)} className="w-full pl-8 pr-1 py-1 h-10 bg-white dark:bg-gray-900 border rounded-md"/></div>
                 </div>
-                {/* --- KONTROL BARU UNTUK OPACITY OVERLAY --- */}
                 <div className="mt-2">
-                    <label className="flex items-center gap-2 text-sm font-medium mb-1"><Layers size={16}/> Opacity Overlay: {Math.round(settings.overlayOpacity * 100)}%</label>
+                    <label className="flex items-center gap-2 text-sm font-medium mb-1 text-gray-600 dark:text-gray-300"><Layers size={16}/> Opacity Overlay: {Math.round(settings.overlayOpacity * 100)}%</label>
                     <input type="range" min="0" max="1" step="0.1" value={settings.overlayOpacity} onChange={e => handleSettingChange('overlayOpacity', parseFloat(e.target.value))} className="w-full" />
                 </div>
             </details>
             
-            <details className="space-y-4 p-2 border rounded-md" open>
-                <summary className="cursor-pointer font-medium">Data Mahasiswa</summary>
-                <input type="text" placeholder="Nama Lengkap" value={settings.name} onChange={e => handleSettingChange('name', e.target.value)} className="w-full p-2 rounded-md bg-white dark:bg-gray-900 border"/>
-                <input type="text" placeholder="NIM" value={settings.studentId} onChange={e => handleSettingChange('studentId', e.target.value)} className="w-full p-2 rounded-md bg-white dark:bg-gray-900 border"/>
-                <input type="text" placeholder="Jurusan" value={settings.major} onChange={e => handleSettingChange('major', e.target.value)} className="w-full p-2 rounded-md bg-white dark:bg-gray-900 border"/>
-                <input type="text" placeholder="Universitas" value={settings.university} onChange={e => handleSettingChange('university', e.target.value)} className="w-full p-2 rounded-md bg-white dark:bg-gray-900 border"/>
+            <details className="space-y-4 p-2 border dark:border-gray-700 rounded-md" open>
+                <summary className="cursor-pointer font-medium text-gray-700 dark:text-gray-200">Data Mahasiswa</summary>
+                <input type="text" placeholder="Nama Lengkap" value={settings.name} onChange={e => handleSettingChange('name', e.target.value)} className={inputBaseStyle}/>
+                <input type="text" placeholder="NIM" value={settings.studentId} onChange={e => handleSettingChange('studentId', e.target.value)} className={inputBaseStyle}/>
+                <input type="text" placeholder="Jurusan" value={settings.major} onChange={e => handleSettingChange('major', e.target.value)} className={inputBaseStyle}/>
+                <input type="text" placeholder="Universitas" value={settings.university} onChange={e => handleSettingChange('university', e.target.value)} className={inputBaseStyle}/>
                 <div className="grid grid-cols-2 gap-4">
-                    <input type="date" title="Tgl Terbit" value={settings.issueDate} onChange={e => handleSettingChange('issueDate', e.target.value)} className="w-full p-2 rounded-md bg-white dark:bg-gray-900 border"/>
-                    <input type="date" title="Tgl Kadaluwarsa" value={settings.expiryDate} onChange={e => handleSettingChange('expiryDate', e.target.value)} className="w-full p-2 rounded-md bg-white dark:bg-gray-900 border"/>
+                    <input type="date" title="Tgl Terbit" value={settings.issueDate} onChange={e => handleSettingChange('issueDate', e.target.value)} className={inputBaseStyle}/>
+                    <input type="date" title="Tgl Kadaluwarsa" value={settings.expiryDate} onChange={e => handleSettingChange('expiryDate', e.target.value)} className={inputBaseStyle}/>
                 </div>
             </details>
             
-            <details className="space-y-2 p-2 border rounded-md">
-                <summary className="cursor-pointer font-medium">QR Code</summary>
+            <details className="space-y-2 p-2 border dark:border-gray-700 rounded-md">
+                <summary className="cursor-pointer font-medium text-gray-700 dark:text-gray-200">QR Code</summary>
                 <div className="flex gap-4 mt-2">
-                    <label className="flex items-center gap-1 text-sm"><input type="radio" name="qrType" value="dynamic" checked={settings.qrCodeContentType === 'dynamic'} onChange={e => handleSettingChange('qrCodeContentType', e.target.value)} /> Dinamis</label>
-                    <label className="flex items-center gap-1 text-sm"><input type="radio" name="qrType" value="manual" checked={settings.qrCodeContentType === 'manual'} onChange={e => handleSettingChange('qrCodeContentType', e.target.value)} /> Manual</label>
+                    <label className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300"><input type="radio" name="qrType" value="dynamic" checked={settings.qrCodeContentType === 'dynamic'} onChange={e => handleSettingChange('qrCodeContentType', e.target.value)} /> Dinamis</label>
+                    <label className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300"><input type="radio" name="qrType" value="manual" checked={settings.qrCodeContentType === 'manual'} onChange={e => handleSettingChange('qrCodeContentType', e.target.value)} /> Manual</label>
                 </div>
                 {settings.qrCodeContentType === 'manual' && (
                   <div className="relative mt-2">
                     <LinkIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input type="text" placeholder="https://..." value={settings.qrCodeValue} onChange={e => handleSettingChange('qrCodeValue', e.target.value)} className="w-full p-2 pl-8 rounded-md bg-white dark:bg-gray-900 border"/>
+                    <input type="text" placeholder="https://..." value={settings.qrCodeValue} onChange={e => handleSettingChange('qrCodeValue', e.target.value)} className={`${inputBaseStyle} pl-8`}/>
                   </div>
                 )}
             </details>
 
-            <details className="p-2 border rounded-md" open>
-                <summary className="cursor-pointer font-medium">Gambar</summary>
+            <details className="p-2 border dark:border-gray-700 rounded-md" open>
+                <summary className="cursor-pointer font-medium text-gray-700 dark:text-gray-200">Gambar</summary>
                 <div className="space-y-2 mt-2">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <label className="w-full cursor-pointer bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 text-center py-2 px-2 rounded-md"><ImageIcon size={16} className="inline-block mr-1"/> Foto <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, 'photo')} /></label>
-                        <label className="w-full cursor-pointer bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 text-center py-2 px-2 rounded-md"><Building size={16} className="inline-block mr-1"/> Logo <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, 'logo')} /></label>
-                        <label className="w-full cursor-pointer bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 text-center py-2 px-2 rounded-md"><FileText size={16} className="inline-block mr-1"/> Unggah BG <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, 'background')} /></label>
+                        <label className="w-full cursor-pointer bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-center py-2 px-2 rounded-md"><ImageIcon size={16} className="inline-block mr-1"/> Foto <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, 'photo')} /></label>
+                        <label className="w-full cursor-pointer bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-center py-2 px-2 rounded-md"><Building size={16} className="inline-block mr-1"/> Logo <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, 'logo')} /></label>
+                        <label className="w-full cursor-pointer bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-center py-2 px-2 rounded-md"><FileText size={16} className="inline-block mr-1"/> Unggah BG <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, 'background')} /></label>
                     </div>
                     <div className="pt-2">
-                        <label className="block text-sm font-medium mb-1">Generate Background AI</label>
+                        <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-300">Generate Background AI</label>
                         <div className="flex gap-2">
-                            <input type="text" placeholder="misal: abstract blue pattern" value={bgPrompt} onChange={e => setBgPrompt(e.target.value)} className="flex-grow p-2 rounded-md bg-white dark:bg-gray-900 border"/>
+                            <input type="text" placeholder="misal: abstract blue pattern" value={bgPrompt} onChange={e => setBgPrompt(e.target.value)} className={`${inputBaseStyle} flex-grow`}/>
                             <button onClick={handleGenerateBg} disabled={isGeneratingBg} className="p-2 bg-purple-500 text-white rounded-md disabled:bg-gray-400">
                                 {isGeneratingBg ? <RefreshCw className="animate-spin" /> : <Wand2 />}
                             </button>
@@ -298,7 +314,6 @@ const IdCardGeneratorClient = () => {
         <div className="lg:col-span-2 flex flex-col items-center justify-center bg-gray-200 dark:bg-gray-900 p-6 rounded-lg min-h-[550px]">
             <div style={{ transform: 'scale(1.25)', transformOrigin: 'center' }}>
                 <div ref={cardRef} className={cardClasses} style={cardStyles}>
-                    {/* --- PERBAIKAN DI SINI: Menggunakan state opacity --- */}
                     <div className="absolute inset-0 z-0" style={{ backgroundColor: hexToRgba(settings.overlayColor, settings.overlayOpacity) }}></div>
                     <div className="absolute top-0 left-0 w-full h-1/3" style={{ background: `linear-gradient(to right, ${settings.headerColor1}, ${settings.headerColor2})` }}></div>
                     
