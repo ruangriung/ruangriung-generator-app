@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
-import ThemeToggle from '@/components/ThemeToggle'; // <-- 1. Import ThemeToggle
+import ThemeToggle from '@/components/ThemeToggle';
 
 // --- Tipe Data dan Nilai Default ---
 interface CardSettings {
@@ -107,6 +107,7 @@ const IdCardGeneratorClient = () => {
         }
     };
 
+    // === FUNGSI YANG DIPERBAIKI ===
     const handleGenerateBg = async () => {
         if (!bgPrompt) {
             toast.error("Prompt background tidak boleh kosong!");
@@ -116,11 +117,24 @@ const IdCardGeneratorClient = () => {
         const toastId = toast.loading("AI sedang membuat background...");
 
         try {
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(bgPrompt)}?model=flux&width=500&height=300&seed=${Date.now()}`;
+            // Menambahkan parameter 'referrer', 'enhance', dan 'nologo'
+            const params = new URLSearchParams({
+                model: 'flux',
+                width: '500',
+                height: '300',
+                seed: Date.now().toString(),
+                referrer: 'ruangriung.my.id',
+                enhance: 'true',
+                nologo: 'true'
+            });
+
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(bgPrompt)}?${params.toString()}`;
+            
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`Gagal mengambil gambar dari API (Status: ${response.status})`);
             }
+            
             handleSettingChange('background', response.url);
             toast.success("Background berhasil dibuat!", { id: toastId });
 
@@ -189,7 +203,6 @@ const IdCardGeneratorClient = () => {
     
     return (
     <div className="container mx-auto px-4 py-8">
-      {/* --- 2. Tambahkan Navigasi Atas --- */}
       <div className="mb-8 flex justify-between items-center w-full max-w-lg mx-auto">
         <Link
           href="/"
@@ -203,7 +216,7 @@ const IdCardGeneratorClient = () => {
         </div>
       </div>
 
-      <h1 className="text-4xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">ID Card Generator</h1>
+      <h1 className="text-4xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">ID Card Mahasiswa Generator</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 bg-gray-100 dark:bg-gray-800 p-6 rounded-lg shadow-md">
