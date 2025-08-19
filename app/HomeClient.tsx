@@ -164,8 +164,12 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         </Link>
       </div>
       {/* AKHIR TOMBOL BARU */}
+      
+      {/* --- IKLAN PERTAMA DINONAKTIFKAN --- */}
       <div className="w-full max-w-4xl mb-4">
-        <AdBanner dataAdSlot="6897039624" />
+        {/*
+          <AdBanner dataAdSlot="6897039624" />
+        */}
       </div>
 
       <div className="w-full max-w-4xl flex flex-col gap-4 mb-4">
@@ -177,8 +181,12 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
       <main className="w-full flex flex-col items-center">
         <Tabs />
       </main>
+
+      {/* --- IKLAN KEDUA DINONAKTIFKAN --- */}
       <div className="w-full max-w-4xl mt-16">
-        <AdBanner dataAdSlot="5961316189" />
+        {/*
+          <AdBanner dataAdSlot="5961316189" />
+        */}
       </div>
 
       <div className="w-full mt-16">

@@ -95,19 +95,85 @@ const IdCardGeneratorClient = () => {
         }
     };
 
+    // --- FUNGSI UNDUH YANG TELAH DIPERBAIKI ---
     const downloadCard = () => {
-        if (cardRef.current) {
-            html2canvas(cardRef.current, { useCORS: true, scale: 2, backgroundColor: null })
-                .then(canvas => {
+        const node = cardRef.current;
+        if (!node) {
+            toast.error("Referensi kartu tidak ditemukan.");
+            return;
+        }
+
+        toast.loading("Mempersiapkan unduhan...", { id: 'download-toast' });
+
+        const scale = 2; // Menghasilkan gambar 2x lebih besar untuk kualitas lebih baik
+        const width = settings.layout === 'horizontal' ? 336 : 210;
+        const height = settings.layout === 'horizontal' ? 210 : 336;
+        
+        const clonedNode = node.cloneNode(true) as HTMLDivElement;
+        
+        clonedNode.style.width = `${width}px`;
+        clonedNode.style.height = `${height}px`;
+        clonedNode.style.transform = 'scale(1)';
+        clonedNode.style.boxShadow = 'none';
+        clonedNode.style.position = 'absolute';
+        clonedNode.style.top = '0';
+        clonedNode.style.left = '-9999px';
+        
+        document.body.appendChild(clonedNode);
+
+        const images = Array.from(clonedNode.getElementsByTagName('img'));
+        const promises = images.map(img => new Promise((resolve, reject) => {
+            if (img.complete) {
+                resolve(true);
+            } else {
+                img.onload = resolve;
+                img.onerror = reject;
+            }
+        }));
+
+        // Pastikan background image juga dimuat jika ada
+        if (settings.background) {
+            // ** PERBAIKAN DI SINI **
+            const backgroundUrl = settings.background;
+            promises.push(new Promise((resolve, reject) => {
+                const bgImg = new Image();
+                bgImg.src = backgroundUrl; // Gunakan variabel yang sudah pasti string
+                bgImg.onload = resolve;
+                bgImg.onerror = reject;
+            }));
+        }
+
+        Promise.all(promises).then(() => {
+            setTimeout(() => {
+                html2canvas(clonedNode, {
+                    useCORS: true,
+                    scale: scale,
+                    backgroundColor: null,
+                    width: width,
+                    height: height,
+                    scrollX: 0,
+                    scrollY: 0, 
+                }).then(canvas => {
                     const link = document.createElement('a');
                     link.download = `id-card-${settings.studentId}.png`;
                     link.href = canvas.toDataURL('image/png');
                     link.click();
+                    toast.success("Unduhan dimulai!", { id: 'download-toast' });
+                }).catch(err => {
+                    console.error("Error generating canvas:", err);
+                    toast.error("Gagal membuat gambar kartu.", { id: 'download-toast' });
+                }).finally(() => {
+                    document.body.removeChild(clonedNode);
                 });
-        }
+            }, 500);
+        }).catch(error => {
+            console.error("Error loading images:", error);
+            toast.error("Gagal memuat gambar untuk diunduh.", { id: 'download-toast' });
+            document.body.removeChild(clonedNode);
+        });
     };
-
-    // === FUNGSI YANG DIPERBAIKI ===
+    
+    // --- FUNGSI LAINNYA (TIDAK ADA PERUBAHAN) ---
     const handleGenerateBg = async () => {
         if (!bgPrompt) {
             toast.error("Prompt background tidak boleh kosong!");
@@ -117,7 +183,6 @@ const IdCardGeneratorClient = () => {
         const toastId = toast.loading("AI sedang membuat background...");
 
         try {
-            // Menambahkan parameter 'referrer', 'enhance', dan 'nologo'
             const params = new URLSearchParams({
                 model: 'flux',
                 width: '500',
@@ -203,6 +268,7 @@ const IdCardGeneratorClient = () => {
     
     return (
     <div className="container mx-auto px-4 py-8">
+      {/* --- UI PENGATURAN (TIDAK ADA PERUBAHAN) --- */}
       <div className="mb-8 flex justify-between items-center w-full max-w-lg mx-auto">
         <Link
           href="/"
@@ -323,7 +389,7 @@ const IdCardGeneratorClient = () => {
           </div>
         </div>
 
-        {/* Card Preview */}
+        {/* --- Card Preview --- */}
         <div className="lg:col-span-2 flex flex-col items-center justify-center bg-gray-200 dark:bg-gray-900 p-6 rounded-lg min-h-[550px]">
             <div style={{ transform: 'scale(1.25)', transformOrigin: 'center' }}>
                 <div ref={cardRef} className={cardClasses} style={cardStyles}>
@@ -342,7 +408,9 @@ const IdCardGeneratorClient = () => {
                                 </Draggable>
                                 <Draggable bounds="parent" defaultPosition={settings.photoPosition} onStop={(e, data) => handleSettingChange('photoPosition', { x: data.x, y: data.y })}>
                                     <div className="cursor-move">
-                                        {settings.photo && <img src={settings.photo} alt="Student" className={'w-20 h-24 object-cover rounded-md shadow-md mx-auto'}/>}
+                                        <div className="w-20 h-24 mx-auto rounded-md shadow-md overflow-hidden">
+                                            {settings.photo && <img src={settings.photo} alt="Student" className={'w-full h-full object-cover'}/>}
+                                        </div>
                                         <h3 className="font-bold text-lg mt-1 leading-tight">{settings.name}</h3>
                                         <p className="text-xs">{settings.studentId}</p>
                                         <p className="text-xs font-semibold">{settings.major}</p>
@@ -359,11 +427,13 @@ const IdCardGeneratorClient = () => {
                         ) : (
                             <div className="flex flex-row w-full h-full text-[10px] leading-tight items-center">
                                 <Draggable bounds="parent" defaultPosition={settings.photoPosition} onStop={(e, data) => handleSettingChange('photoPosition', { x: data.x, y: data.y })}>
-                                    <div className="w-[35%] p-2 cursor-move">
-                                        {settings.photo && <img src={settings.photo} alt="Student" className="w-20 h-24 object-cover rounded-md shadow-md"/>}
+                                    <div className="w-[118px] flex-shrink-0 p-2 cursor-move">
+                                        <div className="w-20 h-24 rounded-md shadow-md overflow-hidden">
+                                           {settings.photo && <img src={settings.photo} alt="Student" className="w-full h-full object-cover"/>}
+                                        </div>
                                     </div>
                                 </Draggable>
-                                <div className="w-[65%] h-full flex flex-col justify-between p-2 text-left">
+                                <div className="flex-grow h-full flex flex-col justify-between p-2 text-left">
                                     <Draggable bounds="parent" defaultPosition={settings.logoPosition} onStop={(e, data) => handleSettingChange('logoPosition', { x: data.x, y: data.y })}>
                                         <div className="flex items-center gap-2 cursor-move">
                                             {settings.logo && <img src={settings.logo} alt="Logo" className="w-8 h-8 object-contain"/>}
