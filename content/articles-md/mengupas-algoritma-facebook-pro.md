@@ -4,7 +4,7 @@ date: 2025-08-19
 author: Tim RuangRiung
 category: Media Sosial
 tags: ['facebook pro', 'algoritma', 'media sosial', 'tips kreator']
-image: /v1/assets/artikel/algoritma-facebook-pro.png
+image: /v1/assets/ruangriung.png
 summary: Memahami cara kerja algoritma Facebook adalah kunci sukses bagi kreator konten FB Pro. Pelajari tahapan, sinyal, dan tips praktis untuk meningkatkan jangkauan dan interaksi konten Anda secara organik.
 ---
 
