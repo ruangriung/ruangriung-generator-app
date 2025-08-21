@@ -4,10 +4,38 @@ import nodemailer from 'nodemailer';
 
 export async function POST(request: Request) {
   try {
-    const { author, email, title, promptContent, tool, tags } = await request.json();
+    const { author, email, title, promptContent, tool, tags, token } = await request.json();
 
-    if (!author || !email || !title || !promptContent || !tool) {
-      return NextResponse.json({ message: 'Semua kolom wajib diisi.' }, { status: 400 });
+    if (!author || !email || !title || !promptContent || !tool || !token) {
+      return NextResponse.json(
+        { message: 'Semua kolom, termasuk verifikasi, harus diisi.' },
+        { status: 400 }
+      );
+    }
+
+    const turnstileSecretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+    if (!turnstileSecretKey) {
+      console.error('CLOUDFLARE_TURNSTILE_SECRET_KEY tidak diatur.');
+      return NextResponse.json({ message: 'Kesalahan konfigurasi server.' }, { status: 500 });
+    }
+
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret: turnstileSecretKey,
+        response: token,
+        remoteip: request.headers.get('x-forwarded-for'),
+      }),
+    });
+
+    const turnstileData = await response.json();
+    if (!turnstileData.success) {
+      console.error('Verifikasi Turnstile Gagal:', turnstileData['error-codes']);
+      return NextResponse.json(
+        { message: 'Verifikasi keamanan gagal. Silakan coba lagi.' },
+        { status: 401 }
+      );
     }
 
     const transporter = nodemailer.createTransport({
