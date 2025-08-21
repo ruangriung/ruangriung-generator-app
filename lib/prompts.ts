@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import matter from 'gray-matter';
 
 const promptsDirectory = path.join(process.cwd(), 'content/prompts');
 
@@ -16,12 +17,25 @@ export interface Prompt {
 export async function getAllPrompts(): Promise<Prompt[]> {
   try {
     const fileNames = await fs.readdir(promptsDirectory);
-    const allPrompts = await Promise.all(fileNames.map(async (fileName) => {
-      const fullPath = path.join(promptsDirectory, fileName);
-      const fileContents = await fs.readFile(fullPath, 'utf8');
-      const prompt = JSON.parse(fileContents) as Prompt;
-      return prompt;
-    }));
+    const allPrompts = await Promise.all(
+      fileNames
+        .filter(fileName => fileName.endsWith('.md'))
+        .map(async fileName => {
+          const fullPath = path.join(promptsDirectory, fileName);
+          const fileContents = await fs.readFile(fullPath, 'utf8');
+          const { data, content } = matter(fileContents);
+          const prompt: Prompt = {
+            id: data.id,
+            slug: data.slug,
+            title: data.title,
+            author: data.author,
+            tool: data.tool,
+            tags: data.tags || [],
+            promptContent: content.trim(),
+          };
+          return prompt;
+        })
+    );
     return allPrompts;
   } catch (error) {
     // If the directory doesn't exist, return an empty array
