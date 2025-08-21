@@ -140,7 +140,7 @@ Metode ini menolak request bot secara langsung, sehingga crawler tidak bisa meng
 
 Sebagai gambaran, crawling AI dapat divisualisasikan layaknya **laba-laba mekanis futuristik** yang berjalan di atas jaringan kabel bercahaya neon. Dengan kaki baja panjang, bot ini merayapi tiap halaman web, membaca konten, lalu menyimpannya dalam indeks raksasa.
 
-![Ilustrasi Crawling AI](/mnt/data/A_digital_illustration_in_a_flat_and_modern_style_.png)
+![Ilustrasi Crawling AI](/v1/assets/A_digital_illustration_in_a_flat_and_modern_style_.png)
 
 ---
 
