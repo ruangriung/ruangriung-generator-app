@@ -2,6 +2,14 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
+
+const DynamicTurnstile = dynamic(() => import('./TurnstileWidget'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-[300px] h-[65px] bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+  ),
+});
 
 interface PromptSubmissionFormProps {
   isOpen: boolean;
@@ -17,9 +25,16 @@ export default function PromptSubmissionForm({ isOpen, onClose }: PromptSubmissi
   const [tags, setTags] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
+  const [token, setToken] = useState('');
+  const [captchaError, setCaptchaError] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!token) {
+      setCaptchaError(true);
+      return;
+    }
+    setCaptchaError(false);
     setIsSubmitting(true);
     setSubmitStatus(null);
 
@@ -35,6 +50,7 @@ export default function PromptSubmissionForm({ isOpen, onClose }: PromptSubmissi
         promptContent,
         tool,
         tags: tags.split(',').map(tag => tag.trim()),
+        token,
       }),
     });
 
@@ -48,6 +64,7 @@ export default function PromptSubmissionForm({ isOpen, onClose }: PromptSubmissi
       setPromptContent('');
       setTool('');
       setTags('');
+      setToken('');
     } else {
       setSubmitStatus('error');
     }
@@ -74,13 +91,18 @@ export default function PromptSubmissionForm({ isOpen, onClose }: PromptSubmissi
             <textarea placeholder="Isi Prompt" value={promptContent} onChange={e => setPromptContent(e.target.value)} required rows={6} className="w-full p-2 border rounded mb-4 dark:bg-gray-700"></textarea>
             <input type="text" placeholder="Tool yang Digunakan (e.g., DALL-E 3)" value={tool} onChange={e => setTool(e.target.value)} required className="w-full p-2 border rounded mb-4 dark:bg-gray-700" />
             <input type="text" placeholder="Tags (pisahkan dengan koma)" value={tags} onChange={e => setTags(e.target.value)} className="w-full p-2 border rounded mb-6 dark:bg-gray-700" />
-            
+
+            <div className="flex justify-center mb-6">
+              <DynamicTurnstile onSuccess={setToken} />
+            </div>
+
             <div className="flex justify-end gap-4">
               <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400">Batal</button>
-              <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-500">
+              <button type="submit" disabled={isSubmitting || !token} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-500">
                 {isSubmitting ? 'Mengirim...' : 'Kirim'}
               </button>
             </div>
+            {captchaError && <p className="text-red-500 mt-4">Silakan selesaikan verifikasi keamanan.</p>}
             {submitStatus === 'error' && <p className="text-red-500 mt-4">Gagal mengirim prompt. Silakan coba lagi.</p>}
           </form>
         )}
