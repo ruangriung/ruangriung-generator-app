@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RuangRiung Generator App
 
-## Getting Started
+RuangRiung Generator adalah aplikasi Next.js 14 yang membantu membuat konten berbasis AI seperti prompt, kartu identitas, dan cerita bergambar. Proyek ini menggunakan Tailwind CSS, PWA, serta dukungan Mode Gelap untuk pengalaman yang nyaman.
 
-First, run the development server:
+## Fitur Utama
+- **ID Card Generator** – buat kartu identitas kustom dengan elemen drag-and-drop.
+- **Kumpulan Prompt** – kumpulan contoh prompt dalam berkas Markdown yang bisa dieksplorasi.
+- **Storyteller** – menghasilkan cerita visual dengan gambar dan deskripsi menggunakan AI.
+- **Video Prompt** – rancang skrip dan adegan untuk pembuatan video berbasis AI.
+
+## Memulai
+1. Instal dependensi:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Jalankan server pengembangan:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Aplikasi dapat diakses di [http://localhost:3000](http://localhost:3000).
 
-## Learn More
+## Variabel Lingkungan
+Buat berkas `.env.local` pada root proyek dan isi variabel berikut sesuai kebutuhan fitur:
 
-To learn more about Next.js, take a look at the following resources:
+```
+NEXTAUTH_SECRET=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+FACEBOOK_CLIENT_ID=
+FACEBOOK_CLIENT_SECRET=
+NODEMAILER_EMAIL=
+NODEMAILER_APP_PASSWORD=
+CLOUDFLARE_TURNSTILE_SECRET_KEY=
+NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY=
+NEXT_PUBLIC_POLLINATIONS_TOKEN=
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Variabel tambahan mungkin diperlukan untuk fitur tertentu seperti formulir kontak atau iklan.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Konten
+Artikel dan contoh prompt berada pada direktori `content` dan dimuat dari berkas Markdown.
 
-## Deploy on Vercel
+## Skrip
+- `pnpm dev` – menjalankan server pengembangan
+- `pnpm build` – membangun aplikasi untuk produksi
+- `pnpm start` – menjalankan aplikasi hasil build
+- `pnpm lint` – menjalankan ESLint
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Lisensi
+Proyek ini menggunakan lisensi ISC seperti yang tercantum pada `package.json`.
