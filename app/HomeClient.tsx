@@ -1,11 +1,10 @@
-// app/HomeClient.tsx
 'use client'; // Tandai sebagai Client Component
 
-import { Wand2, Sparkles, Download, X, Rss, Crown, Facebook, Star, QrCode, Mail, LayoutGrid, EarthIcon, BookOpen } from 'lucide-react';
+import { Wand2, Sparkles, Download, X, Rss, Facebook, Mail, LayoutGrid, EarthIcon, BookOpen, QrCode, ChevronDown, MessageSquare } from 'lucide-react';
 import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import FAQ from '@/components/FAQ';
 import { AdBanner } from '@/components/AdBanner';
 import Link from 'next/link';
@@ -14,7 +13,7 @@ interface HomeClientProps {
   latestArticle: {
     slug: string;
     title: string;
-    date: string; // Tetap string karena ini datang dari front matter
+    date: string;
     author: string;
     summary: string;
   };
@@ -24,7 +23,10 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
   const [deferredPrompt, setDeferredPrompt] = useState<any | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
+  const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
+  const toolsMenuRef = useRef<HTMLDivElement>(null);
 
+  // Efek untuk PWA Install Prompt
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -45,6 +47,21 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
+
+  // Efek untuk menutup dropdown menu saat klik di luar area
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+        if (toolsMenuRef.current && !toolsMenuRef.current.contains(event.target as Node)) {
+            setIsToolsMenuOpen(false);
+        }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
@@ -120,7 +137,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
           <span>Email Kami</span>
         </Link>
       </div>
-      {/* Tombol Artikel Terbaru */}
+      
       <div className="w-full max-w-4xl mb-4">
         <Link
           href={`/artikel/${latestArticle.slug}`}
@@ -147,25 +164,56 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
           <span>Tutorial</span>
         </a>
 
-        {/* Tombol Menuju Halaman Storyteller */}
-        <Link
-          href="/storyteller"
-          className="flex-1 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset hover:bg-purple-700 transition-colors"
-        >
-          <BookOpen size={18} />
-          <span>StoryTeller AI</span>
-        </Link>
-        <Link
-          href="/id-card-generator"
-          className="flex-1 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-200 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset hover:text-orange-600 transition-colors"
-        >
-          <QrCode size={18} />
-          <span>ID CARD Generator</span>
-        </Link>
+        {/* Dropdown Fitur Lainnya */}
+        <div className="relative flex-1 w-full" ref={toolsMenuRef}>
+            <button
+                onClick={() => setIsToolsMenuOpen(!isToolsMenuOpen)}
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset hover:bg-purple-700 transition-colors"
+            >
+                <LayoutGrid size={18} />
+                <span>Fitur Lainnya</span>
+                <ChevronDown size={18} className={`transition-transform duration-200 ${isToolsMenuOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isToolsMenuOpen && (
+                <div className="absolute top-full mt-2 w-full bg-gray-700 dark:bg-dark-bg border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-10">
+                    <ul className="py-2">
+                        <li>
+                            <Link
+                                href="/storyteller"
+                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
+                                onClick={() => setIsToolsMenuOpen(false)}
+                            >
+                                <BookOpen size={18} />
+                                <span>StoryTeller AI</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                href="/id-card-generator"
+                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
+                                onClick={() => setIsToolsMenuOpen(false)}
+                            >
+                                <QrCode size={18} />
+                                <span>ID CARD Generator</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                href="/comment-overlay"
+                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
+                                onClick={() => setIsToolsMenuOpen(false)}
+                            >
+                                <MessageSquare size={18} />
+                                <span>Bubble Komentar</span>
+                            </Link>
+                        </li>
+                    </ul>
+                </div>
+            )}
+        </div>
       </div>
-      {/* AKHIR TOMBOL BARU */}
       
-      {/* --- IKLAN PERTAMA DINONAKTIFKAN --- */}
       <div className="w-full max-w-4xl mb-4">
         {/*
           <AdBanner dataAdSlot="6897039624" />
@@ -176,13 +224,11 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         <AuthButton />
         <ThemeToggle />
       </div>
-      {/* ==================================== */}
 
       <main className="w-full flex flex-col items-center">
         <Tabs />
       </main>
 
-      {/* --- IKLAN KEDUA DINONAKTIFKAN --- */}
       <div className="w-full max-w-4xl mt-16">
         {/*
           <AdBanner dataAdSlot="5961316189" />
