@@ -1,4 +1,4 @@
-title: AI: Potensi Besar yang Masih Terabaikan di Indonesia
+title: AI - Potensi Besar yang Masih Terabaikan di Indonesia
 date: 2025-08-27
 author: Tim RuangRiung
 category: AI
