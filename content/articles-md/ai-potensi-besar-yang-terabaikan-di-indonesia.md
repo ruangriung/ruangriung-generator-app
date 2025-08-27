@@ -1,3 +1,4 @@
+---
 title: AI - Potensi Besar yang Masih Terabaikan di Indonesia
 date: 2025-08-27
 author: Tim RuangRiung
@@ -5,7 +6,6 @@ category: AI
 tags: ['AI', 'literasi digital', 'Indonesia', 'generasi muda']
 image: /v1/assets/ruangriung.png
 summary: Artificial Intelligence punya potensi luar biasa untuk mengubah kehidupan. Namun, di Indonesia, kesadaran akan kekuatan AI masih minim. Bagaimana membangun literasi agar generasi muda tidak tertinggal?
-
 ---
 
 Artificial Intelligence (AI) kini menjadi salah satu teknologi paling revolusioner di era modern. Kemampuannya untuk menganalisis data dalam jumlah besar, mengambil keputusan cerdas, hingga belajar dari pengalaman membuat AI berpotensi mengubah berbagai aspek kehidupan manusia. Namun, di Indonesia, pemanfaatan AI masih sering dipandang sebelah mata dan belum digali secara optimal.
