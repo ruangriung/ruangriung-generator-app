@@ -97,7 +97,8 @@ export default function PromptClient({ prompts }: PromptClientProps) {
           <Link key={prompt.id} href={`/kumpulan-prompt/${prompt.slug}`}>
             <div className="block h-full p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 dark:bg-gray-900 dark:border-gray-700 dark:hover:bg-gray-700">
               <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{prompt.title}</h5>
-              <p className="font-normal text-gray-500 dark:text-gray-400 mb-3">Oleh: {prompt.author}</p>
+              <p className="font-normal text-gray-500 dark:text-gray-400">Oleh: {prompt.author}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Tanggal: {new Date(prompt.date).toLocaleDateString('id-ID')}</p>
               <p className="font-normal text-gray-600 dark:text-gray-300 mb-4">Tool: <strong>{prompt.tool}</strong></p>
               <div className="flex flex-wrap gap-2">
                 {prompt.tags.map(tag => (

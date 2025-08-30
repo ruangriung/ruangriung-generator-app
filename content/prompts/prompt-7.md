@@ -3,6 +3,7 @@ id: "7"
 slug: "bunga-rumput"
 title: "Bunga Rumput"
 author: "awanbyru"
+date: "2025-08-30"
 tool: "Gemini"
 tags:
   - fractal

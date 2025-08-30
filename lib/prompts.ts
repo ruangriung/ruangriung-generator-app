@@ -9,6 +9,7 @@ export interface Prompt {
   slug: string;
   title: string;
   author: string;
+  date: string;
   tool: string;
   image?: string;
   tags: string[];
@@ -31,6 +32,7 @@ export async function getAllPrompts(): Promise<Prompt[]> {
             image: data.image,
             title: data.title,
             author: data.author,
+            date: data.date,
             tool: data.tool,
             tags: data.tags || [],
             promptContent: content.trim(),
