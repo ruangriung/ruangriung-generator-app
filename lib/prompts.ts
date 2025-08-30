@@ -38,7 +38,7 @@ export async function getAllPrompts(): Promise<Prompt[]> {
           return prompt;
         })
     );
-    return allPrompts;
+    return allPrompts.sort((a, b) => Number(b.id) - Number(a.id));
   } catch (error) {
     // If the directory doesn't exist, return an empty array
     console.log("Could not read prompts directory, returning empty array.");
