@@ -3,6 +3,7 @@ id: "6"
 slug: "wajah-energi-kontras"
 title: "Wajah Energi Kontras"
 author: "Arif Tirtana"
+date: "2025-08-28"
 tool: "Gemini"
 tags:
   - seni digital

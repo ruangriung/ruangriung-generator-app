@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import AdBanner from '@/components/AdBanner';
+import CopyButton from '@/components/CopyButton';
 
 export default async function PromptDetailPage({ params }: { params: { slug: string } }) {
   const prompt = await getPromptBySlug(params.slug);
@@ -36,11 +37,16 @@ export default async function PromptDetailPage({ params }: { params: { slug: str
           </div>
         )}
         <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">{prompt.title}</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 mb-2">By {prompt.author}</p>
+        <p className="text-lg text-gray-600 dark:text-gray-300">By {prompt.author}</p>
+        <p className="text-md text-gray-500 dark:text-gray-400 mb-2">Tanggal: {new Date(prompt.date).toLocaleDateString('id-ID')}</p>
         <p className="text-md text-gray-500 dark:text-gray-400 mb-6">Tool: {prompt.tool}</p>
         
         <div className="prose prose-lg max-w-none dark:prose-invert">
           <p>{prompt.promptContent}</p>
+        </div>
+
+        <div className="mt-4">
+          <CopyButton text={prompt.promptContent} />
         </div>
 
         <div className="my-8">
