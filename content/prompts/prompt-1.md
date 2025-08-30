@@ -3,6 +3,7 @@ id: "1"
 slug: "prompt-satu-keren"
 title: "Prompt Keren Pertama"
 author: "Ayick"
+date: "2025-08-30"
 tool: "DALL-E 3"
 tags:
   - fantasi

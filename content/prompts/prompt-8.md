@@ -3,6 +3,7 @@ id: "8"
 slug: "cubist-surealist"
 title: "Surealis Cubism"
 author: "Geo storm"
+date: "2025-08-30"
 tool: "Gemini, ChatGpt, etc"
 tags:
   - cubism
