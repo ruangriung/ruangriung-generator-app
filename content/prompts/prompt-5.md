@@ -3,6 +3,7 @@ id: "5"
 slug: "arsitektur-ramah-lingkungan"
 title: "Arsitektur Ramah Lingkungan"
 author: "Eko"
+date: "2025-08-30"
 tool: "DALL-E 3"
 tags:
   - arsitektur

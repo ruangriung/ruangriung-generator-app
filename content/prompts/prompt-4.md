@@ -3,6 +3,7 @@ id: "4"
 slug: "potret-realistik-nenek"
 title: "Potret Realistik Nenek"
 author: "Dewi"
+date: "2025-08-30"
 tool: "Midjourney"
 tags:
   - potret

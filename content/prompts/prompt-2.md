@@ -3,6 +3,7 @@ id: "2"
 slug: "prompt-kedua-hebat"
 title: "Prompt Hebat Kedua"
 author: "Budi"
+date: "2025-08-30"
 tool: "Midjourney"
 tags:
   - sci-fi
