@@ -11,4 +11,3 @@ tags:
 ---
 
 A futuristic robot warrior standing in a neon-lit cyberpunk city, detailed illustration, cinematic lighting, concept art.
-

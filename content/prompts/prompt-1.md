@@ -11,4 +11,3 @@ tags:
 ---
 
 A beautiful fantasy landscape with floating islands, waterfalls, and a giant crystal palace, digital art, hyperrealistic, 8k.
-

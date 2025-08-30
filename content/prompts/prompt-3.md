@@ -11,4 +11,3 @@ tags:
 ---
 
 A vibrant illustration of a sunrise over a whimsical village, pastel colors, cartoon style, 4k digital art.
-

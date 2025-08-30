@@ -11,4 +11,3 @@ tags:
 ---
 
 Concept art of a futuristic eco-friendly skyscraper with integrated greenery and solar panels, sleek design, concept art.
-

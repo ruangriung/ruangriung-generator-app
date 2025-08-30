@@ -11,4 +11,3 @@ tags:
 ---
 
 Ultra-realistic portrait of an elderly woman with soft lighting and expressive wrinkles, 4k photography.
-

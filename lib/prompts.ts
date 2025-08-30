@@ -10,6 +10,7 @@ export interface Prompt {
   title: string;
   author: string;
   tool: string;
+  image?: string;
   tags: string[];
   promptContent: string;
 }
@@ -27,6 +28,7 @@ export async function getAllPrompts(): Promise<Prompt[]> {
           const prompt: Prompt = {
             id: data.id,
             slug: data.slug,
+            image: data.image,
             title: data.title,
             author: data.author,
             tool: data.tool,
