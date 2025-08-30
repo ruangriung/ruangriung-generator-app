@@ -9,7 +9,7 @@ import Pagination from '../../components/Pagination';
 import AdBanner from '../../components/AdBanner';
 import { ArrowLeft } from 'lucide-react';
 
-const PROMPTS_PER_PAGE = 6;
+const PROMPTS_PER_PAGE = 9;
 
 interface PromptClientProps {
   prompts: Prompt[];
