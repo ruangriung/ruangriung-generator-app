@@ -2,7 +2,7 @@
 id: "32"
 slug: "dissolving-effect"
 title: "Dissolving Effect"
-author: "Hamba Allah Guru"
+author: "Hamba Allah"
 date: "2025-09-10"
 tool: "Gemini"
 tags:
