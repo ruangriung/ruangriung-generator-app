@@ -1,5 +1,5 @@
 ---
-id: "36"
+id: "37"
 slug: "fantasy-art-in-the-style-of-greg-rutkowski"
 title: "Fantasy Art in the Style of Greg Rutkowski"
 author: "Ekin Liu"
