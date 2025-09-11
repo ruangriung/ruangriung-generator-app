@@ -13,9 +13,9 @@ interface TextareaModalProps {
 }
 
 export default function TextareaModal({ isOpen, onClose, value, onChange, title, readOnly = false }: TextareaModalProps) {
-  if (!isOpen) return null;
-
   const [internalValue, setInternalValue] = useState(value);
+
+  if (!isOpen) return null;
 
   const handleSave = () => {
     if (!readOnly) {
