@@ -13,5 +13,5 @@ tags:
   - light-bloom
 ---
 
-A lone Indonesian woman walking on a glowing golden path over a dark ocean, leading toward a giant radiant phallistic halo in the distance, wearing a red fedora hat, black t-shirt with subtle text, black ripped jeans, and black leather boots, silhouette partially illuminated by the warm light bloom, soft mist surrounding the scene, cinematic surreal atmosphere, dreamy glow, minimal color palette, ultra high detail, ambient fog, inspired by light bloom art and vapor wave dreamscape
+A lone Indonesian woman walking on a glowing golden path over a dark ocean, leading toward a giant radiant nightmare halo in the distance, wearing a red fedora hat, black t-shirt with subtle text, black ripped jeans, and black leather boots, silhouette partially illuminated by the warm light bloom, soft mist surrounding the scene, cinematic surreal atmosphere, dreamy glow, minimal color palette, ultra high detail, ambient fog, inspired by light bloom art and vapor wave dreamscape
 
