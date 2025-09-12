@@ -215,9 +215,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
       </div>
       
       <div className="w-full max-w-4xl mb-4">
-        {/*
-          <AdBanner dataAdSlot="6897039624" />
-        */}
+        <AdBanner dataAdSlot="6897039624" />
       </div>
 
       <div className="w-full max-w-4xl flex flex-col gap-4 mb-4">
@@ -230,9 +228,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
       </main>
 
       <div className="w-full max-w-4xl mt-16">
-        {/*
-          <AdBanner dataAdSlot="5961316189" />
-        */}
+        <AdBanner dataAdSlot="5961316189" />
       </div>
 
       <div className="w-full mt-16">
