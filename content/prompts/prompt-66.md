@@ -1,5 +1,5 @@
 ---
-id: "62"
+id: "66"
 slug: "weekend-vibes"
 title: "Weekend vibes"
 author: "Ery"
