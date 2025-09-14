@@ -37,7 +37,21 @@ export default async function PromptDetailPage({ params }: { params: { slug: str
           </div>
         )}
         <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">{prompt.title}</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300">By {prompt.author}</p>
+        <p className="text-lg text-gray-600 dark:text-gray-300">
+          By{' '}
+          {prompt.facebook ? (
+            <a
+              href={prompt.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              {prompt.author}
+            </a>
+          ) : (
+            prompt.author
+          )}
+        </p>
         <p className="text-md text-gray-500 dark:text-gray-400 mb-2">Tanggal: {new Date(prompt.date).toLocaleDateString('id-ID')}</p>
         <p className="text-md text-gray-500 dark:text-gray-400 mb-6">Tool: {prompt.tool}</p>
 
