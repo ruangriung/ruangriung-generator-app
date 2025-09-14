@@ -39,9 +39,9 @@ export default async function PromptDetailPage({ params }: { params: { slug: str
         <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">{prompt.title}</h1>
         <p className="text-lg text-gray-600 dark:text-gray-300">
           By{' '}
-          {prompt.facebook ? (
+          {prompt.link || prompt.facebook ? (
             <a
-              href={prompt.facebook}
+              href={prompt.link || prompt.facebook}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:underline"

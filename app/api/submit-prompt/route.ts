@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 
 export async function POST(request: Request) {
   try {
-    const { author, email, facebook, title, promptContent, tool, tags, token } = await request.json();
+    const { author, email, facebook, link, title, promptContent, tool, tags, token } = await request.json();
 
     if (!author || !email || !title || !promptContent || !tool || !token) {
       return NextResponse.json(
@@ -55,6 +55,7 @@ export async function POST(request: Request) {
         <p><strong>Nama Pengirim:</strong> ${author}</p>
         <p><strong>Email Pengirim:</strong> ${email}</p>
         <p><strong>Link Facebook:</strong> ${facebook || '-'}</p>
+        <p><strong>Link:</strong> ${link || '-'}</p>
         <p><strong>Judul Prompt:</strong> ${title}</p>
         <p><strong>Tool:</strong> ${tool}</p>
         <p><strong>Tags:</strong> ${tags.join(', ')}</p>
