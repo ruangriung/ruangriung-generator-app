@@ -23,6 +23,7 @@ export default function PromptSubmissionForm({ isOpen, onClose }: PromptSubmissi
   const [promptContent, setPromptContent] = useState('');
   const [tool, setTool] = useState('');
   const [tags, setTags] = useState('');
+  const [facebook, setFacebook] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
   const [token, setToken] = useState('');
@@ -46,6 +47,7 @@ export default function PromptSubmissionForm({ isOpen, onClose }: PromptSubmissi
       body: JSON.stringify({
         author,
         email,
+        facebook,
         title,
         promptContent,
         tool,
@@ -60,6 +62,7 @@ export default function PromptSubmissionForm({ isOpen, onClose }: PromptSubmissi
       setSubmitStatus('success');
       setAuthor('');
       setEmail('');
+      setFacebook('');
       setTitle('');
       setPromptContent('');
       setTool('');
@@ -87,6 +90,13 @@ export default function PromptSubmissionForm({ isOpen, onClose }: PromptSubmissi
               <input type="text" placeholder="Nama Anda" value={author} onChange={e => setAuthor(e.target.value)} required className="p-2 border rounded dark:bg-gray-700" />
               <input type="email" placeholder="Email Anda" value={email} onChange={e => setEmail(e.target.value)} required className="p-2 border rounded dark:bg-gray-700" />
             </div>
+            <input
+              type="url"
+              placeholder="Link Facebook (opsional)"
+              value={facebook}
+              onChange={e => setFacebook(e.target.value)}
+              className="w-full p-2 border rounded mb-4 dark:bg-gray-700"
+            />
             <input type="text" placeholder="Judul Prompt" value={title} onChange={e => setTitle(e.target.value)} required className="w-full p-2 border rounded mb-4 dark:bg-gray-700" />
             <textarea placeholder="Isi Prompt" value={promptContent} onChange={e => setPromptContent(e.target.value)} required rows={6} className="w-full p-2 border rounded mb-4 dark:bg-gray-700"></textarea>
             <input type="text" placeholder="Tool yang Digunakan (e.g., DALL-E 3)" value={tool} onChange={e => setTool(e.target.value)} required className="w-full p-2 border rounded mb-4 dark:bg-gray-700" />
