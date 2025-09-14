@@ -24,6 +24,7 @@ export default function PromptSubmissionForm({ isOpen, onClose }: PromptSubmissi
   const [tool, setTool] = useState('');
   const [tags, setTags] = useState('');
   const [facebook, setFacebook] = useState('');
+  const [link, setLink] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
   const [token, setToken] = useState('');
@@ -48,6 +49,7 @@ export default function PromptSubmissionForm({ isOpen, onClose }: PromptSubmissi
         author,
         email,
         facebook,
+        link,
         title,
         promptContent,
         tool,
@@ -63,6 +65,7 @@ export default function PromptSubmissionForm({ isOpen, onClose }: PromptSubmissi
       setAuthor('');
       setEmail('');
       setFacebook('');
+      setLink('');
       setTitle('');
       setPromptContent('');
       setTool('');
@@ -95,6 +98,13 @@ export default function PromptSubmissionForm({ isOpen, onClose }: PromptSubmissi
               placeholder="Link Facebook (opsional)"
               value={facebook}
               onChange={e => setFacebook(e.target.value)}
+              className="w-full p-2 border rounded mb-4 dark:bg-gray-700"
+            />
+            <input
+              type="url"
+              placeholder="Link (opsional)"
+              value={link}
+              onChange={e => setLink(e.target.value)}
               className="w-full p-2 border rounded mb-4 dark:bg-gray-700"
             />
             <input type="text" placeholder="Judul Prompt" value={title} onChange={e => setTitle(e.target.value)} required className="w-full p-2 border rounded mb-4 dark:bg-gray-700" />

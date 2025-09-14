@@ -99,9 +99,9 @@ export default function PromptClient({ prompts }: PromptClientProps) {
               <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{prompt.title}</h5>
               <p className="font-normal text-gray-500 dark:text-gray-400">
                 Oleh:{' '}
-                {prompt.facebook ? (
+                {prompt.link || prompt.facebook ? (
                   <a
-                    href={prompt.facebook}
+                    href={prompt.link || prompt.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"

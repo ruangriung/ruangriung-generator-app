@@ -11,6 +11,7 @@ export interface Prompt {
   author: string;
   email?: string;
   facebook?: string;
+  link?: string;
   date: string;
   tool: string;
   image?: string;
@@ -36,6 +37,7 @@ export async function getAllPrompts(): Promise<Prompt[]> {
             author: data.author,
             email: data.email,
             facebook: data.facebook,
+            link: data.link,
             date: data.date,
             tool: data.tool,
             tags: data.tags || [],
