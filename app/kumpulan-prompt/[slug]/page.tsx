@@ -33,7 +33,15 @@ export default async function PromptDetailPage({ params }: { params: { slug: str
       <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
         {prompt.image && (
           <div className="mb-8">
-            <img src={prompt.image} alt={prompt.title} className="w-full h-[300px] object-cover rounded-lg shadow-lg" />
+            <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">Link Gambar:</p>
+            <a
+              href={prompt.image}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline break-all"
+            >
+              {prompt.image}
+            </a>
           </div>
         )}
         <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">{prompt.title}</h1>
