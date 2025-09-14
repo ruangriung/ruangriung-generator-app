@@ -102,7 +102,7 @@ export default function PromptSubmissionForm({ isOpen, onClose }: PromptSubmissi
             />
             <input
               type="url"
-              placeholder="Link (opsional)"
+              placeholder="Link gambar (opsional)"
               value={link}
               onChange={e => setLink(e.target.value)}
               className="w-full p-2 border rounded mb-4 dark:bg-gray-700"
