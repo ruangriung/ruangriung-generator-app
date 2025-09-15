@@ -4,7 +4,7 @@ slug: "artistic-poster-crumple-style"
 title: "Artistic poster in crumple style, torn paper, effect xerox photocopy"
 author: "Hamba Allah"
 facebook: "https://www.facebook.com/share/19v6GHt7c6/"
-link: "https://g.co/gemini/share/6ff8c9eab7c2"
+image: "https://g.co/gemini/share/6ff8c9eab7c2"
 date: "2025-09-15"
 tool: "Grmini, cici"
 tags:
