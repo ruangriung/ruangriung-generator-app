@@ -1,6 +1,6 @@
 ---
 title: Prompt Haram Untuk Konten Kreator
-date: 2025-08-25
+date: 2025-08-17
 author: Tim RuangRiung
 category: Sosial Media
 tags: ['website', 'konten kreator', 'seo', 'monetisasi', 'branding']
