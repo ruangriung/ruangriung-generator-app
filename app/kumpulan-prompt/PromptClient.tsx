@@ -1,15 +1,39 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { Prompt } from '../../lib/prompts';
 import Link from 'next/link';
 import PromptSubmissionForm from '../../components/PromptSubmissionForm';
 import Pagination from '../../components/Pagination';
 import AdBanner from '../../components/AdBanner';
 import { ArrowLeft } from 'lucide-react';
+import { usePromptSuggestions } from './usePromptSuggestions';
 
 const PROMPTS_PER_PAGE = 9;
+
+const escapeRegExp = (value: string) =>
+  value.replace(/[-/\\^$*+?.()|[\]{}]/g, '\$&');
+
+const highlightMatches = (text: string, term: string) => {
+  if (!term.trim()) {
+    return text;
+  }
+
+  const regex = new RegExp(`(${escapeRegExp(term)})`, 'gi');
+  const parts = text.split(regex);
+  const lowerTerm = term.toLowerCase();
+
+  return parts.map((part, index) =>
+    part.toLowerCase() === lowerTerm ? (
+      <mark key={`${part}-${index}`} className="bg-yellow-200 dark:bg-yellow-500/40">
+        {part}
+      </mark>
+    ) : (
+      <Fragment key={`${part}-${index}`}>{part}</Fragment>
+    ),
+  );
+};
 
 interface PromptClientProps {
   prompts: Prompt[];
@@ -20,6 +44,8 @@ export default function PromptClient({ prompts }: PromptClientProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const allTags = useMemo(() => {
     const tags = new Set<string>();
@@ -27,14 +53,27 @@ export default function PromptClient({ prompts }: PromptClientProps) {
     return Array.from(tags);
   }, [prompts]);
 
+  const suggestions = usePromptSuggestions(prompts, searchTerm);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedTag]);
+
+  useEffect(() => () => {
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+    }
+  }, []);
+
   const filteredPrompts = useMemo(() => {
-    setCurrentPage(1); // Reset to first page on filter change
+    const normalizedSearch = searchTerm.trim().toLowerCase();
     return prompts.filter(prompt => {
-      const matchesSearch = 
-        prompt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        prompt.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        prompt.promptContent.toLowerCase().includes(searchTerm.toLowerCase());
-      
+      const matchesSearch = normalizedSearch
+        ? prompt.title.toLowerCase().includes(normalizedSearch) ||
+          prompt.author.toLowerCase().includes(normalizedSearch) ||
+          prompt.promptContent.toLowerCase().includes(normalizedSearch)
+        : true;
+
       const matchesTag = selectedTag ? prompt.tags.includes(selectedTag) : true;
 
       return matchesSearch && matchesTag;
@@ -47,6 +86,39 @@ export default function PromptClient({ prompts }: PromptClientProps) {
   }, [currentPage, filteredPrompts]);
 
   const totalPages = Math.ceil(filteredPrompts.length / PROMPTS_PER_PAGE);
+  const shouldShowSuggestions = showSuggestions && suggestions.length > 0;
+
+  const handleInputFocus = () => {
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+      blurTimeoutRef.current = null;
+    }
+
+    if (searchTerm.trim()) {
+      setShowSuggestions(true);
+    }
+  };
+
+  const handleInputBlur = () => {
+    blurTimeoutRef.current = setTimeout(() => {
+      setShowSuggestions(false);
+    }, 120);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setShowSuggestions(!!value.trim());
+  };
+
+  const handleSuggestionSelect = (value: string) => {
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+      blurTimeoutRef.current = null;
+    }
+
+    setSearchTerm(value);
+    setShowSuggestions(false);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -72,13 +144,40 @@ export default function PromptClient({ prompts }: PromptClientProps) {
 
       <div className="mb-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
         <div className="flex flex-col md:flex-row gap-4">
-          <input 
-            type="text"
-            placeholder="Cari berdasarkan judul, penulis, atau isi..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="flex-grow p-3 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600"
-          />
+          <div className="relative flex-grow">
+            <input
+              type="text"
+              placeholder="Cari berdasarkan judul, penulis, atau isi..."
+              value={searchTerm}
+              onChange={e => handleSearchChange(e.target.value)}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+              className="flex-grow w-full p-3 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600"
+            />
+            {shouldShowSuggestions && (
+              <ul className="absolute z-20 mt-1 w-full overflow-hidden rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                {suggestions.map(suggestion => (
+                  <li key={`${suggestion.type}-${suggestion.value}`} className="border-b border-gray-100 last:border-0 dark:border-gray-700">
+                    <button
+                      type="button"
+                      className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 dark:hover:bg-gray-700 dark:focus:bg-gray-700"
+                      onMouseDown={event => {
+                        event.preventDefault();
+                        handleSuggestionSelect(suggestion.value);
+                      }}
+                    >
+                      <div className="font-medium text-gray-800 dark:text-gray-100">
+                        {highlightMatches(suggestion.value, searchTerm)}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {suggestion.type === 'title' ? 'Judul' : 'Penulis'} • {suggestion.occurrences} kecocokan
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
           <select
             value={selectedTag}
             onChange={e => setSelectedTag(e.target.value)}
@@ -96,7 +195,9 @@ export default function PromptClient({ prompts }: PromptClientProps) {
         {paginatedPrompts.map((prompt: Prompt) => (
           <Link key={prompt.id} href={`/kumpulan-prompt/${prompt.slug}`}>
             <div className="block h-full p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 dark:bg-gray-900 dark:border-gray-700 dark:hover:bg-gray-700">
-              <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{prompt.title}</h5>
+              <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                {highlightMatches(prompt.title, searchTerm)}
+              </h5>
               <p className="font-normal text-gray-500 dark:text-gray-400">
                 Oleh:{' '}
                 {prompt.link || prompt.facebook ? (
@@ -106,14 +207,16 @@ export default function PromptClient({ prompts }: PromptClientProps) {
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
                   >
-                    {prompt.author}
+                    {highlightMatches(prompt.author, searchTerm)}
                   </a>
                 ) : (
-                  prompt.author
+                  <>{highlightMatches(prompt.author, searchTerm)}</>
                 )}
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Tanggal: {new Date(prompt.date).toLocaleDateString('id-ID')}</p>
-              <p className="font-normal text-gray-600 dark:text-gray-300 mb-4">Tool: <strong>{prompt.tool}</strong></p>
+              <p className="font-normal text-gray-600 dark:text-gray-300 mb-4">
+                Tool: <strong>{highlightMatches(prompt.tool, searchTerm)}</strong>
+              </p>
               <div className="flex flex-wrap gap-2">
                 {prompt.tags.map(tag => (
                   <span key={tag} className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300">{tag}</span>
