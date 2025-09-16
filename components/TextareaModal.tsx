@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, X } from 'lucide-react';
 
 interface TextareaModalProps {
@@ -14,6 +14,12 @@ interface TextareaModalProps {
 
 export default function TextareaModal({ isOpen, onClose, value, onChange, title, readOnly = false }: TextareaModalProps) {
   const [internalValue, setInternalValue] = useState(value);
+
+  useEffect(() => {
+    if (isOpen) {
+      setInternalValue(value);
+    }
+  }, [isOpen, value]);
 
   if (!isOpen) return null;
 
