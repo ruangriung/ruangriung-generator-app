@@ -45,7 +45,7 @@ export default function CookieConsent() {
         <div className="flex-1">
           <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">Persetujuan Cookie</h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Kami menggunakan cookie untuk menyimpan preferensi Anda seperti riwayat chat dan tema. Ini membantu meningkatkan pengalaman Anda di aplikasi kami.
+            Kami menggunakan cookie untuk menyimpan preferensi Anda seperti riwayat chat dan tema. Penolakan cookie tidak akan menghentikan penayangan iklan, namun data preferensi Anda mungkin tidak tersimpan.
           </p>
         </div>
       </div>
