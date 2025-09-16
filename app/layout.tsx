@@ -9,7 +9,7 @@ import { Toaster } from 'react-hot-toast';
 import CookieConsent from '@/components/CookieConsent';
 import ThemeScript from '@/components/ThemeScript';
 import AdSenseLoader from '@/components/AdSenseLoader';
-import { ADSENSE_META_ACCOUNT } from '@/lib/adsense';
+import { ADSENSE_PUBLISHER_ID } from '@/lib/adsense';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -63,21 +63,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-      <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <ThemeScript />
         {/* Tag verifikasi AdSense */}
-        <meta name="google-adsense-account" content={ADSENSE_META_ACCOUNT}></meta>
+        {ADSENSE_PUBLISHER_ID ? (
+          <meta
+            name="google-adsense-account"
+            content={ADSENSE_PUBLISHER_ID}
+          ></meta>
+        ) : null}
 
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className={`${inter.className} bg-light-bg`}>
         <AuthProvider>
-          <div className="flex flex-col min-h-screen">
-            <main className="flex-grow">
-              {children}
-            </main>
+          <div className="flex min-h-screen flex-col">
+            <main className="flex-grow">{children}</main>
             <Footer />
           </div>
         </AuthProvider>
@@ -99,7 +102,6 @@ export default function RootLayout({
             `,
           }}
         />
-        
       </body>
     </html>
   );

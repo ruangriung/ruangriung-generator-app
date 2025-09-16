@@ -9,10 +9,13 @@ declare global {
   }
 }
 
-const CONSENT_STORAGE_KEY = 'cookie_consent';
 const isProduction = process.env.NODE_ENV === 'production';
 
-type ConsentEvent = CustomEvent<boolean>;
+const defaultAdStyle: CSSProperties = {
+  display: 'block',
+  width: '100%',
+  minHeight: '120px',
+};
 
 interface AdBannerProps {
   className?: string;
@@ -24,13 +27,12 @@ interface AdBannerProps {
 
 export const AdBanner = ({
   className = '',
-  style = { display: 'block' },
+  style,
   dataAdSlot,
   dataAdFormat = 'auto',
   dataFullWidthResponsive = 'true',
 }: AdBannerProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [hasConsent, setHasConsent] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [hasRequestedAd, setHasRequestedAd] = useState(false);
   const [scriptReady, setScriptReady] = useState(false);
@@ -40,52 +42,14 @@ export const AdBanner = ({
       return;
     }
 
-    const updateConsentFromStorage = () => {
-      try {
-        const stored = localStorage.getItem(CONSENT_STORAGE_KEY);
-        setHasConsent(stored === 'true');
-      } catch (error) {
-        console.warn('Tidak dapat membaca status persetujuan cookie:', error);
-        setHasConsent(false);
-      }
-    };
-
-    updateConsentFromStorage();
-
-    const handleConsentChange = (event: Event) => {
-      const consentEvent = event as ConsentEvent;
-      if (typeof consentEvent.detail === 'boolean') {
-        setHasConsent(consentEvent.detail);
-      } else {
-        updateConsentFromStorage();
-      }
-    };
-
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === CONSENT_STORAGE_KEY) {
-        updateConsentFromStorage();
-      }
-    };
-
-    window.addEventListener('cookie_consent_change', handleConsentChange as EventListener);
-    window.addEventListener('storage', handleStorage);
-
-    return () => {
-      window.removeEventListener('cookie_consent_change', handleConsentChange as EventListener);
-      window.removeEventListener('storage', handleStorage);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!hasConsent) {
-      setIsInView(false);
-      setHasRequestedAd(false);
-      setScriptReady(false);
+    const element = containerRef.current;
+    if (!element) {
+      setIsInView(true);
       return;
     }
 
-    const element = containerRef.current;
-    if (!element) {
+    if (!('IntersectionObserver' in window)) {
+      setIsInView(true);
       return;
     }
 
@@ -99,7 +63,7 @@ export const AdBanner = ({
       },
       {
         rootMargin: '200px',
-        threshold: 0.01,
+        threshold: 0.1,
       },
     );
 
@@ -108,11 +72,10 @@ export const AdBanner = ({
     return () => {
       observer.disconnect();
     };
-  }, [hasConsent]);
+  }, []);
 
   useEffect(() => {
-    if (!hasConsent || typeof window === 'undefined') {
-      setScriptReady(false);
+    if (typeof window === 'undefined') {
       return;
     }
 
@@ -131,15 +94,19 @@ export const AdBanner = ({
         setScriptReady(true);
         window.clearInterval(interval);
       }
-    }, 500);
+    }, 400);
 
     return () => {
       window.clearInterval(interval);
     };
-  }, [hasConsent]);
+  }, []);
 
   useEffect(() => {
-    if (!hasConsent || !isInView || hasRequestedAd || !scriptReady) {
+    setHasRequestedAd(false);
+  }, [dataAdSlot]);
+
+  useEffect(() => {
+    if (!isInView || hasRequestedAd || !scriptReady) {
       return;
     }
 
@@ -159,32 +126,46 @@ export const AdBanner = ({
     } catch (error) {
       console.error('Gagal memuat iklan AdSense:', error);
     }
-  }, [hasConsent, isInView, hasRequestedAd, scriptReady, dataAdSlot]);
+  }, [isInView, hasRequestedAd, scriptReady, dataAdSlot]);
 
   if (!ADSENSE_PUBLISHER_ID) {
     return null;
   }
 
+  const mergedStyle: CSSProperties = {
+    ...defaultAdStyle,
+    ...(style ?? {}),
+  };
+
   return (
-    <div ref={containerRef} className={`w-full text-center ${className}`}>
-      {hasConsent ? (
-        <ins
-          className="adsbygoogle"
-          style={style}
-          data-ad-client={ADSENSE_PUBLISHER_ID}
-          data-ad-slot={dataAdSlot}
-          data-ad-format={dataAdFormat}
-          data-full-width-responsive={dataFullWidthResponsive}
-          data-adtest={isProduction ? undefined : 'on'}
-        />
-      ) : (
-        <div
-          className="mx-auto flex min-h-[90px] w-full max-w-xl items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-xs text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
-          role="note"
-        >
-          Iklan akan tampil setelah Anda memberikan persetujuan cookie.
+    <div
+      ref={containerRef}
+      className={`w-full ${className}`}
+      role="region"
+      aria-label="Unit iklan yang dilindungi dari klik tidak sengaja"
+    >
+      <div className="mx-auto flex max-w-xl flex-col gap-3 rounded-3xl border border-gray-200/70 bg-white/70 p-4 text-left shadow-lg shadow-slate-900/5 transition-colors dark:border-gray-700/60 dark:bg-slate-900/70 dark:shadow-black/40 sm:max-w-2xl">
+        <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <span>Iklan</span>
+          <span className="font-normal normal-case text-slate-400 dark:text-slate-500">
+            Klik hanya jika relevan
+          </span>
         </div>
-      )}
+        <div className="rounded-2xl border border-dashed border-slate-200/80 bg-white/80 p-4 dark:border-slate-700/60 dark:bg-slate-950/40">
+          <p className="mb-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            Area aman ditambahkan agar jarak dengan elemen lain cukup jauh dan membantu mencegah klik yang tidak disengaja.
+          </p>
+          <ins
+            className="adsbygoogle block w-full"
+            style={mergedStyle}
+            data-ad-client={ADSENSE_PUBLISHER_ID}
+            data-ad-slot={dataAdSlot}
+            data-ad-format={dataAdFormat}
+            data-full-width-responsive={dataFullWidthResponsive}
+            data-adtest={isProduction ? undefined : 'on'}
+          />
+        </div>
+      </div>
     </div>
   );
 };
