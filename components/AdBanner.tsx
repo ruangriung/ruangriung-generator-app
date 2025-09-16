@@ -144,17 +144,8 @@ export const AdBanner = ({
       role="region"
       aria-label="Unit iklan yang dilindungi dari klik tidak sengaja"
     >
-      <div className="mx-auto flex max-w-xl flex-col gap-3 rounded-3xl border border-gray-200/70 bg-white/70 p-4 text-left shadow-lg shadow-slate-900/5 transition-colors dark:border-gray-700/60 dark:bg-slate-900/70 dark:shadow-black/40 sm:max-w-2xl">
-        <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-          <span>Iklan</span>
-          <span className="font-normal normal-case text-slate-400 dark:text-slate-500">
-            Klik hanya jika relevan
-          </span>
-        </div>
+      <div className="mx-auto max-w-xl rounded-3xl border border-gray-200/70 bg-white/70 p-4 text-left shadow-lg shadow-slate-900/5 transition-colors dark:border-gray-700/60 dark:bg-slate-900/70 dark:shadow-black/40 sm:max-w-2xl">
         <div className="rounded-2xl border border-dashed border-slate-200/80 bg-white/80 p-4 dark:border-slate-700/60 dark:bg-slate-950/40">
-          <p className="mb-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-            Area aman ditambahkan agar jarak dengan elemen lain cukup jauh dan membantu mencegah klik yang tidak disengaja.
-          </p>
           <ins
             className="adsbygoogle block w-full"
             style={mergedStyle}
