@@ -3,8 +3,9 @@ id: "91"
 slug: "3dnametagphoto"
 title: "3DnametagPHOTO"
 author: "kokosima"
-facebook: "https://www.facebook.com/share/p/1C68CA1BtA/"
+facebook: "https://www.facebook.com/chochoshima"
 date: "2025-09-16"
+image: "https://www.facebook.com/share/p/1C68CA1BtA/"
 tool: "Gemini"
 tags:
   - digital-art
