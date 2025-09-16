@@ -8,6 +8,8 @@ import Script from 'next/script';
 import { Toaster } from 'react-hot-toast';
 import CookieConsent from '@/components/CookieConsent';
 import ThemeScript from '@/components/ThemeScript';
+import AdSenseLoader from '@/components/AdSenseLoader';
+import { ADSENSE_META_ACCOUNT } from '@/lib/adsense';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -60,24 +62,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Ini adalah ID Penayang Anda yang sudah benar
-  const YOUR_AD_PUBLISHER_ID = "ca-pub-1439044724518446";
-
   return (
       <html lang="en" suppressHydrationWarning>
       <head>
         <ThemeScript />
         {/* Tag verifikasi AdSense */}
-        <meta name="google-adsense-account" content={YOUR_AD_PUBLISHER_ID}></meta>
-        
-        {/* Skrip utama AdSense menggunakan ID Penayang */}
-        <Script
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${YOUR_AD_PUBLISHER_ID}`}
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
-        
+        <meta name="google-adsense-account" content={ADSENSE_META_ACCOUNT}></meta>
+
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
@@ -92,6 +83,7 @@ export default function RootLayout({
         </AuthProvider>
         <Toaster />
         <CookieConsent />
+        <AdSenseLoader />
 
         {/* Google Analytics Script */}
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-PWFT2SQWNZ" />
