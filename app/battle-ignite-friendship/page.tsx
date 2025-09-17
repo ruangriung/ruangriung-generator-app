@@ -71,12 +71,12 @@ const participantDirectory = {
   Nurul: {
     name: 'Nurul',
     community: 'RuangRiung',
-    facebookUrl: 'https://www.facebook.com/nurul.sholehah.eka',
+    facebookUrl: 'https://www.facebook.com/uul.aja',
   },
   'Ayu Dian': {
     name: 'Ayu Dian',
     community: 'Timun-AI',
-    facebookUrl: 'https://www.facebook.com/ayu.D14n.1992',
+    facebookUrl: 'https://www.facebook.com/Ayu.D14n.1992',
   },
   'Saka Mbarep': {
     name: 'Saka Mbarep',
@@ -91,7 +91,7 @@ const participantDirectory = {
   'Bangteh CRT': {
     name: 'Bangteh CRT',
     community: 'RuangRiung',
-    facebookUrl: 'https://www.facebook.com/janseengan',
+    facebookUrl: 'https://www.facebook.com/share/1BM5gUuc29/',
   },
   'Ismail A.R': {
     name: 'Ismail A.R',
@@ -116,12 +116,12 @@ const participantDirectory = {
   'Winda A.': {
     name: 'Winda A.',
     community: 'Timun-AI',
-    facebookUrl: 'https://www.facebook.com/windaazizah',
+    facebookUrl: 'https://www.facebook.com/share/1GfHJi8CRf/',
   },
   'David Amd': {
     name: 'David Amd',
     community: 'RuangRiung',
-    facebookUrl: 'https://www.facebook.com/davidamd',
+    facebookUrl: 'https://www.facebook.com/share/1FcxWDCDLc/',
   },
   'Elena M.': {
     name: 'Elena M.',
@@ -136,17 +136,17 @@ const participantDirectory = {
   'Rudi H.': {
     name: 'Rudi H.',
     community: 'Timun-AI',
-    facebookUrl: 'https://www.facebook.com/saka.mbarep.2025',
+    facebookUrl: 'https://www.facebook.com/share/1BXc9Ym8v5/',
   },
   'Code Z': {
     name: 'Code Z',
     community: 'RuangRiung',
-    facebookUrl: 'https://www.facebook.com/uul.aja',
+    facebookUrl: 'https://www.facebook.com/share/1VvKsZhLim/',
   },
   'Sri Hayati': {
     name: 'Sri Hayati',
     community: 'Timun-AI',
-    facebookUrl: 'https://www.facebook.com/sri.hayati',
+    facebookUrl: 'https://www.facebook.com/share/1BHrAXtHiu/',
   },
 } satisfies Record<string, ParticipantInfo>;
 
@@ -160,7 +160,7 @@ const withParticipant = (
 
 const eventHighlights = [
   {
-    title: 'Tema',
+    title: 'Battle',
     highlight: 'Friendship',
     description:
       'Menyalakan kembali semangat persahabatan melalui karya visual terbaik dari kedua komunitas.',
@@ -322,7 +322,7 @@ const thirdPlaceMatches = [
     match: '3rd Place Battle',
     stageLabel: '3rd Place',
     dateLabel: 'Minggu, 21 September 2025',
-    timeLabel: '19.00 (bersamaan Final)',
+    timeLabel: '10.00 - 19.00 (bersamaan Final)',
     locationLabel: 'RuangRiung AI Image',
     left: { name: 'Kalah Semifinal 1', subtitle: 'Semifinal 1' },
     right: { name: 'Kalah Semifinal 2', subtitle: 'Semifinal 2' },
@@ -351,13 +351,13 @@ const stageSchedule = [
   {
     stage: 'Final',
     date: 'Minggu, 21 September 2025',
-    time: '19.00',
+    time: '10.00 - 19.00',
     location: 'RuangRiung AI Image',
   },
   {
     stage: '3rd Place',
     date: 'Minggu, 21 September 2025',
-    time: '19.00 (bersamaan Final)',
+    time: '10.00 - 19.00 (bersamaan Final)',
     location: 'RuangRiung AI Image',
   },
 ] as const;
