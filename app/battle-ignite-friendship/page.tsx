@@ -281,6 +281,45 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/battle-ignite-friendship',
   },
+  keywords: [
+    'Battle Ignite Friendship',
+    'RuangRiung',
+    'Timun-AI',
+    'Kompetisi AI Art',
+    'Battle Ignite',
+    'Turnamen AI Art',
+    'Jadwal Battle Ignite',
+    'Tema Battle Ignite',
+    'Komunitas AI Indonesia',
+  ],
+  openGraph: {
+    title: 'Battle Ignite Friendship - RuangRiung vs Timun-AI',
+    description:
+      'Ikuti Battle Ignite Friendship: duel kreator AI RuangRiung dan Timun-AI lengkap dengan jadwal, tema, dan peserta setiap babak.',
+    url: '/battle-ignite-friendship',
+    type: 'website',
+    siteName: 'RuangRiung AI Generator',
+    locale: 'id_ID',
+    images: [
+      {
+        url: '/battle-ignite-friendship/opengraph-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Kolase Battle Ignite Friendship RuangRiung vs Timun-AI',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Battle Ignite Friendship - RuangRiung vs Timun-AI',
+    description:
+      'Skema lengkap Battle Ignite Friendship: peserta, tema, dan jadwal duel kreator AI RuangRiung dan Timun-AI.',
+    images: ['/battle-ignite-friendship/opengraph-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 const ParticipantBadge = ({
