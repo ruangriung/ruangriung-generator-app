@@ -310,7 +310,7 @@ const finalMatches = [
     match: 'Grand Final',
     stageLabel: 'Final',
     dateLabel: 'Minggu, 21 September 2025',
-    timeLabel: '19.00',
+    timeLabel: '10.00 - 19.00',
     locationLabel: 'RuangRiung AI Image',
     left: { name: 'Pemenang Semifinal 1', subtitle: 'Semifinal 1' },
     right: { name: 'Pemenang Semifinal 2', subtitle: 'Semifinal 2' },
@@ -791,7 +791,7 @@ export default function BattleIgniteFriendshipPage() {
             <div className="text-center">
               <h2 className="text-3xl font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white">Babak Final</h2>
               <p className="mt-2 text-sm font-semibold uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-300">
-                Minggu, 21 September 2025 - Pukul 19.00
+                Minggu, 21 September 2025 - Pukul 10.00 - 19.00
               </p>
             </div>
 
@@ -806,7 +806,7 @@ export default function BattleIgniteFriendshipPage() {
             <div className="text-center">
               <h2 className="text-3xl font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white">3rd Place Battle</h2>
               <p className="mt-2 text-sm font-semibold uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-300">
-                Digelar serentak dengan Final pada pukul 19.00
+                Digelar serentak dengan Final pada pukul 10.00 - 19.00
               </p>
             </div>
 
