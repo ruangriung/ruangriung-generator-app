@@ -30,6 +30,37 @@ const createInitials = (name: string) => {
     .join('');
 };
 
+type Community = 'RuangRiung' | 'Timun-AI';
+
+type ParticipantInfo = {
+  name: string;
+  community?: Community;
+  subtitle?: string;
+};
+
+type BracketMatch = {
+  match: string;
+  stageLabel: string;
+  dateLabel: string;
+  timeLabel: string;
+  locationLabel: string;
+  left: ParticipantInfo;
+  right: ParticipantInfo;
+};
+
+const communityAccents: Record<Community, string> = {
+  RuangRiung: 'from-amber-400 via-orange-500 to-amber-600',
+  'Timun-AI': 'from-emerald-400 via-green-500 to-lime-500',
+};
+
+const fallbackAccent = 'from-slate-500 via-slate-600 to-slate-700';
+
+const resolveAccent = (participant: ParticipantInfo) =>
+  participant.community ? communityAccents[participant.community] : fallbackAccent;
+
+const resolveSubtitle = (participant: ParticipantInfo) =>
+  participant.subtitle ?? participant.community;
+
 const eventHighlights = [
   {
     title: 'Tema',
@@ -65,80 +96,141 @@ const qualificationBattles = [
   {
     id: 1,
     theme: 'Makoto Shinkai style',
-    left: { name: 'Nurul', community: 'RuangRiung' as const },
-    right: { name: 'Ayu Dian', community: 'Timun-AI' as const },
+    left: { name: 'Nurul', community: 'RuangRiung' },
+    right: { name: 'Ayu Dian', community: 'Timun-AI' },
   },
   {
     id: 2,
     theme: 'Lattice reality',
-    left: { name: 'Saka Mbarep', community: 'RuangRiung' as const },
-    right: { name: 'Elena M.', community: 'Timun-AI' as const },
+    left: { name: 'Saka Mbarep', community: 'RuangRiung' },
+    right: { name: 'Elena M.', community: 'Timun-AI' },
   },
   {
     id: 3,
     theme: 'Refraction labyrinth',
-    left: { name: 'Bangteh CRT', community: 'RuangRiung' as const },
-    right: { name: 'Ismail A.R', community: 'Timun-AI' as const },
+    left: { name: 'Bangteh CRT', community: 'RuangRiung' },
+    right: { name: 'Ismail A.R', community: 'Timun-AI' },
   },
   {
     id: 4,
     theme: 'Escher style impossible geometri',
-    left: { name: 'Famii', community: 'RuangRiung' as const },
-    right: { name: 'Aluh Gemoy', community: 'Timun-AI' as const },
+    left: { name: 'Famii', community: 'RuangRiung' },
+    right: { name: 'Aluh Gemoy', community: 'Timun-AI' },
   },
   {
     id: 5,
     theme: 'Hyper-detailed Maximalism',
-    left: { name: 'Mahidara', community: 'RuangRiung' as const },
-    right: { name: 'Rudi H.', community: 'Timun-AI' as const },
+    left: { name: 'Mahidara', community: 'RuangRiung' },
+    right: { name: 'Rudi H.', community: 'Timun-AI' },
   },
   {
     id: 6,
     theme: 'Hypervoronoi Matrix',
-    left: { name: 'David Amd', community: 'RuangRiung' as const },
-    right: { name: 'Budy R.', community: 'Timun-AI' as const },
+    left: { name: 'David Amd', community: 'RuangRiung' },
+    right: { name: 'Budy R.', community: 'Timun-AI' },
   },
   {
     id: 7,
     theme: 'Baroque Grotesque',
-    left: { name: 'Dery Lau', community: 'RuangRiung' as const },
-    right: { name: 'Winda A.', community: 'Timun-AI' as const },
+    left: { name: 'Dery Lau', community: 'RuangRiung' },
+    right: { name: 'Winda A.', community: 'Timun-AI' },
   },
   {
     id: 8,
     theme: 'Fractal Lines',
-    left: { name: 'Code Z', community: 'RuangRiung' as const },
-    right: { name: 'Sri Hayati', community: 'Timun-AI' as const },
+    left: { name: 'Code Z', community: 'RuangRiung' },
+    right: { name: 'Sri Hayati', community: 'Timun-AI' },
   },
-] as const;
+] satisfies Array<{
+  id: number;
+  theme: string;
+  left: ParticipantInfo;
+  right: ParticipantInfo;
+}>;
 
-const communityAccents = {
-  'RuangRiung': 'from-amber-400 via-orange-500 to-amber-600',
-  'Timun-AI': 'from-emerald-400 via-green-500 to-lime-500',
-} as const;
-
-const quarterFinalists = [
+const quarterFinalMatches = [
   {
     match: 'Match 1',
-    left: { name: 'Elena M.', community: 'Timun-AI' as const },
-    right: { name: 'Ayu Dian', community: 'Timun-AI' as const },
+    stageLabel: 'Perempat Final',
+    dateLabel: 'Jumat, 19 September 2025',
+    timeLabel: '10.00 – 22.00',
+    locationLabel: 'RuangRiung AI Image',
+    left: { name: 'Elena M.', community: 'Timun-AI' },
+    right: { name: 'Ayu Dian', community: 'Timun-AI' },
   },
   {
     match: 'Match 2',
-    left: { name: 'Saka Mbarep', community: 'RuangRiung' as const },
-    right: { name: 'Ismail A.R', community: 'Timun-AI' as const },
+    stageLabel: 'Perempat Final',
+    dateLabel: 'Jumat, 19 September 2025',
+    timeLabel: '10.00 – 22.00',
+    locationLabel: 'RuangRiung AI Image',
+    left: { name: 'Saka Mbarep', community: 'RuangRiung' },
+    right: { name: 'Ismail A.R', community: 'Timun-AI' },
   },
   {
     match: 'Match 3',
-    left: { name: 'Rudi H.', community: 'Timun-AI' as const },
-    right: { name: 'Aluh Gemoy', community: 'Timun-AI' as const },
+    stageLabel: 'Perempat Final',
+    dateLabel: 'Jumat, 19 September 2025',
+    timeLabel: '10.00 – 22.00',
+    locationLabel: 'RuangRiung AI Image',
+    left: { name: 'Rudi H.', community: 'Timun-AI' },
+    right: { name: 'Aluh Gemoy', community: 'Timun-AI' },
   },
   {
     match: 'Match 4',
-    left: { name: 'Winda A.', community: 'Timun-AI' as const },
-    right: { name: 'Code Z', community: 'RuangRiung' as const },
+    stageLabel: 'Perempat Final',
+    dateLabel: 'Jumat, 19 September 2025',
+    timeLabel: '10.00 – 22.00',
+    locationLabel: 'RuangRiung AI Image',
+    left: { name: 'Winda A.', community: 'Timun-AI' },
+    right: { name: 'Code Z', community: 'RuangRiung' },
   },
-] as const;
+] satisfies BracketMatch[];
+
+const semiFinalMatches = [
+  {
+    match: 'Semifinal 1',
+    stageLabel: 'Semifinal',
+    dateLabel: 'Sabtu, 20 September 2025',
+    timeLabel: '10.00 – 22.00',
+    locationLabel: 'RuangRiung AI Image',
+    left: { name: 'Pemenang Match 1', subtitle: 'Perempat Final 1' },
+    right: { name: 'Pemenang Match 2', subtitle: 'Perempat Final 2' },
+  },
+  {
+    match: 'Semifinal 2',
+    stageLabel: 'Semifinal',
+    dateLabel: 'Sabtu, 20 September 2025',
+    timeLabel: '10.00 – 22.00',
+    locationLabel: 'RuangRiung AI Image',
+    left: { name: 'Pemenang Match 3', subtitle: 'Perempat Final 3' },
+    right: { name: 'Pemenang Match 4', subtitle: 'Perempat Final 4' },
+  },
+] satisfies BracketMatch[];
+
+const finalMatches = [
+  {
+    match: 'Grand Final',
+    stageLabel: 'Final',
+    dateLabel: 'Minggu, 21 September 2025',
+    timeLabel: '19.00',
+    locationLabel: 'RuangRiung AI Image',
+    left: { name: 'Pemenang Semifinal 1', subtitle: 'Semifinal 1' },
+    right: { name: 'Pemenang Semifinal 2', subtitle: 'Semifinal 2' },
+  },
+] satisfies BracketMatch[];
+
+const thirdPlaceMatches = [
+  {
+    match: '3rd Place Battle',
+    stageLabel: '3rd Place',
+    dateLabel: 'Minggu, 21 September 2025',
+    timeLabel: '19.00 (bersamaan Final)',
+    locationLabel: 'RuangRiung AI Image',
+    left: { name: 'Kalah Semifinal 1', subtitle: 'Semifinal 1' },
+    right: { name: 'Kalah Semifinal 2', subtitle: 'Semifinal 2' },
+  },
+] satisfies BracketMatch[];
 
 const stageSchedule = [
   {
@@ -168,7 +260,7 @@ const stageSchedule = [
   {
     stage: '3rd Place',
     date: 'Minggu, 21 September 2025',
-    time: '13.00',
+    time: '19.00 (bersamaan Final)',
     location: 'RuangRiung AI Image',
   },
 ] as const;
@@ -235,6 +327,53 @@ const Pill = ({ label, icon: Icon }: { label: string; icon?: LucideIcon }) => (
     {Icon ? <Icon className="h-4 w-4" /> : null}
     {label}
   </span>
+);
+
+const BracketMatchCard = ({
+  match,
+  stageLabel,
+  dateLabel,
+  timeLabel,
+  locationLabel,
+  left,
+  right,
+}: BracketMatch) => (
+  <div className="overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.08),_transparent_60%)] bg-slate-950/60 p-6 shadow-2xl shadow-black/40 backdrop-blur">
+    <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
+      <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.4em] text-gray-200">
+        {match}
+      </span>
+      <span className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-emerald-200">
+        <CalendarDays className="h-3.5 w-3.5" /> {dateLabel}
+      </span>
+    </div>
+    <div className="mt-6 flex flex-col items-center gap-6 text-center sm:flex-row sm:flex-wrap sm:justify-between sm:text-left">
+      <ParticipantBadge
+        name={left.name}
+        accent={resolveAccent(left)}
+        subtitle={resolveSubtitle(left)}
+      />
+      <div className="flex w-full flex-col items-center justify-center text-center sm:flex-1">
+        <span className="text-lg font-black uppercase tracking-[0.5em] text-emerald-300">VS</span>
+        <span className="text-[10px] font-semibold uppercase tracking-[0.4em] text-gray-400">{stageLabel}</span>
+      </div>
+      <ParticipantBadge
+        name={right.name}
+        accent={resolveAccent(right)}
+        subtitle={resolveSubtitle(right)}
+      />
+    </div>
+    <div className="mt-6 flex flex-col items-center gap-3 text-center text-[11px] font-medium uppercase tracking-[0.25em] text-gray-200 sm:flex-row sm:justify-between sm:text-left">
+      <span className="inline-flex items-center gap-2">
+        <MapPin className="h-4 w-4 text-emerald-300" />
+        {locationLabel}
+      </span>
+      <span className="inline-flex items-center gap-2">
+        <Clock className="h-4 w-4 text-amber-300" />
+        {timeLabel}
+      </span>
+    </div>
+  </div>
 );
 
 export default function BattleIgniteFriendshipPage() {
@@ -329,7 +468,7 @@ export default function BattleIgniteFriendshipPage() {
                   key={battle.id}
                   className="overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.08),_transparent_60%)] bg-slate-950/60 p-6 shadow-2xl shadow-black/40 backdrop-blur"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:flex-wrap sm:justify-between sm:text-left">
                     <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.4em] text-gray-300">
                       Battle {battle.id}
                     </span>
@@ -338,19 +477,19 @@ export default function BattleIgniteFriendshipPage() {
                     </span>
                   </div>
 
-                  <div className="mt-6 flex flex-wrap items-center justify-between gap-6">
+                  <div className="mt-6 flex flex-col items-center gap-6 text-center sm:flex-row sm:flex-wrap sm:justify-between sm:text-left">
                     <ParticipantBadge
                       name={battle.left.name}
-                      accent={communityAccents[battle.left.community]}
-                      subtitle={battle.left.community}
+                      accent={resolveAccent(battle.left)}
+                      subtitle={resolveSubtitle(battle.left)}
                     />
-                    <div className="flex flex-1 min-w-[120px] items-center justify-center">
+                    <div className="flex w-full items-center justify-center sm:flex-1 sm:min-w-[120px]">
                       <span className="text-xs font-black uppercase tracking-[0.5em] text-emerald-300">VS</span>
                     </div>
                     <ParticipantBadge
                       name={battle.right.name}
-                      accent={communityAccents[battle.right.community]}
-                      subtitle={battle.right.community}
+                      accent={resolveAccent(battle.right)}
+                      subtitle={resolveSubtitle(battle.right)}
                     />
                   </div>
 
@@ -375,46 +514,56 @@ export default function BattleIgniteFriendshipPage() {
             </div>
 
             <div className="mt-10 grid gap-8 lg:grid-cols-2">
-              {quarterFinalists.map((match) => (
-                <div
-                  key={match.match}
-                  className="group relative overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.08),_transparent_60%)] bg-slate-950/60 p-6 shadow-2xl shadow-black/40 backdrop-blur"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.4em] text-gray-200">
-                      {match.match}
-                    </span>
-                    <span className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-emerald-200">
-                      <CalendarDays className="h-3.5 w-3.5" /> 19 Sept 2025
-                    </span>
-                  </div>
-                  <div className="mt-6 flex flex-wrap items-center justify-between gap-6">
-                    <ParticipantBadge
-                      name={match.left.name}
-                      accent={communityAccents[match.left.community]}
-                      subtitle={match.left.community}
-                    />
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <span className="text-lg font-black uppercase tracking-[0.5em] text-emerald-300">VS</span>
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.4em] text-gray-400">Perempat Final</span>
-                    </div>
-                    <ParticipantBadge
-                      name={match.right.name}
-                      accent={communityAccents[match.right.community]}
-                      subtitle={match.right.community}
-                    />
-                  </div>
-                  <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-[11px] font-medium uppercase tracking-[0.25em] text-gray-200">
-                    <span className="inline-flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-emerald-300" />
-                      RuangRiung AI Image
-                    </span>
-                    <span className="inline-flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-amber-300" />
-                      10.00 – 22.00
-                    </span>
-                  </div>
-                </div>
+              {quarterFinalMatches.map((match) => (
+                <BracketMatchCard key={match.match} {...match} />
+              ))}
+            </div>
+          </section>
+
+          <section className="mt-16">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold uppercase tracking-[0.2em] text-white">Babak Semifinal</h2>
+              <p className="mt-2 text-sm font-semibold uppercase tracking-[0.3em] text-emerald-300">
+                Jadwal: Sabtu, 20 September 2025
+              </p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.35em] text-amber-200">
+                Slot menunggu pemenang perempat final
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-8 lg:grid-cols-2">
+              {semiFinalMatches.map((match) => (
+                <BracketMatchCard key={match.match} {...match} />
+              ))}
+            </div>
+          </section>
+
+          <section className="mt-16">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold uppercase tracking-[0.2em] text-white">Babak Final</h2>
+              <p className="mt-2 text-sm font-semibold uppercase tracking-[0.3em] text-emerald-300">
+                Minggu, 21 September 2025 - Pukul 19.00
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-8 sm:mx-auto sm:max-w-2xl">
+              {finalMatches.map((match) => (
+                <BracketMatchCard key={match.match} {...match} />
+              ))}
+            </div>
+          </section>
+
+          <section className="mt-16">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold uppercase tracking-[0.2em] text-white">3rd Place Battle</h2>
+              <p className="mt-2 text-sm font-semibold uppercase tracking-[0.3em] text-emerald-300">
+                Digelar serentak dengan Final pada pukul 19.00
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-8 sm:mx-auto sm:max-w-2xl">
+              {thirdPlaceMatches.map((match) => (
+                <BracketMatchCard key={match.match} {...match} />
               ))}
             </div>
           </section>
