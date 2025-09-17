@@ -367,7 +367,7 @@ const HighlightCard = ({
   description,
   icon: Icon,
 }: (typeof eventHighlights)[number]) => (
-  <div className="rounded-3xl border border-slate-200/70 bg-white/90 p-6 text-left shadow-xl shadow-slate-900/10 backdrop-blur-sm transition-colors duration-300 dark:border-white/10 dark:bg-white/5 dark:text-white dark:shadow-black/30">
+  <div className="rounded-3xl border border-slate-200/70 bg-white/90 p-6 text-left shadow-xl shadow-slate-900/10 backdrop-blur-sm transition-colors duration-300 dark:border-white/10 dark:bg-slate-900/70 dark:text-white dark:shadow-black/30">
     <div className="flex items-center gap-3">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-black dark:from-amber-500 dark:to-orange-600">
         <Icon className="h-6 w-6" aria-hidden />
@@ -382,7 +382,7 @@ const HighlightCard = ({
 );
 
 const Pill = ({ label, icon: Icon }: { label: string; icon?: LucideIcon }) => (
-  <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-4 py-1 text-sm font-medium text-slate-700 shadow-inner shadow-slate-900/10 transition-colors duration-300 dark:border-white/15 dark:bg-white/5 dark:text-gray-100 dark:shadow-black/40">
+  <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-4 py-1 text-sm font-medium text-slate-700 shadow-inner shadow-slate-900/10 transition-colors duration-300 dark:border-white/15 dark:bg-slate-900/70 dark:text-gray-100 dark:shadow-black/40">
     {Icon ? <Icon className="h-4 w-4" aria-hidden /> : null}
     {label}
   </span>
@@ -439,8 +439,8 @@ const BracketMatchCard = ({
 
 export default function BattleIgniteFriendshipPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-amber-50 via-white to-emerald-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.12),_transparent_60%)] dark:text-white">
-      <div className="bg-white/80 transition-colors duration-300 dark:bg-[radial-gradient(circle_at_bottom,_rgba(34,197,94,0.12),_transparent_60%)]">
+    <main className="min-h-screen bg-gradient-to-b from-amber-50 via-white to-emerald-50 text-slate-900 transition-colors duration-300 dark:from-slate-950 dark:via-slate-950 dark:to-slate-950 dark:bg-slate-950 dark:bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.14),_transparent_65%)] dark:text-white">
+      <div className="bg-white/80 transition-colors duration-300 dark:bg-slate-950/70 dark:bg-[radial-gradient(circle_at_bottom,_rgba(34,197,94,0.12),_transparent_60%)]">
         <div className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
@@ -497,7 +497,7 @@ export default function BattleIgniteFriendshipPage() {
               {stageSchedule.map((stage) => (
                 <div
                   key={stage.stage}
-                  className="relative rounded-3xl border border-slate-200/70 bg-white/90 p-6 shadow-2xl shadow-slate-900/10 backdrop-blur transition-colors duration-300 dark:border-white/10 dark:bg-white/5 dark:shadow-black/40"
+                  className="relative rounded-3xl border border-slate-200/70 bg-white/90 p-6 shadow-2xl shadow-slate-900/10 backdrop-blur transition-colors duration-300 dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/40"
                 >
                   <span
                     className="absolute left-[-1.85rem] top-7 hidden h-4 w-4 rounded-full border-2 border-white bg-gradient-to-br from-amber-300 to-emerald-400 shadow-lg shadow-slate-900/15 dark:border-slate-950 dark:shadow-black/40 sm:block"
@@ -563,7 +563,7 @@ export default function BattleIgniteFriendshipPage() {
                     />
                   </div>
 
-                  <div className="mt-6 rounded-2xl border border-amber-300/40 bg-white/80 p-4 text-center shadow-inner shadow-slate-900/10 transition-colors duration-300 dark:border-amber-300/20 dark:bg-white/5 dark:shadow-black/40">
+                  <div className="mt-6 rounded-2xl border border-amber-300/40 bg-white/80 p-4 text-center shadow-inner shadow-slate-900/10 transition-colors duration-300 dark:border-amber-300/20 dark:bg-slate-900/70 dark:shadow-black/40">
                     <span className="text-[10px] font-semibold uppercase tracking-[0.4em] text-emerald-600 dark:text-emerald-200">Tema Wajib</span>
                     <p className="mt-2 text-sm font-bold uppercase tracking-[0.25em] text-amber-600 dark:text-amber-200">{battle.theme}</p>
                   </div>
@@ -639,7 +639,7 @@ export default function BattleIgniteFriendshipPage() {
           </section>
 
           <section className="mt-16">
-            <div className="rounded-3xl border border-slate-200/70 bg-white/90 p-8 shadow-2xl shadow-slate-900/10 backdrop-blur transition-colors duration-300 dark:border-white/10 dark:bg-white/5 dark:shadow-black/40">
+            <div className="rounded-3xl border border-slate-200/70 bg-white/90 p-8 shadow-2xl shadow-slate-900/10 backdrop-blur transition-colors duration-300 dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/40">
               <div className="grid gap-8 md:grid-cols-3">
                 <div>
                   <div className="flex items-center gap-3">
