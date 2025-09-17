@@ -61,28 +61,54 @@ const eventHighlights = [
   },
 ] as const;
 
-const teamQualifiers = [
+const qualificationBattles = [
   {
-    name: 'RuangRiung',
-    accent: 'from-amber-400 via-orange-500 to-amber-600',
-    vsColor: 'text-amber-300',
-    matchups: [
-      { first: 'Nurul', second: 'Ayu Dian' },
-      { first: 'Saka Mbarep', second: 'Budi. R' },
-      { first: 'Famii', second: 'Aluh Gemoy' },
-      { first: 'Dery Lau', second: 'Winda Azizah' },
-    ],
+    id: 1,
+    theme: 'Makoto Shinichi Style',
+    left: { name: 'Nurul', community: 'RuangRiung' as const },
+    right: { name: 'Ayu Dian', community: 'Timun-AI' as const },
   },
   {
-    name: 'Timun-AI',
-    accent: 'from-emerald-400 via-green-500 to-lime-500',
-    vsColor: 'text-emerald-300',
-    matchups: [
-      { first: 'David', second: 'Elena' },
-      { first: 'Bangteng CRT', second: 'Ismail. A.R' },
-      { first: 'Mahidara', second: 'Rudi Hartono' },
-      { first: 'Code Z', second: 'Sri Hayati' },
-    ],
+    id: 2,
+    theme: 'Hyper-Detailed Maximalism',
+    left: { name: 'Saka Mbarep', community: 'RuangRiung' as const },
+    right: { name: 'Elena M.', community: 'Timun-AI' as const },
+  },
+  {
+    id: 3,
+    theme: 'Hyperreal Holographic Matrix',
+    left: { name: 'Bangteh CRT', community: 'RuangRiung' as const },
+    right: { name: 'Ismail A.R', community: 'Timun-AI' as const },
+  },
+  {
+    id: 4,
+    theme: 'Refraction Labyrinth',
+    left: { name: 'Famii', community: 'RuangRiung' as const },
+    right: { name: 'Aluh Gemoy', community: 'Timun-AI' as const },
+  },
+  {
+    id: 5,
+    theme: 'Baroque Grotesque',
+    left: { name: 'Mahidara', community: 'RuangRiung' as const },
+    right: { name: 'Rudi H.', community: 'Timun-AI' as const },
+  },
+  {
+    id: 6,
+    theme: 'Cyber Ethereal Essence',
+    left: { name: 'David Amd', community: 'RuangRiung' as const },
+    right: { name: 'Budy R.', community: 'Timun-AI' as const },
+  },
+  {
+    id: 7,
+    theme: 'Neon Dream Realism',
+    left: { name: 'Dery Lau', community: 'RuangRiung' as const },
+    right: { name: 'Winda A.', community: 'Timun-AI' as const },
+  },
+  {
+    id: 8,
+    theme: 'Fractal Lines Universe',
+    left: { name: 'Code Z', community: 'RuangRiung' as const },
+    right: { name: 'Sri Hayati', community: 'Timun-AI' as const },
   },
 ] as const;
 
@@ -94,8 +120,8 @@ const communityAccents = {
 const quarterFinalists = [
   {
     match: 'Match 1',
-    left: { name: 'Elena', community: 'Timun-AI' as const },
-    right: { name: 'Ayu Dian', community: 'RuangRiung' as const },
+    left: { name: 'Elena M.', community: 'Timun-AI' as const },
+    right: { name: 'Ayu Dian', community: 'Timun-AI' as const },
   },
   {
     match: 'Match 2',
@@ -104,13 +130,13 @@ const quarterFinalists = [
   },
   {
     match: 'Match 3',
-    left: { name: 'Rudi Hartono', community: 'Timun-AI' as const },
-    right: { name: 'Aluh Gemoy', community: 'RuangRiung' as const },
+    left: { name: 'Rudi H.', community: 'Timun-AI' as const },
+    right: { name: 'Aluh Gemoy', community: 'Timun-AI' as const },
   },
   {
     match: 'Match 4',
-    left: { name: 'Winda Azizah', community: 'RuangRiung' as const },
-    right: { name: 'Code Z', community: 'Timun-AI' as const },
+    left: { name: 'Winda A.', community: 'Timun-AI' as const },
+    right: { name: 'Code Z', community: 'RuangRiung' as const },
   },
 ] as const;
 
@@ -147,8 +173,8 @@ const stageSchedule = [
   },
 ] as const;
 
-const committee = ['Koko Ajeeb', 'Xenopath', 'Yogi Arfi'] as const;
-const judges = ['Edyxcho AI', 'Arif Tirtana'] as const;
+const committee = ['Yogi Arfi', 'Xenopath', 'Koko Ajeeb'] as const;
+const judges = ['Arif Tirtana', 'Edxycho AI'] as const;
 const tools = ['Gemini'] as const;
 const hashtag = '#IgniteBattleAI';
 
@@ -298,35 +324,47 @@ export default function BattleIgniteFriendshipPage() {
             </div>
 
             <div className="mt-10 grid gap-8 lg:grid-cols-2">
-              {teamQualifiers.map((team) => (
+              {qualificationBattles.map((battle) => (
                 <div
-                  key={team.name}
-                  className="rounded-3xl border border-white/10 bg-black/40 p-6 shadow-2xl shadow-black/40 backdrop-blur"
+                  key={battle.id}
+                  className="overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.08),_transparent_60%)] bg-slate-950/60 p-6 shadow-2xl shadow-black/40 backdrop-blur"
                 >
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.35em] text-gray-300/90">Kualifikasi</p>
-                      <h3 className="mt-1 text-2xl font-bold text-white">{team.name}</h3>
-                    </div>
-                    <span className={`rounded-full border border-white/20 bg-gradient-to-r ${team.accent} px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-black shadow-lg shadow-black/30`}>
-                      Squad
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.4em] text-gray-300">
+                      Battle {battle.id}
+                    </span>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-emerald-200">
+                      Tema Matchup
                     </span>
                   </div>
 
-                  <div className="mt-8 space-y-6">
-                    {team.matchups.map((matchup, index) => (
-                      <div
-                        key={`${team.name}-${matchup.first}-${matchup.second}`}
-                        className="relative flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-4 shadow-xl shadow-black/30"
-                      >
-                        <ParticipantBadge name={matchup.first} accent={team.accent} />
-                        <div className="flex flex-col items-center justify-center text-center">
-                          <span className={`text-sm font-black uppercase tracking-[0.4em] ${team.vsColor}`}>VS</span>
-                          <span className="text-[10px] font-medium uppercase tracking-[0.5em] text-gray-400">Match {index + 1}</span>
-                        </div>
-                        <ParticipantBadge name={matchup.second} accent={team.accent} />
-                      </div>
-                    ))}
+                  <div className="mt-6 flex flex-wrap items-center justify-between gap-6">
+                    <ParticipantBadge
+                      name={battle.left.name}
+                      accent={communityAccents[battle.left.community]}
+                      subtitle={`Tim ${battle.left.community}`}
+                    />
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.4em] text-emerald-200">Tema</span>
+                      <span className="mt-2 max-w-[12rem] text-sm font-bold uppercase tracking-[0.2em] text-amber-200">
+                        {battle.theme}
+                      </span>
+                      <span className="mt-3 text-xs font-black uppercase tracking-[0.5em] text-gray-300">VS</span>
+                    </div>
+                    <ParticipantBadge
+                      name={battle.right.name}
+                      accent={communityAccents[battle.right.community]}
+                      subtitle={`Tim ${battle.right.community}`}
+                    />
+                  </div>
+
+                  <div className="mt-6 grid grid-cols-2 gap-3 text-[11px] font-semibold uppercase tracking-[0.25em] text-gray-200">
+                    <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-center">
+                      Tim {battle.left.community}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-center">
+                      Tim {battle.right.community}
+                    </span>
                   </div>
                 </div>
               ))}
