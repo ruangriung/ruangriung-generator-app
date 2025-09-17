@@ -91,7 +91,7 @@ const participantDirectory = {
   'Budy R.': {
     name: 'Budy R.',
     community: 'Timun-AI',
-    facebookUrl: 'https://www.facebook.com/buddy.putrasunda',
+    facebookUrl: 'https://www.facebook.com/share/1GMCPX27jQ/',
   },
   'Bangteh CRT': {
     name: 'Bangteh CRT',
@@ -131,7 +131,7 @@ const participantDirectory = {
   'Elena M.': {
     name: 'Elena M.',
     community: 'Timun-AI',
-    facebookUrl: 'https://www.facebook.com/aiezci.endirleuweh',
+    facebookUrl: 'https://www.facebook.com/share/1LJRCLYc2a/',
   },
   'Dery Lau': {
     name: 'Dery Lau',
@@ -377,7 +377,7 @@ const committee: ProfiledPerson[] = [
 
 const judges: ProfiledPerson[] = [
   { name: 'Arif Tirtana', facebookUrl: 'https://www.facebook.com/ayicktigabelas' },
-  { name: 'Edxycho AI', facebookUrl: 'https://www.facebook.com/edxycho.ai' },
+  { name: 'Edxycho AI', facebookUrl: 'https://www.facebook.com/share/1P9khZTmg1/' },
 ];
 const tools = ['Gemini'] as const;
 const hashtag = '#IgniteBattleAI';
