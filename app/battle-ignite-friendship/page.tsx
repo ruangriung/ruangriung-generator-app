@@ -342,29 +342,21 @@ export default function BattleIgniteFriendshipPage() {
                     <ParticipantBadge
                       name={battle.left.name}
                       accent={communityAccents[battle.left.community]}
-                      subtitle={`Tim ${battle.left.community}`}
+                      subtitle={battle.left.community}
                     />
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.4em] text-emerald-200">Tema</span>
-                      <span className="mt-2 max-w-[12rem] text-sm font-bold uppercase tracking-[0.2em] text-amber-200">
-                        {battle.theme}
-                      </span>
-                      <span className="mt-3 text-xs font-black uppercase tracking-[0.5em] text-gray-300">VS</span>
+                    <div className="flex flex-1 min-w-[120px] items-center justify-center">
+                      <span className="text-xs font-black uppercase tracking-[0.5em] text-emerald-300">VS</span>
                     </div>
                     <ParticipantBadge
                       name={battle.right.name}
                       accent={communityAccents[battle.right.community]}
-                      subtitle={`Tim ${battle.right.community}`}
+                      subtitle={battle.right.community}
                     />
                   </div>
 
-                  <div className="mt-6 grid grid-cols-2 gap-3 text-[11px] font-semibold uppercase tracking-[0.25em] text-gray-200">
-                    <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-center">
-                      Tim {battle.left.community}
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-center">
-                      Tim {battle.right.community}
-                    </span>
+                  <div className="mt-6 rounded-2xl border border-amber-300/20 bg-white/5 p-4 text-center shadow-inner shadow-black/40">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.4em] text-emerald-200">Tema Wajib</span>
+                    <p className="mt-2 text-sm font-bold uppercase tracking-[0.25em] text-amber-200">{battle.theme}</p>
                   </div>
                 </div>
               ))}
