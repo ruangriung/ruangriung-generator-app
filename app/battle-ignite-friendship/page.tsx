@@ -54,6 +54,11 @@ type BracketMatch = {
   right: ParticipantInfo;
 };
 
+type ProfiledPerson = {
+  name: string;
+  facebookUrl: string;
+};
+
 const communityAccents: Record<Community, string> = {
   RuangRiung: 'from-amber-400 via-orange-500 to-amber-600',
   'Timun-AI': 'from-emerald-400 via-green-500 to-lime-500',
@@ -86,7 +91,7 @@ const participantDirectory = {
   'Budy R.': {
     name: 'Budy R.',
     community: 'Timun-AI',
-    facebookUrl: 'https://www.facebook.com/buddy.putrasunda',
+    facebookUrl: 'https://www.facebook.com/share/1GMCPX27jQ/',
   },
   'Bangteh CRT': {
     name: 'Bangteh CRT',
@@ -126,7 +131,7 @@ const participantDirectory = {
   'Elena M.': {
     name: 'Elena M.',
     community: 'Timun-AI',
-    facebookUrl: 'https://www.facebook.com/aiezci.endirleuweh',
+    facebookUrl: 'https://www.facebook.com/share/1LJRCLYc2a/',
   },
   'Dery Lau': {
     name: 'Dery Lau',
@@ -362,8 +367,18 @@ const stageSchedule = [
   },
 ] as const;
 
-const committee = ['Yogi Arfi', 'Xenopath', 'Koko Ajeeb'] as const;
-const judges = ['Arif Tirtana', 'Edxycho AI'] as const;
+const committee: ProfiledPerson[] = [
+  { name: 'Yogi Arfi', facebookUrl: 'https://www.facebook.com/yogee.krib' },
+  { name: 'Xenopath', facebookUrl: 'https://www.facebook.com/xenopati' },
+  { name: 'Koko Ajeeb', facebookUrl: 'https://www.facebook.com/koko.ajeeb' },
+  { name: 'Paijem Tok', facebookUrl: 'https://www.facebook.com/ardian.arip.2025' },
+  { name: 'HUS', facebookUrl: 'https://www.facebook.com/janseengan' },
+];
+
+const judges: ProfiledPerson[] = [
+  { name: 'Arif Tirtana', facebookUrl: 'https://www.facebook.com/ayicktigabelas' },
+  { name: 'Edxycho AI', facebookUrl: 'https://www.facebook.com/share/1P9khZTmg1/' },
+];
 const tools = ['Gemini'] as const;
 const hashtag = '#IgniteBattleAI';
 
@@ -558,12 +573,42 @@ const HighlightCard = ({
   </div>
 );
 
-const Pill = ({ label, icon: Icon }: { label: string; icon?: LucideIcon }) => (
-  <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-4 py-1 text-sm font-medium text-slate-700 shadow-inner shadow-slate-900/10 transition-colors duration-300 dark:border-white/15 dark:bg-slate-900/70 dark:text-gray-100 dark:shadow-black/40">
-    {Icon ? <Icon className="h-4 w-4" aria-hidden /> : null}
-    {label}
-  </span>
-);
+const Pill = ({
+  label,
+  icon: Icon,
+  href,
+}: {
+  label: string;
+  icon?: LucideIcon;
+  href?: string;
+}) => {
+  const baseClassName =
+    'inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-4 py-1 text-sm font-medium text-slate-700 shadow-inner shadow-slate-900/10 transition-colors duration-300 dark:border-white/15 dark:bg-slate-900/70 dark:text-gray-100 dark:shadow-black/40';
+
+  const content = (
+    <>
+      {Icon ? <Icon className="h-4 w-4" aria-hidden /> : null}
+      {label}
+    </>
+  );
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${baseClassName} no-underline hover:border-blue-400/60 hover:bg-blue-50/80 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent dark:hover:border-blue-400/50 dark:hover:bg-blue-500/10 dark:hover:text-blue-200`}
+        title={`Buka profil Facebook ${label}`}
+        aria-label={`Buka profil Facebook ${label}`}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return <span className={baseClassName}>{content}</span>;
+};
 
 const BracketMatchCard = ({
   match,
@@ -730,6 +775,7 @@ export default function BattleIgniteFriendshipPage() {
                       accent={resolveAccent(battle.left)}
                       subtitle={resolveSubtitle(battle.left)}
                       progression={battle.left.progression}
+                      facebookUrl={battle.left.facebookUrl}
                     />
                     <div className="flex w-full items-center justify-center sm:flex-1 sm:min-w-[120px]">
                       <span className="text-xs font-black uppercase tracking-[0.5em] text-emerald-600 dark:text-emerald-300">VS</span>
@@ -739,6 +785,7 @@ export default function BattleIgniteFriendshipPage() {
                       accent={resolveAccent(battle.right)}
                       subtitle={resolveSubtitle(battle.right)}
                       progression={battle.right.progression}
+                      facebookUrl={battle.right.facebookUrl}
                     />
                   </div>
 
@@ -828,8 +875,8 @@ export default function BattleIgniteFriendshipPage() {
                     <h3 className="text-lg font-semibold uppercase tracking-[0.2em] text-slate-900 dark:text-white">Panitia</h3>
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {committee.map((name) => (
-                      <Pill key={name} label={name} />
+                    {committee.map((member) => (
+                      <Pill key={member.name} label={member.name} href={member.facebookUrl} />
                     ))}
                   </div>
                 </div>
@@ -858,7 +905,7 @@ export default function BattleIgniteFriendshipPage() {
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {judges.map((judge) => (
-                      <Pill key={judge} label={judge} />
+                      <Pill key={judge.name} label={judge.name} href={judge.facebookUrl} />
                     ))}
                   </div>
                 </div>
