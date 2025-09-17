@@ -7,6 +7,7 @@ import {
   Award,
   CalendarDays,
   Clock,
+  Facebook,
   Flame,
   Hash,
   MapPin,
@@ -40,6 +41,7 @@ type ParticipantInfo = {
   community?: Community;
   subtitle?: string;
   progression?: ParticipantProgression;
+  facebookUrl?: string;
 };
 
 type BracketMatch = {
@@ -64,6 +66,97 @@ const resolveAccent = (participant: ParticipantInfo) =>
 
 const resolveSubtitle = (participant: ParticipantInfo) =>
   participant.subtitle ?? participant.community;
+
+const participantDirectory = {
+  Nurul: {
+    name: 'Nurul',
+    community: 'RuangRiung',
+    facebookUrl: 'https://www.facebook.com/nurul.sholehah.eka',
+  },
+  'Ayu Dian': {
+    name: 'Ayu Dian',
+    community: 'Timun-AI',
+    facebookUrl: 'https://www.facebook.com/ayu.D14n.1992',
+  },
+  'Saka Mbarep': {
+    name: 'Saka Mbarep',
+    community: 'RuangRiung',
+    facebookUrl: 'https://www.facebook.com/saka.mbarep.2025',
+  },
+  'Budy R.': {
+    name: 'Budy R.',
+    community: 'Timun-AI',
+    facebookUrl: 'https://www.facebook.com/buddy.putrasunda',
+  },
+  'Bangteh CRT': {
+    name: 'Bangteh CRT',
+    community: 'RuangRiung',
+    facebookUrl: 'https://www.facebook.com/janseengan',
+  },
+  'Ismail A.R': {
+    name: 'Ismail A.R',
+    community: 'Timun-AI',
+    facebookUrl: 'https://www.facebook.com/ismail.paputungan',
+  },
+  Famii: {
+    name: 'Famii',
+    community: 'RuangRiung',
+    facebookUrl: 'https://www.facebook.com/nengayu.hong',
+  },
+  'Aluh Gemoy': {
+    name: 'Aluh Gemoy',
+    community: 'Timun-AI',
+    facebookUrl: 'https://www.facebook.com/mia.fahrizt.58',
+  },
+  Mahidara: {
+    name: 'Mahidara',
+    community: 'RuangRiung',
+    facebookUrl: 'https://www.facebook.com/ruth.andanasari',
+  },
+  'Winda A.': {
+    name: 'Winda A.',
+    community: 'Timun-AI',
+    facebookUrl: 'https://www.facebook.com/windaazizah',
+  },
+  'David Amd': {
+    name: 'David Amd',
+    community: 'RuangRiung',
+    facebookUrl: 'https://www.facebook.com/davidamd',
+  },
+  'Elena M.': {
+    name: 'Elena M.',
+    community: 'Timun-AI',
+    facebookUrl: 'https://www.facebook.com/aiezci.endirleuweh',
+  },
+  'Dery Lau': {
+    name: 'Dery Lau',
+    community: 'RuangRiung',
+    facebookUrl: 'https://www.facebook.com/dery.megana',
+  },
+  'Rudi H.': {
+    name: 'Rudi H.',
+    community: 'Timun-AI',
+    facebookUrl: 'https://www.facebook.com/saka.mbarep.2025',
+  },
+  'Code Z': {
+    name: 'Code Z',
+    community: 'RuangRiung',
+    facebookUrl: 'https://www.facebook.com/uul.aja',
+  },
+  'Sri Hayati': {
+    name: 'Sri Hayati',
+    community: 'Timun-AI',
+    facebookUrl: 'https://www.facebook.com/sri.hayati',
+  },
+} satisfies Record<string, ParticipantInfo>;
+
+const withParticipant = (
+  name: keyof typeof participantDirectory,
+  overrides?: Partial<ParticipantInfo>,
+): ParticipantInfo => ({
+  ...participantDirectory[name],
+  ...overrides,
+});
 
 const eventHighlights = [
   {
@@ -100,50 +193,50 @@ const qualificationBattles = [
   {
     id: 1,
     theme: 'Makoto Shinkai style',
-    left: { name: 'Nurul', community: 'RuangRiung', progression: 'eliminated' },
-    right: { name: 'Ayu Dian', community: 'Timun-AI', progression: 'advanced' },
+    left: withParticipant('Nurul', { progression: 'eliminated' }),
+    right: withParticipant('Ayu Dian', { progression: 'advanced' }),
   },
   {
     id: 2,
     theme: 'Lattice reality',
-    left: { name: 'Saka Mbarep', community: 'RuangRiung', progression: 'advanced' },
-    right: { name: 'Budy R.', community: 'Timun-AI', progression: 'eliminated' },
+    left: withParticipant('Saka Mbarep', { progression: 'advanced' }),
+    right: withParticipant('Budy R.', { progression: 'eliminated' }),
   },
   {
     id: 3,
     theme: 'Refraction labyrinth',
-    left: { name: 'Bangteh CRT', community: 'RuangRiung', progression: 'eliminated' },
-    right: { name: 'Ismail A.R', community: 'Timun-AI', progression: 'advanced' },
+    left: withParticipant('Bangteh CRT', { progression: 'eliminated' }),
+    right: withParticipant('Ismail A.R', { progression: 'advanced' }),
   },
   {
     id: 4,
     theme: 'Escher style impossible geometri',
-    left: { name: 'Famii', community: 'RuangRiung', progression: 'eliminated' },
-    right: { name: 'Aluh Gemoy', community: 'Timun-AI', progression: 'advanced' },
+    left: withParticipant('Famii', { progression: 'eliminated' }),
+    right: withParticipant('Aluh Gemoy', { progression: 'advanced' }),
   },
   {
     id: 5,
     theme: 'Hyper-detailed Maximalism',
-    left: { name: 'Mahidara', community: 'RuangRiung', progression: 'eliminated' },
-    right: { name: 'Winda A.', community: 'Timun-AI', progression: 'advanced' },
+    left: withParticipant('Mahidara', { progression: 'eliminated' }),
+    right: withParticipant('Winda A.', { progression: 'advanced' }),
   },
   {
     id: 6,
     theme: 'Hypervoronoi Matrix',
-    left: { name: 'David Amd', community: 'RuangRiung', progression: 'eliminated' },
-    right: { name: 'Elena M.', community: 'Timun-AI', progression: 'advanced' },
+    left: withParticipant('David Amd', { progression: 'eliminated' }),
+    right: withParticipant('Elena M.', { progression: 'advanced' }),
   },
   {
     id: 7,
     theme: 'Baroque Grotesque',
-    left: { name: 'Dery Lau', community: 'RuangRiung', progression: 'eliminated' },
-    right: { name: 'Rudi H.', community: 'Timun-AI', progression: 'advanced' },
+    left: withParticipant('Dery Lau', { progression: 'eliminated' }),
+    right: withParticipant('Rudi H.', { progression: 'advanced' }),
   },
   {
     id: 8,
     theme: 'Fractal Lines',
-    left: { name: 'Code Z', community: 'RuangRiung', progression: 'advanced' },
-    right: { name: 'Sri Hayati', community: 'Timun-AI', progression: 'eliminated' },
+    left: withParticipant('Code Z', { progression: 'advanced' }),
+    right: withParticipant('Sri Hayati', { progression: 'eliminated' }),
   },
 ] satisfies Array<{
   id: number;
@@ -159,8 +252,8 @@ const quarterFinalMatches = [
     dateLabel: 'Jumat, 19 September 2025',
     timeLabel: '10.00 – 22.00',
     locationLabel: 'RuangRiung AI Image',
-    left: { name: 'Elena M.', community: 'Timun-AI' },
-    right: { name: 'Ayu Dian', community: 'Timun-AI' },
+    left: withParticipant('Elena M.'),
+    right: withParticipant('Ayu Dian'),
   },
   {
     match: 'Match 2',
@@ -168,8 +261,8 @@ const quarterFinalMatches = [
     dateLabel: 'Jumat, 19 September 2025',
     timeLabel: '10.00 – 22.00',
     locationLabel: 'RuangRiung AI Image',
-    left: { name: 'Saka Mbarep', community: 'RuangRiung' },
-    right: { name: 'Ismail A.R', community: 'Timun-AI' },
+    left: withParticipant('Saka Mbarep'),
+    right: withParticipant('Ismail A.R'),
   },
   {
     match: 'Match 3',
@@ -177,8 +270,8 @@ const quarterFinalMatches = [
     dateLabel: 'Jumat, 19 September 2025',
     timeLabel: '10.00 – 22.00',
     locationLabel: 'RuangRiung AI Image',
-    left: { name: 'Rudi H.', community: 'Timun-AI' },
-    right: { name: 'Aluh Gemoy', community: 'Timun-AI' },
+    left: withParticipant('Rudi H.'),
+    right: withParticipant('Aluh Gemoy'),
   },
   {
     match: 'Match 4',
@@ -186,8 +279,8 @@ const quarterFinalMatches = [
     dateLabel: 'Jumat, 19 September 2025',
     timeLabel: '10.00 – 22.00',
     locationLabel: 'RuangRiung AI Image',
-    left: { name: 'Winda A.', community: 'Timun-AI' },
-    right: { name: 'Code Z', community: 'RuangRiung' },
+    left: withParticipant('Winda A.'),
+    right: withParticipant('Code Z'),
   },
 ] satisfies BracketMatch[];
 
@@ -327,11 +420,13 @@ const ParticipantBadge = ({
   accent,
   subtitle,
   progression,
+  facebookUrl,
 }: {
   name: string;
   accent: string;
   subtitle?: string;
   progression?: ParticipantProgression;
+  facebookUrl?: string;
 }) => {
   const isEliminated = progression === 'eliminated';
   const isAdvanced = progression === 'advanced';
@@ -342,6 +437,7 @@ const ParticipantBadge = ({
   if (isEliminated) {
     containerClasses.push('opacity-75');
   }
+  const baseClassName = containerClasses.join(' ');
 
   const circleClasses = [
     'flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br text-lg font-bold text-white shadow-lg transition-all duration-300',
@@ -360,6 +456,12 @@ const ParticipantBadge = ({
     circleClasses.push('shadow-slate-900/10 dark:shadow-black/40');
   }
 
+  if (facebookUrl) {
+    circleClasses.push(
+      'group-hover:scale-105 group-hover:shadow-blue-500/25 dark:group-hover:shadow-blue-400/30'
+    );
+  }
+
   const nameClasses = ['text-sm font-semibold uppercase tracking-wide transition'];
   if (isEliminated) {
     nameClasses.push(
@@ -371,33 +473,69 @@ const ParticipantBadge = ({
     nameClasses.push('text-slate-900 dark:text-gray-100');
   }
 
+  if (facebookUrl) {
+    nameClasses.push('group-hover:text-blue-600 dark:group-hover:text-blue-300');
+  }
+
   const subtitleClasses = [
     'text-[10px] font-semibold uppercase tracking-[0.35em] text-slate-500 dark:text-gray-400',
   ];
   if (isEliminated) {
     subtitleClasses.push('line-through decoration-rose-300/60');
   }
+  if (facebookUrl) {
+    subtitleClasses.push('group-hover:text-blue-500 dark:group-hover:text-blue-300');
+  }
 
-  return (
-    <div className={containerClasses.join(' ')}>
+  const badgeContent = (
+    <>
       <div className={circleClasses.join(' ')} aria-hidden>
         {createInitials(name)}
       </div>
       <span className={nameClasses.join(' ')}>{name}</span>
       {subtitle ? <span className={subtitleClasses.join(' ')}>{subtitle}</span> : null}
-      {progression ? (
-        <span
-          className={`rounded-full border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.35em] ${
-            isAdvanced
-              ? 'border-emerald-400/60 bg-emerald-400/10 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-200'
-              : 'border-rose-400/60 bg-rose-400/10 text-rose-500 dark:bg-rose-500/10 dark:text-rose-300'
-          }`}
-        >
-          {isAdvanced ? 'Lolos 8 Besar' : 'Tidak Lolos'}
-        </span>
+      {progression || facebookUrl ? (
+        <div className="flex flex-col items-center gap-1">
+          {progression ? (
+            <span
+              className={`rounded-full border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.35em] ${
+                isAdvanced
+                  ? 'border-emerald-400/60 bg-emerald-400/10 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-200'
+                  : 'border-rose-400/60 bg-rose-400/10 text-rose-500 dark:bg-rose-500/10 dark:text-rose-300'
+              }`}
+            >
+              {isAdvanced ? 'Lolos 8 Besar' : 'Tidak Lolos'}
+            </span>
+          ) : null}
+          {facebookUrl ? (
+            <span
+              className="inline-flex items-center gap-1 rounded-full border border-blue-400/60 bg-blue-400/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.35em] text-blue-600 transition-colors duration-300 group-hover:border-blue-500/70 group-hover:bg-blue-500/15 dark:border-blue-400/60 dark:bg-blue-500/10 dark:text-blue-300"
+            >
+              <Facebook className="h-3 w-3" aria-hidden />
+              Profil
+            </span>
+          ) : null}
+        </div>
       ) : null}
-    </div>
+    </>
   );
+
+  if (facebookUrl) {
+    return (
+      <a
+        href={facebookUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${baseClassName} group rounded-2xl px-3 py-2 no-underline hover:-translate-y-1 hover:bg-blue-50/70 hover:shadow-lg hover:shadow-blue-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent dark:hover:bg-blue-500/10 dark:hover:shadow-blue-500/15`}
+        title={`Buka profil Facebook ${name}`}
+        aria-label={`Buka profil Facebook ${name}`}
+      >
+        {badgeContent}
+      </a>
+    );
+  }
+
+  return <div className={baseClassName}>{badgeContent}</div>;
 };
 
 const HighlightCard = ({
@@ -451,6 +589,7 @@ const BracketMatchCard = ({
         accent={resolveAccent(left)}
         subtitle={resolveSubtitle(left)}
         progression={left.progression}
+        facebookUrl={left.facebookUrl}
       />
       <div className="flex w-full flex-col items-center justify-center text-center sm:flex-1">
         <span className="text-lg font-black uppercase tracking-[0.5em] text-emerald-600 dark:text-emerald-300">VS</span>
@@ -461,6 +600,7 @@ const BracketMatchCard = ({
         accent={resolveAccent(right)}
         subtitle={resolveSubtitle(right)}
         progression={right.progression}
+        facebookUrl={right.facebookUrl}
       />
     </div>
     <div className="mt-6 flex flex-col items-center gap-3 text-center text-[11px] font-medium uppercase tracking-[0.25em] text-slate-700 dark:text-gray-200 sm:flex-row sm:justify-between sm:text-left">
