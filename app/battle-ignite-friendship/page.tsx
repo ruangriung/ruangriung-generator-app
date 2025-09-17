@@ -209,32 +209,32 @@ const qualificationBattles = [
   },
   {
     id: 3,
-    theme: 'Refraction labyrinth',
+    theme: 'Hypervoronoi Matrix',
     left: withParticipant('Bangteh CRT', { progression: 'eliminated' }),
     right: withParticipant('Ismail A.R', { progression: 'advanced' }),
   },
   {
     id: 4,
-    theme: 'Escher style impossible geometri',
+    theme: 'Refraction Labyrinth',
     left: withParticipant('Famii', { progression: 'eliminated' }),
     right: withParticipant('Aluh Gemoy', { progression: 'advanced' }),
   },
   {
     id: 5,
-    theme: 'Hyper-detailed Maximalism',
-    left: withParticipant('Mahidara', { progression: 'eliminated' }),
+    theme: 'Escher Style Impossible Geometry',
+    left: withParticipant('Dery Lau', { progression: 'eliminated' }),
     right: withParticipant('Winda A.', { progression: 'advanced' }),
   },
   {
     id: 6,
-    theme: 'Hypervoronoi Matrix',
+    theme: 'Hyperdetail Maximalist',
     left: withParticipant('David Amd', { progression: 'eliminated' }),
     right: withParticipant('Elena M.', { progression: 'advanced' }),
   },
   {
     id: 7,
     theme: 'Baroque Grotesque',
-    left: withParticipant('Dery Lau', { progression: 'eliminated' }),
+    left: withParticipant('Mahidara', { progression: 'eliminated' }),
     right: withParticipant('Rudi H.', { progression: 'advanced' }),
   },
   {
