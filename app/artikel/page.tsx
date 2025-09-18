@@ -19,7 +19,7 @@ export default function ArticleListPage() {
           <span>Kembali ke Beranda</span>
         </Link>
       </div>
-      <h1 className="text-4xl font-bold mb-8 text-center">Artikel</h1>
+      <h1 className="text-4xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">Artikel</h1>
       <ArticlePaginationClient initialArticles={articles} adSlotId={adSlotId} />
     </div>
   );
