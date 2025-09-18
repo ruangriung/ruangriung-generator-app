@@ -50,6 +50,7 @@ type BracketMatch = {
   dateLabel: string;
   timeLabel: string;
   locationLabel: string;
+  theme?: string;
   left: ParticipantInfo;
   right: ParticipantInfo;
 };
@@ -257,6 +258,7 @@ const quarterFinalMatches = [
     dateLabel: 'Jumat, 19 September 2025',
     timeLabel: '10.00 – 22.00',
     locationLabel: 'RuangRiung AI Image',
+    theme: 'Horror Chiaroscuro',
     left: withParticipant('Elena M.'),
     right: withParticipant('Ayu Dian'),
   },
@@ -266,6 +268,7 @@ const quarterFinalMatches = [
     dateLabel: 'Jumat, 19 September 2025',
     timeLabel: '10.00 – 22.00',
     locationLabel: 'RuangRiung AI Image',
+    theme: 'Psychedelic Stippling',
     left: withParticipant('Saka Mbarep'),
     right: withParticipant('Ismail A.R'),
   },
@@ -275,6 +278,7 @@ const quarterFinalMatches = [
     dateLabel: 'Jumat, 19 September 2025',
     timeLabel: '10.00 – 22.00',
     locationLabel: 'RuangRiung AI Image',
+    theme: 'Maximalist Anime (Masaaki Yuasa Style)',
     left: withParticipant('Rudi H.'),
     right: withParticipant('Aluh Gemoy'),
   },
@@ -284,6 +288,7 @@ const quarterFinalMatches = [
     dateLabel: 'Jumat, 19 September 2025',
     timeLabel: '10.00 – 22.00',
     locationLabel: 'RuangRiung AI Image',
+    theme: 'Time-Lapse Self',
     left: withParticipant('Winda A.'),
     right: withParticipant('Code Z'),
   },
@@ -616,6 +621,7 @@ const BracketMatchCard = ({
   dateLabel,
   timeLabel,
   locationLabel,
+  theme,
   left,
   right,
 }: BracketMatch) => (
@@ -648,6 +654,14 @@ const BracketMatchCard = ({
         facebookUrl={right.facebookUrl}
       />
     </div>
+    {theme ? (
+      <div className="mt-6 rounded-2xl border border-amber-300/40 bg-white/80 p-4 text-center shadow-inner shadow-slate-900/10 transition-colors duration-300 dark:border-amber-300/20 dark:bg-slate-900/70 dark:shadow-black/40">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.4em] text-emerald-600 dark:text-emerald-200">
+          Tema Wajib
+        </span>
+        <p className="mt-2 text-sm font-bold uppercase tracking-[0.25em] text-amber-600 dark:text-amber-200">{theme}</p>
+      </div>
+    ) : null}
     <div className="mt-6 flex flex-col items-center gap-3 text-center text-[11px] font-medium uppercase tracking-[0.25em] text-slate-700 dark:text-gray-200 sm:flex-row sm:justify-between sm:text-left">
       <span className="inline-flex items-center gap-2">
         <MapPin className="h-4 w-4 text-emerald-500 dark:text-emerald-300" />
