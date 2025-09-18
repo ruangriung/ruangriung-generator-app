@@ -3,6 +3,7 @@ id: "95"
 slug: "hypervoronoi-matrix-fractal-dimension"
 title: "Hypervoronoi Matrix Fractal Dimension"
 author: "Ekin Liu"
+facebook: "https://www.facebook.com/share/17HwJpCW5e/"
 date: "2025-09-18"
 tool: "ChatGPT, Gemini"
 tags:
