@@ -2,13 +2,13 @@
 title: "40 Kata Kunci Unik & Antik untuk Nama Kesenian"
 date: 2025-09-18
 author: "Arif Tirtana"
-image: /v1/assets/ruangriung.png
+image: /v1/assets/kata-unik.webp
 category: Penamaan
 tags: ['kesenian', 'penamaan', 'kreatif', 'unik', 'antik']
-summary: "Empat puluh kata kunci unik dan antik yang dirancang khusus untuk penamaan proyek kesenian, studio, atau kolektif. Masing-masing membawa nuansa misteri, sejarah, dan orisinalitas."
+summary: "Empat puluh kata kunci unik dan antik yang dirancang khusus untuk penamaan proyek kesenian, studio, atau tema kolektif untuk gambar AI. Masing-masing membawa nuansa misteri, sejarah, dan orisinalitas."
 ---
 
-# Kata Kunci Unik & Antik untuk Nama Kesenian
+# Kata Kunci Unik & Antik untuk Nama Kesenian Gambar AI
 
 Nama bukan sekadar tanda, melainkan **roh seni** yang melahirkan identitas. Nama menjaga warisan, memelihara rasa hormat, dan menanamkan rasa ingin tahu kepada setiap orang yang mendengarnya. Nama pula yang menciptakan jembatan antara generasi lama dengan generasi baru tanpa harus mengorbankan kedalaman makna. Nama dapat mengubah arah percakapan dalam sebuah rapat kuratorial karena ia menawarkan imajinasi yang siap diwujudkan. Nama yang tepat memberi rasa percaya diri kepada pelaku seni untuk keluar dari jebakan tren sesaat. Nama yang kuat mendorong penonton untuk memperhatikan detail dan pesan yang ingin disampaikan. Nama yang kreatif sekaligus antik membuat ruang untuk nostalgia yang dirayakan secara modern. Nama yang dirumuskan dengan matang memberikan tempat bagi kolaborasi lintas disiplin yang saling menguatkan.
 
