@@ -2,6 +2,8 @@ import { getAllPrompts } from '../../../lib/prompts';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import rehypeHighlight from 'rehype-highlight';
 import AdBanner from '@/components/AdBanner';
 import CopyButton from '@/components/CopyButton';
 import PromptSubmissionTrigger from '@/components/PromptSubmissionTrigger';
@@ -86,7 +88,7 @@ export default async function PromptDetailPage({ params }: { params: { slug: str
           </div>
         </div>
         <div className="prose prose-lg max-w-none dark:prose-invert">
-          <p>{prompt.promptContent}</p>
+          <ReactMarkdown rehypePlugins={[rehypeHighlight]}>{prompt.promptContent}</ReactMarkdown>
         </div>
 
         {relatedPrompts.length > 0 && (

@@ -4,7 +4,7 @@ slug: "sydney-opera-dreamstairs"
 title: "Sydney Opera Dreamstairs"
 author: "Arif Tirtana"
 facebook: "https://www.facebook.com/ayicktigabelas"
-date: "2025-09-18"
+date: "2025-09-19"
 tool: "Dall-E 3, Microsoft Designer, CiciAI"
 tags:
   - surreal
@@ -18,8 +18,9 @@ tags:
   - vertical-art
   - psychedelic
 ---
- 
+
 ## English
+
 A surreal and highly detailed vertical artwork featuring the iconic Sydney Opera House as the central structure.
 
 Surrounding it are imaginative elements like strange alphabets, abstract symbols, artistic music notations including Treble clefs, and a fantastical stairway to heaven with complex architectural forms.
@@ -33,6 +34,7 @@ The color scheme is rich and dark, featuring glowing gold, vivid orange, emerald
 ========
 
 ## עברית
+
 יצירת אמנות אנכית סוריאליסטית ומפורטת מאוד, עם בית האופרה של סידני האייקוני כמבנה המרכזי.
 
 מסביבו אלמנטים דמיוניים כמו אלפביתים מוזרים, סמלים מופשטים, סימונים מוזיקליים אמנותיים כולל מפתח סול, וגרם מדרגות פנטסטי לגן עדן עם מבנים אדריכליים מורכבים.
@@ -46,6 +48,7 @@ The color scheme is rich and dark, featuring glowing gold, vivid orange, emerald
 ========
 
 ## Bahasa Indonesia
+
 Karya seni vertikal surealis yang sangat detail ini menampilkan Sydney Opera House yang ikonik sebagai struktur pusat.
 
 Di sekelilingnya terdapat elemen imajinatif seperti alfabet aneh, simbol abstrak, notasi musik artistik termasuk kunci G, dan tangga menuju surga yang fantastis dengan bentuk arsitektur kompleks.
