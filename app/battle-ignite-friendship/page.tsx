@@ -268,7 +268,7 @@ const quarterFinalMatches = [
     dateLabel: 'Jumat, 19 September 2025',
     timeLabel: '10.00 – 22.00',
     locationLabel: 'RuangRiung AI Image',
-    theme: 'Tibetan Thangka',
+    theme: 'Psychedelic Stippling',
     left: withParticipant('Saka Mbarep'),
     right: withParticipant('Ismail A.R'),
   },
