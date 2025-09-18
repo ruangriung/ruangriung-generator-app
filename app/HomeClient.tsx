@@ -8,6 +8,7 @@ import { useState, useEffect, useRef } from 'react';
 import FAQ from '@/components/FAQ';
 import { AdBanner } from '@/components/AdBanner';
 import Link from 'next/link';
+import PromptSubmissionTrigger from '@/components/PromptSubmissionTrigger';
 
 interface HomeClientProps {
   latestArticle: {
@@ -138,6 +139,18 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         </Link>
       </div>
       
+      <div className="w-full max-w-4xl mb-4">
+        <PromptSubmissionTrigger
+          className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset hover:bg-blue-700 transition-colors"
+          label={
+            <>
+              <Sparkles size={18} className="text-yellow-300" />
+              <span>Kirim Prompt Anda</span>
+            </>
+          }
+        />
+      </div>
+
       <div className="w-full max-w-4xl mb-4">
         <Link
           href={`/artikel/${latestArticle.slug}`}
