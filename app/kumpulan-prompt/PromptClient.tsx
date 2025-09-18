@@ -4,7 +4,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { Prompt } from '../../lib/prompts';
 import Link from 'next/link';
-import PromptSubmissionForm from '../../components/PromptSubmissionForm';
+import PromptSubmissionTrigger from '../../components/PromptSubmissionTrigger';
 import Pagination from '../../components/Pagination';
 import AdBanner from '../../components/AdBanner';
 import { ArrowLeft } from 'lucide-react';
@@ -40,7 +40,6 @@ interface PromptClientProps {
 }
 
 export default function PromptClient({ prompts }: PromptClientProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -134,12 +133,7 @@ export default function PromptClient({ prompts }: PromptClientProps) {
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Kumpulan Prompt</h1>
         <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">Jelajahi, gunakan, dan bagikan prompt kreatif untuk berbagai model AI.</p>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="mt-6 px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition duration-300 shadow-lg"
-        >
-          Kirim Prompt Anda
-        </button>
+        <PromptSubmissionTrigger className="mt-6 px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition duration-300 shadow-lg" />
       </div>
 
       <div className="mb-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
@@ -239,10 +233,6 @@ export default function PromptClient({ prompts }: PromptClientProps) {
         />
       )}
 
-      <PromptSubmissionForm 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
     </div>
   );
 }

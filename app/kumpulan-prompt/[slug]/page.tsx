@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import AdBanner from '@/components/AdBanner';
 import CopyButton from '@/components/CopyButton';
+import PromptSubmissionTrigger from '@/components/PromptSubmissionTrigger';
 
 export default async function PromptDetailPage({ params }: { params: { slug: string } }) {
   const prompts = await getAllPrompts();
@@ -78,8 +79,11 @@ export default async function PromptDetailPage({ params }: { params: { slug: str
         <p className="text-md text-gray-500 dark:text-gray-400 mb-2">Tanggal: {new Date(prompt.date).toLocaleDateString('id-ID')}</p>
         <p className="text-md text-gray-500 dark:text-gray-400 mb-6">Tool: {prompt.tool}</p>
 
-        <div className="mb-4 flex justify-end">
-          <CopyButton text={prompt.promptContent} />
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <PromptSubmissionTrigger className="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition duration-300 shadow-lg" />
+          <div className="flex w-full justify-end sm:w-auto">
+            <CopyButton text={prompt.promptContent} />
+          </div>
         </div>
         <div className="prose prose-lg max-w-none dark:prose-invert">
           <p>{prompt.promptContent}</p>
