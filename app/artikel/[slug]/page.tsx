@@ -93,7 +93,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         <ArrowLeft className="mr-2" size={20} />
         Kembali ke Artikel
       </Link>
-      <h1 className="text-4xl font-bold mb-4 text-center">{article.title}</h1>
+      <h1 className="text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">
+        {article.title}
+      </h1>
       <p className="text-gray-600 dark:text-gray-400 text-center mb-2">
         Oleh {article.author} pada {new Date(article.date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}
       </p>
@@ -133,7 +135,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
 
       {relatedArticles.length > 0 && (
         <div className="mt-12">
-          <h2 className="text-3xl font-bold mb-6 text-center">Artikel Terkait</h2>
+          <h2 className="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-gray-100">
+            Artikel Terkait
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {relatedArticles.map(relatedArticle => (
               <Link key={relatedArticle.slug} href={`/artikel/${relatedArticle.slug}`} className="block p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
