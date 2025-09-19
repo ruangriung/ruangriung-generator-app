@@ -181,9 +181,9 @@ const eventHighlights = [
   },
   {
     title: 'Jadwal',
-    highlight: '17 - 21 September 2025',
+    highlight: '17 - 22 September 2025',
     description:
-      'Dimulai dari 16 besar hingga final, dengan perempat final pada Jumat 19 September 2025 dan final Minggu 21 September 2025.',
+      'Dimulai dari 16 besar hingga final, dengan perempat final pada Jumat 19 September 2025, semifinal Minggu 21 September 2025, dan final Selasa 22 September 2025.',
     icon: CalendarDays,
   },
   {
@@ -298,20 +298,20 @@ const semiFinalMatches = [
   {
     match: 'Semifinal 1',
     stageLabel: 'Semifinal',
-    dateLabel: 'Sabtu, 20 September 2025',
+    dateLabel: 'Minggu, 21 September 2025',
     timeLabel: '10.00 – 22.00',
     locationLabel: 'RuangRiung AI Image',
-    left: { name: 'Pemenang Match 1', subtitle: 'Perempat Final 1' },
-    right: { name: 'Pemenang Match 2', subtitle: 'Perempat Final 2' },
+    left: withParticipant('Ayu Dian'),
+    right: withParticipant('Saka Mbarep'),
   },
   {
     match: 'Semifinal 2',
     stageLabel: 'Semifinal',
-    dateLabel: 'Sabtu, 20 September 2025',
+    dateLabel: 'Minggu, 21 September 2025',
     timeLabel: '10.00 – 22.00',
     locationLabel: 'RuangRiung AI Image',
-    left: { name: 'Pemenang Match 3', subtitle: 'Perempat Final 3' },
-    right: { name: 'Pemenang Match 4', subtitle: 'Perempat Final 4' },
+    left: withParticipant('Aluh Gemoy'),
+    right: withParticipant('Winda A.', { name: 'Winda' }),
   },
 ] satisfies BracketMatch[];
 
@@ -319,7 +319,7 @@ const finalMatches = [
   {
     match: 'Grand Final',
     stageLabel: 'Final',
-    dateLabel: 'Minggu, 21 September 2025',
+    dateLabel: 'Selasa, 22 September 2025',
     timeLabel: '10.00 - 19.00',
     locationLabel: 'RuangRiung AI Image',
     left: { name: 'Pemenang Semifinal 1', subtitle: 'Semifinal 1' },
@@ -331,7 +331,7 @@ const thirdPlaceMatches = [
   {
     match: '3rd Place Battle',
     stageLabel: '3rd Place',
-    dateLabel: 'Minggu, 21 September 2025',
+    dateLabel: 'Selasa, 22 September 2025',
     timeLabel: '10.00 - 19.00 (bersamaan Final)',
     locationLabel: 'RuangRiung AI Image',
     left: { name: 'Kalah Semifinal 1', subtitle: 'Semifinal 1' },
@@ -354,19 +354,19 @@ const stageSchedule = [
   },
   {
     stage: 'Semifinal',
-    date: 'Sabtu, 20 September 2025',
+    date: 'Minggu, 21 September 2025',
     time: '10.00 – 22.00',
     location: 'RuangRiung AI Image',
   },
   {
     stage: 'Final',
-    date: 'Minggu, 21 September 2025',
+    date: 'Selasa, 22 September 2025',
     time: '10.00 - 19.00',
     location: 'RuangRiung AI Image',
   },
   {
     stage: '3rd Place',
-    date: 'Minggu, 21 September 2025',
+    date: 'Selasa, 22 September 2025',
     time: '10.00 - 19.00 (bersamaan Final)',
     location: 'RuangRiung AI Image',
   },
@@ -677,7 +677,7 @@ const BracketMatchCard = ({
 
 export default function BattleIgniteFriendshipPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-amber-50 via-white to-emerald-50 text-slate-900 transition-colors duration-300 dark:from-slate-950 dark:via-slate-950 dark:to-slate-950 dark:bg-slate-950 dark:bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.14),_transparent_65%)] dark:text-white">
+    <main className="min-h-screen scroll-smooth bg-gradient-to-b from-amber-50 via-white to-emerald-50 text-slate-900 transition-colors duration-300 dark:from-slate-950 dark:via-slate-950 dark:to-slate-950 dark:bg-slate-950 dark:bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.14),_transparent_65%)] dark:text-white">
       <div className="bg-white/80 transition-colors duration-300 dark:bg-slate-950/70 dark:bg-[radial-gradient(circle_at_bottom,_rgba(34,197,94,0.12),_transparent_60%)]">
         <div className="mx-auto max-w-6xl px-4 py-12 lg:py-16">
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -732,31 +732,54 @@ export default function BattleIgniteFriendshipPage() {
                 className="absolute left-4 top-0 hidden h-full w-px bg-gradient-to-b from-amber-400/60 via-white/10 to-emerald-400/60 sm:block"
                 aria-hidden
               />
-              {stageSchedule.map((stage) => (
-                <div
-                  key={stage.stage}
-                  className="relative rounded-3xl border border-slate-200/70 bg-white/90 p-6 shadow-2xl shadow-slate-900/10 backdrop-blur transition-colors duration-300 dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/40"
-                >
-                  <span
-                    className="absolute left-[-1.85rem] top-7 hidden h-4 w-4 rounded-full border-2 border-white bg-gradient-to-br from-amber-300 to-emerald-400 shadow-lg shadow-slate-900/15 dark:border-slate-950 dark:shadow-black/40 sm:block"
-                    aria-hidden
-                  />
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <span className="text-xs font-semibold uppercase tracking-[0.4em] text-amber-600 dark:text-amber-200">{stage.stage}</span>
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.35em] text-emerald-600 dark:text-emerald-200">{stage.date}</span>
-                  </div>
-                  <div className="mt-4 flex flex-col gap-4 text-sm text-slate-600 dark:text-gray-200/80 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="inline-flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-emerald-500 dark:text-emerald-300" />
-                      <span className="uppercase tracking-[0.25em] text-slate-800 dark:text-gray-100">{stage.location}</span>
+              {stageSchedule.map((stage) => {
+                const isSemifinalStage = stage.stage === 'Semifinal';
+
+                const cardContent = (
+                  <>
+                    <span
+                      className="absolute left-[-1.85rem] top-7 hidden h-4 w-4 rounded-full border-2 border-white bg-gradient-to-br from-amber-300 to-emerald-400 shadow-lg shadow-slate-900/15 dark:border-slate-950 dark:shadow-black/40 sm:block"
+                      aria-hidden
+                    />
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <span className="text-xs font-semibold uppercase tracking-[0.4em] text-amber-600 dark:text-amber-200">{stage.stage}</span>
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.35em] text-emerald-600 dark:text-emerald-200">{stage.date}</span>
                     </div>
-                    <div className="inline-flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-amber-500 dark:text-amber-300" />
-                      <span className="uppercase tracking-[0.25em] text-slate-800 dark:text-gray-100">{stage.time}</span>
+                    <div className="mt-4 flex flex-col gap-4 text-sm text-slate-600 dark:text-gray-200/80 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="inline-flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-emerald-500 dark:text-emerald-300" />
+                        <span className="uppercase tracking-[0.25em] text-slate-800 dark:text-gray-100">{stage.location}</span>
+                      </div>
+                      <div className="inline-flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-amber-500 dark:text-amber-300" />
+                        <span className="uppercase tracking-[0.25em] text-slate-800 dark:text-gray-100">{stage.time}</span>
+                      </div>
                     </div>
+                  </>
+                );
+
+                const sharedClassName =
+                  'relative block rounded-3xl border border-slate-200/70 bg-white/90 p-6 shadow-2xl shadow-slate-900/10 backdrop-blur transition-colors duration-300 dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent';
+
+                if (isSemifinalStage) {
+                  return (
+                    <a
+                      key={stage.stage}
+                      href="#semifinal-block"
+                      className={`${sharedClassName} hover:border-amber-400/60 hover:bg-white/95 dark:hover:border-amber-300/40 dark:hover:bg-slate-900/60`}
+                      aria-label="Lihat detail babak semifinal"
+                    >
+                      {cardContent}
+                    </a>
+                  );
+                }
+
+                return (
+                  <div key={stage.stage} className={sharedClassName}>
+                    {cardContent}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 
@@ -830,14 +853,14 @@ export default function BattleIgniteFriendshipPage() {
             </div>
           </section>
 
-          <section className="mt-16">
+          <section id="semifinal-block" className="mt-16 scroll-mt-24">
             <div className="text-center">
               <h2 className="text-3xl font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white">Babak Semifinal</h2>
               <p className="mt-2 text-sm font-semibold uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-300">
-                Jadwal: Sabtu, 20 September 2025
+                Jadwal: Minggu, 21 September 2025
               </p>
               <p className="mt-1 text-xs font-semibold uppercase tracking-[0.35em] text-amber-600 dark:text-amber-200">
-                Slot menunggu pemenang perempat final
+                Empat besar: Ayu Dian, Saka Mbarep, Aluh Gemoy, Winda
               </p>
             </div>
 
@@ -852,7 +875,7 @@ export default function BattleIgniteFriendshipPage() {
             <div className="text-center">
               <h2 className="text-3xl font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white">Babak Final</h2>
               <p className="mt-2 text-sm font-semibold uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-300">
-                Minggu, 21 September 2025 - Pukul 10.00 - 19.00
+                Selasa, 22 September 2025 - Pukul 10.00 - 19.00
               </p>
             </div>
 
@@ -867,7 +890,7 @@ export default function BattleIgniteFriendshipPage() {
             <div className="text-center">
               <h2 className="text-3xl font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white">3rd Place Battle</h2>
               <p className="mt-2 text-sm font-semibold uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-300">
-                Digelar serentak dengan Final pada pukul 10.00 - 19.00
+                Digelar serentak dengan Final pada Selasa, 22 September 2025 pukul 10.00 - 19.00
               </p>
             </div>
 
