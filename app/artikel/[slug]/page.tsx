@@ -1,11 +1,52 @@
 import { type Article, getArticleBySlug, getArticleSlugs, getRelatedArticles } from '@/lib/articles';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { type Components } from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import type { Root, Paragraph } from 'mdast';
+import type { Parent } from 'unist';
+import { visit } from 'unist-util-visit';
+import type { Plugin } from 'unified';
 import AdBanner from '@/components/AdBanner';
+
+interface ParagraphData extends Record<string, unknown> {
+  shouldInsertAdAfter?: boolean;
+  hProperties?: Record<string, unknown>;
+}
+
+const remarkInsertInlineAd: Plugin<[], Root> = () => tree => {
+  const paragraphs: Array<{ node: Paragraph; parent: Parent }> = [];
+
+  visit(tree, 'paragraph', (node, _index, parent) => {
+    if (!parent) {
+      return;
+    }
+
+    paragraphs.push({ node, parent });
+  });
+
+  if (paragraphs.length === 0) {
+    return;
+  }
+
+  const rootParagraphs = paragraphs.filter(({ parent }) => parent.type === 'root');
+  const relevantParagraphs = rootParagraphs.length > 0 ? rootParagraphs : paragraphs;
+  const adIndex = Math.max(0, Math.ceil(relevantParagraphs.length / 2) - 1);
+  const target = relevantParagraphs[adIndex];
+
+  if (!target) {
+    return;
+  }
+
+  const paragraphData = (target.node.data ??= {}) as ParagraphData;
+  paragraphData.shouldInsertAdAfter = true;
+  paragraphData.hProperties = {
+    ...(paragraphData.hProperties ?? {}),
+    'data-ad-inline': 'true',
+  };
+};
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const article: Article | undefined = getArticleBySlug(params.slug);
@@ -60,6 +101,32 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   // === PERBAIKAN DI SINI ===
   // Variabel relatedArticles didefinisikan di dalam komponen
   const relatedArticles = getRelatedArticles(params.slug);
+
+  const articleAdSlot = '7992484013';
+
+  const markdownComponents: Components = {
+    p({ node, children, ...props }) {
+      const adFlagValue =
+        typeof node?.properties?.['data-ad-inline'] === 'string'
+          ? node.properties['data-ad-inline'] === 'true'
+          : Boolean(node?.properties?.['data-ad-inline']);
+
+      const { ['data-ad-inline']: _inlineAd, ...paragraphProps } = props as JSX.IntrinsicElements['p'] & {
+        'data-ad-inline'?: string | boolean;
+      };
+
+      return (
+        <>
+          <p {...paragraphProps}>{children}</p>
+          {adFlagValue && (
+            <div className="my-8">
+              <AdBanner dataAdSlot={articleAdSlot} />
+            </div>
+          )}
+        </>
+      );
+    },
+  };
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -128,7 +195,11 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         />
       )}
       <div className="prose dark:prose-invert max-w-none">
-        <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+        <ReactMarkdown
+          rehypePlugins={[rehypeHighlight]}
+          remarkPlugins={[remarkInsertInlineAd]}
+          components={markdownComponents}
+        >
           {article.content}
         </ReactMarkdown>
       </div>
@@ -151,7 +222,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       )}
 
       <div className="my-8">
-        <AdBanner dataAdSlot="7992484013" />
+        <AdBanner dataAdSlot={articleAdSlot} />
       </div>
       <script
         type="application/ld+json"
