@@ -181,9 +181,9 @@ const eventHighlights = [
   },
   {
     title: 'Jadwal',
-    highlight: '17 - 21 September 2025',
+    highlight: '17 - 22 September 2025',
     description:
-      'Dimulai dari 16 besar hingga final, dengan perempat final pada Jumat 19 September 2025 dan final Minggu 21 September 2025.',
+      'Dimulai dari 16 besar hingga final, dengan perempat final pada Jumat 19 September 2025, semifinal Minggu 21 September 2025, dan final Selasa 22 September 2025.',
     icon: CalendarDays,
   },
   {
@@ -298,20 +298,20 @@ const semiFinalMatches = [
   {
     match: 'Semifinal 1',
     stageLabel: 'Semifinal',
-    dateLabel: 'Sabtu, 20 September 2025',
+    dateLabel: 'Minggu, 21 September 2025',
     timeLabel: '10.00 – 22.00',
     locationLabel: 'RuangRiung AI Image',
-    left: { name: 'Pemenang Match 1', subtitle: 'Perempat Final 1' },
-    right: { name: 'Pemenang Match 2', subtitle: 'Perempat Final 2' },
+    left: withParticipant('Ayu Dian'),
+    right: withParticipant('Saka Mbarep'),
   },
   {
     match: 'Semifinal 2',
     stageLabel: 'Semifinal',
-    dateLabel: 'Sabtu, 20 September 2025',
+    dateLabel: 'Minggu, 21 September 2025',
     timeLabel: '10.00 – 22.00',
     locationLabel: 'RuangRiung AI Image',
-    left: { name: 'Pemenang Match 3', subtitle: 'Perempat Final 3' },
-    right: { name: 'Pemenang Match 4', subtitle: 'Perempat Final 4' },
+    left: withParticipant('Aluh Gemoy'),
+    right: withParticipant('Winda A.', { name: 'Winda' }),
   },
 ] satisfies BracketMatch[];
 
@@ -319,7 +319,7 @@ const finalMatches = [
   {
     match: 'Grand Final',
     stageLabel: 'Final',
-    dateLabel: 'Minggu, 21 September 2025',
+    dateLabel: 'Selasa, 22 September 2025',
     timeLabel: '10.00 - 19.00',
     locationLabel: 'RuangRiung AI Image',
     left: { name: 'Pemenang Semifinal 1', subtitle: 'Semifinal 1' },
@@ -331,7 +331,7 @@ const thirdPlaceMatches = [
   {
     match: '3rd Place Battle',
     stageLabel: '3rd Place',
-    dateLabel: 'Minggu, 21 September 2025',
+    dateLabel: 'Selasa, 22 September 2025',
     timeLabel: '10.00 - 19.00 (bersamaan Final)',
     locationLabel: 'RuangRiung AI Image',
     left: { name: 'Kalah Semifinal 1', subtitle: 'Semifinal 1' },
@@ -354,19 +354,19 @@ const stageSchedule = [
   },
   {
     stage: 'Semifinal',
-    date: 'Sabtu, 20 September 2025',
+    date: 'Minggu, 21 September 2025',
     time: '10.00 – 22.00',
     location: 'RuangRiung AI Image',
   },
   {
     stage: 'Final',
-    date: 'Minggu, 21 September 2025',
+    date: 'Selasa, 22 September 2025',
     time: '10.00 - 19.00',
     location: 'RuangRiung AI Image',
   },
   {
     stage: '3rd Place',
-    date: 'Minggu, 21 September 2025',
+    date: 'Selasa, 22 September 2025',
     time: '10.00 - 19.00 (bersamaan Final)',
     location: 'RuangRiung AI Image',
   },
@@ -834,10 +834,10 @@ export default function BattleIgniteFriendshipPage() {
             <div className="text-center">
               <h2 className="text-3xl font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white">Babak Semifinal</h2>
               <p className="mt-2 text-sm font-semibold uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-300">
-                Jadwal: Sabtu, 20 September 2025
+                Jadwal: Minggu, 21 September 2025
               </p>
               <p className="mt-1 text-xs font-semibold uppercase tracking-[0.35em] text-amber-600 dark:text-amber-200">
-                Slot menunggu pemenang perempat final
+                Empat besar: Ayu Dian, Saka Mbarep, Aluh Gemoy, Winda
               </p>
             </div>
 
@@ -852,7 +852,7 @@ export default function BattleIgniteFriendshipPage() {
             <div className="text-center">
               <h2 className="text-3xl font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white">Babak Final</h2>
               <p className="mt-2 text-sm font-semibold uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-300">
-                Minggu, 21 September 2025 - Pukul 10.00 - 19.00
+                Selasa, 22 September 2025 - Pukul 10.00 - 19.00
               </p>
             </div>
 
@@ -867,7 +867,7 @@ export default function BattleIgniteFriendshipPage() {
             <div className="text-center">
               <h2 className="text-3xl font-bold uppercase tracking-[0.2em] text-slate-900 dark:text-white">3rd Place Battle</h2>
               <p className="mt-2 text-sm font-semibold uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-300">
-                Digelar serentak dengan Final pada pukul 10.00 - 19.00
+                Digelar serentak dengan Final pada Selasa, 22 September 2025 pukul 10.00 - 19.00
               </p>
             </div>
 
