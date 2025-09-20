@@ -1,15 +1,15 @@
 
 import { getAllArticles } from '@/lib/articles';
+import { ARTICLE_BOTTOM_AD_SLOT, ARTICLE_LIST_AD_SLOT } from '@/lib/adsense';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import ArticlePaginationClient from './ArticlePaginationClient';
 
-const DEFAULT_AD_SLOT_ID = '7992484013';
-
 export default function ArticleListPage() {
   const articles = getAllArticles();
-  const adSlotId =
-    process.env.NEXT_PUBLIC_ADSENSE_AD_SLOT_ID_3 || DEFAULT_AD_SLOT_ID;
+  const adSlotIds = [ARTICLE_LIST_AD_SLOT, ARTICLE_BOTTOM_AD_SLOT].filter(
+    (slot): slot is string => Boolean(slot),
+  );
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -23,7 +23,7 @@ export default function ArticleListPage() {
         </Link>
       </div>
       <h1 className="text-4xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">Artikel</h1>
-      <ArticlePaginationClient initialArticles={articles} adSlotId={adSlotId} />
+      <ArticlePaginationClient initialArticles={articles} adSlotIds={adSlotIds} />
     </div>
   );
 }

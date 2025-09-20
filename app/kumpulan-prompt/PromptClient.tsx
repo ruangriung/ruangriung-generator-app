@@ -7,6 +7,7 @@ import Link from 'next/link';
 import PromptSubmissionTrigger from '../../components/PromptSubmissionTrigger';
 import Pagination from '../../components/Pagination';
 import AdBanner from '../../components/AdBanner';
+import { PROMPT_BOTTOM_AD_SLOT, PROMPT_TOP_AD_SLOT } from '../../lib/adsense';
 import { ArrowLeft } from 'lucide-react';
 import { usePromptSuggestions } from './usePromptSuggestions';
 
@@ -45,6 +46,8 @@ export default function PromptClient({ prompts }: PromptClientProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const topAdSlot = PROMPT_TOP_AD_SLOT;
+  const bottomAdSlot = PROMPT_BOTTOM_AD_SLOT;
 
   const allTags = useMemo(() => {
     const tags = new Set<string>();
@@ -185,6 +188,12 @@ export default function PromptClient({ prompts }: PromptClientProps) {
         </div>
       </div>
 
+      {topAdSlot && (
+        <div className="my-8">
+          <AdBanner key="prompt-top-ad" dataAdSlot={topAdSlot} />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {paginatedPrompts.map((prompt: Prompt) => (
           <Link key={prompt.id} href={`/kumpulan-prompt/${prompt.slug}`}>
@@ -221,9 +230,14 @@ export default function PromptClient({ prompts }: PromptClientProps) {
         ))}
       </div>
 
-      <div className="my-8">
-        <AdBanner dataAdSlot="5961316189" />
-      </div>
+      {bottomAdSlot && (
+        <div className="my-8">
+          <AdBanner
+            key={`prompt-bottom-ad-${currentPage}`}
+            dataAdSlot={bottomAdSlot}
+          />
+        </div>
+      )}
 
       {totalPages > 1 && (
         <Pagination 
