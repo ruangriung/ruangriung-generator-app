@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Fragment } from 'react';
+import { useState, Fragment, useMemo } from 'react';
 import Link from 'next/link';
 import AdBanner from '@/components/AdBanner';
 
@@ -18,16 +18,21 @@ interface Article {
 
 interface ArticlePaginationClientProps {
     initialArticles: Article[];
-    adSlotId: string;
+    adSlotIds: string[];
 }
 
-export default function ArticlePaginationClient({ initialArticles, adSlotId }: ArticlePaginationClientProps) {
+export default function ArticlePaginationClient({ initialArticles, adSlotIds }: ArticlePaginationClientProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const postsPerPage = 6;
     const totalPages = Math.ceil(initialArticles.length / postsPerPage);
     const indexOfLastPost = currentPage * postsPerPage;
     const indexOfFirstPost = indexOfLastPost - postsPerPage;
     const currentPosts = initialArticles.slice(indexOfFirstPost, indexOfLastPost);
+
+    const sanitizedAdSlots = useMemo(
+        () => adSlotIds.map(slot => slot.trim()).filter(Boolean),
+        [adSlotIds],
+    );
     
     const handleNextPage = () => {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
@@ -65,11 +70,30 @@ export default function ArticlePaginationClient({ initialArticles, adSlotId }: A
                             </div>
                         </div>
 
-                        {(index + 1) % AD_INTERVAL === 0 && (
-                            <div className="my-6">
-                                <AdBanner dataAdSlot={adSlotId} />
-                            </div>
-                        )}
+                        {(() => {
+                            const shouldShowAd =
+                                (index + 1) % AD_INTERVAL === 0 && sanitizedAdSlots.length > 0;
+
+                            if (!shouldShowAd) {
+                                return null;
+                            }
+
+                            const adIndex = Math.floor((index + 1) / AD_INTERVAL) - 1;
+                            const slotId = sanitizedAdSlots[adIndex % sanitizedAdSlots.length];
+
+                            if (!slotId) {
+                                return null;
+                            }
+
+                            return (
+                                <div className="my-6">
+                                    <AdBanner
+                                        key={`article-list-ad-${currentPage}-${index}-${slotId}`}
+                                        dataAdSlot={slotId}
+                                    />
+                                </div>
+                            );
+                        })()}
                     </Fragment>
                 ))}
             </div>

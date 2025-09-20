@@ -10,6 +10,7 @@ import type { Parent } from 'unist';
 import { visit } from 'unist-util-visit';
 import type { Plugin } from 'unified';
 import AdBanner from '@/components/AdBanner';
+import { ARTICLE_BOTTOM_AD_SLOT, ARTICLE_INLINE_AD_SLOT } from '@/lib/adsense';
 
 interface ParagraphData extends Record<string, unknown> {
   shouldInsertAdAfter?: boolean;
@@ -102,7 +103,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   // Variabel relatedArticles didefinisikan di dalam komponen
   const relatedArticles = getRelatedArticles(params.slug);
 
-  const articleAdSlot = '7992484013';
+  const inlineAdSlot = ARTICLE_INLINE_AD_SLOT;
+  const bottomAdSlot = ARTICLE_BOTTOM_AD_SLOT;
 
   const markdownComponents: Components = {
     p({ node, children, ...props }) {
@@ -118,9 +120,12 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       return (
         <>
           <p {...paragraphProps}>{children}</p>
-          {adFlagValue && (
+          {adFlagValue && inlineAdSlot && (
             <div className="my-8">
-              <AdBanner dataAdSlot={articleAdSlot} />
+              <AdBanner
+                key={`article-inline-ad-${article.slug}`}
+                dataAdSlot={inlineAdSlot}
+              />
             </div>
           )}
         </>
@@ -221,9 +226,14 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         </div>
       )}
 
-      <div className="my-8">
-        <AdBanner dataAdSlot={articleAdSlot} />
-      </div>
+      {bottomAdSlot && (
+        <div className="my-8">
+          <AdBanner
+            key={`article-bottom-ad-${article.slug}`}
+            dataAdSlot={bottomAdSlot}
+          />
+        </div>
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
