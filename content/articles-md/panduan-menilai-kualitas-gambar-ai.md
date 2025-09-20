@@ -1,6 +1,6 @@
 ---
 title: Panduan Menilai Kualitas Gambar AI Secara Menyeluruh
-date: 2025-08-10
+date: 2025-09-20
 author: Tim RuangRiung
 image: /v1/assets/ruangriung.png
 category: AI
