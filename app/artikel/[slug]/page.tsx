@@ -11,6 +11,7 @@ import { visit } from 'unist-util-visit';
 import type { Plugin } from 'unified';
 import AdBanner from '@/components/AdBanner';
 import { ARTICLE_BOTTOM_AD_SLOT, ARTICLE_INLINE_AD_SLOT } from '@/lib/adsense';
+import ArticleSubmissionButton from '../ArticleSubmissionButton';
 
 interface ParagraphData extends Record<string, unknown> {
   shouldInsertAdAfter?: boolean;
@@ -161,10 +162,13 @@ export default async function ArticlePage({ params }: { params: { slug: string }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Link href="/artikel" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
-        <ArrowLeft className="mr-2" size={20} />
-        Kembali ke Artikel
-      </Link>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Link href="/artikel" className="inline-flex items-center text-blue-600 hover:text-blue-800">
+          <ArrowLeft className="mr-2" size={20} />
+          Kembali ke Artikel
+        </Link>
+        <ArticleSubmissionButton className="w-full sm:w-auto" />
+      </div>
       <h1 className="text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">
         {article.title}
       </h1>
