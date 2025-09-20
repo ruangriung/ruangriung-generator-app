@@ -11,7 +11,7 @@ import { visit } from 'unist-util-visit';
 import type { Plugin } from 'unified';
 import AdBanner from '@/components/AdBanner';
 import { ARTICLE_BOTTOM_AD_SLOT, ARTICLE_INLINE_AD_SLOT } from '@/lib/adsense';
-import ArticleSubmissionButton from '../ArticleSubmissionButton';
+import ArticleSubmissionTrigger from '@/components/ArticleSubmissionTrigger';
 
 interface ParagraphData extends Record<string, unknown> {
   shouldInsertAdAfter?: boolean;
@@ -167,7 +167,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           <ArrowLeft className="mr-2" size={20} />
           Kembali ke Artikel
         </Link>
-        <ArticleSubmissionButton className="w-full sm:w-auto" />
+        <ArticleSubmissionTrigger className="w-full sm:w-auto" />
       </div>
       <h1 className="text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">
         {article.title}

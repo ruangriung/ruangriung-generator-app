@@ -4,7 +4,7 @@ import { ARTICLE_BOTTOM_AD_SLOT, ARTICLE_LIST_AD_SLOT } from '@/lib/adsense';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import ArticlePaginationClient from './ArticlePaginationClient';
-import ArticleSubmissionButton from './ArticleSubmissionButton';
+import ArticleSubmissionTrigger from '@/components/ArticleSubmissionTrigger';
 
 export default function ArticleListPage() {
   const articles = getAllArticles();
@@ -22,7 +22,7 @@ export default function ArticleListPage() {
           <ArrowLeft size={18} />
           <span>Kembali ke Beranda</span>
         </Link>
-        <ArticleSubmissionButton className="w-full sm:w-auto" />
+        <ArticleSubmissionTrigger className="w-full sm:w-auto" />
       </div>
       <h1 className="text-4xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">Artikel</h1>
       <ArticlePaginationClient initialArticles={articles} adSlotIds={adSlotIds} />
