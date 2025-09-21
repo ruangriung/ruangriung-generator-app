@@ -306,10 +306,10 @@ export default function KontenKreatorPage() {
             Direktori Konten Kreator
           </span>
           <h1 className="mt-6 text-4xl font-bold text-gray-900 dark:text-gray-100">
-            Kreator RuangRiung yang Menghidupkan Komunitas
+            Bersama Kreator, Untuk Kreator, Oleh Kreator.
           </h1>
           <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-            Kenali wajah di balik karya-karya inspiratif RuangRiung. Mereka adalah para admin dan kontributor yang rajin berbagi eksperimen, tips, dan semangat kolaborasi di berbagai kanal digital.
+            RuangRiung adalah rumah kedua untuk tumbuh, berjejaring, dan mengubah passion menjadi proyek yang berarti bersama rekan seperjalanan. Tampilkan profil anda agar seluruh dunia tahu bahwa anda bisa! Jelajahi jaringan kreator kami untuk menemukan kolaborator baru, inspirasi segar, dan ruang belajar yang hangat.
           </p>
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -384,7 +384,7 @@ export default function KontenKreatorPage() {
                 <div className="h-1 w-full bg-gradient-to-r from-purple-400 via-fuchsia-400 to-blue-400 dark:from-purple-700 dark:via-fuchsia-700 dark:to-blue-700" />
                 <div className="flex flex-col gap-6 p-6">
                   <div className="flex items-start gap-4">
-                    <div className="relative h-24 w-24 overflow-hidden rounded-full border-4 border-purple-100 bg-purple-50 shadow-inner dark:border-purple-900 dark:bg-purple-900/40">
+                    <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-purple-100 bg-purple-50 shadow-inner dark:border-purple-900 dark:bg-purple-900/40">
                       <Image
                         src={creator.imageUrl}
                         alt={`Foto profil ${creator.name}`}
