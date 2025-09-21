@@ -1,10 +1,38 @@
 'use client';
 
 import { useState, Fragment, useMemo, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import AdBanner from '@/components/AdBanner';
 import ArticleSearchForm from '@/components/ArticleSearchForm';
+
+const escapeRegExp = (value: string) => value.replace(/[-/\\^$*+?.()|[\]{}]/g, '\$&');
+
+const highlightMatches = (text: string, term: string): ReactNode => {
+    const normalizedTerm = term.trim();
+
+    if (!normalizedTerm) {
+        return text;
+    }
+
+    const lowerTerm = normalizedTerm.toLowerCase();
+    const regex = new RegExp(`(${escapeRegExp(normalizedTerm)})`, 'gi');
+    const parts = text.split(regex);
+
+    return parts.map((part, index) =>
+        part.toLowerCase() === lowerTerm ? (
+            <mark
+                key={`${index}-${part}`}
+                className="rounded bg-yellow-200 px-1 py-0 text-gray-900 dark:bg-yellow-500/40"
+            >
+                {part}
+            </mark>
+        ) : (
+            <Fragment key={`${index}-${part}`}>{part}</Fragment>
+        ),
+    );
+};
 
 interface Article {
     slug: string;
@@ -91,7 +119,7 @@ export default function ArticlePaginationClient({ initialArticles, adSlotIds }: 
         <>
             <div className="mb-8 flex justify-center">
                 <ArticleSearchForm
-                    className="w-full max-w-3xl"
+                    className="w-full max-w-4xl backdrop-blur"
                     placeholder="Cari judul, ringkasan, atau tag artikel..."
                 />
             </div>
@@ -102,8 +130,10 @@ export default function ArticlePaginationClient({ initialArticles, adSlotIds }: 
                     {rawSearchQuery ? (
                         <p className="mt-2 text-gray-600 dark:text-gray-400">
                             Kami tidak menemukan artikel yang cocok untuk{' '}
-                            <span className="font-semibold text-purple-600 dark:text-purple-400">"{rawSearchQuery}"</span>.{' '}
-                            Coba gunakan kata kunci lain.
+                            <mark className="rounded bg-yellow-200 px-1 py-0 font-semibold text-purple-700 dark:bg-yellow-500/40 dark:text-purple-200">
+                                "{rawSearchQuery}"
+                            </mark>
+                            . Coba gunakan kata kunci lain.
                         </p>
                     ) : (
                         <p className="mt-2 text-gray-600 dark:text-gray-400">
@@ -120,15 +150,19 @@ export default function ArticlePaginationClient({ initialArticles, adSlotIds }: 
                                     <div className="flex items-start justify-between mb-2">
                                         <Link href={`/artikel/${article.slug}`} className="block">
                                             <h2 className="text-2xl font-bold text-purple-600 dark:text-purple-400 hover:underline">
-                                                {article.title}
+                                                {highlightMatches(article.title, rawSearchQuery)}
                                             </h2>
                                         </Link>
                                         <span className="whitespace-nowrap rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-600 dark:bg-indigo-900 dark:text-indigo-400">
-                                            {article.category}
+                                            {highlightMatches(article.category, rawSearchQuery)}
                                         </span>
                                     </div>
                                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                        Oleh {article.author} -
+                                        Oleh{' '}
+                                        <span className="font-medium text-gray-700 dark:text-gray-200">
+                                            {highlightMatches(article.author, rawSearchQuery)}
+                                        </span>{' '}
+                                        -
                                         {' '}
                                         {new Date(article.date).toLocaleDateString('id-ID', {
                                             year: 'numeric',
@@ -137,7 +171,9 @@ export default function ArticlePaginationClient({ initialArticles, adSlotIds }: 
                                         })}
                                     </p>
                                     <Link href={`/artikel/${article.slug}`} className="block">
-                                        <p className="mt-3 text-gray-700 dark:text-gray-300">{article.summary}</p>
+                                        <p className="mt-3 text-gray-700 dark:text-gray-300">
+                                            {highlightMatches(article.summary, rawSearchQuery)}
+                                        </p>
                                     </Link>
                                     <div className="mt-4 flex flex-wrap gap-2">
                                         {article.tags.map(tag => (
@@ -145,7 +181,7 @@ export default function ArticlePaginationClient({ initialArticles, adSlotIds }: 
                                                 key={tag}
                                                 className="rounded-full bg-gray-200 px-3 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300"
                                             >
-                                                #{tag}
+                                                {highlightMatches(`#${tag}`, rawSearchQuery)}
                                             </span>
                                         ))}
                                     </div>
