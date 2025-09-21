@@ -1,7 +1,7 @@
 ---
 title: "Terbongkar! 9 Trik Rahasia Google AI Studio Biar Prompt Kamu Auto Meledak"
 summary: "Kupas tuntas strategi tersembunyi di Google AI Studio agar prototipe Gemini kamu jadi makin tajam, responsif, dan siap dibawa ke level produksi."
-date: "2025-01-10"
+date: "2025-09-21"
 author: "Tim RuangRiung"
 category: "AI"
 tags: ['Google AI Studio', 'Gemini', 'prompting', 'tutorial', 'prototyping']
