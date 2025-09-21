@@ -8,29 +8,29 @@ tags: ['AI', 'moodboard', 'strategi visual', 'kompetisi']
 summary: Moodboard yang dirancang dengan struktur jelas membantu kreator AI mengunci narasi visual dan mempercepat proses iterasi menjelang battle.
 ---
 
-Moodboard bukan sekadar papan inspirasi; ia berfungsi sebagai pusat kendali visual yang menyatukan tema, emosi, dan arah teknis sebelum Anda memasuki battle gambar AI. Ketika waktu persiapan singkat, moodboard strategis memastikan setiap elemen—dari referensi warna hingga narasi cerita—selaras dengan tujuan kemenangan yang Anda tetapkan.
+Moodboard bukan sekadar papan inspirasi; ia adalah pusat kendali visual yang menyatukan tema, emosi, dan arah teknis sebelum saya memasuki battle gambar AI. Ketika waktu persiapan singkat, moodboard strategis memastikan setiap elemen—dari referensi warna hingga narasi cerita—selaras dengan tujuan kemenangan yang sudah saya tetapkan.
 
 ## Dekonstruksi Brief dan Tema Utama
 
-Mulai dengan memecah brief kompetisi menjadi pertanyaan kunci: suasana apa yang ingin dihadirkan? Elemen simbolik apa yang wajib muncul? Apa batasan teknis yang harus dihormati? Tulis jawaban dalam tabel dua kolom yang memuat *Kebutuhan Kompetisi* dan *Respon Kreatif Anda*. Tabel ini menjadi filter awal untuk memilih referensi yang benar-benar mendukung strategi.
+Saya memulai dengan memecah brief kompetisi menjadi pertanyaan kunci: suasana apa yang ingin dihadirkan? Elemen simbolik apa yang wajib muncul? Apa batasan teknis yang harus dihormati? Jawaban dari pertanyaan tersebut saya tulis dalam tabel dua kolom yang memuat *kebutuhan kompetisi* dan *respon kreatif*. Tabel ini menjadi filter awal untuk memilih referensi yang benar-benar mendukung strategi.
 
-Tambahkan lapisan riset tren. Gunakan platform komunitas kreator untuk mengamati pola visual yang sedang naik daun, lalu tandai area yang ingin Anda dekati atau hindari agar karya tetap unik. Dokumentasikan alasan pemilihan setiap referensi agar tidak sekadar mengikuti arus.
+Saya juga menambahkan lapisan riset tren. Platform komunitas kreator membantu saya mengamati pola visual yang sedang naik daun. Dari sana, saya menandai area yang ingin didekati atau justru dihindari agar karya tetap unik. Alasan pemilihan setiap referensi saya dokumentasikan supaya keputusan tidak sekadar mengikuti arus.
 
 ## Struktur Moodboard Multi-Lapis
 
-Bagi moodboard menjadi tiga lapis:
+Setelah riset selesai, saya membagi moodboard menjadi tiga lapis:
 
 1. **Lapisan atmosfer.** Kumpulkan gambar yang menangkap tone emosi, pencahayaan, dan tekstur utama. Sertakan catatan singkat seperti "nuansa senja keemasan dengan kabut halus" untuk memudahkan penyesuaian prompt.
 2. **Lapisan karakter dan objek.** Masukkan referensi pose, siluet, atau ikon yang relevan dengan tema. Gunakan highlight atau kode warna untuk menandai bagian wajib, eksperimen, dan cadangan.
 3. **Lapisan tipografi dan elemen pendukung.** Jika battle mengizinkan overlay teks atau elemen grafis, siapkan variasi tipografi dan pattern yang dapat memperkuat cerita.
 
-Gunakan format digital yang memungkinkan tagging dan pencarian cepat. Aplikasi kolaboratif atau papan digital membantu Anda mengelompokkan referensi berdasarkan kategori tanpa kehilangan konteks.
+Saya memilih format digital yang memungkinkan *tagging* dan pencarian cepat. Aplikasi kolaboratif atau papan digital membantu saya mengelompokkan referensi berdasarkan kategori tanpa kehilangan konteks.
 
 ## Terjemahkan Moodboard ke Pustaka Prompt
 
-Setelah moodboard matang, konversikan tiap kelompok referensi menjadi template prompt. Misalnya, lapisan atmosfer dapat ditransformasi menjadi frasa "volumetric golden hour fog, cinematic haze" sementara lapisan karakter menjadi "heroic figure, dynamic perspective, expressive brush strokes". Gabungkan kedua template dengan modul parameter teknis seperti rasio aspek dan preferensi model.
+Setelah moodboard matang, saya mengonversi tiap kelompok referensi menjadi template prompt. Misalnya, lapisan atmosfer saya ubah menjadi frasa "volumetric golden hour fog, cinematic haze" sementara lapisan karakter menjadi "heroic figure, dynamic perspective, expressive brush strokes". Kedua template tersebut saya gabungkan dengan parameter teknis seperti rasio aspek dan preferensi model.
 
-Susun pustaka prompt ke dalam tiga tingkat kesiapan: prototipe, kompetitif, dan cadangan darurat. Untuk setiap tingkat, catat variasi seed, lensa kamera, dan konfigurasi stylize sehingga Anda dapat bereksperimen tanpa kehilangan arah.
+Pustaka prompt saya susun dalam tiga tingkat kesiapan: prototipe, kompetitif, dan cadangan darurat. Untuk setiap tingkat, saya mencatat variasi *seed*, lensa kamera, dan konfigurasi *stylize* sehingga eksperimen dapat berjalan tanpa kehilangan arah.
 
 ## Checklist Moodboard Kompetitif
 
@@ -40,4 +40,4 @@ Susun pustaka prompt ke dalam tiga tingkat kesiapan: prototipe, kompetitif, dan 
 - [ ] Template prompt dibuat untuk tiap lapisan dan dikelompokkan berdasarkan tingkat kesiapan.
 - [ ] File moodboard tersimpan di lokasi yang mudah diakses saat simulasi maupun hari-H.
 
-Dengan blueprint ini, moodboard Anda tidak hanya indah dipandang, tetapi juga berfungsi sebagai sistem navigasi kreatif yang siap memandu Anda menuju karya kompetitif terbaik.
+Dengan blueprint ini, moodboard tidak hanya enak dipandang, tetapi juga berfungsi sebagai sistem navigasi kreatif yang siap memandu saya—dan Anda—menuju karya kompetitif terbaik.
