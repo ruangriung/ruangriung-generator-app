@@ -390,7 +390,7 @@ export default function KontenKreatorPage() {
                         alt={`Foto profil ${creator.name}`}
                         fill
                         sizes="96px"
-                        className="object-cover"
+                        className="h-full w-full rounded-full object-cover"
                       />
                     </div>
                     <div>
