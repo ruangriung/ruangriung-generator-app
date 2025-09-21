@@ -1,8 +1,16 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { ArrowLeft, Sparkles, Send, CheckCircle2, Info, FileText } from 'lucide-react';
+
+const DynamicTurnstile = dynamic(() => import('@/components/TurnstileWidget'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[65px] w-[300px] rounded-2xl bg-gray-200/80 dark:bg-gray-800/80" />
+  ),
+});
 
 type ProfileSubmission = {
   name: string;
@@ -64,6 +72,13 @@ export default function KirimProfilPage() {
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [token, setToken] = useState('');
+  const [captchaError, setCaptchaError] = useState(false);
+
+  const handleCaptchaSuccess = (tokenValue: string) => {
+    setToken(tokenValue);
+    setCaptchaError(false);
+  };
 
   const handleChange = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -96,6 +111,12 @@ export default function KirimProfilPage() {
       return;
     }
 
+    if (!token) {
+      setCaptchaError(true);
+      return;
+    }
+
+    setCaptchaError(false);
     setIsSubmitting(true);
 
     try {
@@ -386,6 +407,15 @@ export default function KirimProfilPage() {
                 </div>
               </div>
 
+              <div className="mt-2 flex flex-col items-center gap-2">
+                <DynamicTurnstile onSuccess={handleCaptchaSuccess} options={{ theme: 'auto' }} />
+                {captchaError && (
+                  <p className="text-xs font-medium text-red-600 dark:text-red-400">
+                    Silakan selesaikan verifikasi keamanan sebelum mengirim.
+                  </p>
+                )}
+              </div>
+
               {errorMessage && (
                 <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800/60 dark:bg-red-950/50 dark:text-red-200">
                   {errorMessage}
@@ -401,7 +431,7 @@ export default function KirimProfilPage() {
               <button
                 type="submit"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:from-purple-700 hover:to-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !token}
               >
                 <Send className="h-4 w-4" />
                 {isSubmitting ? 'Menyiapkan Email...' : 'Buka Draf Pengajuan'}
