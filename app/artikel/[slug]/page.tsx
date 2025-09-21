@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { type Article, getArticleBySlug, getArticleSlugs, getRelatedArticles } from '@/lib/articles';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
@@ -12,6 +13,7 @@ import type { Plugin } from 'unified';
 import AdBanner from '@/components/AdBanner';
 import { ARTICLE_BOTTOM_AD_SLOT, ARTICLE_INLINE_AD_SLOT } from '@/lib/adsense';
 import ArticleSubmissionTrigger from '@/components/ArticleSubmissionTrigger';
+import ArticleSearchForm from '@/components/ArticleSearchForm';
 
 interface ParagraphData extends Record<string, unknown> {
   shouldInsertAdAfter?: boolean;
@@ -168,6 +170,19 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           Kembali ke Artikel
         </Link>
         <ArticleSubmissionTrigger className="w-full sm:w-auto" />
+      </div>
+      <div className="mb-8 flex justify-center">
+        <Suspense
+          fallback={
+            <div className="h-12 w-full max-w-3xl animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
+          }
+        >
+          <ArticleSearchForm
+            targetPath="/artikel"
+            placeholder="Cari artikel lain di RuangRiung..."
+            className="w-full max-w-3xl"
+          />
+        </Suspense>
       </div>
       <h1 className="text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">
         {article.title}

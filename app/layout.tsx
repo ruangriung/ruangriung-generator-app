@@ -1,6 +1,5 @@
 // app/layout.tsx
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import AuthProvider from '@/components/AuthProvider';
 import Footer from '@/components/Footer';
@@ -10,8 +9,6 @@ import CookieConsent from '@/components/CookieConsent';
 import ThemeScript from '@/components/ThemeScript';
 import AdSenseLoader from '@/components/AdSenseLoader';
 import { ADSENSE_PUBLISHER_ID } from '@/lib/adsense';
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ruangriung.my.id'),
@@ -77,7 +74,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
-      <body className={`${inter.className} bg-light-bg`}>
+      <body className="bg-light-bg font-sans">
         <AuthProvider>
           <div className="flex min-h-screen flex-col">
             <main className="flex-grow">{children}</main>

@@ -1,4 +1,5 @@
 
+import { Suspense } from 'react';
 import { getAllArticles } from '@/lib/articles';
 import { ARTICLE_BOTTOM_AD_SLOT, ARTICLE_LIST_AD_SLOT } from '@/lib/adsense';
 import Link from 'next/link';
@@ -25,7 +26,25 @@ export default function ArticleListPage() {
         <ArticleSubmissionTrigger className="w-full sm:w-auto" />
       </div>
       <h1 className="text-4xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">Artikel</h1>
-      <ArticlePaginationClient initialArticles={articles} adSlotIds={adSlotIds} />
+      <Suspense
+        fallback={
+          <div className="space-y-6">
+            <div className="mx-auto flex w-full max-w-3xl justify-center">
+              <div className="h-12 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
+            </div>
+            <div className="space-y-4">
+              {[0, 1].map(item => (
+                <div
+                  key={item}
+                  className="h-40 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800"
+                />
+              ))}
+            </div>
+          </div>
+        }
+      >
+        <ArticlePaginationClient initialArticles={articles} adSlotIds={adSlotIds} />
+      </Suspense>
     </div>
   );
 }
