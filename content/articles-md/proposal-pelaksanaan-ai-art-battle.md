@@ -1,6 +1,6 @@
 ---
 title: Proposal Pelaksanaan Kompetisi AI Art Battle
-date: 2025-10-05
+date: 2025-09-21
 author: Tim RuangRiung
 image: /v1/assets/ruangriung.png
 category: AI
