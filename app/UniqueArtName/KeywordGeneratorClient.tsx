@@ -662,10 +662,10 @@ const KeywordGeneratorClient = () => {
                   Unique Art Name Lab
                 </div>
                 <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 sm:text-4xl">
-                  Eksperimen 20 Kata Kunci Uji Prompt yang Benar-Benar Unik
+                  Eksperimen 20 Visual Style AI untuk sebuah Generasi Gambar AI yang Benar-Benar Unik
                 </h1>
                 <p className="max-w-2xl text-base text-gray-700 dark:text-gray-300">
-                  Halaman ini dirancang sebagai laboratorium kata kunci langka untuk menguji ide prompt gambar. Setiap sesi menghasilkan istilah yang terasa baru—kadang satu kata, kadang gabungan dengan sentuhan tak terduga—lengkap dengan deskripsi singkat agar mudah kamu padukan.
+                  Halaman ini dirancang sebagai laboratorium Visual Style yang unik, langka dengan tujuan untuk menguji ide prompt gambar AI. Setiap sesi menghasilkan istilah atau Visual Style yang terasa baru—kadang satu kata, kadang gabungan dengan sentuhan tak terduga—lengkap dengan deskripsi singkat agar mudah dipadukan.
                 </p>
               </div>
               <div className="rounded-2xl bg-white/60 p-5 shadow-inner dark:bg-dark-neumorphic-light/70">
@@ -696,9 +696,9 @@ const KeywordGeneratorClient = () => {
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Generate Kata Kunci Uji Prompt</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Hasilkan Visual Style untuk Uji Prompt</h2>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Tekan tombol di bawah untuk meminta model menghadirkan {KEYWORD_COUNT} istilah eksperimental beserta deskripsi ringkasnya. Susunan kata selalu acak untuk memberi variasi ide setiap kali kamu mencoba.
+                  Tekan tombol di bawah untuk meminta model menghadirkan {KEYWORD_COUNT} istilah Visual Style eksperimental beserta deskripsi ringkasnya. Susunan kata selalu acak untuk memberi variasi ide setiap kali kamu mencoba.
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
@@ -709,7 +709,7 @@ const KeywordGeneratorClient = () => {
                   className="inline-flex items-center gap-2 rounded-2xl bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-purple-700 disabled:cursor-not-allowed disabled:bg-purple-400"
                 >
                   {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                  {isGenerating ? 'Sedang membuat...' : 'Generate Sekarang'}
+                  {isGenerating ? 'Sedang membuat...' : 'Generate Visual Style'}
                 </button>
                 <button
                   type="button"
