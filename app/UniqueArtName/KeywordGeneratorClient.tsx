@@ -696,9 +696,9 @@ const KeywordGeneratorClient = () => {
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Hasilkan Visual Style untuk Uji Prompt</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Hasilkan Tema Unik</h2>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Hasilkan {KEYWORD_COUNT} istilah Tema Eksperimental yang benar-benar baru dan lengkap dengan deskripsi kilat — setiap kombinasi dibuat Serapi mungkin agar setiap kali kamu mencoba muncul ide baru yang mengejutkan dan inspiratif!
+                  Hasilkan {KEYWORD_COUNT} istilah Tema unik dan Eksperimental yang benar-benar baru serta lengkap dengan deskripsi kilat — setiap kombinasi dibuat Serapi mungkin agar setiap kali kamu mencoba muncul ide baru yang mengejutkan dan inspiratif!
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
