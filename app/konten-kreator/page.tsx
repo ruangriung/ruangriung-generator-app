@@ -9,182 +9,19 @@ import {
   ChevronDown,
   Facebook,
   Globe,
-  Instagram,
-  MessageCircle,
   Search,
   Send,
   Sparkles,
-  Twitter,
   Users,
-  Youtube,
 } from 'lucide-react';
-
-type SocialLinks = {
-  facebook?: string;
-  youtube?: string;
-  instagram?: string;
-  threads?: string;
-  x?: string;
-  website?: string;
-};
-
-type Creator = {
-  name: string;
-  role: string;
-  description: string;
-  imageUrl: string;
-  specialties: string[];
-  socials: SocialLinks;
-};
-
-type SocialKey = keyof SocialLinks;
-
-type SocialPlatform = {
-  key: SocialKey;
-  label: string;
-  icon: LucideIcon;
-};
+import { creators, type Creator } from './creators';
+import { socialPlatforms } from './social-platforms';
 
 type SubmissionBenefit = {
   title: string;
   description: string;
   icon: LucideIcon;
 };
-
-const socialPlatforms: SocialPlatform[] = [
-  { key: 'facebook', label: 'Facebook', icon: Facebook },
-  { key: 'youtube', label: 'YouTube', icon: Youtube },
-  { key: 'instagram', label: 'Instagram', icon: Instagram },
-  { key: 'threads', label: 'Threads', icon: MessageCircle },
-  { key: 'x', label: 'X (d/h Twitter)', icon: Twitter },
-  { key: 'website', label: 'Website', icon: Globe },
-];
-
-const creators: Creator[] = [
-  {
-    name: 'Koko Ajeeb',
-    role: 'Admin - Founder & CEO',
-    description:
-      'Visioner di balik RuangRiung yang memastikan generator AI kami ramah digunakan oleh semua anggota komunitas.',
-    imageUrl: '/author/img/koko-ajeeb.jpg',
-    specialties: ['Strategi Komunitas', 'Eksperimen AI', 'Konten Edukatif'],
-    socials: {
-      facebook: 'https://web.facebook.com/koko.ajeeb',
-      website: 'https://www.ruangriung.my.id',
-    },
-  },
-  {
-    name: 'Xenopath',
-    role: 'Admin',
-    description:
-      'Kurator visual yang rajin berbagi preset dan referensi gaya sehingga ide liar komunitas bisa diwujudkan jadi gambar.',
-    imageUrl: '/author/img/xenopath.jpg',
-    specialties: ['Kurasi Prompt', 'Eksperimen Visual', 'Mentor Komunitas'],
-    socials: {
-      facebook: 'https://web.facebook.com/xenopati',
-    },
-  },
-  {
-    name: 'Yogi Arfianto',
-    role: 'Admin',
-    description:
-      'Menjaga percakapan komunitas tetap hangat sambil merangkum tips teknis agar tiap kreator cepat menemukan gaya uniknya.',
-    imageUrl: '/author/img/yogi-profil.jpg',
-    specialties: ['Moderasi Komunitas', 'Tutorial Cepat', 'Eksperimen Gaya'],
-    socials: {
-      facebook: 'https://web.facebook.com/yogee.krib',
-    },
-  },
-  {
-    name: 'Famii',
-    role: 'Admin',
-    description:
-      'Storyteller yang senang memadukan narasi dan visual; karyanya sering jadi inspirasi kolaborasi lintas kreator.',
-    imageUrl: '/author/img/famii.jpg',
-    specialties: ['Storytelling', 'Kolaborasi', 'Eksperimen Karakter'],
-    socials: {
-      facebook: 'https://web.facebook.com/nengayu.hong',
-    },
-  },
-  {
-    name: 'Dery Lau',
-    role: 'Admin',
-    description:
-      'Berbagi tips editing dan workflow sehingga anggota baru cepat percaya diri menyelesaikan proyek visual mereka.',
-    imageUrl: '/author/img/dery-lau.jpg',
-    specialties: ['Workflow Kreatif', 'Eksperimen Lighting', 'Pendampingan'],
-    socials: {
-      facebook: 'https://web.facebook.com/dery.megana',
-      website: 'https://www.derylau.my.id/',
-    },
-  },
-  {
-    name: 'Paijem Ardian Arip',
-    role: 'Admin',
-    description:
-      'Selalu hadir memberi semangat serta menghidupkan sesi live sharing agar komunitas terasa dekat tanpa jarak.',
-    imageUrl: '/author/img/paijem.jpg',
-    specialties: ['Live Sharing', 'Engagement Komunitas', 'Curator Event'],
-    socials: {
-      facebook: 'https://web.facebook.com/ardian.arip.2025',
-    },
-  },
-  {
-    name: 'Mahidara Ratri',
-    role: 'Admin',
-    description:
-      'Meracik panduan teknis bertahap yang membuat pembelajaran AI generator jadi lebih mudah diikuti oleh siapa saja.',
-    imageUrl: '/author/img/mahidara.jpg',
-    specialties: ['Panduan Teknis', 'Eksperimen Model', 'Pembelajaran'],
-    socials: {
-      facebook: 'https://web.facebook.com/ruth.andanasari',
-    },
-  },
-  {
-    name: 'Nadifa Family',
-    role: 'Admin',
-    description:
-      'Mengkurasi highlight karya komunitas dan menghadirkannya kembali sebagai inspirasi segar di kanal sosial RuangRiung.',
-    imageUrl: '/author/img/nadifa.jpg',
-    specialties: ['Kurasi Konten', 'Media Sosial', 'Highlight Komunitas'],
-    socials: {
-      facebook: 'https://web.facebook.com/nadifa.familly',
-    },
-  },
-  {
-    name: 'Nurul Sholehah Eka',
-    role: 'Admin',
-    description:
-      'Penulis tutorial yang telaten mendokumentasikan langkah demi langkah agar semua orang bisa mencoba hal baru setiap hari.',
-    imageUrl: '/author/img/uul.jpg',
-    specialties: ['Penulisan Tutorial', 'Eksperimen Harian', 'Dukungan Anggota'],
-    socials: {
-      facebook: 'https://web.facebook.com/uul.aja',
-    },
-  },
-  {
-    name: 'Arif Tirtana',
-    role: 'Kontributor & Tukang Hore',
-    description:
-      'Sumber energi positif yang tak segan memberi apresiasi dan membantu kreator lain menemukan keunikan karyanya.',
-    imageUrl: '/author/img/arif.jpg',
-    specialties: ['Apresiasi Karya', 'Eksplorasi Ide', 'Kolaborasi'],
-    socials: {
-      facebook: 'https://web.facebook.com/ayicktigabelas',
-    },
-  },
-  {
-    name: 'Hus',
-    role: 'Admin',
-    description:
-      'Mengulas fitur baru dan memberikan umpan balik cepat agar pengembangan alat RuangRiung tetap relevan untuk kreator.',
-    imageUrl: '/author/img/hus.jpg',
-    specialties: ['Umpan Balik Produk', 'Eksperimen Fitur', 'Review Cepat'],
-    socials: {
-      facebook: 'https://web.facebook.com/janseengan',
-    },
-  },
-];
 
 const submissionBenefits: SubmissionBenefit[] = [
   {
@@ -256,7 +93,14 @@ const doesCreatorMatchTokens = (creator: Creator, tokens: string[]) => {
     creator.name,
     creator.role,
     creator.description,
+    creator.bio,
+    creator.location,
+    creator.availability,
     creator.specialties.join(' '),
+    creator.highlights.join(' '),
+    creator.portfolio
+      .map((item) => `${item.title} ${item.description}`)
+      .join(' '),
     Object.values(creator.socials)
       .filter(Boolean)
       .join(' '),
@@ -467,7 +311,7 @@ export default function KontenKreatorPage() {
           <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2">
             {paginatedCreators.map((creator) => (
               <article
-                key={creator.name}
+                key={creator.slug}
                 className="group flex h-full flex-col overflow-hidden rounded-3xl border border-purple-100 bg-white shadow-lg shadow-purple-100/50 transition-transform hover:-translate-y-1 hover:shadow-purple-200/80 dark:border-purple-900 dark:bg-gray-900/60 dark:shadow-black/40"
               >
                 <div className="h-1 w-full bg-gradient-to-r from-purple-400 via-fuchsia-400 to-blue-400 dark:from-purple-700 dark:via-fuchsia-700 dark:to-blue-700" />
@@ -544,17 +388,26 @@ export default function KontenKreatorPage() {
                     </div>
                   </div>
 
-                  {creator.socials.facebook && (
-                    <a
-                      href={creator.socials.facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-2 inline-flex w-max items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:from-purple-600 hover:to-fuchsia-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Link
+                      href={`/konten-kreator/profil/${creator.slug}`}
+                      className="inline-flex w-max items-center gap-2 rounded-full bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
                     >
-                      <Users className="h-4 w-4" />
-                      Lihat Profil Facebook
-                    </a>
-                  )}
+                      <Sparkles className="h-4 w-4" />
+                      Lihat Profil Lengkap
+                    </Link>
+                    {creator.socials.facebook && (
+                      <a
+                        href={creator.socials.facebook}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex w-max items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:from-purple-600 hover:to-fuchsia-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                      >
+                        <Users className="h-4 w-4" />
+                        Lihat Profil Facebook
+                      </a>
+                    )}
+                  </div>
                 </div>
               </article>
             ))}
