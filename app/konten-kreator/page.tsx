@@ -344,7 +344,7 @@ export default function KontenKreatorPage() {
             Bersama Kreator, Untuk Kreator, Oleh Kreator.
           </h1>
           <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-            Halaman ini dirancang untuk memperkenalkan dan memperkuat personal branding kreator RuangRiung sekaligus menonjolkan konten Facebook pro mereka agar semakin dikenal dunia. Jelajahi direktori ini untuk bertemu rekan seperjalanan yang siap berkolaborasi, membuka peluang baru, dan saling mengangkat karya terbaik.
+            Halaman ini dirancang untuk memperkenalkan dan memperkuat personal branding para Konten kreator di seluruh dunia sekaligus menonjolkan konten Facebook pro Anda semakin dikenal dunia. Jelajahi direktori ini untuk bertemu rekan seperjalanan yang siap berkolaborasi, membuka peluang baru, dan saling mengangkat karya terbaik.
           </p>
           <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
             Pengajuan profil membantu tim menampilkan cerita, nilai, dan karya Anda secara terkurasi sehingga komunitas maupun brand dapat memahami keahlian Anda dalam sekejap.
