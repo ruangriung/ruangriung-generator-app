@@ -347,7 +347,7 @@ export default function KontenKreatorPage() {
             Halaman ini dirancang untuk memperkenalkan dan memperkuat personal branding para Konten kreator di seluruh dunia sekaligus menonjolkan konten Facebook pro Anda semakin dikenal dunia. Jelajahi direktori ini untuk bertemu rekan seperjalanan yang siap berkolaborasi, membuka peluang baru, dan saling mengangkat karya terbaik.
           </p>
           <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-            Pengajuan profil membantu tim menampilkan cerita, nilai, dan karya Anda secara terkurasi sehingga komunitas maupun brand dapat memahami keahlian Anda dalam sekejap.
+            Submit profil membantu tim menampilkan cerita, nilai, dan karya Anda secara terkurasi sehingga komunitas maupun brand dapat memahami keahlian Anda dalam sekejap.
           </p>
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
