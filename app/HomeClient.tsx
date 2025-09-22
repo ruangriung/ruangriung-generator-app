@@ -230,6 +230,16 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
                     <ul className="py-2">
                         <li>
                             <Link
+                                href="/UniqueArtName"
+                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
+                                onClick={() => setIsToolsMenuOpen(false)}
+                            >
+                                <Sparkles size={18} />
+                                <span>Generator Kata Kunci Unik</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
                                 href="/storyteller"
                                 className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
                                 onClick={() => setIsToolsMenuOpen(false)}
