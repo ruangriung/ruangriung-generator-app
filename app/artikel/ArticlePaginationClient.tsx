@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Fragment, useMemo, useEffect } from 'react';
+import { useState, Fragment, useMemo, useEffect, useRef, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -55,6 +55,24 @@ export default function ArticlePaginationClient({ initialArticles, adSlotIds }: 
     const [currentPage, setCurrentPage] = useState(1);
     const postsPerPage = 6;
     const searchParams = useSearchParams();
+    const listContainerRef = useRef<HTMLDivElement | null>(null);
+    const hasInteractedWithPaginationRef = useRef(false);
+
+    const scrollToArticleListTop = useCallback(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
+        const element = listContainerRef.current;
+
+        if (!element) {
+            return;
+        }
+
+        window.requestAnimationFrame(() => {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }, []);
 
     const rawSearchQuery = (searchParams.get('q') ?? '').trim();
     const normalizedSearchQuery = rawSearchQuery.toLowerCase();
@@ -89,17 +107,29 @@ export default function ArticlePaginationClient({ initialArticles, adSlotIds }: 
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [normalizedSearchQuery]);
+
+        if (hasInteractedWithPaginationRef.current) {
+            scrollToArticleListTop();
+        }
+    }, [normalizedSearchQuery, scrollToArticleListTop]);
 
     useEffect(() => {
         if (totalPages > 0 && currentPage > totalPages) {
             setCurrentPage(totalPages);
+
+            if (hasInteractedWithPaginationRef.current) {
+                scrollToArticleListTop();
+            }
         }
 
         if (totalPages === 0 && currentPage !== 1) {
             setCurrentPage(1);
+
+            if (hasInteractedWithPaginationRef.current) {
+                scrollToArticleListTop();
+            }
         }
-    }, [currentPage, totalPages]);
+    }, [currentPage, totalPages, scrollToArticleListTop]);
 
     const sanitizedAdSlots = useMemo(
         () => adSlotIds.map(slot => slot.trim()).filter(Boolean),
@@ -107,10 +137,18 @@ export default function ArticlePaginationClient({ initialArticles, adSlotIds }: 
     );
     
     const handleNextPage = () => {
-        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+        if (currentPage < totalPages) {
+            hasInteractedWithPaginationRef.current = true;
+            setCurrentPage(currentPage + 1);
+            scrollToArticleListTop();
+        }
     };
     const handlePrevPage = () => {
-        if (currentPage > 1) setCurrentPage(currentPage - 1);
+        if (currentPage > 1) {
+            hasInteractedWithPaginationRef.current = true;
+            setCurrentPage(currentPage - 1);
+            scrollToArticleListTop();
+        }
     };
 
     const AD_INTERVAL = 3; // Tampilkan iklan setelah setiap 3 artikel
@@ -143,7 +181,7 @@ export default function ArticlePaginationClient({ initialArticles, adSlotIds }: 
                 </div>
             ) : (
                 <>
-                    <div className="space-y-8">
+                    <div ref={listContainerRef} className="space-y-8">
                         {currentPosts.map((article, index) => (
                             <Fragment key={article.slug}>
                                 <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow">
