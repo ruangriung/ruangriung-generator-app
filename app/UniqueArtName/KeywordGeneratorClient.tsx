@@ -61,6 +61,23 @@ const FALLBACK_MODELS: ModelOption[] = [
   { id: 'phi', name: 'Phi-4 Mini Instruct', description: 'Ahli dalam gaya naratif ringkas.' },
 ];
 
+const shouldEnforceDefaultTemperature = (modelId: string) => {
+  const normalized = modelId.trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+
+  return normalized.includes('azure') || normalized.includes('openai');
+};
+
+const getSafeTemperature = (modelId: string, desired: number) => {
+  if (Number.isNaN(desired)) {
+    return undefined;
+  }
+
+  return shouldEnforceDefaultTemperature(modelId) ? undefined : desired;
+};
+
 const sanitizeModels = (models: unknown): ModelOption[] => {
   if (!Array.isArray(models)) {
     return [];
@@ -364,24 +381,30 @@ const KeywordGeneratorClient = () => {
     const instruction = buildInstruction();
 
     try {
+      const payload: Record<string, unknown> = {
+        model: selectedModel,
+        messages: [
+          {
+            role: 'system',
+            content:
+              'Anda adalah kurator kata kunci eksperimental yang terus menemukan istilah baru untuk pengetesan prompt visual. Selalu patuhi format yang diminta dan pastikan hasil dapat langsung disalin.',
+          },
+          { role: 'user', content: instruction },
+        ],
+        max_tokens: 1200,
+      };
+
+      const generationTemperature = getSafeTemperature(selectedModel, 0.95);
+      if (typeof generationTemperature === 'number') {
+        payload.temperature = generationTemperature;
+      }
+
       const response = await fetch('https://text.pollinations.ai/openai', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: [
-            {
-              role: 'system',
-              content:
-                'Anda adalah kurator kata kunci eksperimental yang terus menemukan istilah baru untuk pengetesan prompt visual. Selalu patuhi format yang diminta dan pastikan hasil dapat langsung disalin.',
-            },
-            { role: 'user', content: instruction },
-          ],
-          temperature: 1.05,
-          max_tokens: 1200,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -408,8 +431,12 @@ const KeywordGeneratorClient = () => {
       toast.success('Berhasil membuat kata kunci unik!');
     } catch (error) {
       console.error('Gagal membuat kata kunci:', error);
-      const message = error instanceof Error ? error.message : 'Terjadi kesalahan tak dikenal.';
-      setGenerationError(message);
+      const rawMessage = error instanceof Error ? error.message : 'Terjadi kesalahan tak dikenal.';
+      const normalized = rawMessage.toLowerCase();
+      const friendlyMessage = normalized.includes('temperature')
+        ? 'Model ini hanya mendukung pengaturan suhu default. Coba ulangi tanpa mengganti model atau pilih opsi berbeda.'
+        : rawMessage;
+      setGenerationError(friendlyMessage);
       toast.error('Gagal membuat kata kunci.');
     } finally {
       setIsGenerating(false);
@@ -471,24 +498,30 @@ const KeywordGeneratorClient = () => {
     setAskError(null);
 
     try {
+      const payload: Record<string, unknown> = {
+        model: selectedModel,
+        messages: [
+          {
+            role: 'system',
+            content:
+              'Anda adalah asisten singkat untuk brainstorming prompt visual. Jawab padat, fokus pada ide kreatif yang bisa ditindaklanjuti.',
+          },
+          { role: 'user', content: trimmedQuestion },
+        ],
+        max_tokens: 600,
+      };
+
+      const askTemperature = getSafeTemperature(selectedModel, 0.85);
+      if (typeof askTemperature === 'number') {
+        payload.temperature = askTemperature;
+      }
+
       const response = await fetch('https://text.pollinations.ai/openai', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: [
-            {
-              role: 'system',
-              content:
-                'Anda adalah asisten singkat untuk brainstorming prompt visual. Jawab padat, fokus pada ide kreatif yang bisa ditindaklanjuti.',
-            },
-            { role: 'user', content: trimmedQuestion },
-          ],
-          temperature: 0.9,
-          max_tokens: 600,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -510,8 +543,12 @@ const KeywordGeneratorClient = () => {
       setQuestion('');
     } catch (error) {
       console.error('Gagal mengirim pertanyaan:', error);
-      const message = error instanceof Error ? error.message : 'Terjadi kesalahan tak dikenal.';
-      setAskError(message);
+      const rawMessage = error instanceof Error ? error.message : 'Terjadi kesalahan tak dikenal.';
+      const normalized = rawMessage.toLowerCase();
+      const friendlyMessage = normalized.includes('temperature')
+        ? 'Model ini hanya menerima suhu default saat sesi tanya jawab. Silakan coba lagi atau ganti model yang berbeda.'
+        : rawMessage;
+      setAskError(friendlyMessage);
       toast.error('Tidak dapat menjawab pertanyaan.');
     } finally {
       setIsAsking(false);
