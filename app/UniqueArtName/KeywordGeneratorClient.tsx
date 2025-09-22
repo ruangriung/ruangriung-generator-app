@@ -698,7 +698,7 @@ const KeywordGeneratorClient = () => {
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Hasilkan Visual Style untuk Uji Prompt</h2>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Klik tombol di bawah ini untuk memanggil {KEYWORD_COUNT} istilah Visual Style eksperimental lengkap dengan deskripsi kilatnya — setiap kombinasi dibuat acak agar setiap kali kamu mencoba, selalu muncul gagasan baru yang mengejutkan dan membangkitkan inspirasi!
+                  Hasilkan {KEYWORD_COUNT} istilah Tema Eksperimental yang benar-benar baru dan lengkap dengan deskripsi kilat — setiap kombinasi dibuat Serapi mungkin agar setiap kali kamu mencoba muncul ide baru yang mengejutkan dan inspiratif!
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
