@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Sparkles,
   RefreshCw,
@@ -260,6 +260,7 @@ const KeywordGeneratorClient = () => {
   const [isAsking, setIsAsking] = useState(false);
   const [askError, setAskError] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const resultsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -334,6 +335,22 @@ const KeywordGeneratorClient = () => {
 
     fetchModels();
   }, []);
+
+  useEffect(() => {
+    if (results.length === 0) {
+      return;
+    }
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const scrollTimeout = window.setTimeout(() => {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+
+    return () => window.clearTimeout(scrollTimeout);
+  }, [results.length]);
 
   const selectedModelDetail = useMemo(
     () => models.find((model) => model.id === selectedModel),
@@ -657,96 +674,65 @@ const KeywordGeneratorClient = () => {
               </div>
             </div>
 
-            <div className="grid gap-8 lg:grid-cols-5">
-              <div className="space-y-6 lg:col-span-2">
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200" htmlFor="model-select">
-                    Pilih Model Teks
-                  </label>
-                  <div className="relative">
-                    <select
-                      id="model-select"
-                      value={selectedModel}
-                      onChange={(event) => setSelectedModel(event.target.value)}
-                      disabled={isLoadingModels || models.length === 0}
-                      className="w-full appearance-none rounded-2xl border-0 bg-white px-4 py-3 text-sm font-semibold text-gray-800 shadow-neumorphic dark:bg-dark-neumorphic-light dark:text-gray-100 dark:shadow-dark-neumorphic focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    >
-                      {models.length === 0 ? (
-                        <option>Memuat model...</option>
-                      ) : (
-                        models.map((model) => (
-                          <option key={model.id} value={model.id}>
-                            {model.name}
-                          </option>
-                        ))
-                      )}
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-purple-600">
-                      <ClipboardList className="h-5 w-5" />
-                    </div>
-                  </div>
-                  {selectedModelDetail?.description ? (
-                    <p className="mt-3 rounded-2xl bg-white/70 p-3 text-xs text-gray-600 shadow-inner dark:bg-dark-neumorphic-light/70 dark:text-gray-300">
-                      {selectedModelDetail.description}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200" htmlFor="creative-brief">
-                      Tema Utama (Opsional)
-                    </label>
-                    <textarea
-                      id="creative-brief"
-                      value={creativeBrief}
-                      onChange={(event) => setCreativeBrief(event.target.value)}
-                      placeholder="Contoh: Dunia mesin waktu berdebu dengan pengaruh arsitektur Nusantara kuno"
-                      className="min-h-[92px] w-full resize-none rounded-2xl border-0 bg-white px-4 py-3 text-sm text-gray-800 shadow-neumorphic-inset dark:bg-dark-neumorphic-light dark:text-gray-100 dark:shadow-dark-neumorphic-inset focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200" htmlFor="stylistic-hints">
-                      Arah Gaya / Hal Khusus (Opsional)
-                    </label>
-                    <textarea
-                      id="stylistic-hints"
-                      value={stylisticHints}
-                      onChange={(event) => setStylisticHints(event.target.value)}
-                      placeholder="Contoh: campuran kata kunci bilingual, sedikit sentuhan art deco, fokus pada pencahayaan remang"
-                      className="min-h-[92px] w-full resize-none rounded-2xl border-0 bg-white px-4 py-3 text-sm text-gray-800 shadow-neumorphic-inset dark:bg-dark-neumorphic-light dark:text-gray-100 dark:shadow-dark-neumorphic-inset focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
+            <div className="space-y-6">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200" htmlFor="model-select">
+                  Pilih Model Teks
+                </label>
+                <div className="relative">
+                  <select
+                    id="model-select"
+                    value={selectedModel}
+                    onChange={(event) => setSelectedModel(event.target.value)}
+                    disabled={isLoadingModels || models.length === 0}
+                    className="w-full appearance-none rounded-2xl border-0 bg-white px-4 py-3 text-sm font-semibold text-gray-800 shadow-neumorphic dark:bg-dark-neumorphic-light dark:text-gray-100 dark:shadow-dark-neumorphic focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    {models.length === 0 ? (
+                      <option>Memuat model...</option>
+                    ) : (
+                      models.map((model) => (
+                        <option key={model.id} value={model.id}>
+                          {model.name}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-purple-600">
+                    <ClipboardList className="h-5 w-5" />
                   </div>
                 </div>
+                {selectedModelDetail?.description ? (
+                  <p className="mt-3 rounded-2xl bg-white/70 p-3 text-xs text-gray-600 shadow-inner dark:bg-dark-neumorphic-light/70 dark:text-gray-300">
+                    {selectedModelDetail.description}
+                  </p>
+                ) : null}
               </div>
 
-              <div className="flex flex-col justify-between gap-6 rounded-3xl bg-gradient-to-br from-purple-600/90 to-indigo-600/80 p-6 text-purple-50 lg:col-span-3">
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold">Cara Kerja Cepat</h2>
-                  <ul className="space-y-3 text-sm leading-relaxed">
-                    <li className="flex items-start gap-3">
-                      <Sparkles className="mt-0.5 h-5 w-5 text-amber-200" />
-                      <span>Pilih model teks favoritmu atau gunakan default untuk keseimbangan kecepatan dan kreativitas.</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Wand2 className="mt-0.5 h-5 w-5 text-amber-200" />
-                      <span>Tambahkan tema dan gaya opsional untuk menyesuaikan citra visual yang ingin dibangun.</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <ClipboardList className="mt-0.5 h-5 w-5 text-amber-200" />
-                      <span>Tekan tombol &ldquo;Generate&rdquo; untuk memperoleh 20 kata kunci uji prompt lengkap beserta deskripsi.</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <MessageCircleQuestion className="mt-0.5 h-5 w-5 text-amber-200" />
-                      <span>Gunakan panel pertanyaan di bawah untuk berdiskusi cepat atau meminta variasi tambahan.</span>
-                    </li>
-                  </ul>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200" htmlFor="creative-brief">
+                    Tema Utama (Opsional)
+                  </label>
+                  <textarea
+                    id="creative-brief"
+                    value={creativeBrief}
+                    onChange={(event) => setCreativeBrief(event.target.value)}
+                    placeholder="Contoh: Dunia mesin waktu berdebu dengan pengaruh arsitektur Nusantara kuno"
+                    className="min-h-[92px] w-full resize-none rounded-2xl border-0 bg-white px-4 py-3 text-sm text-gray-800 shadow-neumorphic-inset dark:bg-dark-neumorphic-light dark:text-gray-100 dark:shadow-dark-neumorphic-inset focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
                 </div>
-                <div className="rounded-2xl bg-white/10 p-4 text-sm backdrop-blur">
-                  <p>
-                    Butuh kata kunci lain? Simpan hasilnya terlebih dahulu, lalu kreasikan kembali dengan tema berbeda. Kombinasi kata yang unik akan membantu model gambar memahami nuansa yang kamu bayangkan.
-                  </p>
+
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200" htmlFor="stylistic-hints">
+                    Arah Gaya / Hal Khusus (Opsional)
+                  </label>
+                  <textarea
+                    id="stylistic-hints"
+                    value={stylisticHints}
+                    onChange={(event) => setStylisticHints(event.target.value)}
+                    placeholder="Contoh: campuran kata kunci bilingual, sedikit sentuhan art deco, fokus pada pencahayaan remang"
+                    className="min-h-[92px] w-full resize-none rounded-2xl border-0 bg-white px-4 py-3 text-sm text-gray-800 shadow-neumorphic-inset dark:bg-dark-neumorphic-light dark:text-gray-100 dark:shadow-dark-neumorphic-inset focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
                 </div>
               </div>
             </div>
@@ -757,59 +743,61 @@ const KeywordGeneratorClient = () => {
               </div>
             ) : null}
 
-            {results.length > 0 ? (
-              <div className="space-y-6 rounded-3xl bg-white/80 p-6 shadow-neumorphic dark:bg-dark-neumorphic-light dark:shadow-dark-neumorphic">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
-                    {results.length} kata kunci siap pakai{' '}
-                    {lastGeneratedAt
-                      ? `• Dibuat ${lastGeneratedAt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`
-                      : ''}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-indigo-600/90 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-indigo-600 disabled:cursor-not-allowed disabled:bg-indigo-400"
-                  >
-                    <RefreshCw className="h-3.5 w-3.5" />
-                    Regenerasi
-                  </button>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  {results.map((item, index) => (
-                    <div
-                      key={item.term}
-                      className="group flex h-full flex-col justify-between rounded-3xl bg-white/80 p-5 text-gray-800 shadow-neumorphic dark:bg-dark-neumorphic-light dark:text-gray-100 dark:shadow-dark-neumorphic"
+            <div ref={resultsRef}>
+              {results.length > 0 ? (
+                <div className="space-y-6 rounded-3xl bg-white/80 p-6 shadow-neumorphic dark:bg-dark-neumorphic-light dark:shadow-dark-neumorphic">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                      {results.length} kata kunci siap pakai{' '}
+                      {lastGeneratedAt
+                        ? `• Dibuat ${lastGeneratedAt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`
+                        : ''}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleGenerate}
+                      disabled={isGenerating}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-indigo-600/90 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-indigo-600 disabled:cursor-not-allowed disabled:bg-indigo-400"
                     >
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-purple-600/80 dark:text-purple-300/90">
-                              #{index + 1}
-                            </p>
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{item.term}</h3>
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      Regenerasi
+                    </button>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {results.map((item, index) => (
+                      <div
+                        key={item.term}
+                        className="group flex h-full flex-col justify-between rounded-3xl bg-white/80 p-5 text-gray-800 shadow-neumorphic dark:bg-dark-neumorphic-light dark:text-gray-100 dark:shadow-dark-neumorphic"
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-wide text-purple-600/80 dark:text-purple-300/90">
+                                #{index + 1}
+                              </p>
+                              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{item.term}</h3>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyTerm(item)}
+                              className="rounded-full bg-purple-600/10 p-2 text-purple-600 transition hover:bg-purple-600 hover:text-white dark:bg-purple-500/10 dark:text-purple-200"
+                            >
+                              {copiedTerm === item.term ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                            </button>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => handleCopyTerm(item)}
-                            className="rounded-full bg-purple-600/10 p-2 text-purple-600 transition hover:bg-purple-600 hover:text-white dark:bg-purple-500/10 dark:text-purple-200"
-                          >
-                            {copiedTerm === item.term ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                          </button>
+                          <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">{item.description}</p>
                         </div>
-                        <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">{item.description}</p>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="rounded-3xl border-2 border-dashed border-purple-300/60 bg-white/60 p-10 text-center text-sm text-gray-600 dark:border-purple-500/40 dark:bg-dark-neumorphic-light/60 dark:text-gray-300">
-                Hasil kata kunci akan tampil di sini setelah kamu menekan tombol <span className="font-semibold text-purple-700 dark:text-purple-300">Generate</span>. Kamu bisa memasukkan tema khusus untuk memengaruhi karakter kata.
-              </div>
-            )}
+              ) : (
+                <div className="rounded-3xl border-2 border-dashed border-purple-300/60 bg-white/60 p-10 text-center text-sm text-gray-600 dark:border-purple-500/40 dark:bg-dark-neumorphic-light/60 dark:text-gray-300">
+                  Hasil kata kunci akan tampil di sini setelah kamu menekan tombol <span className="font-semibold text-purple-700 dark:text-purple-300">Generate</span>. Kamu bisa memasukkan tema khusus untuk memengaruhi karakter kata.
+                </div>
+              )}
+            </div>
 
             {rawContent ? (
               <details className="rounded-2xl bg-white/70 p-5 shadow-inner dark:bg-dark-neumorphic-light/70">
@@ -821,6 +809,35 @@ const KeywordGeneratorClient = () => {
                 </pre>
               </details>
             ) : null}
+
+            <div className="rounded-3xl bg-gradient-to-br from-purple-600/90 to-indigo-600/80 p-6 text-purple-50 shadow-neumorphic dark:shadow-dark-neumorphic">
+              <div className="space-y-4">
+                <h2 className="text-xl font-bold">Cara Kerja Cepat</h2>
+                <ul className="space-y-3 text-sm leading-relaxed">
+                  <li className="flex items-start gap-3">
+                    <Sparkles className="mt-0.5 h-5 w-5 text-amber-200" />
+                    <span>Pilih model teks favoritmu atau gunakan default untuk keseimbangan kecepatan dan kreativitas.</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Wand2 className="mt-0.5 h-5 w-5 text-amber-200" />
+                    <span>Tambahkan tema dan gaya opsional untuk menyesuaikan citra visual yang ingin dibangun.</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <ClipboardList className="mt-0.5 h-5 w-5 text-amber-200" />
+                    <span>Tekan tombol &ldquo;Generate&rdquo; untuk memperoleh 20 kata kunci uji prompt lengkap beserta deskripsi.</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <MessageCircleQuestion className="mt-0.5 h-5 w-5 text-amber-200" />
+                    <span>Gunakan panel pertanyaan di bawah untuk berdiskusi cepat atau meminta variasi tambahan.</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 rounded-2xl bg-white/10 p-4 text-sm backdrop-blur">
+                <p>
+                  Butuh kata kunci lain? Simpan hasilnya terlebih dahulu, lalu kreasikan kembali dengan tema berbeda. Kombinasi kata yang unik akan membantu model gambar memahami nuansa yang kamu bayangkan.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
