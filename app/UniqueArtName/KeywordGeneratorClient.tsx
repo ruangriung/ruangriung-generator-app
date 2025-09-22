@@ -357,33 +357,47 @@ const KeywordGeneratorClient = () => {
     [models, selectedModel],
   );
 
-  const buildInstruction = useCallback(() => {
-    const intro = `Buat daftar ${KEYWORD_COUNT} kata kunci baru yang terasa eksperimental untuk pengujian prompt gambar. Kata kunci harus terdengar benar-benar baru, memancing rasa ingin tahu, dan membantu mengeksplorasi arah visual yang segar.`;
-    const rules = [
-      'Jawab dalam bahasa Indonesia.',
-      'Hasilkan variasi struktur: beberapa kata tunggal, beberapa gabungan dua kata, dan beberapa menggabungkan kata sebelumnya dengan modifikasi kreatif (mis. menggunakan tanda hubung atau penggabungan).',
-      'Pastikan seluruh kata kunci terasa langka, eksperimental, atau seperti istilah baru yang siap diuji dalam prompt.',
-      'Untuk setiap kata kunci, sertakan deskripsi singkat maksimal 18 kata yang menggambarkan visual atau suasana yang bisa dijadikan prompt.',
-      'Gunakan format JSON dengan struktur: {"keywords": [{"term": "...", "description": "..."}, ...]}. Tidak ada teks lain di luar JSON.',
-      'Jangan ulangi kosakata umum yang sudah sering digunakan dalam prompt populer.',
-    ];
+  const buildInstruction = useCallback(
+    ({ nonce, previousKeywords }: { nonce: string; previousKeywords: KeywordResult[] }) => {
+      const intro = `Buat daftar ${KEYWORD_COUNT} kata kunci baru yang terasa eksperimental untuk pengujian prompt gambar. Kata kunci harus terdengar benar-benar baru, memancing rasa ingin tahu, dan membantu mengeksplorasi arah visual yang segar.`;
+      const rules = [
+        'Jawab dalam bahasa Indonesia.',
+        'Hasilkan variasi struktur: beberapa kata tunggal, beberapa gabungan dua kata, dan beberapa menggabungkan kata sebelumnya dengan modifikasi kreatif (mis. menggunakan tanda hubung atau penggabungan).',
+        'Pastikan seluruh kata kunci terasa langka, eksperimental, atau seperti istilah baru yang siap diuji dalam prompt.',
+        'Untuk setiap kata kunci, sertakan deskripsi singkat maksimal 18 kata yang menggambarkan visual atau suasana yang bisa dijadikan prompt.',
+        'Gunakan format JSON dengan struktur: {"keywords": [{"term": "...", "description": "..."}, ...]}. Tidak ada teks lain di luar JSON.',
+        'Jangan ulangi kosakata umum yang sudah sering digunakan dalam prompt populer.',
+      ];
 
-    const contextParts = [];
+      if (previousKeywords.length > 0) {
+        const seenTerms = previousKeywords.map((item) => `"${item.term}"`).join(', ');
+        rules.push(
+          `Jangan tampilkan ulang kata kunci yang pernah diberikan sebelumnya: ${seenTerms}. Buatlah istilah baru yang benar-benar berbeda.`,
+        );
+      } else {
+        rules.push('Pastikan kumpulan kata kunci kali ini berbeda dari permintaan sebelumnya dan terasa segar.');
+      }
 
-    if (creativeBrief.trim()) {
-      contextParts.push(`Tema atau fokus utama yang wajib tercermin: ${creativeBrief.trim()}`);
-    }
+      const contextParts = [];
 
-    if (stylisticHints.trim()) {
-      contextParts.push(`Elemen tambahan yang boleh diadaptasi: ${stylisticHints.trim()}`);
-    }
+      if (creativeBrief.trim()) {
+        contextParts.push(`Tema atau fokus utama yang wajib tercermin: ${creativeBrief.trim()}`);
+      }
 
-    const context = contextParts.length > 0
-      ? `Pertimbangkan konteks tambahan berikut:\n- ${contextParts.join('\n- ')}`
-      : 'Bebas mengeksplorasi selama kata kunci tetap segar dan relevan untuk uji coba prompt.';
+      if (stylisticHints.trim()) {
+        contextParts.push(`Elemen tambahan yang boleh diadaptasi: ${stylisticHints.trim()}`);
+      }
 
-    return `${intro}\n\nAturan keluaran:\n- ${rules.join('\n- ')}\n\n${context}`;
-  }, [creativeBrief, stylisticHints]);
+      const context = contextParts.length > 0
+        ? `Pertimbangkan konteks tambahan berikut:\n- ${contextParts.join('\n- ')}`
+        : 'Bebas mengeksplorasi selama kata kunci tetap segar dan relevan untuk uji coba prompt.';
+
+      const randomnessSignal = `Kode permintaan acak: ${nonce}. Gunakan sebagai penanda internal agar hasil setiap kali regenerasi tetap unik.`;
+
+      return `${intro}\n\nAturan keluaran:\n- ${rules.join('\n- ')}\n\n${context}\n\n${randomnessSignal}`;
+    },
+    [creativeBrief, stylisticHints],
+  );
 
   const handleGenerate = useCallback(async () => {
     if (!selectedModel) {
@@ -395,7 +409,12 @@ const KeywordGeneratorClient = () => {
     setGenerationError(null);
     setCopiedTerm(null);
 
-    const instruction = buildInstruction();
+    const nonce =
+      typeof window !== 'undefined' && typeof window.crypto?.randomUUID === 'function'
+        ? window.crypto.randomUUID()
+        : `req-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+    const instruction = buildInstruction({ nonce, previousKeywords: results });
 
     try {
       const payload: Record<string, unknown> = {
@@ -458,7 +477,7 @@ const KeywordGeneratorClient = () => {
     } finally {
       setIsGenerating(false);
     }
-  }, [buildInstruction, selectedModel]);
+  }, [buildInstruction, results, selectedModel]);
 
   const handleCopyTerm = useCallback((item: KeywordResult) => {
     const text = `${item.term} — ${item.description}`;
