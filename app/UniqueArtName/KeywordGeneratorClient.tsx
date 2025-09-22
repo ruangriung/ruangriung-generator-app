@@ -275,11 +275,11 @@ const KeywordGeneratorClient = () => {
   );
 
   const buildInstruction = useCallback(() => {
-    const intro = `Buat daftar ${KEYWORD_COUNT} kata kunci baru bertema antik dan futuristik untuk penulisan prompt gambar. Kata kunci harus terdengar unik, belum pernah digunakan, serta memadukan nuansa klasik dengan sentuhan imajinatif.`;
+    const intro = `Buat daftar ${KEYWORD_COUNT} kata kunci baru yang terasa eksperimental untuk pengujian prompt gambar. Kata kunci harus terdengar benar-benar baru, memancing rasa ingin tahu, dan membantu mengeksplorasi arah visual yang segar.`;
     const rules = [
       'Jawab dalam bahasa Indonesia.',
       'Hasilkan variasi struktur: beberapa kata tunggal, beberapa gabungan dua kata, dan beberapa menggabungkan kata sebelumnya dengan modifikasi kreatif (mis. menggunakan tanda hubung atau penggabungan).',
-      'Pastikan seluruh kata kunci terasa antik, langka, atau seperti artefak budaya yang baru ditemukan.',
+      'Pastikan seluruh kata kunci terasa langka, eksperimental, atau seperti istilah baru yang siap diuji dalam prompt.',
       'Untuk setiap kata kunci, sertakan deskripsi singkat maksimal 18 kata yang menggambarkan visual atau suasana yang bisa dijadikan prompt.',
       'Gunakan format JSON dengan struktur: {"keywords": [{"term": "...", "description": "..."}, ...]}. Tidak ada teks lain di luar JSON.',
       'Jangan ulangi kosakata umum yang sudah sering digunakan dalam prompt populer.',
@@ -297,7 +297,7 @@ const KeywordGeneratorClient = () => {
 
     const context = contextParts.length > 0
       ? `Pertimbangkan konteks tambahan berikut:\n- ${contextParts.join('\n- ')}`
-      : 'Bebas mengeksplorasi selama tetap terasa antik dan orisinal.';
+      : 'Bebas mengeksplorasi selama kata kunci tetap segar dan relevan untuk uji coba prompt.';
 
     return `${intro}\n\nAturan keluaran:\n- ${rules.join('\n- ')}\n\n${context}`;
   }, [creativeBrief, stylisticHints]);
@@ -326,7 +326,7 @@ const KeywordGeneratorClient = () => {
             {
               role: 'system',
               content:
-                'Anda adalah kurator kata kunci antik yang senantiasa menemukan istilah baru untuk inspirasi visual. Selalu patuhi format yang diminta dan pastikan hasil dapat langsung disalin.',
+                'Anda adalah kurator kata kunci eksperimental yang terus menemukan istilah baru untuk pengetesan prompt visual. Selalu patuhi format yang diminta dan pastikan hasil dapat langsung disalin.',
             },
             { role: 'user', content: instruction },
           ],
@@ -356,7 +356,7 @@ const KeywordGeneratorClient = () => {
       setResults(parsedKeywords);
       setRawContent(content);
       setLastGeneratedAt(new Date());
-      toast.success('Berhasil membuat kata kunci antik!');
+      toast.success('Berhasil membuat kata kunci unik!');
     } catch (error) {
       console.error('Gagal membuat kata kunci:', error);
       const message = error instanceof Error ? error.message : 'Terjadi kesalahan tak dikenal.';
@@ -477,13 +477,13 @@ const KeywordGeneratorClient = () => {
             <div className="space-y-3">
               <div className="inline-flex items-center gap-3 rounded-full bg-white/70 px-4 py-2 text-sm font-semibold text-purple-700 shadow dark:bg-dark-neumorphic-light/70 dark:text-purple-200">
                 <Sparkles className="h-4 w-4" />
-                Mesin Kata Kunci Antik
+                Unique Art Name Lab
               </div>
               <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 sm:text-4xl">
-                Rangkai 20 Kata Kunci Prompt yang Benar-Benar Baru
+                Eksperimen 20 Kata Kunci Uji Prompt yang Benar-Benar Unik
               </h1>
               <p className="max-w-2xl text-base text-gray-700 dark:text-gray-300">
-                Halaman ini memanfaatkan endpoint <code className="font-semibold text-purple-700 dark:text-purple-300">text.pollinations.ai</code> untuk membangun kata kunci antik yang unik dan siap pakai. Setiap kata kunci dilengkapi deskripsi singkat agar mudah kamu kombinasikan dalam penulisan prompt gambar.
+                Halaman ini memanfaatkan endpoint <code className="font-semibold text-purple-700 dark:text-purple-300">text.pollinations.ai</code> untuk melahirkan kata kunci baru sebagai bahan uji coba prompt pembuatan gambar. Setiap kata kunci dilengkapi deskripsi singkat agar mudah kamu kombinasikan saat bereksperimen.
               </p>
             </div>
             <div className="rounded-2xl bg-white/60 p-5 shadow-inner dark:bg-dark-neumorphic-light/70">
@@ -589,7 +589,7 @@ const KeywordGeneratorClient = () => {
                 </li>
                 <li className="flex items-start gap-3">
                   <ClipboardList className="mt-0.5 h-5 w-5 text-amber-200" />
-                  <span>Tekan tombol &ldquo;Generate&rdquo; untuk memperoleh 20 kata kunci antik lengkap beserta deskripsi.</span>
+                  <span>Tekan tombol &ldquo;Generate&rdquo; untuk memperoleh 20 kata kunci uji prompt lengkap beserta deskripsi.</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <MessageCircleQuestion className="mt-0.5 h-5 w-5 text-amber-200" />
@@ -608,9 +608,9 @@ const KeywordGeneratorClient = () => {
         <section className="rounded-3xl bg-light-bg p-8 shadow-neumorphic dark:bg-dark-bg dark:shadow-dark-neumorphic">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Generate Kata Kunci Antik</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Generate Kata Kunci Uji Prompt</h2>
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                Tekan tombol di bawah untuk meminta model menghasilkan {KEYWORD_COUNT} kata kunci unik lengkap dengan deskripsi.
+                Tekan tombol di bawah untuk meminta model menghasilkan {KEYWORD_COUNT} kata kunci unik lengkap dengan deskripsi sebagai bahan eksperimen prompt gambar.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
