@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Prompt } from '../../lib/prompts';
 import Link from 'next/link';
 import PromptSubmissionTrigger from '../../components/PromptSubmissionTrigger';
@@ -46,6 +46,8 @@ export default function PromptClient({ prompts }: PromptClientProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const promptListRef = useRef<HTMLDivElement | null>(null);
+  const hasInteractedWithPaginationRef = useRef(false);
   const topAdSlot = PROMPT_TOP_AD_SLOT;
   const bottomAdSlot = PROMPT_BOTTOM_AD_SLOT;
 
@@ -57,9 +59,29 @@ export default function PromptClient({ prompts }: PromptClientProps) {
 
   const suggestions = usePromptSuggestions(prompts, searchTerm);
 
+  const scrollToPromptListTop = useCallback(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const element = promptListRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, []);
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedTag]);
+
+    if (hasInteractedWithPaginationRef.current) {
+      scrollToPromptListTop();
+    }
+  }, [searchTerm, selectedTag, scrollToPromptListTop]);
 
   useEffect(() => () => {
     if (blurTimeoutRef.current) {
@@ -120,6 +142,12 @@ export default function PromptClient({ prompts }: PromptClientProps) {
 
     setSearchTerm(value);
     setShowSuggestions(false);
+  };
+
+  const handlePageChange = (page: number) => {
+    hasInteractedWithPaginationRef.current = true;
+    setCurrentPage(page);
+    scrollToPromptListTop();
   };
 
   return (
@@ -194,7 +222,7 @@ export default function PromptClient({ prompts }: PromptClientProps) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div ref={promptListRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {paginatedPrompts.map((prompt: Prompt) => (
           <Link key={prompt.id} href={`/kumpulan-prompt/${prompt.slug}`}>
             <div className="block h-full p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 dark:bg-gray-900 dark:border-gray-700 dark:hover:bg-gray-700">
@@ -240,10 +268,10 @@ export default function PromptClient({ prompts }: PromptClientProps) {
       )}
 
       {totalPages > 1 && (
-        <Pagination 
+        <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={setCurrentPage}
+          onPageChange={handlePageChange}
         />
       )}
 
