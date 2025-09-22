@@ -9,6 +9,9 @@ type ProfileSubmission = {
   audience: string;
   contentPillars: string;
   brandValues: string;
+  customFieldOne: string;
+  customFieldTwo: string;
+  customFieldThree: string;
   facebook: string;
   youtube: string;
   instagram: string;
@@ -29,6 +32,9 @@ const fieldLabels: Record<keyof ProfileSubmission, string> = {
   audience: 'Audiens utama',
   contentPillars: 'Pilar konten utama',
   brandValues: 'Nilai atau pesan utama personal brand',
+  customFieldOne: 'Kolom tambahan 1',
+  customFieldTwo: 'Kolom tambahan 2',
+  customFieldThree: 'Kolom tambahan 3',
   facebook: 'Profil Facebook',
   youtube: 'Channel YouTube',
   instagram: 'Profil Instagram',
@@ -43,11 +49,7 @@ const fieldLabels: Record<keyof ProfileSubmission, string> = {
 
 const requiredFields: (keyof ProfileSubmission)[] = [
   'name',
-  'role',
   'description',
-  'brandTagline',
-  'audience',
-  'contentPillars',
   'facebook',
   'contactEmail',
 ];
@@ -92,6 +94,9 @@ export async function POST(request: Request) {
       audience: sanitize(body.audience),
       contentPillars: sanitize(body.contentPillars),
       brandValues: sanitize(body.brandValues),
+      customFieldOne: sanitize(body.customFieldOne),
+      customFieldTwo: sanitize(body.customFieldTwo),
+      customFieldThree: sanitize(body.customFieldThree),
       facebook: sanitize(body.facebook),
       youtube: sanitize(body.youtube),
       instagram: sanitize(body.instagram),
@@ -191,6 +196,9 @@ export async function POST(request: Request) {
       <h3>Informasi Tambahan</h3>
       <ul>
         ${createListItem(fieldLabels.portfolio, submission.portfolio)}
+        ${createListItem(fieldLabels.customFieldOne, submission.customFieldOne)}
+        ${createListItem(fieldLabels.customFieldTwo, submission.customFieldTwo)}
+        ${createListItem(fieldLabels.customFieldThree, submission.customFieldThree)}
       </ul>
       ${createPreSection(fieldLabels.highlight, submission.highlight)}
       <h3>Kontak</h3>
