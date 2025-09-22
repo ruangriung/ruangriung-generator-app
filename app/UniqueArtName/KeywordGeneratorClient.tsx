@@ -662,10 +662,10 @@ const KeywordGeneratorClient = () => {
                   Unique Art Name Lab
                 </div>
                 <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 sm:text-4xl">
-                  20 Gaya Visual Eksperimental AI untuk Mewujudkan Gambar yang Tidak Pernah Anda Bayangkan
+                  20 Ide Tema Eksperimental: Tema AI yang Tak Pernah Terbayangkan!
                 </h1>
                 <p className="max-w-2xl text-base text-gray-700 dark:text-gray-300">
-                  Selamat datang di Unique Art Name Lab — ruang eksperimen visual yang dirancang untuk merangsang kreativitas dan memperkaya imajinasi. Di sini Anda dapat menghasilan istilah visual style yang orisinal dan eksperimental, yang dapat menjadi bahan pemicu kuat untuk prompt-generasi karya seni digital.
+                  Selamat datang di Unique Art Name Lab — tempat ideal bagi para pemula yang ingin mengeksplor ide tema AI. Di sini Anda dapat menemukan 20 Tema Visual Eksperimental yang dirancang untuk memperluas cakrawala dan memberikan tema kreatif yang belum pernah terpikirkan sebelumnya. Tidak dibutuhkan pengalaman tinggi — cukup klik Generate Visual Style dan biarkan tema baru muncul secara acak dan orisinal sebagai bahan eksplorasi untuk prompt AI Anda.
                 </p>
               </div>
               <div className="rounded-2xl bg-white/60 p-5 shadow-inner dark:bg-dark-neumorphic-light/70">
