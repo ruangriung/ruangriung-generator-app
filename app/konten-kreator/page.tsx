@@ -6,6 +6,7 @@ import { Fragment, useEffect, useMemo, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
   ArrowLeft,
+  ChevronDown,
   Facebook,
   Globe,
   Instagram,
@@ -41,6 +42,12 @@ type SocialKey = keyof SocialLinks;
 type SocialPlatform = {
   key: SocialKey;
   label: string;
+  icon: LucideIcon;
+};
+
+type SubmissionBenefit = {
+  title: string;
+  description: string;
   icon: LucideIcon;
 };
 
@@ -108,6 +115,7 @@ const creators: Creator[] = [
     specialties: ['Workflow Kreatif', 'Eksperimen Lighting', 'Pendampingan'],
     socials: {
       facebook: 'https://web.facebook.com/dery.megana',
+      website: 'https://www.derylau.my.id/',
     },
   },
   {
@@ -178,6 +186,27 @@ const creators: Creator[] = [
   },
 ];
 
+const submissionBenefits: SubmissionBenefit[] = [
+  {
+    title: 'Personal branding tampil resmi',
+    description:
+      'Cerita, keunikan, dan nilai yang Anda bawa akan dikemas rapi di landing page RuangRiung sebagai kartu nama digital yang mudah dibagikan.',
+    icon: Sparkles,
+  },
+  {
+    title: 'Konten Facebook Pro mendapat sorotan',
+    description:
+      'Kami menyorot unggahan terbaik Anda agar audiens global memahami gaya dan konsistensi yang dibangun di komunitas.',
+    icon: Facebook,
+  },
+  {
+    title: 'Peluang kolaborasi terbuka',
+    description:
+      'Brand, komunitas, dan kreator lain dapat menilai kecocokan kerja sama hanya dari satu halaman profil komprehensif.',
+    icon: Globe,
+  },
+];
+
 const ITEMS_PER_PAGE = 6;
 
 const escapeRegExp = (value: string) => {
@@ -241,6 +270,7 @@ const doesCreatorMatchTokens = (creator: Creator, tokens: string[]) => {
 export default function KontenKreatorPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeBenefitIndex, setActiveBenefitIndex] = useState<number | null>(0);
 
   const searchTokens = useMemo(() => {
     const tokens = searchQuery
@@ -287,6 +317,10 @@ export default function KontenKreatorPage() {
   const rangeEnd = hasResults
     ? Math.min(startIndex + ITEMS_PER_PAGE, filteredCount)
     : 0;
+
+  const toggleBenefit = (index: number) => {
+    setActiveBenefitIndex((previous) => (previous === index ? null : index));
+  };
 
   return (
     <main className="min-h-screen bg-gray-50 py-16 dark:bg-gray-950">
@@ -335,30 +369,52 @@ export default function KontenKreatorPage() {
 
         <section className="mt-12">
           <div className="mx-auto max-w-4xl rounded-3xl border border-purple-200 bg-gradient-to-br from-purple-50 via-white to-blue-50 p-8 text-left shadow-xl dark:border-purple-900 dark:from-purple-950 dark:via-gray-950 dark:to-blue-950">
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Mengapa mengirim profil Anda?</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+              Mengapa harus Submit Profil Anda dan apa keuntungannya?
+            </h2>
             <p className="mt-3 text-base text-gray-600 dark:text-gray-300">
               Submission ke halaman ini membuka akses eksposur dan peluang baru bagi personal brand Anda.
             </p>
-            <ul className="mt-6 space-y-4 text-sm text-gray-600 dark:text-gray-300">
-              <li className="flex gap-3">
-                <Sparkles className="mt-0.5 h-5 w-5 text-purple-600 dark:text-purple-300" />
-                <span>
-                  <strong>Personal branding tampil resmi.</strong> Cerita, keunikan, dan nilai yang Anda bawa akan dikemas rapi di landing page RuangRiung sebagai kartu nama digital yang mudah dibagikan.
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <Facebook className="mt-0.5 h-5 w-5 text-purple-600 dark:text-purple-300" />
-                <span>
-                  <strong>Konten Facebook Pro mendapat sorotan.</strong> Kami menyorot unggahan terbaik Anda agar audiens global memahami gaya dan konsistensi yang dibangun di komunitas.
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <Globe className="mt-0.5 h-5 w-5 text-purple-600 dark:text-purple-300" />
-                <span>
-                  <strong>Peluang kolaborasi terbuka.</strong> Brand, komunitas, dan kreator lain dapat menilai kecocokan kerja sama hanya dari satu halaman profil komprehensif.
-                </span>
-              </li>
-            </ul>
+            <div className="mt-6 space-y-3">
+              {submissionBenefits.map((benefit, index) => {
+                const isOpen = activeBenefitIndex === index;
+                const buttonId = `benefit-trigger-${index}`;
+                const panelId = `benefit-panel-${index}`;
+
+                return (
+                  <div
+                    key={benefit.title}
+                    className="overflow-hidden rounded-2xl border border-purple-200/70 bg-white/80 shadow-sm transition dark:border-purple-800 dark:bg-gray-900/60"
+                  >
+                    <button
+                      type="button"
+                      id={buttonId}
+                      aria-controls={panelId}
+                      aria-expanded={isOpen}
+                      onClick={() => toggleBenefit(index)}
+                      className="flex w-full items-center gap-4 px-6 py-5 text-left transition hover:bg-purple-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-purple-100 dark:hover:bg-purple-900/30 dark:focus-visible:ring-offset-gray-950"
+                    >
+                      <benefit.icon className="h-5 w-5 text-purple-600 dark:text-purple-300" />
+                      <span className="flex-1 text-base font-semibold text-gray-900 dark:text-gray-100">
+                        {benefit.title}
+                      </span>
+                      <ChevronDown
+                        className={`h-4 w-4 text-purple-500 transition-transform duration-200 dark:text-purple-300 ${isOpen ? '-rotate-180' : ''}`}
+                      />
+                    </button>
+                    <div
+                      id={panelId}
+                      role="region"
+                      aria-labelledby={buttonId}
+                      aria-hidden={!isOpen}
+                      className={`px-6 pb-6 text-sm text-gray-600 transition-all duration-200 ease-out dark:text-gray-300 ${isOpen ? 'block' : 'hidden'}`}
+                    >
+                      {benefit.description}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </section>
 
