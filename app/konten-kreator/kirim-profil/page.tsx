@@ -16,6 +16,10 @@ type ProfileSubmission = {
   name: string;
   role: string;
   description: string;
+  brandTagline: string;
+  audience: string;
+  contentPillars: string;
+  brandValues: string;
   facebook: string;
   youtube: string;
   instagram: string;
@@ -32,6 +36,10 @@ const initialForm: ProfileSubmission = {
   name: '',
   role: '',
   description: '',
+  brandTagline: '',
+  audience: '',
+  contentPillars: '',
+  brandValues: '',
   facebook: '',
   youtube: '',
   instagram: '',
@@ -48,6 +56,10 @@ const fieldLabels: Record<keyof ProfileSubmission, string> = {
   name: 'Nama lengkap',
   role: 'Peran atau spesialisasi',
   description: 'Deskripsi singkat',
+  brandTagline: 'Tagline personal branding',
+  audience: 'Audiens utama',
+  contentPillars: 'Pilar konten utama',
+  brandValues: 'Nilai atau pesan utama personal brand',
   facebook: 'Profil Facebook',
   youtube: 'Channel YouTube',
   instagram: 'Profil Instagram',
@@ -60,7 +72,16 @@ const fieldLabels: Record<keyof ProfileSubmission, string> = {
   highlight: 'Sorotan pencapaian',
 };
 
-const requiredFields: (keyof ProfileSubmission)[] = ['name', 'role', 'description', 'facebook', 'contactEmail'];
+const requiredFields: (keyof ProfileSubmission)[] = [
+  'name',
+  'role',
+  'description',
+  'brandTagline',
+  'audience',
+  'contentPillars',
+  'facebook',
+  'contactEmail',
+];
 
 const inputClassName =
   'w-full rounded-2xl border border-purple-200 bg-white/80 px-4 py-3 text-sm font-medium text-gray-900 shadow-sm transition hover:border-purple-300 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:border-purple-800 dark:bg-gray-900/60 dark:text-gray-100 dark:focus:border-purple-500 dark:focus:ring-purple-400';
@@ -142,8 +163,16 @@ export default function KirimProfilPage() {
         '',
         `${fieldLabels.name}: ${formData.name}`,
         `${fieldLabels.role}: ${formData.role}`,
+        `${fieldLabels.brandTagline}: ${formData.brandTagline}`,
+        `${fieldLabels.audience}: ${formData.audience}`,
         `${fieldLabels.description}:`,
         formData.description,
+        '',
+        `${fieldLabels.contentPillars}:`,
+        formData.contentPillars,
+        '',
+        `${fieldLabels.brandValues}:`,
+        formData.brandValues || '-',
         '',
         'Jejak digital:',
         ...socials.map(({ key, label }) => `${label}: ${formData[key] || '-'}`),
@@ -198,9 +227,9 @@ export default function KirimProfilPage() {
               <Sparkles className="h-4 w-4" />
               Pengajuan Profil Kreator
             </span>
-            <h1 className="mt-6 text-4xl font-bold text-gray-900 dark:text-gray-100">Bagikan Perjalanan Kreatif Anda</h1>
+            <h1 className="mt-6 text-4xl font-bold text-gray-900 dark:text-gray-100">Perkuat Personal Branding Anda</h1>
             <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-              Isi formulir di bawah untuk memperkenalkan diri, menampilkan karya, serta mencantumkan kanal digital utama Anda.
+              Isi formulir di bawah untuk memperkenalkan diri, memaparkan identitas personal branding, menampilkan karya, serta mencantumkan kanal digital utama Anda.
               Tim RuangRiung akan menghubungi Anda bila profil siap ditayangkan.
             </p>
           </div>
@@ -253,6 +282,66 @@ export default function KirimProfilPage() {
                   className={textAreaClassName}
                   placeholder="Ceritakan dalam 2-3 kalimat tentang gaya berkarya, komunitas, atau misi Anda."
                   required
+                />
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <label htmlFor="brandTagline" className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    Tagline personal branding <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="brandTagline"
+                    name="brandTagline"
+                    value={formData.brandTagline}
+                    onChange={handleChange}
+                    className={inputClassName}
+                    placeholder="Mis. Visual Storyteller untuk UMKM berani tampil"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="audience" className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    Audiens utama <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="audience"
+                    name="audience"
+                    value={formData.audience}
+                    onChange={handleChange}
+                    className={inputClassName}
+                    placeholder="Mis. Komunitas kreator, brand lokal fashion, atau UMKM digital"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="contentPillars" className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                  Pilar konten utama <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="contentPillars"
+                  name="contentPillars"
+                  value={formData.contentPillars}
+                  onChange={handleChange}
+                  className={textAreaClassName}
+                  placeholder="Sebutkan 2-3 tema besar konten Facebook Pro Anda, mis. tips produksi AI, showcase kolaborasi, ulasan alat."
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="brandValues" className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                  Nilai atau pesan utama personal brand
+                </label>
+                <textarea
+                  id="brandValues"
+                  name="brandValues"
+                  value={formData.brandValues}
+                  onChange={handleChange}
+                  className={textAreaClassName}
+                  placeholder="Jelaskan kata kunci, tone komunikasi, atau janji utama yang selalu Anda bawa di setiap kolaborasi."
                 />
               </div>
 
@@ -447,20 +536,25 @@ export default function KirimProfilPage() {
                 <li className="flex gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-500" />
                   <span>
-                    <strong>Tulis deskripsi otentik.</strong> Ceritakan karakter berkarya Anda agar tim mudah mengenali ciri khas
-                    konten yang ditampilkan.
+                    <strong>Susun tagline yang berkesan.</strong> Padatkan personal branding dalam 5-7 kata agar pembaca langsung menangkap janji utama Anda.
                   </span>
                 </li>
                 <li className="flex gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-500" />
                   <span>
-                    <strong>Pastikan tautan aktif.</strong> Gunakan URL lengkap untuk Facebook dan kanal lain agar mudah diverifikasi.
+                    <strong>Jelaskan pilar dan nilai brand.</strong> Manfaatkan kolom pilar konten dan nilai brand untuk menuliskan tema utama sekaligus sikap yang konsisten Anda suarakan.
                   </span>
                 </li>
                 <li className="flex gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-500" />
                   <span>
-                    <strong>Bagikan karya terbaru.</strong> Sertakan tautan portofolio atau unggahan unggulan yang paling mewakili Anda.
+                    <strong>Tulis deskripsi otentik.</strong> Ceritakan karakter berkarya Anda agar tim mudah mengenali ciri khas konten yang ditampilkan.
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-500" />
+                  <span>
+                    <strong>Pastikan tautan dan portofolio aktif.</strong> Gunakan URL lengkap untuk Facebook, kanal lain, dan karya unggulan agar mudah diverifikasi.
                   </span>
                 </li>
               </ul>

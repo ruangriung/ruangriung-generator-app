@@ -11,6 +11,7 @@ import {
   Instagram,
   MessageCircle,
   Search,
+  Send,
   Sparkles,
   Twitter,
   Users,
@@ -309,7 +310,10 @@ export default function KontenKreatorPage() {
             Bersama Kreator, Untuk Kreator, Oleh Kreator.
           </h1>
           <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-            RuangRiung adalah rumah kedua untuk tumbuh, berjejaring, dan mengubah passion menjadi proyek yang berarti bersama rekan seperjalanan. Tampilkan profil anda agar seluruh dunia tahu bahwa anda bisa! Jelajahi jaringan kreator kami untuk menemukan kolaborator baru, inspirasi segar, dan ruang belajar yang hangat.
+            Halaman ini dirancang untuk memperkenalkan dan memperkuat personal branding kreator RuangRiung sekaligus menonjolkan konten Facebook pro mereka agar semakin dikenal dunia. Jelajahi direktori ini untuk bertemu rekan seperjalanan yang siap berkolaborasi, membuka peluang baru, dan saling mengangkat karya terbaik.
+          </p>
+          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+            Pengajuan profil membantu tim menampilkan cerita, nilai, dan karya Anda secara terkurasi sehingga komunitas maupun brand dapat memahami keahlian Anda dalam sekejap.
           </p>
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -328,6 +332,35 @@ export default function KontenKreatorPage() {
             </Link>
           </div>
         </div>
+
+        <section className="mt-12">
+          <div className="mx-auto max-w-4xl rounded-3xl border border-purple-200 bg-gradient-to-br from-purple-50 via-white to-blue-50 p-8 text-left shadow-xl dark:border-purple-900 dark:from-purple-950 dark:via-gray-950 dark:to-blue-950">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Mengapa mengirim profil Anda?</h2>
+            <p className="mt-3 text-base text-gray-600 dark:text-gray-300">
+              Submission ke halaman ini membuka akses eksposur dan peluang baru bagi personal brand Anda.
+            </p>
+            <ul className="mt-6 space-y-4 text-sm text-gray-600 dark:text-gray-300">
+              <li className="flex gap-3">
+                <Sparkles className="mt-0.5 h-5 w-5 text-purple-600 dark:text-purple-300" />
+                <span>
+                  <strong>Personal branding tampil resmi.</strong> Cerita, keunikan, dan nilai yang Anda bawa akan dikemas rapi di landing page RuangRiung sebagai kartu nama digital yang mudah dibagikan.
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <Facebook className="mt-0.5 h-5 w-5 text-purple-600 dark:text-purple-300" />
+                <span>
+                  <strong>Konten Facebook Pro mendapat sorotan.</strong> Kami menyorot unggahan terbaik Anda agar audiens global memahami gaya dan konsistensi yang dibangun di komunitas.
+                </span>
+              </li>
+              <li className="flex gap-3">
+                <Globe className="mt-0.5 h-5 w-5 text-purple-600 dark:text-purple-300" />
+                <span>
+                  <strong>Peluang kolaborasi terbuka.</strong> Brand, komunitas, dan kreator lain dapat menilai kecocokan kerja sama hanya dari satu halaman profil komprehensif.
+                </span>
+              </li>
+            </ul>
+          </div>
+        </section>
 
         <section className="mt-12 space-y-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -522,15 +555,18 @@ export default function KontenKreatorPage() {
             </div>
             <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-gray-100">Tampilkan Profil Anda</h2>
             <p className="mt-3 text-base text-gray-600 dark:text-gray-300">
-              Ingin profil lengkap Anda hadir di halaman ini? Kirimkan informasi media sosial, karya unggulan, dan cerita singkat tentang perjalanan kreatif Anda.
+              Siap membuat personal branding Anda lebih mudah diingat? Kirimkan informasi media sosial, karya unggulan, serta pesan inti brand agar kami dapat menampilkan profil yang solid dan profesional.
             </p>
             <div className="mt-6 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 href="/konten-kreator/kirim-profil"
-                className="inline-flex items-center gap-2 rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                className="group inline-flex items-center gap-2 rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
               >
-                <Sparkles className="h-4 w-4" />
-                Ajukan Profil Anda
+                <Send
+                  className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-1"
+                  aria-hidden
+                />
+                Submit Profil Anda
               </Link>
               <Link
                 href="/tentang-kami"
