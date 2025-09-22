@@ -134,7 +134,7 @@ export default function PromptClient({ prompts }: PromptClientProps) {
         </Link>
       </div>
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Kumpulan Prompt</h1>
+        <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900 dark:text-white">Kumpulan Prompt</h1>
         <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">Jelajahi, gunakan, dan bagikan prompt kreatif untuk berbagai model AI.</p>
         <PromptSubmissionTrigger className="mt-6 px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition duration-300 shadow-lg" />
       </div>
