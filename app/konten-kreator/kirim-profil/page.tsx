@@ -20,6 +20,9 @@ type ProfileSubmission = {
   audience: string;
   contentPillars: string;
   brandValues: string;
+  customFieldOne: string;
+  customFieldTwo: string;
+  customFieldThree: string;
   facebook: string;
   youtube: string;
   instagram: string;
@@ -40,6 +43,9 @@ const initialForm: ProfileSubmission = {
   audience: '',
   contentPillars: '',
   brandValues: '',
+  customFieldOne: '',
+  customFieldTwo: '',
+  customFieldThree: '',
   facebook: '',
   youtube: '',
   instagram: '',
@@ -60,6 +66,9 @@ const fieldLabels: Record<keyof ProfileSubmission, string> = {
   audience: 'Audiens utama',
   contentPillars: 'Pilar konten utama',
   brandValues: 'Nilai atau pesan utama personal brand',
+  customFieldOne: 'Kolom tambahan 1',
+  customFieldTwo: 'Kolom tambahan 2',
+  customFieldThree: 'Kolom tambahan 3',
   facebook: 'Profil Facebook',
   youtube: 'Channel YouTube',
   instagram: 'Profil Instagram',
@@ -74,11 +83,7 @@ const fieldLabels: Record<keyof ProfileSubmission, string> = {
 
 const requiredFields: (keyof ProfileSubmission)[] = [
   'name',
-  'role',
   'description',
-  'brandTagline',
-  'audience',
-  'contentPillars',
   'facebook',
   'contactEmail',
 ];
@@ -226,7 +231,7 @@ export default function KirimProfilPage() {
                 </div>
                 <div>
                   <label htmlFor="role" className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                    Peran atau spesialisasi <span className="text-red-500">*</span>
+                    Peran atau spesialisasi (opsional)
                   </label>
                   <input
                     id="role"
@@ -235,7 +240,6 @@ export default function KirimProfilPage() {
                     onChange={handleChange}
                     className={inputClassName}
                     placeholder="Mis. Storyteller, Kurator Prompt"
-                    required
                   />
                 </div>
               </div>
@@ -258,7 +262,7 @@ export default function KirimProfilPage() {
               <div className="grid gap-6 md:grid-cols-2">
                 <div>
                   <label htmlFor="brandTagline" className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                    Tagline personal branding <span className="text-red-500">*</span>
+                    Tagline personal branding (opsional)
                   </label>
                   <input
                     id="brandTagline"
@@ -267,12 +271,11 @@ export default function KirimProfilPage() {
                     onChange={handleChange}
                     className={inputClassName}
                     placeholder="Mis. Visual Storyteller untuk UMKM berani tampil"
-                    required
                   />
                 </div>
                 <div>
                   <label htmlFor="audience" className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                    Audiens utama <span className="text-red-500">*</span>
+                    Audiens utama (opsional)
                   </label>
                   <input
                     id="audience"
@@ -281,14 +284,13 @@ export default function KirimProfilPage() {
                     onChange={handleChange}
                     className={inputClassName}
                     placeholder="Mis. Komunitas kreator, brand lokal fashion, atau UMKM digital"
-                    required
                   />
                 </div>
               </div>
 
               <div>
                 <label htmlFor="contentPillars" className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                  Pilar konten utama <span className="text-red-500">*</span>
+                  Pilar konten utama (opsional)
                 </label>
                 <textarea
                   id="contentPillars"
@@ -297,7 +299,6 @@ export default function KirimProfilPage() {
                   onChange={handleChange}
                   className={textAreaClassName}
                   placeholder="Sebutkan 2-3 tema besar konten Facebook Pro Anda, mis. tips produksi AI, showcase kolaborasi, ulasan alat."
-                  required
                 />
               </div>
 
@@ -313,6 +314,48 @@ export default function KirimProfilPage() {
                   className={textAreaClassName}
                   placeholder="Jelaskan kata kunci, tone komunikasi, atau janji utama yang selalu Anda bawa di setiap kolaborasi."
                 />
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-3">
+                <div>
+                  <label htmlFor="customFieldOne" className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    Kolom tambahan 1 (opsional)
+                  </label>
+                  <input
+                    id="customFieldOne"
+                    name="customFieldOne"
+                    value={formData.customFieldOne}
+                    onChange={handleChange}
+                    className={inputClassName}
+                    placeholder="Mis. Program rutin, jadwal live, atau kelas yang Anda jalankan"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="customFieldTwo" className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    Kolom tambahan 2 (opsional)
+                  </label>
+                  <input
+                    id="customFieldTwo"
+                    name="customFieldTwo"
+                    value={formData.customFieldTwo}
+                    onChange={handleChange}
+                    className={inputClassName}
+                    placeholder="Mis. Daftar layanan, komunitas yang diampu, atau paket kolaborasi"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="customFieldThree" className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    Kolom tambahan 3 (opsional)
+                  </label>
+                  <input
+                    id="customFieldThree"
+                    name="customFieldThree"
+                    value={formData.customFieldThree}
+                    onChange={handleChange}
+                    className={inputClassName}
+                    placeholder="Mis. Media kit, link katalog, atau catatan penting lainnya"
+                  />
+                </div>
               </div>
 
               <div>
