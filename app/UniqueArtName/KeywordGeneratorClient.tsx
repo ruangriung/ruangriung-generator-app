@@ -662,10 +662,10 @@ const KeywordGeneratorClient = () => {
                   Unique Art Name Lab
                 </div>
                 <h1 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 sm:text-4xl">
-                  Eksperimen 20 Visual Style AI untuk sebuah Generasi Gambar AI yang Benar-Benar Unik
+                  20 Gaya Visual Eksperimental AI untuk Mewujudkan Gambar yang Tidak Pernah Anda Bayangkan
                 </h1>
                 <p className="max-w-2xl text-base text-gray-700 dark:text-gray-300">
-                  Halaman ini dirancang sebagai laboratorium Visual Style yang unik, langka dengan tujuan untuk menguji ide prompt gambar AI. Setiap sesi menghasilkan istilah atau Visual Style yang terasa baru—kadang satu kata, kadang gabungan dengan sentuhan tak terduga—lengkap dengan deskripsi singkat agar mudah dipadukan.
+                  Selamat datang di Unique Art Name Lab — ruang eksperimen visual yang dirancang untuk merangsang kreativitas dan memperkaya imajinasi. Di sini Anda dapat menghasilan istilah visual style yang orisinal dan eksperimental, yang dapat menjadi bahan pemicu kuat untuk prompt-generasi karya seni digital.
                 </p>
               </div>
               <div className="rounded-2xl bg-white/60 p-5 shadow-inner dark:bg-dark-neumorphic-light/70">
@@ -698,7 +698,7 @@ const KeywordGeneratorClient = () => {
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Hasilkan Visual Style untuk Uji Prompt</h2>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Tekan tombol di bawah untuk meminta model menghadirkan {KEYWORD_COUNT} istilah Visual Style eksperimental beserta deskripsi ringkasnya. Susunan kata selalu acak untuk memberi variasi ide setiap kali kamu mencoba.
+                  Klik tombol di bawah ini untuk memanggil {KEYWORD_COUNT} istilah Visual Style eksperimental lengkap dengan deskripsi kilatnya — setiap kombinasi dibuat acak agar setiap kali kamu mencoba, selalu muncul gagasan baru yang mengejutkan dan membangkitkan inspirasi!
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
