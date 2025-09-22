@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
   ArrowLeft,
@@ -115,6 +115,7 @@ export default function KontenKreatorPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [activeBenefitIndex, setActiveBenefitIndex] = useState<number | null>(0);
+  const resultsRef = useRef<HTMLDivElement | null>(null);
 
   const searchTokens = useMemo(() => {
     const tokens = searchQuery
@@ -161,6 +162,44 @@ export default function KontenKreatorPage() {
   const rangeEnd = hasResults
     ? Math.min(startIndex + ITEMS_PER_PAGE, filteredCount)
     : 0;
+
+  const scrollToResults = () => {
+    if (!resultsRef.current) {
+      return;
+    }
+
+    resultsRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage === 1) {
+      return;
+    }
+
+    setCurrentPage(currentPage - 1);
+    scrollToResults();
+  };
+
+  const handleNextPage = () => {
+    if (currentPage === totalPages) {
+      return;
+    }
+
+    setCurrentPage(currentPage + 1);
+    scrollToResults();
+  };
+
+  const handleSelectPage = (pageNumber: number) => {
+    if (pageNumber === currentPage) {
+      return;
+    }
+
+    setCurrentPage(pageNumber);
+    scrollToResults();
+  };
 
   const toggleBenefit = (index: number) => {
     setActiveBenefitIndex((previous) => (previous === index ? null : index));
@@ -308,153 +347,155 @@ export default function KontenKreatorPage() {
         </section>
 
         {hasResults && (
-          <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2">
-            {paginatedCreators.map((creator) => (
-              <article
-                key={creator.slug}
-                className="group flex h-full flex-col overflow-hidden rounded-3xl border border-purple-100 bg-white shadow-lg shadow-purple-100/50 transition-transform hover:-translate-y-1 hover:shadow-purple-200/80 dark:border-purple-900 dark:bg-gray-900/60 dark:shadow-black/40"
-              >
-                <div className="h-1 w-full bg-gradient-to-r from-purple-400 via-fuchsia-400 to-blue-400 dark:from-purple-700 dark:via-fuchsia-700 dark:to-blue-700" />
-                <div className="flex flex-col gap-6 p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-purple-100 bg-purple-50 shadow-inner dark:border-purple-900 dark:bg-purple-900/40">
-                      <Image
-                        src={creator.imageUrl}
-                        alt={`Foto profil ${creator.name}`}
-                        fill
-                        sizes="96px"
-                        className="h-full w-full rounded-full object-cover"
-                      />
+          <div ref={resultsRef} className="mt-8 space-y-12 scroll-mt-24">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              {paginatedCreators.map((creator) => (
+                <article
+                  key={creator.slug}
+                  className="group flex h-full flex-col overflow-hidden rounded-3xl border border-purple-100 bg-white shadow-lg shadow-purple-100/50 transition-transform hover:-translate-y-1 hover:shadow-purple-200/80 dark:border-purple-900 dark:bg-gray-900/60 dark:shadow-black/40"
+                >
+                  <div className="h-1 w-full bg-gradient-to-r from-purple-400 via-fuchsia-400 to-blue-400 dark:from-purple-700 dark:via-fuchsia-700 dark:to-blue-700" />
+                  <div className="flex flex-col gap-6 p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-purple-100 bg-purple-50 shadow-inner dark:border-purple-900 dark:bg-purple-900/40">
+                        <Image
+                          src={creator.imageUrl}
+                          alt={`Foto profil ${creator.name}`}
+                          fill
+                          sizes="96px"
+                          className="h-full w-full rounded-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                          {highlightText(creator.name, searchTokens)}
+                        </h2>
+                        <p className="text-sm font-medium text-purple-600 dark:text-purple-300">
+                          {highlightText(creator.role, searchTokens)}
+                        </p>
+                        <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                          {highlightText(creator.description, searchTokens)}
+                        </p>
+                      </div>
                     </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {creator.specialties.map((specialty) => (
+                        <span
+                          key={specialty}
+                          className="rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700 dark:bg-purple-900/60 dark:text-purple-200"
+                        >
+                          {highlightText(specialty, searchTokens)}
+                        </span>
+                      ))}
+                    </div>
+
                     <div>
-                      <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                        {highlightText(creator.name, searchTokens)}
-                      </h2>
-                      <p className="text-sm font-medium text-purple-600 dark:text-purple-300">
-                        {highlightText(creator.role, searchTokens)}
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        Jejak Digital
                       </p>
-                      <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
-                        {highlightText(creator.description, searchTokens)}
-                      </p>
-                    </div>
-                  </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {socialPlatforms.map((platform) => {
+                          const url = creator.socials[platform.key];
+                          const Icon = platform.icon;
 
-                  <div className="flex flex-wrap gap-2">
-                    {creator.specialties.map((specialty) => (
-                      <span
-                        key={specialty}
-                        className="rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700 dark:bg-purple-900/60 dark:text-purple-200"
-                      >
-                        {highlightText(specialty, searchTokens)}
-                      </span>
-                    ))}
-                  </div>
+                          if (url) {
+                            return (
+                              <a
+                                key={platform.key}
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700 transition hover:border-purple-300 hover:bg-purple-100 hover:text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:border-purple-800 dark:bg-purple-900/40 dark:text-purple-200 dark:hover:border-purple-700 dark:hover:bg-purple-900/60 dark:hover:text-purple-100"
+                              >
+                                <Icon className="h-4 w-4" />
+                                {platform.label}
+                              </a>
+                            );
+                          }
 
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                      Jejak Digital
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {socialPlatforms.map((platform) => {
-                        const url = creator.socials[platform.key];
-                        const Icon = platform.icon;
-
-                        if (url) {
                           return (
-                            <a
+                            <span
                               key={platform.key}
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700 transition hover:border-purple-300 hover:bg-purple-100 hover:text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:border-purple-800 dark:bg-purple-900/40 dark:text-purple-200 dark:hover:border-purple-700 dark:hover:bg-purple-900/60 dark:hover:text-purple-100"
+                              aria-disabled="true"
+                              className="inline-flex items-center gap-2 rounded-full border border-dashed border-gray-300 bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-400 dark:border-gray-700 dark:bg-gray-800/70 dark:text-gray-500"
                             >
                               <Icon className="h-4 w-4" />
                               {platform.label}
-                            </a>
+                            </span>
                           );
-                        }
+                        })}
+                      </div>
+                    </div>
 
-                        return (
-                          <span
-                            key={platform.key}
-                            aria-disabled="true"
-                            className="inline-flex items-center gap-2 rounded-full border border-dashed border-gray-300 bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-400 dark:border-gray-700 dark:bg-gray-800/70 dark:text-gray-500"
-                          >
-                            <Icon className="h-4 w-4" />
-                            {platform.label}
-                          </span>
-                        );
-                      })}
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Link
+                        href={`/konten-kreator/profil/${creator.slug}`}
+                        className="inline-flex w-max items-center gap-2 rounded-full bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                      >
+                        <Sparkles className="h-4 w-4" />
+                        Lihat Profil Lengkap
+                      </Link>
+                      {creator.socials.facebook && (
+                        <a
+                          href={creator.socials.facebook}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex w-max items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:from-purple-600 hover:to-fuchsia-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                        >
+                          <Users className="h-4 w-4" />
+                          Lihat Profil Facebook
+                        </a>
+                      )}
                     </div>
                   </div>
+                </article>
+              ))}
+            </div>
 
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <Link
-                      href={`/konten-kreator/profil/${creator.slug}`}
-                      className="inline-flex w-max items-center gap-2 rounded-full bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                    >
-                      <Sparkles className="h-4 w-4" />
-                      Lihat Profil Lengkap
-                    </Link>
-                    {creator.socials.facebook && (
-                      <a
-                        href={creator.socials.facebook}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex w-max items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:from-purple-600 hover:to-fuchsia-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                      >
-                        <Users className="h-4 w-4" />
-                        Lihat Profil Facebook
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-
-        {hasResults && totalPages > 1 && (
-          <nav
-            className="mt-12 flex flex-wrap items-center justify-center gap-2"
-            aria-label="Navigasi halaman kreator"
-          >
-            <button
-              type="button"
-              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              disabled={currentPage === 1}
-              className="inline-flex items-center rounded-full border border-purple-200 px-4 py-2 text-sm font-medium text-purple-700 transition hover:border-purple-300 hover:text-purple-800 disabled:cursor-not-allowed disabled:opacity-50 dark:border-purple-800 dark:text-purple-200 dark:hover:border-purple-600"
-            >
-              Sebelumnya
-            </button>
-            {Array.from({ length: totalPages }).map((_, index) => {
-              const pageNumber = index + 1;
-              const isActive = pageNumber === currentPage;
-
-              return (
+            {totalPages > 1 && (
+              <nav
+                className="flex flex-wrap items-center justify-center gap-2"
+                aria-label="Navigasi halaman kreator"
+              >
                 <button
-                  key={pageNumber}
                   type="button"
-                  onClick={() => setCurrentPage(pageNumber)}
-                  className={`inline-flex h-10 w-10 items-center justify-center rounded-full border text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
-                    isActive
-                      ? 'border-purple-500 bg-purple-600 text-white shadow-lg shadow-purple-500/30 dark:border-purple-500 dark:bg-purple-600 dark:text-white'
-                      : 'border-purple-200 bg-white text-purple-700 hover:border-purple-300 hover:text-purple-800 dark:border-purple-800 dark:bg-gray-900 dark:text-purple-200 dark:hover:border-purple-600'
-                  }`}
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 1}
+                  className="inline-flex items-center rounded-full border border-purple-200 px-4 py-2 text-sm font-medium text-purple-700 transition hover:border-purple-300 hover:text-purple-800 disabled:cursor-not-allowed disabled:opacity-50 dark:border-purple-800 dark:text-purple-200 dark:hover:border-purple-600"
                 >
-                  {pageNumber}
+                  Sebelumnya
                 </button>
-              );
-            })}
-            <button
-              type="button"
-              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-              disabled={currentPage === totalPages}
-              className="inline-flex items-center rounded-full border border-purple-200 px-4 py-2 text-sm font-medium text-purple-700 transition hover:border-purple-300 hover:text-purple-800 disabled:cursor-not-allowed disabled:opacity-50 dark:border-purple-800 dark:text-purple-200 dark:hover:border-purple-600"
-            >
-              Selanjutnya
-            </button>
-          </nav>
+                {Array.from({ length: totalPages }).map((_, index) => {
+                  const pageNumber = index + 1;
+                  const isActive = pageNumber === currentPage;
+
+                  return (
+                    <button
+                      key={pageNumber}
+                      type="button"
+                      onClick={() => handleSelectPage(pageNumber)}
+                      className={`inline-flex h-10 w-10 items-center justify-center rounded-full border text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
+                        isActive
+                          ? 'border-purple-500 bg-purple-600 text-white shadow-lg shadow-purple-500/30 dark:border-purple-500 dark:bg-purple-600 dark:text-white'
+                          : 'border-purple-200 bg-white text-purple-700 hover:border-purple-300 hover:text-purple-800 dark:border-purple-800 dark:bg-gray-900 dark:text-purple-200 dark:hover:border-purple-600'
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
+                <button
+                  type="button"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  className="inline-flex items-center rounded-full border border-purple-200 px-4 py-2 text-sm font-medium text-purple-700 transition hover:border-purple-300 hover:text-purple-800 disabled:cursor-not-allowed disabled:opacity-50 dark:border-purple-800 dark:text-purple-200 dark:hover:border-purple-600"
+                >
+                  Selanjutnya
+                </button>
+              </nav>
+            )}
+          </div>
         )}
 
         <section className="mt-16">
