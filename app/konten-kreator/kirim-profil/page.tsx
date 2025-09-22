@@ -116,18 +116,20 @@ export default function KirimProfilPage() {
     setErrorMessage(null);
     setFeedbackMessage(null);
 
-    const missingFields = requiredFields.filter((field) => !formData[field].trim());
+    const trimmedFormData = Object.fromEntries(
+      Object.entries(formData).map(([key, value]) => [key, typeof value === 'string' ? value.trim() : value]),
+    ) as ProfileSubmission;
+
+    const missingFields = requiredFields.filter(field => !trimmedFormData[field]);
 
     if (missingFields.length > 0) {
-      const readableMissing = missingFields
-        .map((field) => fieldLabels[field])
-        .join(', ');
+      const readableMissing = missingFields.map(field => fieldLabels[field]).join(', ');
       setErrorMessage(`Lengkapi terlebih dahulu: ${readableMissing}.`);
       return;
     }
 
     const emailPattern = /[^\s@]+@[^\s@]+\.[^\s@]+/;
-    if (!emailPattern.test(formData.contactEmail)) {
+    if (!emailPattern.test(trimmedFormData.contactEmail)) {
       setErrorMessage('Pastikan email kontak ditulis dengan format yang benar.');
       return;
     }
@@ -141,68 +143,36 @@ export default function KirimProfilPage() {
     setIsSubmitting(true);
 
     try {
-      const socials = [
-        { key: 'facebook', label: fieldLabels.facebook },
-        { key: 'youtube', label: fieldLabels.youtube },
-        { key: 'instagram', label: fieldLabels.instagram },
-        { key: 'threads', label: fieldLabels.threads },
-        { key: 'x', label: fieldLabels.x },
-        { key: 'website', label: fieldLabels.website },
-      ] as const;
+      const response = await fetch('/api/submit-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...trimmedFormData,
+          token,
+        }),
+      });
 
-      const optionalDetails = [
-        { key: 'portfolio', label: fieldLabels.portfolio },
-        { key: 'highlight', label: fieldLabels.highlight },
-        { key: 'contactWhatsapp', label: fieldLabels.contactWhatsapp },
-      ] as const;
+      const result = await response.json();
 
-      const bodyLines = [
-        'Halo Tim RuangRiung,',
-        '',
-        'Saya ingin mengajukan profil saya untuk halaman konten kreator.',
-        '',
-        `${fieldLabels.name}: ${formData.name}`,
-        `${fieldLabels.role}: ${formData.role}`,
-        `${fieldLabels.brandTagline}: ${formData.brandTagline}`,
-        `${fieldLabels.audience}: ${formData.audience}`,
-        `${fieldLabels.description}:`,
-        formData.description,
-        '',
-        `${fieldLabels.contentPillars}:`,
-        formData.contentPillars,
-        '',
-        `${fieldLabels.brandValues}:`,
-        formData.brandValues || '-',
-        '',
-        'Jejak digital:',
-        ...socials.map(({ key, label }) => `${label}: ${formData[key] || '-'}`),
-        '',
-        'Informasi tambahan:',
-        ...optionalDetails.map(({ key, label }) => `${label}: ${formData[key] || '-'}`),
-        '',
-        `${fieldLabels.contactEmail}: ${formData.contactEmail}`,
-        '',
-        'Terima kasih.',
-      ];
-
-      const emailSubject = `Pengajuan Profil Konten Kreator - ${formData.name}`;
-      const emailBody = bodyLines.join('\n');
-
-      try {
-        if (navigator?.clipboard?.writeText) {
-          await navigator.clipboard.writeText(emailBody);
+      if (!response.ok) {
+        if (response.status === 401) {
+          setCaptchaError(true);
+          setToken('');
         }
-      } catch (clipboardError) {
-        console.error('Gagal menyalin ke clipboard:', clipboardError);
+
+        setErrorMessage(result?.message ?? 'Gagal mengirim pengajuan profil. Silakan coba lagi.');
+        return;
       }
 
-      const mailtoLink = `mailto:admin@ruangriung.my.id?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-
-      setFeedbackMessage(
-        'Kami membuka klien email default Anda dengan draf pengajuan. Jika email tidak muncul otomatis, tempel detail yang sudah tersalin ke pesan baru.',
-      );
-
-      window.location.href = mailtoLink;
+      setCaptchaError(false);
+      setFeedbackMessage(result?.message ?? 'Profil Anda berhasil dikirim! Tim RuangRiung akan meninjaunya.');
+      setFormData(initialForm);
+      setToken('');
+    } catch (submissionError) {
+      console.error('Gagal mengirim pengajuan profil:', submissionError);
+      setErrorMessage('Terjadi kesalahan saat mengirim pengajuan. Silakan coba lagi.');
     } finally {
       setIsSubmitting(false);
     }
@@ -523,7 +493,7 @@ export default function KirimProfilPage() {
                 disabled={isSubmitting || !token}
               >
                 <Send className="h-4 w-4" />
-                {isSubmitting ? 'Menyiapkan Email...' : 'Buka Draf Pengajuan'}
+                {isSubmitting ? 'Mengirim...' : 'Kirim Pengajuan'}
               </button>
             </form>
 
