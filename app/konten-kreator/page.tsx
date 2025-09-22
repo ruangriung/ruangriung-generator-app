@@ -11,6 +11,7 @@ import {
   Instagram,
   MessageCircle,
   Search,
+  Send,
   Sparkles,
   Twitter,
   Users,
@@ -559,10 +560,13 @@ export default function KontenKreatorPage() {
             <div className="mt-6 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 href="/konten-kreator/kirim-profil"
-                className="inline-flex items-center gap-2 rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                className="group inline-flex items-center gap-2 rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
               >
-                <Sparkles className="h-4 w-4" />
-                Ajukan Profil Anda
+                <Send
+                  className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-1"
+                  aria-hidden
+                />
+                Submit Profil Anda
               </Link>
               <Link
                 href="/tentang-kami"
