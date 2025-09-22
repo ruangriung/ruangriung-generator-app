@@ -61,6 +61,45 @@ const FALLBACK_MODELS: ModelOption[] = [
   { id: 'phi', name: 'Phi-4 Mini Instruct', description: 'Ahli dalam gaya naratif ringkas.' },
 ];
 
+const POLLINATIONS_TEXT_API_BASE_URL = 'https://text.pollinations.ai';
+const POLLINATIONS_MODELS_ENDPOINT = `${POLLINATIONS_TEXT_API_BASE_URL}/models`;
+const POLLINATIONS_OPENAI_ENDPOINT = `${POLLINATIONS_TEXT_API_BASE_URL}/openai`;
+const POLLINATIONS_TOKEN = process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN?.trim();
+const POLLINATIONS_REFERRER = 'ruangriung.my.id';
+
+const getPollinationsQueryParam = () => {
+  if (POLLINATIONS_TOKEN) {
+    return { name: 'token', value: POLLINATIONS_TOKEN } as const;
+  }
+
+  return { name: 'referrer', value: POLLINATIONS_REFERRER } as const;
+};
+
+const buildPollinationsUrl = (baseUrl: string) => {
+  try {
+    const url = new URL(baseUrl);
+    const { name, value } = getPollinationsQueryParam();
+    url.searchParams.set(name, value);
+    return url.toString();
+  } catch (error) {
+    console.warn('Gagal membangun URL Pollinations:', error);
+    const { name, value } = getPollinationsQueryParam();
+    const separator = baseUrl.includes('?') ? '&' : '?';
+    return `${baseUrl}${separator}${name}=${encodeURIComponent(value)}`;
+  }
+};
+
+const getPollinationsAuthHeaders = (hasJsonBody: boolean) => {
+  const headers: Record<string, string> = {};
+  if (hasJsonBody) {
+    headers['Content-Type'] = 'application/json';
+  }
+  if (POLLINATIONS_TOKEN) {
+    headers.Authorization = `Bearer ${POLLINATIONS_TOKEN}`;
+  }
+  return headers;
+};
+
 const shouldEnforceDefaultTemperature = (modelId: string) => {
   const normalized = modelId.trim().toLowerCase();
   if (!normalized) {
@@ -309,7 +348,9 @@ const KeywordGeneratorClient = () => {
       setIsLoadingModels(true);
       setModelError(null);
       try {
-        const response = await fetch('https://text.pollinations.ai/models');
+        const response = await fetch(buildPollinationsUrl(POLLINATIONS_MODELS_ENDPOINT), {
+          headers: getPollinationsAuthHeaders(false),
+        });
         if (!response.ok) {
           throw new Error(`Gagal memuat model (${response.status})`);
         }
@@ -435,11 +476,9 @@ const KeywordGeneratorClient = () => {
         payload.temperature = generationTemperature;
       }
 
-      const response = await fetch('https://text.pollinations.ai/openai', {
+      const response = await fetch(buildPollinationsUrl(POLLINATIONS_OPENAI_ENDPOINT), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getPollinationsAuthHeaders(true),
         body: JSON.stringify(payload),
       });
 
@@ -552,11 +591,9 @@ const KeywordGeneratorClient = () => {
         payload.temperature = askTemperature;
       }
 
-      const response = await fetch('https://text.pollinations.ai/openai', {
+      const response = await fetch(buildPollinationsUrl(POLLINATIONS_OPENAI_ENDPOINT), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getPollinationsAuthHeaders(true),
         body: JSON.stringify(payload),
       });
 
