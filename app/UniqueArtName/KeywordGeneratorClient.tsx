@@ -464,7 +464,7 @@ const KeywordGeneratorClient = () => {
           {
             role: 'system',
             content:
-              'Anda adalah kurator kata kunci eksperimental yang terus menemukan istilah baru untuk pengetesan prompt visual. Selalu patuhi format yang diminta dan pastikan hasil dapat langsung disalin.',
+              'Anda adalah kurator kata kunci eksperimental yang terus menemukan istilah baru untuk pengetesan prompt visual. Selalu patuhi format yang diminta dan pastikan hasil dapat langsung disalin dan berikan dalam bahasa inggris.',
           },
           { role: 'user', content: instruction },
         ],
