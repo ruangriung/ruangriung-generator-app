@@ -3,18 +3,18 @@ import KeywordGeneratorClient from './KeywordGeneratorClient';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ruangriung.my.id'),
-  title: 'Generator Kata Kunci Unik untuk Prompt Gambar | RuangRiung',
+  title: 'Generator tema unik untuk  Gambar AI| RuangRiung',
   description:
-    'Bangun 20 kata kunci antik yang belum pernah ada setiap kali Anda bereksperimen dengan prompt gambar AI. Cocok untuk eksplorasi gaya visual baru dan penulisan deskripsi karya.',
+    'Eksplorasi tema AI untuk pemula — dapatkan 20 tema visual eksperimental yang belum pernah terpikirkan sebelumnya, sempurna untuk memperkuat prompt AI Anda.',
   keywords:
-    'generator kata kunci unik, kata kunci antik, prompt gambar AI, eksperimen prompt, ruangriung unique art name, generator pollinations',
+    'generator tema AI, kata kunci unik, kata kunci antik, prompt gambar AI, tema AI, eksperimen prompt, ruangriung unique art name, generator unik',
   alternates: {
     canonical: '/UniqueArtName',
   },
   openGraph: {
-    title: 'Unique Art Name Prompt Lab - Generator Kata Kunci Antik',
+    title: 'Unique Art Name Theme AI - Tema Unik untuk Gambar AI',
     description:
-      'Uji coba prompt gambar AI dengan 20 kata kunci eksperimental lengkap bersama deskripsi singkat yang mudah disalin.',
+      'Eksplorasi tema AI untuk pemula — dapatkan 20 tema visual eksperimental yang belum pernah terpikirkan sebelumnya, sempurna untuk memperkuat prompt AI Anda.',
     url: 'https://ruangriung.my.id/UniqueArtName',
     siteName: 'RuangRiung AI Generator',
     images: [
