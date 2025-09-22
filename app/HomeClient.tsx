@@ -166,7 +166,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
               <span className="absolute -right-1 -top-1 h-3 w-3 animate-ping rounded-full bg-yellow-300" aria-hidden />
             </span>
             <div className="text-left">
-              <p className="text-lg sm:text-xl leading-tight">Build Your Brand Here</p>
+              <p className="text-lg sm:text-xl leading-tight">Build Your Personal Brand Here</p>
               <p className="text-sm sm:text-base font-normal text-white/80">
                 Masuk ke etalase konten kreator kami dan dapatkan eksposur lebih untuk karya terbaikmu.
               </p>
