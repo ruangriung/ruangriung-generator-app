@@ -139,7 +139,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
           className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
         >
           <LayoutGrid size={18} />
-          <span>Kumpulan Prompt AI</span>
+          <span>Prompt AI</span>
         </Link>
         <Link href="/artikel" className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
           <Rss size={18} />
