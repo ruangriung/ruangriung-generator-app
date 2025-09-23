@@ -12,6 +12,7 @@ import {
   Wand2,
   ClipboardList,
   CircleAlert,
+  CircleHelp,
   Send,
   Undo2,
   ArrowLeft,
@@ -19,6 +20,7 @@ import {
   Sun,
   Palette,
   Globe2,
+  X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AdBanner } from '@/components/AdBanner';
@@ -469,6 +471,8 @@ const KeywordGeneratorClient = () => {
   const [isAsking, setIsAsking] = useState(false);
   const [askError, setAskError] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isKeywordHelpOpen, setIsKeywordHelpOpen] = useState(false);
+  const keywordHelpTitleId = 'keyword-help-dialog-title';
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const artistResultsRef = useRef<HTMLDivElement | null>(null);
   const shouldAutoGenerateArtists = useRef(false);
@@ -514,6 +518,26 @@ const KeywordGeneratorClient = () => {
       return next;
     });
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    if (!isKeywordHelpOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsKeywordHelpOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isKeywordHelpOpen]);
 
   useEffect(() => {
     const fetchModels = async () => {
@@ -1008,8 +1032,9 @@ const KeywordGeneratorClient = () => {
     : 'bg-gray-900 text-white hover:bg-gray-800';
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10">
+    <>
+      <div className="container mx-auto px-4 py-12">
+        <div className="mx-auto flex max-w-6xl flex-col gap-10">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Link
             href="/"
@@ -1070,8 +1095,18 @@ const KeywordGeneratorClient = () => {
             </div>
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Hasilkan Tema Unik</h2>
+              <div className="space-y-2">
+                <div className="flex items-start gap-3">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Hasilkan Tema Unik</h2>
+                  <button
+                    type="button"
+                    onClick={() => setIsKeywordHelpOpen(true)}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-purple-700 shadow-neumorphic transition hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-dark-neumorphic-light dark:text-purple-200 dark:shadow-dark-neumorphic dark:hover:bg-dark-neumorphic-light/80"
+                    aria-label="Buka panduan penggunaan kata kunci"
+                  >
+                    <CircleHelp className="h-5 w-5" />
+                  </button>
+                </div>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
                   Hasilkan {KEYWORD_COUNT} istilah Tema unik dan Eksperimental yang benar-benar baru serta lengkap dengan deskripsi kilat — setiap kombinasi dibuat Serapi mungkin agar setiap kali kamu mencoba muncul ide baru yang mengejutkan dan inspiratif!
                 </p>
@@ -1486,6 +1521,112 @@ const KeywordGeneratorClient = () => {
         </section>
       </div>
     </div>
+
+      {isKeywordHelpOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
+          <div
+            className="absolute inset-0 bg-gray-900/70"
+            onClick={() => setIsKeywordHelpOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={keywordHelpTitleId}
+            className="relative z-10 w-full max-w-3xl rounded-3xl bg-white/95 p-6 text-gray-800 shadow-neumorphic backdrop-blur-sm dark:bg-dark-neumorphic-light/95 dark:text-gray-100 dark:shadow-dark-neumorphic"
+          >
+            <button
+              type="button"
+              onClick={() => setIsKeywordHelpOpen(false)}
+              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-purple-100 text-purple-700 transition hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-purple-500/10 dark:text-purple-100 dark:hover:bg-purple-500/20"
+            >
+              <span className="sr-only">Tutup panduan kata kunci</span>
+              <X className="h-5 w-5" />
+            </button>
+            <div className="space-y-5 pt-2">
+              <div className="space-y-2">
+                <p className="inline-flex items-center gap-2 rounded-full bg-purple-100/70 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700 dark:bg-purple-500/10 dark:text-purple-200">
+                  <Sparkles className="h-4 w-4" />
+                  Panduan Cepat
+                </p>
+                <h3 id={keywordHelpTitleId} className="text-2xl font-bold text-purple-700 dark:text-purple-200">
+                  Eksperimen Kata Kunci Lebih Efektif
+                </h3>
+                <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                  Ikuti langkah ringkas berikut agar setiap daftar kata kunci terasa segar, relevan dengan visi visualmu, dan mudah dipadukan menjadi prompt.
+                </p>
+              </div>
+
+              <ol className="space-y-3 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                <li className="flex gap-3 rounded-2xl bg-purple-50/70 p-4 dark:bg-purple-500/10">
+                  <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-purple-200 text-sm font-semibold text-purple-800 dark:bg-purple-500/30 dark:text-purple-100">
+                    1
+                  </span>
+                  <div className="space-y-1">
+                    <p className="font-semibold text-gray-900 dark:text-gray-100">Mulai dari visi besarmu.</p>
+                    <p>
+                      Tulis gambaran utamamu pada kolom <strong>Tema Utama</strong>. Satu atau dua kalimat sudah cukup untuk mengarahkan model menuju suasana yang kamu bayangkan.
+                    </p>
+                  </div>
+                </li>
+                <li className="flex gap-3 rounded-2xl bg-purple-50/70 p-4 dark:bg-purple-500/10">
+                  <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-purple-200 text-sm font-semibold text-purple-800 dark:bg-purple-500/30 dark:text-purple-100">
+                    2
+                  </span>
+                  <div className="space-y-1">
+                    <p className="font-semibold text-gray-900 dark:text-gray-100">Tambahkan aksen dan gaya khusus.</p>
+                    <p>
+                      Gunakan kolom <strong>Arah Gaya / Hal Khusus</strong> untuk menyebut detail spesifik: teknik, warna, gabungan bahasa, atau elemen budaya. Detail ini membantu AI membuat istilah yang lebih tajam.
+                    </p>
+                  </div>
+                </li>
+                <li className="flex gap-3 rounded-2xl bg-purple-50/70 p-4 dark:bg-purple-500/10">
+                  <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-purple-200 text-sm font-semibold text-purple-800 dark:bg-purple-500/30 dark:text-purple-100">
+                    3
+                  </span>
+                  <div className="space-y-1">
+                    <p className="font-semibold text-gray-900 dark:text-gray-100">Analisis deskripsi singkatnya.</p>
+                    <p>
+                      Setelah menekan <strong>Generate Tema Unik</strong>, baca tiap deskripsi. Gabungkan istilah yang saling melengkapi lalu tekan <strong>Salin Semua</strong> untuk menyimpannya sebagai referensi prompt.
+                    </p>
+                  </div>
+                </li>
+                <li className="flex gap-3 rounded-2xl bg-purple-50/70 p-4 dark:bg-purple-500/10">
+                  <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-purple-200 text-sm font-semibold text-purple-800 dark:bg-purple-500/30 dark:text-purple-100">
+                    4
+                  </span>
+                  <div className="space-y-1">
+                    <p className="font-semibold text-gray-900 dark:text-gray-100">Kembangkan dengan fitur tambahan.</p>
+                    <p>
+                      Aktifkan daftar seniman untuk menambah referensi visual, atau gunakan <strong>Panel Pertanyaan Kilat</strong> guna meminta variasi baru tanpa kehilangan konteks hasil sebelumnya.
+                    </p>
+                  </div>
+                </li>
+              </ol>
+
+              <div className="space-y-2 rounded-2xl bg-white/80 p-4 text-sm text-gray-700 shadow-inner dark:bg-dark-neumorphic-light/80 dark:text-gray-200">
+                <p className="font-semibold text-gray-900 dark:text-gray-100">Tips tambahan:</p>
+                <ul className="list-disc space-y-1 pl-5">
+                  <li>Coba kombinasikan dua atau tiga kata kunci unik menjadi satu frasa prompt untuk efek yang lebih dramatis.</li>
+                  <li>Simpan batch kata kunci favoritmu sebelum mengklik <strong>Reset</strong> agar ide langka tidak hilang.</li>
+                  <li>Gunakan mode gelap/terang sesuai kebutuhan agar sesi eksplorasi panjang tetap nyaman.</li>
+                </ul>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setIsKeywordHelpOpen(false)}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-purple-600 px-5 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  Mengerti
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 
 };
