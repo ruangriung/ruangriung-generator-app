@@ -176,16 +176,23 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         </Link>
       </div>
 
-      <div className="w-full max-w-4xl mb-4">
+      <div className="w-full max-w-4xl mb-4 flex flex-col sm:flex-row gap-4">
         <PromptSubmissionTrigger
-          className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset hover:bg-blue-700 transition-colors"
+          className="w-full sm:flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset hover:bg-blue-700 transition-colors"
           label={
             <>
               <Sparkles size={18} className="text-yellow-300" />
-              <span>Kirim Prompt Anda</span>
+              <span>Submit Prompt</span>
             </>
           }
         />
+        <Link
+          href="/UniqueArtName"
+          className="w-full sm:flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset hover:bg-purple-700 transition-colors"
+        >
+          <Sparkles size={18} className="text-yellow-300" />
+          <span>Tema Unik</span>
+        </Link>
       </div>
 
       <div className="w-full max-w-4xl mb-4">
@@ -228,16 +235,6 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
             {isToolsMenuOpen && (
                 <div className="absolute top-full mt-2 w-full bg-gray-700 dark:bg-dark-bg border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-10">
                     <ul className="py-2">
-                        <li>
-                            <Link
-                                href="/UniqueArtName"
-                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
-                                onClick={() => setIsToolsMenuOpen(false)}
-                            >
-                                <Sparkles size={18} />
-                                <span>Generator Kata Kunci Unik</span>
-                            </Link>
-                        </li>
                         <li>
                             <Link
                                 href="/storyteller"
