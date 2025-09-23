@@ -13,6 +13,9 @@ import { usePromptSuggestions } from './usePromptSuggestions';
 
 const PROMPTS_PER_PAGE = 9;
 
+const sortPrompts = (items: Prompt[]) =>
+  items.slice().sort((a, b) => Number(b.id) - Number(a.id));
+
 const escapeRegExp = (value: string) =>
   value.replace(/[-/\\^$*+?.()|[\]{}]/g, '\$&');
 
@@ -41,6 +44,7 @@ interface PromptClientProps {
 }
 
 export default function PromptClient({ prompts }: PromptClientProps) {
+  const [promptList, setPromptList] = useState(() => sortPrompts(prompts));
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,13 +55,17 @@ export default function PromptClient({ prompts }: PromptClientProps) {
   const topAdSlot = PROMPT_TOP_AD_SLOT;
   const bottomAdSlot = PROMPT_BOTTOM_AD_SLOT;
 
-  const allTags = useMemo(() => {
-    const tags = new Set<string>();
-    prompts.forEach(p => p.tags.forEach(t => tags.add(t)));
-    return Array.from(tags);
+  useEffect(() => {
+    setPromptList(sortPrompts(prompts));
   }, [prompts]);
 
-  const suggestions = usePromptSuggestions(prompts, searchTerm);
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    promptList.forEach(p => p.tags.forEach(t => tags.add(t)));
+    return Array.from(tags);
+  }, [promptList]);
+
+  const suggestions = usePromptSuggestions(promptList, searchTerm);
 
   const scrollToPromptListTop = useCallback(() => {
     if (typeof window === 'undefined') {
@@ -89,9 +97,33 @@ export default function PromptClient({ prompts }: PromptClientProps) {
     }
   }, []);
 
+  const upsertPrompt = useCallback((nextPrompt: Prompt) => {
+    setPromptList(previous => {
+      const filtered = previous.filter(prompt => prompt.slug !== nextPrompt.slug);
+      return sortPrompts([nextPrompt, ...filtered]);
+    });
+  }, []);
+
+  const handlePromptCreated = useCallback(
+    (nextPrompt: Prompt) => {
+      upsertPrompt(nextPrompt);
+      setCurrentPage(1);
+      hasInteractedWithPaginationRef.current = true;
+      scrollToPromptListTop();
+    },
+    [scrollToPromptListTop, upsertPrompt],
+  );
+
+  const handlePromptUpdated = useCallback(
+    (nextPrompt: Prompt) => {
+      upsertPrompt(nextPrompt);
+    },
+    [upsertPrompt],
+  );
+
   const filteredPrompts = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
-    return prompts.filter(prompt => {
+    return promptList.filter(prompt => {
       const matchesSearch = normalizedSearch
         ? prompt.title.toLowerCase().includes(normalizedSearch) ||
           prompt.author.toLowerCase().includes(normalizedSearch) ||
@@ -102,7 +134,7 @@ export default function PromptClient({ prompts }: PromptClientProps) {
 
       return matchesSearch && matchesTag;
     });
-  }, [searchTerm, selectedTag, prompts]);
+  }, [searchTerm, selectedTag, promptList]);
 
   const paginatedPrompts = useMemo(() => {
     const startIndex = (currentPage - 1) * PROMPTS_PER_PAGE;
@@ -164,7 +196,10 @@ export default function PromptClient({ prompts }: PromptClientProps) {
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900 dark:text-white">Kumpulan Prompt</h1>
         <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">Jelajahi, gunakan, dan bagikan prompt kreatif untuk berbagai model AI.</p>
-        <PromptSubmissionTrigger className="mt-6 px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition duration-300 shadow-lg" />
+        <PromptSubmissionTrigger
+          className="mt-6 px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition duration-300 shadow-lg"
+          onSuccess={handlePromptCreated}
+        />
       </div>
 
       <div className="mb-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
@@ -222,15 +257,18 @@ export default function PromptClient({ prompts }: PromptClientProps) {
         </div>
       )}
 
-      <div ref={promptListRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div ref={promptListRef} className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {paginatedPrompts.map((prompt: Prompt) => (
-          <Link key={prompt.id} href={`/kumpulan-prompt/${prompt.slug}`}>
-            <div className="block h-full p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 dark:bg-gray-900 dark:border-gray-700 dark:hover:bg-gray-700">
+          <div
+            key={prompt.id}
+            className="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-6 shadow-md transition-shadow duration-300 hover:shadow-xl dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700"
+          >
+            <Link href={`/kumpulan-prompt/${prompt.slug}`} className="flex-1">
               <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 {highlightMatches(prompt.title, searchTerm)}
               </h5>
               <p className="font-normal text-gray-500 dark:text-gray-400">
-                Oleh:{' '}
+                Oleh{' '}
                 {prompt.link || prompt.facebook ? (
                   <a
                     href={prompt.link || prompt.facebook}
@@ -244,17 +282,33 @@ export default function PromptClient({ prompts }: PromptClientProps) {
                   <>{highlightMatches(prompt.author, searchTerm)}</>
                 )}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Tanggal: {new Date(prompt.date).toLocaleDateString('id-ID')}</p>
-              <p className="font-normal text-gray-600 dark:text-gray-300 mb-4">
+              <p className="mb-3 text-sm text-gray-500 dark:text-gray-400">
+                Tanggal: {new Date(prompt.date).toLocaleDateString('id-ID')}
+              </p>
+              <p className="mb-4 font-normal text-gray-600 dark:text-gray-300">
                 Tool: <strong>{highlightMatches(prompt.tool, searchTerm)}</strong>
               </p>
               <div className="flex flex-wrap gap-2">
                 {prompt.tags.map(tag => (
-                  <span key={tag} className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300">{tag}</span>
+                  <span
+                    key={tag}
+                    className="inline-block rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+                  >
+                    {tag}
+                  </span>
                 ))}
               </div>
+            </Link>
+            <div className="mt-4 flex justify-end">
+              <PromptSubmissionTrigger
+                mode="edit"
+                prompt={prompt}
+                onSuccess={handlePromptUpdated}
+                label="Edit Prompt"
+                className="rounded-md border border-blue-500 px-4 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-50 dark:border-blue-400 dark:text-blue-200 dark:hover:bg-blue-900/30"
+              />
             </div>
-          </Link>
+          </div>
         ))}
       </div>
 
