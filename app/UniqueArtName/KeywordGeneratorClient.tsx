@@ -665,7 +665,7 @@ const KeywordGeneratorClient = () => {
                   20 Ide Tema Eksperimental: Tema AI yang Tak Pernah Terbayangkan!
                 </h1>
                 <p className="max-w-2xl text-base text-gray-700 dark:text-gray-300">
-                  Selamat datang di Unique Art Name Lab — tempat ideal bagi para pemula yang ingin mengeksplor ide tema AI. Di sini Anda dapat menemukan 20 Tema Visual Eksperimental yang dirancang untuk memperluas cakrawala dan memberikan tema kreatif yang belum pernah terpikirkan sebelumnya. Tidak dibutuhkan pengalaman tinggi — cukup klik Generate Visual Style dan biarkan tema baru muncul secara acak dan orisinal sebagai bahan eksplorasi untuk prompt AI Anda.
+                  Selamat datang di Unique Art Name Lab — tempat ideal bagi para pemula yang ingin mengeksplor ide tema AI. Di sini Anda dapat menemukan 20 Tema Visual Eksperimental yang dirancang untuk memperluas cakrawala dan memberikan tema kreatif yang belum pernah terpikirkan sebelumnya. Tidak dibutuhkan pengalaman tinggi — cukup klik Generate Tema Unik dan biarkan tema baru muncul secara acak dan orisinal sebagai bahan eksplorasi untuk prompt AI Anda.
                 </p>
               </div>
               <div className="rounded-2xl bg-white/60 p-5 shadow-inner dark:bg-dark-neumorphic-light/70">
@@ -709,7 +709,7 @@ const KeywordGeneratorClient = () => {
                   className="inline-flex items-center gap-2 rounded-2xl bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-purple-700 disabled:cursor-not-allowed disabled:bg-purple-400"
                 >
                   {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                  {isGenerating ? 'Sedang membuat...' : 'Generate Visual Style'}
+                  {isGenerating ? 'Sedang membuat...' : 'Generate Tema Unik'}
                 </button>
                 <button
                   type="button"
