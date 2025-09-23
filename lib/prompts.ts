@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import matter from 'gray-matter';
+import { resolveDateString } from './date';
 
 const promptsDirectory = path.join(process.cwd(), 'content/prompts');
 
@@ -23,6 +24,10 @@ const sanitizeFrontMatter = (frontMatter: Record<string, unknown>) => {
     Object.entries(frontMatter).filter(([, value]) => {
       if (Array.isArray(value)) {
         return value.length > 0;
+      }
+
+      if (value instanceof Date) {
+        return !Number.isNaN(value.getTime());
       }
 
       return value !== undefined && value !== null && value !== '';
@@ -109,8 +114,16 @@ export async function getAllPrompts(): Promise<Prompt[]> {
         .filter(fileName => fileName.endsWith('.md'))
         .map(async fileName => {
           const fullPath = path.join(promptsDirectory, fileName);
-          const fileContents = await fs.readFile(fullPath, 'utf8');
+          const [fileContents, stats] = await Promise.all([
+            fs.readFile(fullPath, 'utf8'),
+            fs.stat(fullPath),
+          ]);
           const { data, content } = matter(fileContents);
+          const date = resolveDateString(
+            data.date,
+            stats.birthtime,
+            stats.mtime,
+          );
           const prompt: Prompt = {
             id: data.id,
             slug: data.slug,
@@ -120,9 +133,9 @@ export async function getAllPrompts(): Promise<Prompt[]> {
             facebook: data.facebook,
             image: data.image,
             link: data.link,
-            date: data.date,
+            date,
             tool: data.tool,
-            tags: data.tags || [],
+            tags: Array.isArray(data.tags) ? data.tags.map(tag => String(tag)) : [],
             promptContent: content.trim(),
           };
           return prompt;
@@ -149,8 +162,7 @@ export async function createPrompt(payload: PromptPayload): Promise<Prompt> {
     : '1';
   const existingSlugs = new Set(allPrompts.map(prompt => prompt.slug));
   const slug = generateUniqueSlug(payload.title, existingSlugs);
-  const providedDate = payload.date?.trim();
-  const date = providedDate && providedDate.length > 0 ? providedDate : new Date().toISOString().split('T')[0];
+  const date = resolveDateString(payload.date, new Date());
   const prompt: Prompt = {
     id: nextId,
     slug,
@@ -186,12 +198,18 @@ export async function updatePromptBySlug(slug: string, payload: PromptPayload): 
     const filePath = path.join(promptsDirectory, fileName);
     const fileContents = await fs.readFile(filePath, 'utf8');
     const { data } = matter(fileContents);
+    const stats = await fs.stat(filePath);
 
     if (data.slug !== slug) {
       continue;
     }
 
-    const normalizedDate = payload.date?.trim();
+    const normalizedDate = resolveDateString(
+      payload.date,
+      data.date,
+      stats.birthtime,
+      stats.mtime,
+    );
     const prompt: Prompt = {
       id: data.id,
       slug: data.slug,
@@ -201,10 +219,7 @@ export async function updatePromptBySlug(slug: string, payload: PromptPayload): 
       facebook: payload.facebook?.trim() || undefined,
       image: payload.image?.trim() || undefined,
       link: payload.link?.trim() || undefined,
-      date:
-        normalizedDate && normalizedDate.length > 0
-          ? normalizedDate
-          : data.date ?? new Date().toISOString().split('T')[0],
+      date: normalizedDate,
       tool: payload.tool.trim(),
       tags: normalizeTags(payload.tags),
       promptContent: payload.promptContent.trim(),
