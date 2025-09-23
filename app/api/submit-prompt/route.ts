@@ -1,10 +1,23 @@
 
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { revalidatePath } from 'next/cache';
+import { createPrompt } from '@/lib/prompts';
 
 export async function POST(request: Request) {
   try {
-    const { author, email, facebook, link, title, promptContent, tool, tags, token } = await request.json();
+    const {
+      author,
+      email,
+      facebook,
+      image,
+      link,
+      title,
+      promptContent,
+      tool,
+      tags,
+      token,
+    } = await request.json();
 
     if (!author || !email || !title || !promptContent || !tool || !token) {
       return NextResponse.json(
@@ -38,6 +51,18 @@ export async function POST(request: Request) {
       );
     }
 
+    const prompt = await createPrompt({
+      author,
+      email,
+      facebook,
+      image,
+      link,
+      title,
+      promptContent,
+      tool,
+      tags,
+    });
+
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -56,9 +81,11 @@ export async function POST(request: Request) {
         <p><strong>Email Pengirim:</strong> ${email}</p>
         <p><strong>Link Facebook:</strong> ${facebook || '-'}</p>
         <p><strong>Link:</strong> ${link || '-'}</p>
+        <p><strong>Link Gambar:</strong> ${image || '-'}</p>
         <p><strong>Judul Prompt:</strong> ${title}</p>
         <p><strong>Tool:</strong> ${tool}</p>
         <p><strong>Tags:</strong> ${tags.join(', ')}</p>
+        <p><strong>Slug:</strong> ${prompt.slug}</p>
         <p><strong>Isi Prompt:</strong></p>
         <pre>${promptContent}</pre>
       `,
@@ -66,7 +93,10 @@ export async function POST(request: Request) {
 
     await transporter.sendMail(mailOptions);
 
-    return NextResponse.json({ message: 'Prompt berhasil dikirim!' }, { status: 200 });
+    revalidatePath('/kumpulan-prompt');
+    revalidatePath(`/kumpulan-prompt/${prompt.slug}`);
+
+    return NextResponse.json({ message: 'Prompt berhasil dikirim!', prompt }, { status: 200 });
 
   } catch (error: any) {
     console.error('Gagal mengirim email:', error);

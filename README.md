@@ -37,6 +37,7 @@ NODEMAILER_APP_PASSWORD=
 CLOUDFLARE_TURNSTILE_SECRET_KEY=
 NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY=
 NEXT_PUBLIC_POLLINATIONS_TOKEN=
+PROMPT_EDIT_TOKEN=
 ```
 
 Variabel tambahan mungkin diperlukan untuk fitur tertentu seperti formulir kontak atau iklan.
