@@ -45,6 +45,7 @@ export default function PromptSubmissionForm({
   const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [token, setToken] = useState('');
+  const [adminToken, setAdminToken] = useState('');
   const [captchaError, setCaptchaError] = useState(false);
 
   const isEditMode = mode === 'edit';
@@ -68,6 +69,7 @@ export default function PromptSubmissionForm({
     setSubmitStatus(null);
     setFeedbackMessage('');
     setCaptchaError(false);
+    setAdminToken('');
   }, [isOpen, initialPrompt]);
 
   const handleClose = () => {
@@ -87,6 +89,12 @@ export default function PromptSubmissionForm({
     if (isEditMode && !initialPrompt?.slug) {
       setSubmitStatus('error');
       setFeedbackMessage('Prompt tidak memiliki slug yang valid.');
+      return;
+    }
+
+    if (isEditMode && !adminToken.trim()) {
+      setSubmitStatus('error');
+      setFeedbackMessage('Token admin diperlukan untuk mengedit prompt.');
       return;
     }
 
@@ -115,11 +123,17 @@ export default function PromptSubmissionForm({
         ...(isEditMode ? { date: initialPrompt?.date } : { token }),
       };
 
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (isEditMode) {
+        headers['x-admin-token'] = adminToken.trim();
+      }
+
       const response = await fetch(endpoint, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(body),
       });
 
@@ -269,6 +283,22 @@ export default function PromptSubmissionForm({
               onChange={e => setTags(e.target.value)}
               className="w-full p-2 border rounded mb-6 dark:bg-gray-700"
             />
+
+            {isEditMode && (
+              <div className="mb-6">
+                <input
+                  type="password"
+                  placeholder="Token admin"
+                  value={adminToken}
+                  onChange={e => setAdminToken(e.target.value)}
+                  className="w-full p-2 border rounded dark:bg-gray-700"
+                  required
+                />
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  Masukkan token admin untuk memverifikasi hak edit.
+                </p>
+              </div>
+            )}
 
             {!isEditMode && (
               <div className="flex justify-center mb-6">

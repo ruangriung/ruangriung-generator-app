@@ -7,6 +7,25 @@ export async function PATCH(
   { params }: { params: { slug: string } },
 ) {
   try {
+    const configuredToken = process.env.PROMPT_EDIT_TOKEN;
+
+    if (!configuredToken) {
+      console.error('PROMPT_EDIT_TOKEN is not configured.');
+      return NextResponse.json(
+        { message: 'Konfigurasi server belum lengkap.' },
+        { status: 500 },
+      );
+    }
+
+    const requestToken = request.headers.get('x-admin-token');
+
+    if (!requestToken || requestToken !== configuredToken) {
+      return NextResponse.json(
+        { message: 'Token admin tidak valid atau tidak diberikan.' },
+        { status: 401 },
+      );
+    }
+
     const body = await request.json();
     const {
       author,
