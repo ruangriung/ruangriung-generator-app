@@ -97,28 +97,17 @@ export default function PromptClient({ prompts }: PromptClientProps) {
     }
   }, []);
 
-  const upsertPrompt = useCallback((nextPrompt: Prompt) => {
-    setPromptList(previous => {
-      const filtered = previous.filter(prompt => prompt.slug !== nextPrompt.slug);
-      return sortPrompts([nextPrompt, ...filtered]);
-    });
-  }, []);
-
   const handlePromptCreated = useCallback(
     (nextPrompt: Prompt) => {
-      upsertPrompt(nextPrompt);
+      setPromptList(previous => {
+        const filtered = previous.filter(prompt => prompt.slug !== nextPrompt.slug);
+        return sortPrompts([nextPrompt, ...filtered]);
+      });
       setCurrentPage(1);
       hasInteractedWithPaginationRef.current = true;
       scrollToPromptListTop();
     },
-    [scrollToPromptListTop, upsertPrompt],
-  );
-
-  const handlePromptUpdated = useCallback(
-    (nextPrompt: Prompt) => {
-      upsertPrompt(nextPrompt);
-    },
-    [upsertPrompt],
+    [scrollToPromptListTop],
   );
 
   const filteredPrompts = useMemo(() => {
@@ -299,15 +288,6 @@ export default function PromptClient({ prompts }: PromptClientProps) {
                 ))}
               </div>
             </Link>
-            <div className="mt-4 flex justify-end">
-              <PromptSubmissionTrigger
-                mode="edit"
-                prompt={prompt}
-                onSuccess={handlePromptUpdated}
-                label="Edit Prompt"
-                className="rounded-md border border-blue-500 px-4 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-50 dark:border-blue-400 dark:text-blue-200 dark:hover:bg-blue-900/30"
-              />
-            </div>
           </div>
         ))}
       </div>

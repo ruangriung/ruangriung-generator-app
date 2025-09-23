@@ -19,7 +19,7 @@ interface PromptDetailClientProps {
 }
 
 export default function PromptDetailClient({ prompt, prompts }: PromptDetailClientProps) {
-  const [currentPrompt, setCurrentPrompt] = useState(prompt);
+  const currentPrompt = prompt;
   const [promptCollection, setPromptCollection] = useState(() => sortPrompts(prompts));
 
   const relatedPrompts = useMemo(() => {
@@ -37,14 +37,6 @@ export default function PromptDetailClient({ prompt, prompts }: PromptDetailClie
       })
       .slice(0, 4);
   }, [promptCollection, currentPrompt]);
-
-  const handlePromptUpdated = (updatedPrompt: Prompt) => {
-    setCurrentPrompt(updatedPrompt);
-    setPromptCollection(previous => {
-      const filtered = previous.filter(item => item.slug !== updatedPrompt.slug);
-      return sortPrompts([updatedPrompt, ...filtered]);
-    });
-  };
 
   const handlePromptCreated = (createdPrompt: Prompt) => {
     setPromptCollection(previous => {
@@ -111,13 +103,6 @@ export default function PromptDetailClient({ prompt, prompts }: PromptDetailClie
             <PromptSubmissionTrigger
               className="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition duration-300 shadow-lg"
               onSuccess={handlePromptCreated}
-            />
-            <PromptSubmissionTrigger
-              mode="edit"
-              prompt={currentPrompt}
-              onSuccess={handlePromptUpdated}
-              label="Edit Prompt Ini"
-              className="w-full sm:w-auto px-8 py-3 rounded-full border border-blue-500 font-semibold text-blue-600 transition hover:bg-blue-50 dark:border-blue-400 dark:text-blue-200 dark:hover:bg-blue-900/30"
             />
           </div>
           <div className="flex w-full justify-end sm:w-auto">
