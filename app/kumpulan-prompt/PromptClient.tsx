@@ -285,6 +285,7 @@ export default function PromptClient({ prompts }: PromptClientProps) {
               </p>
               <p className="mb-3 text-sm text-gray-500 dark:text-gray-400">
                 Tanggal: {formatDateForDisplay(prompt.date)}
+                Tanggal: {new Date(prompt.date).toLocaleDateString('id-ID')}
               </p>
               <p className="mb-4 font-normal text-gray-600 dark:text-gray-300">
                 Tool: <strong>{highlightMatches(prompt.tool, searchTerm)}</strong>

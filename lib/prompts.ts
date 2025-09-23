@@ -26,9 +26,11 @@ const sanitizeFrontMatter = (frontMatter: Record<string, unknown>) => {
         return value.length > 0;
       }
 
+
       if (value instanceof Date) {
         return !Number.isNaN(value.getTime());
       }
+
 
       return value !== undefined && value !== null && value !== '';
     }),
@@ -162,7 +164,11 @@ export async function createPrompt(payload: PromptPayload): Promise<Prompt> {
     : '1';
   const existingSlugs = new Set(allPrompts.map(prompt => prompt.slug));
   const slug = generateUniqueSlug(payload.title, existingSlugs);
+
   const date = resolveDateString(payload.date, new Date());
+
+  const providedDate = payload.date?.trim();
+  const date = providedDate && providedDate.length > 0 ? providedDate : new Date().toISOString().split('T')[0];
   const prompt: Prompt = {
     id: nextId,
     slug,
@@ -198,11 +204,15 @@ export async function updatePromptBySlug(slug: string, payload: PromptPayload): 
     const filePath = path.join(promptsDirectory, fileName);
     const fileContents = await fs.readFile(filePath, 'utf8');
     const { data } = matter(fileContents);
+
     const stats = await fs.stat(filePath);
+
+
 
     if (data.slug !== slug) {
       continue;
     }
+
 
     const normalizedDate = resolveDateString(
       payload.date,
@@ -210,6 +220,7 @@ export async function updatePromptBySlug(slug: string, payload: PromptPayload): 
       stats.birthtime,
       stats.mtime,
     );
+
     const prompt: Prompt = {
       id: data.id,
       slug: data.slug,
@@ -219,7 +230,14 @@ export async function updatePromptBySlug(slug: string, payload: PromptPayload): 
       facebook: payload.facebook?.trim() || undefined,
       image: payload.image?.trim() || undefined,
       link: payload.link?.trim() || undefined,
+
       date: normalizedDate,
+
+      date:
+        payload.date?.trim() && payload.date.trim().length > 0
+          ? payload.date.trim()
+          : data.date ?? new Date().toISOString().split('T')[0],
+
       tool: payload.tool.trim(),
       tags: normalizeTags(payload.tags),
       promptContent: payload.promptContent.trim(),

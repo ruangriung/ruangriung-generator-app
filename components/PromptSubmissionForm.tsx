@@ -196,8 +196,15 @@ export default function PromptSubmissionForm({
   }
 
   return (
+
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
       <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-2xl">
+
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black bg-opacity-50 p-4 sm:items-center sm:p-6"
+    >
+      <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800 sm:p-8 max-h-[calc(100vh-2rem)] overflow-y-auto">
+
         <h2 className="text-2xl font-bold mb-6">
           {isEditMode ? 'Edit Prompt' : 'Kirim Prompt Anda'}
         </h2>

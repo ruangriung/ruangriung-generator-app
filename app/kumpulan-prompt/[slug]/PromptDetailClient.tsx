@@ -9,6 +9,7 @@ import AdBanner from '@/components/AdBanner';
 import CopyButton from '@/components/CopyButton';
 import PromptSubmissionTrigger from '@/components/PromptSubmissionTrigger';
 import { Prompt } from '@/lib/prompts';
+
 import { formatDateForDisplay } from '@/lib/date';
 
 const sortPrompts = (items: Prompt[]) =>
@@ -103,7 +104,11 @@ export default function PromptDetailClient({ prompt, prompts }: PromptDetailClie
           )}
         </p>
         <p className="text-md text-gray-500 dark:text-gray-400 mb-2">
+
           Tanggal: {formatDateForDisplay(currentPrompt.date)}
+
+          Tanggal: {new Date(currentPrompt.date).toLocaleDateString('id-ID')}
+
         </p>
         <p className="text-md text-gray-500 dark:text-gray-400 mb-6">Tool: {currentPrompt.tool}</p>
 
