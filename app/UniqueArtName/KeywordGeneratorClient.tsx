@@ -17,6 +17,8 @@ import {
   ArrowLeft,
   Moon,
   Sun,
+  Palette,
+  Globe2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AdBanner } from '@/components/AdBanner';
@@ -43,6 +45,13 @@ interface KeywordResult {
   description: string;
 }
 
+interface ArtistResult {
+  name: string;
+  origin: string;
+  movement: string;
+  highlight: string;
+}
+
 interface PollinationsResponse {
   choices?: Array<{
     message?: {
@@ -52,6 +61,7 @@ interface PollinationsResponse {
 }
 
 const KEYWORD_COUNT = 20;
+const ARTIST_COUNT = 12;
 
 const FALLBACK_MODELS: ModelOption[] = [
   { id: 'openai', name: 'OpenAI GPT-4o Mini', description: 'Model generalis cepat untuk teks kreatif.' },
@@ -278,6 +288,158 @@ const formatKeywordsForClipboard = (items: KeywordResult[]) =>
     .map((item, index) => `${index + 1}. ${item.term} — ${item.description}`)
     .join('\n');
 
+const tryParseJsonArtists = (text: string): ArtistResult[] => {
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start === -1 || end === -1 || end <= start) {
+    return [];
+  }
+
+  const jsonCandidate = text.slice(start, end + 1);
+
+  try {
+    const parsed = JSON.parse(jsonCandidate);
+    const artistArray = Array.isArray(parsed)
+      ? parsed
+      : Array.isArray((parsed as { artists?: unknown }).artists)
+        ? (parsed as { artists: unknown[] }).artists
+        : Array.isArray((parsed as { items?: unknown }).items)
+          ? (parsed as { items: unknown[] }).items
+          : Array.isArray((parsed as { list?: unknown }).list)
+            ? (parsed as { list: unknown[] }).list
+            : [];
+
+    return artistArray
+      .map((item) => {
+        if (typeof item !== 'object' || item === null) {
+          return null;
+        }
+
+        const artistItem = item as {
+          name?: unknown;
+          artist?: unknown;
+          origin?: unknown;
+          country?: unknown;
+          nationality?: unknown;
+          movement?: unknown;
+          style?: unknown;
+          genre?: unknown;
+          highlight?: unknown;
+          note?: unknown;
+          why?: unknown;
+          reason?: unknown;
+        };
+
+        const rawName = artistItem.name ?? artistItem.artist;
+        if (!rawName) {
+          return null;
+        }
+
+        const name = String(rawName).trim();
+        if (!name) {
+          return null;
+        }
+
+        const origin = String(
+          artistItem.origin ?? artistItem.country ?? artistItem.nationality ?? '',
+        ).trim();
+        const movement = String(
+          artistItem.movement ?? artistItem.style ?? artistItem.genre ?? '',
+        ).trim();
+        const highlight = String(
+          artistItem.highlight ?? artistItem.note ?? artistItem.why ?? artistItem.reason ?? '',
+        ).trim();
+
+        return {
+          name,
+          origin: origin || 'Asal tidak diketahui',
+          movement: movement || 'Gaya tidak dijelaskan',
+          highlight: highlight || 'Tokoh penting dalam sejarah seni visual.',
+        };
+      })
+      .filter((item): item is ArtistResult => Boolean(item));
+  } catch (error) {
+    console.warn('Gagal mengurai respons JSON seniman:', error);
+    return [];
+  }
+};
+
+const parseArtistResponse = (content: string): ArtistResult[] => {
+  if (!content) {
+    return [];
+  }
+
+  const trimmed = content.trim();
+  let artists = tryParseJsonArtists(trimmed);
+
+  if (artists.length === 0) {
+    const lines = trimmed.split(/\n+/).map((line) => line.trim()).filter(Boolean);
+    const seen = new Set<string>();
+
+    artists = lines
+      .map((line) => {
+        const withoutIndex = line
+          .replace(/^\d+\s*\.?\s*/, '')
+          .replace(/^[\-\*•]\s*/, '')
+          .trim();
+
+        if (!withoutIndex) {
+          return null;
+        }
+
+        const separators = [' — ', ' – ', ' - ', ' : ', ': ', ' | '];
+        let parts: string[] = [];
+        for (const separator of separators) {
+          if (withoutIndex.includes(separator)) {
+            parts = withoutIndex.split(separator).map((part) => part.trim()).filter(Boolean);
+            break;
+          }
+        }
+
+        if (parts.length === 0) {
+          parts = [withoutIndex];
+        }
+
+        const [rawName, rawOrigin, rawMovement, ...rest] = parts;
+        const highlightText = rest.join(' — ');
+
+        if (!rawName) {
+          return null;
+        }
+
+        const normalizedName = rawName.replace(/"/g, '').trim();
+        if (!normalizedName) {
+          return null;
+        }
+
+        const normalizedKey = normalizedName.toLowerCase();
+        if (seen.has(normalizedKey)) {
+          return null;
+        }
+
+        seen.add(normalizedKey);
+
+        return {
+          name: normalizedName,
+          origin: rawOrigin?.trim() || 'Asal tidak diketahui',
+          movement: rawMovement?.trim() || 'Gaya tidak dijelaskan',
+          highlight: highlightText.trim() || 'Tokoh penting dalam sejarah seni visual.',
+        };
+      })
+      .filter((item): item is ArtistResult => Boolean(item));
+  }
+
+  return artists.slice(0, ARTIST_COUNT);
+};
+
+const formatArtistsForClipboard = (items: ArtistResult[]) =>
+  items
+    .map(
+      (item, index) =>
+        `${index + 1}. ${item.name} — ${item.origin} — ${item.movement} — ${item.highlight}`,
+    )
+    .join('\n');
+
 const KeywordGeneratorClient = () => {
   const [models, setModels] = useState<ModelOption[]>([]);
   const [selectedModel, setSelectedModel] = useState('');
@@ -294,12 +456,22 @@ const KeywordGeneratorClient = () => {
   const [copiedTerm, setCopiedTerm] = useState<string | null>(null);
   const [lastGeneratedAt, setLastGeneratedAt] = useState<Date | null>(null);
 
+  const [artists, setArtists] = useState<ArtistResult[]>([]);
+  const [artistRawContent, setArtistRawContent] = useState('');
+  const [isGeneratingArtists, setIsGeneratingArtists] = useState(false);
+  const [artistError, setArtistError] = useState<string | null>(null);
+  const [copiedArtistName, setCopiedArtistName] = useState<string | null>(null);
+  const [lastArtistsGeneratedAt, setLastArtistsGeneratedAt] = useState<Date | null>(null);
+  const [autoGenerateArtists, setAutoGenerateArtists] = useState(true);
+
   const [question, setQuestion] = useState('');
   const [qaHistory, setQaHistory] = useState<Array<{ question: string; answer: string }>>([]);
   const [isAsking, setIsAsking] = useState(false);
   const [askError, setAskError] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const resultsRef = useRef<HTMLDivElement | null>(null);
+  const artistResultsRef = useRef<HTMLDivElement | null>(null);
+  const shouldAutoGenerateArtists = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -393,6 +565,22 @@ const KeywordGeneratorClient = () => {
     return () => window.clearTimeout(scrollTimeout);
   }, [results.length]);
 
+  useEffect(() => {
+    if (artists.length === 0) {
+      return;
+    }
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const scrollTimeout = window.setTimeout(() => {
+      artistResultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+
+    return () => window.clearTimeout(scrollTimeout);
+  }, [artists.length]);
+
   const selectedModelDetail = useMemo(
     () => models.find((model) => model.id === selectedModel),
     [models, selectedModel],
@@ -440,6 +628,46 @@ const KeywordGeneratorClient = () => {
     [creativeBrief, stylisticHints],
   );
 
+  const buildArtistInstruction = useCallback(
+    ({ nonce }: { nonce: string }) => {
+      const intro = `Berikan daftar ${ARTIST_COUNT} seniman visual terkenal dari berbagai belahan dunia sebagai referensi untuk eksperimen tema gambar.`;
+      const rules = [
+        'Jawab dalam bahasa Indonesia.',
+        'Pastikan seniman mewakili berbagai negara, era, dan medium artistik.',
+        'Gunakan format JSON dengan struktur: {"artists": [{"name": "...", "origin": "...", "movement": "...", "highlight": "..."}, ...]}.',
+        'Bidang "highlight" menjelaskan mengapa seniman tersebut relevan untuk eksplorasi tema.',
+        'Tidak ada teks lain di luar JSON.',
+      ];
+
+      const contextParts: string[] = [];
+
+      if (creativeBrief.trim()) {
+        contextParts.push(`Tema utama yang perlu dipertimbangkan: ${creativeBrief.trim()}`);
+      }
+
+      if (stylisticHints.trim()) {
+        contextParts.push(`Petunjuk gaya tambahan: ${stylisticHints.trim()}`);
+      }
+
+      if (results.length > 0) {
+        const highlightedThemes = results
+          .slice(0, 8)
+          .map((item) => item.term)
+          .join(', ');
+        contextParts.push(
+          `Selaraskan pilihan seniman dengan daftar tema unik berikut tanpa mengulang inspirasi yang sama: ${highlightedThemes}. Tetap jaga keragaman regional dan zaman.`,
+        );
+      } else {
+        contextParts.push('Jika belum ada tema, hadirkan perpaduan seniman lintas era, medium, dan budaya.');
+      }
+
+      const randomnessSignal = `Kode permintaan seniman: ${nonce}. Gunakan sebagai penanda agar daftar terasa segar setiap kali.`;
+
+      return `${intro}\n\nAturan keluaran:\n- ${rules.join('\n- ')}\n\nKonteks tambahan:\n- ${contextParts.join('\n- ')}\n\n${randomnessSignal}`;
+    },
+    [creativeBrief, results, stylisticHints],
+  );
+
   const handleGenerate = useCallback(async () => {
     if (!selectedModel) {
       toast.error('Model belum siap.');
@@ -449,6 +677,7 @@ const KeywordGeneratorClient = () => {
     setIsGenerating(true);
     setGenerationError(null);
     setCopiedTerm(null);
+    shouldAutoGenerateArtists.current = false;
 
     const nonce =
       typeof window !== 'undefined' && typeof window.crypto?.randomUUID === 'function'
@@ -503,6 +732,9 @@ const KeywordGeneratorClient = () => {
       setResults(parsedKeywords);
       setRawContent(content);
       setLastGeneratedAt(new Date());
+      if (autoGenerateArtists) {
+        shouldAutoGenerateArtists.current = true;
+      }
       toast.success('Berhasil membuat kata kunci unik!');
     } catch (error) {
       console.error('Gagal membuat kata kunci:', error);
@@ -513,10 +745,112 @@ const KeywordGeneratorClient = () => {
         : rawMessage;
       setGenerationError(friendlyMessage);
       toast.error('Gagal membuat kata kunci.');
+      shouldAutoGenerateArtists.current = false;
     } finally {
       setIsGenerating(false);
     }
-  }, [buildInstruction, results, selectedModel]);
+  }, [autoGenerateArtists, buildInstruction, results, selectedModel]);
+
+  const handleGenerateArtists = useCallback(async () => {
+    if (!selectedModel) {
+      toast.error('Model belum siap.');
+      return;
+    }
+
+    shouldAutoGenerateArtists.current = false;
+    setIsGeneratingArtists(true);
+    setArtistError(null);
+    setCopiedArtistName(null);
+
+    const nonce =
+      typeof window !== 'undefined' && typeof window.crypto?.randomUUID === 'function'
+        ? window.crypto.randomUUID()
+        : `artists-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+    const instruction = buildArtistInstruction({ nonce });
+
+    try {
+      const payload: Record<string, unknown> = {
+        model: selectedModel,
+        messages: [
+          {
+            role: 'system',
+            content:
+              'Anda adalah kurator sejarah seni global yang merangkum seniman-seniman penting lintas era. Pastikan format JSON dipatuhi dan informasi ringkas namun relevan.',
+          },
+          { role: 'user', content: instruction },
+        ],
+        max_tokens: 900,
+      };
+
+      const generationTemperature = getSafeTemperature(selectedModel, 0.75);
+      if (typeof generationTemperature === 'number') {
+        payload.temperature = generationTemperature;
+      }
+
+      const response = await fetch(buildPollinationsUrl(POLLINATIONS_OPENAI_ENDPOINT), {
+        method: 'POST',
+        headers: getPollinationsAuthHeaders(true),
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Pollinations mengembalikan kesalahan: ${errorText}`);
+      }
+
+      const data = (await response.json()) as PollinationsResponse;
+      const content = data.choices?.[0]?.message?.content?.trim();
+
+      if (!content) {
+        throw new Error('Respons model kosong.');
+      }
+
+      const parsedArtists = parseArtistResponse(content);
+
+      if (parsedArtists.length === 0) {
+        throw new Error('Tidak dapat mengurai daftar seniman dari respons model.');
+      }
+
+      setArtists(parsedArtists);
+      setArtistRawContent(content);
+      setLastArtistsGeneratedAt(new Date());
+      toast.success('Berhasil mendapatkan seniman terkenal!');
+    } catch (error) {
+      console.error('Gagal membuat daftar seniman:', error);
+      const rawMessage = error instanceof Error ? error.message : 'Terjadi kesalahan tak dikenal.';
+      const normalized = rawMessage.toLowerCase();
+      const friendlyMessage = normalized.includes('temperature')
+        ? 'Model ini hanya mendukung pengaturan suhu default. Coba ulangi tanpa mengganti model atau pilih opsi berbeda.'
+        : rawMessage;
+      setArtistError(friendlyMessage);
+      toast.error('Gagal menampilkan seniman.');
+    } finally {
+      setIsGeneratingArtists(false);
+    }
+  }, [buildArtistInstruction, selectedModel]);
+
+  useEffect(() => {
+    if (!autoGenerateArtists) {
+      shouldAutoGenerateArtists.current = false;
+      return;
+    }
+
+    if (isGeneratingArtists) {
+      return;
+    }
+
+    if (!shouldAutoGenerateArtists.current) {
+      return;
+    }
+
+    if (results.length === 0) {
+      return;
+    }
+
+    shouldAutoGenerateArtists.current = false;
+    handleGenerateArtists();
+  }, [autoGenerateArtists, handleGenerateArtists, isGeneratingArtists, results]);
 
   const handleCopyTerm = useCallback((item: KeywordResult) => {
     const text = `${item.term} — ${item.description}`;
@@ -549,12 +883,53 @@ const KeywordGeneratorClient = () => {
       });
   }, [results]);
 
+  const handleCopyArtist = useCallback((item: ArtistResult) => {
+    const text = `${item.name} — ${item.origin} — ${item.movement} — ${item.highlight}`;
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopiedArtistName(item.name);
+        toast.success('Data seniman disalin!');
+        setTimeout(() => setCopiedArtistName(null), 1800);
+      })
+      .catch(() => {
+        toast.error('Tidak dapat menyalin ke clipboard.');
+      });
+  }, []);
+
+  const handleCopyAllArtists = useCallback(() => {
+    if (artists.length === 0) {
+      toast.error('Belum ada seniman untuk disalin.');
+      return;
+    }
+
+    const text = formatArtistsForClipboard(artists);
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        toast.success('Daftar seniman berhasil disalin!');
+      })
+      .catch(() => {
+        toast.error('Gagal menyalin daftar seniman.');
+      });
+  }, [artists]);
+
+  const handleResetArtists = () => {
+    setArtists([]);
+    setArtistRawContent('');
+    setArtistError(null);
+    setCopiedArtistName(null);
+    setLastArtistsGeneratedAt(null);
+    shouldAutoGenerateArtists.current = false;
+  };
+
   const handleReset = () => {
     setResults([]);
     setRawContent('');
     setGenerationError(null);
     setCopiedTerm(null);
     setLastGeneratedAt(null);
+    handleResetArtists();
   };
 
   const handleAskModel = useCallback(async () => {
@@ -791,6 +1166,147 @@ const KeywordGeneratorClient = () => {
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="space-y-5 rounded-3xl bg-white/80 p-6 shadow-neumorphic dark:bg-dark-neumorphic-light dark:shadow-dark-neumorphic">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="space-y-2">
+                  <h3 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-gray-100">
+                    <Palette className="h-5 w-5 text-purple-600 dark:text-purple-300" />
+                    Jelajahi Seniman Terkenal
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Gunakan AI untuk menampilkan {ARTIST_COUNT} nama seniman internasional beserta gaya khasnya. Hasilnya akan
+                    mengikuti tema dan gaya yang kamu masukkan agar mudah dijadikan referensi visual.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleGenerateArtists}
+                    disabled={isGeneratingArtists}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-indigo-600/90 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-indigo-600 disabled:cursor-not-allowed disabled:bg-indigo-400"
+                  >
+                    {isGeneratingArtists ? <Loader2 className="h-4 w-4 animate-spin" /> : <Palette className="h-4 w-4" />}
+                    {isGeneratingArtists ? 'Sedang mengumpulkan...' : 'Generate Seniman'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResetArtists}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-neumorphic transition hover:bg-gray-50 dark:bg-dark-neumorphic-light dark:text-gray-200 dark:shadow-dark-neumorphic"
+                  >
+                    <Undo2 className="h-4 w-4" />
+                    Reset Seniman
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyAllArtists}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500/90 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-emerald-500"
+                  >
+                    <Copy className="h-4 w-4" />
+                    Salin Seniman
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 rounded-2xl bg-white/70 p-4 text-xs text-gray-600 shadow-inner dark:bg-dark-neumorphic-light/70 dark:text-gray-300 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center gap-2">
+                  <Globe2 className="h-4 w-4 text-purple-600 dark:text-purple-300" />
+                  <span>
+                    Form ini menggunakan model yang sama dengan generator tema, sehingga rekomendasi seniman bisa mengikuti fokus
+                    visualmu secara otomatis.
+                  </span>
+                </div>
+                <label className="flex items-center gap-2 text-xs font-semibold text-purple-600 dark:text-purple-300">
+                  <input
+                    type="checkbox"
+                    checked={autoGenerateArtists}
+                    onChange={(event) => setAutoGenerateArtists(event.target.checked)}
+                    className="h-4 w-4 rounded border-purple-400 text-purple-600 focus:ring-2 focus:ring-purple-500"
+                  />
+                  <span>Generate otomatis setelah tema dibuat</span>
+                </label>
+              </div>
+
+              {artistError ? (
+                <div className="rounded-2xl border border-red-300 bg-red-50/80 p-4 text-sm text-red-700 dark:border-red-500/60 dark:bg-red-500/10 dark:text-red-200">
+                  {artistError}
+                </div>
+              ) : null}
+
+              <div ref={artistResultsRef}>
+                {artists.length > 0 ? (
+                  <div className="space-y-6">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                        {artists.length} seniman internasional terkurasi{' '}
+                        {lastArtistsGeneratedAt
+                          ? `• Dibuat ${lastArtistsGeneratedAt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`
+                          : ''}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleGenerateArtists}
+                        disabled={isGeneratingArtists}
+                        className="inline-flex items-center gap-2 rounded-2xl bg-purple-600/90 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-purple-600 disabled:cursor-not-allowed disabled:bg-purple-400"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        Regenerasi Seniman
+                      </button>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {artists.map((item, index) => (
+                        <div
+                          key={`${item.name}-${index}`}
+                          className="group flex h-full flex-col justify-between rounded-3xl bg-white/80 p-5 text-gray-800 shadow-neumorphic dark:bg-dark-neumorphic-light dark:text-gray-100 dark:shadow-dark-neumorphic"
+                        >
+                          <div className="space-y-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-xs font-semibold uppercase tracking-wide text-purple-600/80 dark:text-purple-300/90">
+                                  #{index + 1}
+                                </p>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{item.name}</h3>
+                                <p className="mt-1 text-xs font-semibold text-gray-500 dark:text-gray-300">Asal: {item.origin}</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyArtist(item)}
+                                className="rounded-full bg-purple-600/10 p-2 text-purple-600 transition hover:bg-purple-600 hover:text-white dark:bg-purple-500/10 dark:text-purple-200"
+                              >
+                                {copiedArtistName === item.name ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                              </button>
+                            </div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-300">
+                              Gaya / Pergerakan:
+                              <span className="ml-1 text-sm font-semibold text-gray-700 dark:text-gray-200">{item.movement}</span>
+                            </p>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">{item.highlight}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-3xl border-2 border-dashed border-purple-300/60 bg-white/60 p-8 text-center text-sm text-gray-600 dark:border-purple-500/40 dark:bg-dark-neumorphic-light/60 dark:text-gray-300">
+                    Daftar seniman akan muncul di sini setelah kamu menekan tombol{' '}
+                    <span className="font-semibold text-purple-700 dark:text-purple-300">Generate Seniman</span>. Gunakan tema
+                    unik untuk mendapatkan rekomendasi yang seirama.
+                  </div>
+                )}
+              </div>
+
+              {artistRawContent ? (
+                <details className="rounded-2xl bg-white/70 p-5 shadow-inner dark:bg-dark-neumorphic-light/70">
+                  <summary className="cursor-pointer text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    Lihat respons mentah daftar seniman
+                  </summary>
+                  <pre className="mt-4 whitespace-pre-wrap break-words rounded-2xl bg-gray-900/90 p-4 text-xs text-purple-100">
+                    {artistRawContent}
+                  </pre>
+                </details>
+              ) : null}
             </div>
 
             {generationError ? (
