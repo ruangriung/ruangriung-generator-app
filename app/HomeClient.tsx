@@ -11,7 +11,6 @@ import {
   LayoutGrid,
   EarthIcon,
   BookOpen,
-  Compass,
   QrCode,
   ChevronDown,
   MessageSquare,
@@ -264,16 +263,6 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
                             >
                                 <MessageSquare size={18} />
                                 <span>Bubble Komentar</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/rekomendasi-tools"
-                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
-                                onClick={() => setIsToolsMenuOpen(false)}
-                            >
-                                <Compass size={18} />
-                                <span>Rekomendasi Tools</span>
                             </Link>
                         </li>
                     </ul>
