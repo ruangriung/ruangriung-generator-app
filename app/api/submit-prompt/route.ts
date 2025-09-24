@@ -123,7 +123,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const prompt = await createPrompt({
+    const { prompt, persisted } = await createPrompt({
       author,
       email,
       facebook,
@@ -157,6 +157,9 @@ export async function POST(request: Request) {
 
     const safeTags = tags.map(tag => escapeHtml(tag));
     const formattedTags = safeTags.length > 0 ? safeTags.join(', ') : '-';
+    const storageStatusLabel = persisted
+      ? 'Berhasil disimpan otomatis di server.'
+      : 'Tidak dapat disimpan otomatis (lingkungan hosting hanya-baca). Harap tindak lanjuti secara manual.';
 
     const mailOptions = {
       from: senderAddress,
@@ -173,6 +176,7 @@ export async function POST(request: Request) {
         <p><strong>Tool:</strong> ${escapeHtml(tool)}</p>
         <p><strong>Tags:</strong> ${formattedTags}</p>
         <p><strong>Slug:</strong> ${escapeHtml(prompt.slug)}</p>
+        <p><strong>Status Penyimpanan:</strong> ${storageStatusLabel}</p>
         <p><strong>Isi Prompt:</strong></p>
         <pre>${escapeHtml(promptContent)}</pre>
       `,
@@ -180,10 +184,19 @@ export async function POST(request: Request) {
 
     await transporter.sendMail(mailOptions);
 
-    revalidatePath('/kumpulan-prompt');
-    revalidatePath(`/kumpulan-prompt/${prompt.slug}`);
+    if (persisted) {
+      revalidatePath('/kumpulan-prompt');
+      revalidatePath(`/kumpulan-prompt/${prompt.slug}`);
+    }
 
-    return NextResponse.json({ message: 'Prompt berhasil dikirim!', prompt }, { status: 200 });
+    const successMessage = persisted
+      ? 'Prompt berhasil dikirim!'
+      : 'Prompt berhasil dikirim, namun diperlukan peninjauan manual sebelum dipublikasikan.';
+
+    return NextResponse.json(
+      { message: successMessage, prompt, persisted },
+      { status: 200 },
+    );
 
   } catch (error: any) {
     console.error('Gagal mengirim email:', error);

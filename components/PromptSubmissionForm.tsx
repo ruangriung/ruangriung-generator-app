@@ -144,6 +144,8 @@ export default function PromptSubmissionForm({
       }
 
       const prompt: Prompt | undefined = data?.prompt;
+      const persisted: boolean =
+        typeof data?.persisted === 'boolean' ? data.persisted : true;
 
       if (!prompt) {
         throw new Error('Server tidak mengembalikan data prompt.');
@@ -173,11 +175,12 @@ export default function PromptSubmissionForm({
       }
 
       setSubmitStatus('success');
-      setFeedbackMessage(
-        isEditMode
-          ? 'Prompt berhasil diperbarui dan perubahan langsung ditayangkan.'
-          : 'Prompt berhasil dikirim dan langsung dipublikasikan.',
-      );
+      const successMessage = isEditMode
+        ? 'Prompt berhasil diperbarui dan perubahan langsung ditayangkan.'
+        : persisted
+            ? 'Prompt berhasil dikirim dan langsung dipublikasikan.'
+            : 'Prompt berhasil dikirim. Tim kami akan meninjau dan memublikasikannya secara manual.';
+      setFeedbackMessage(successMessage);
 
       onSuccess?.(prompt);
     } catch (error: any) {
