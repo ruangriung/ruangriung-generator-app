@@ -390,11 +390,47 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
               <section>
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Generator &amp; Personalisasi</h3>
                 <p className="mt-2">
-                  Bagian tab generator di tengah halaman berisi berbagai alat AI (misalnya caption, konten video, hingga ide kampanye). Pilih tab yang sesuai, isi kebutuhan Anda, lalu tekan tombol generate untuk memperoleh hasil instan.
+                  Bagian tab generator di tengah halaman berisi berbagai alat AI (misalnya chatbot, video, audio, dan generator gambar). Pilih tab yang sesuai, isi prompt utama, lengkapi kolom <em>negative prompt</em> bila perlu, lalu tekan tombol <span className="font-semibold">Buat Gambar</span> untuk memperoleh hasil instan.
                 </p>
                 <p className="mt-2">
-                  Gunakan tombol <span className="font-semibold">Masuk/Daftar</span> untuk menyimpan favorit dan tombol <span className="font-semibold">Tema Gelap/Terang</span> guna menyesuaikan tampilan halaman dengan kenyamanan mata Anda.
+                  Gunakan tombol <span className="font-semibold">Masuk/Daftar</span> untuk mengakses fitur premium seperti pengaturan lanjutan, asisten prompt, dan penyimpanan riwayat. Tombol <span className="font-semibold">Tema Gelap/Terang</span> menyesuaikan tampilan halaman agar nyaman di mata.
                 </p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Tombol Aksi Prompt</h3>
+                <ul className="mt-2 list-disc space-y-2 pl-5">
+                  <li>
+                    <span className="font-semibold">Acak Prompt</span> meminta AI menyusun ide unik berdasarkan tema acak sehingga Anda selalu memiliki inspirasi baru.
+                  </li>
+                  <li>
+                    <span className="font-semibold">Surprise Me!</span> mengacak seluruh pengaturan (model, gaya, rasio, kualitas, hingga seed) untuk mengeksplorasi kombinasi tak terduga. Cukup tekan <span className="font-semibold">Buat Gambar</span> setelahnya untuk melihat hasilnya.
+                  </li>
+                  <li>
+                    <span className="font-semibold">Sempurnakan</span> memoles prompt yang sudah ada agar lebih detail dan siap dipakai menghasilkan visual berkualitas.
+                  </li>
+                  <li>
+                    <span className="font-semibold">JSON</span> mengubah prompt menjadi struktur data terformat yang berguna untuk dokumentasi atau integrasi dengan workflow lain.
+                  </li>
+                  <li>
+                    <span className="font-semibold">Simpan</span> menyimpan prompt favorit Anda ke dalam daftar riwayat sehingga dapat dipakai ulang kapan saja.
+                  </li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Pengaturan &amp; Asisten</h3>
+                <ul className="mt-2 list-disc space-y-2 pl-5">
+                  <li>
+                    <span className="font-semibold">Pengaturan Lanjutan</span> (tersedia setelah login) membuka kontrol tambahan seperti memilih model, rasio, kualitas gambar, CFG, hingga mode privat/safe.
+                  </li>
+                  <li>
+                    Preset <span className="font-semibold">Negative Prompt</span> membantu menghapus kualitas buruk, anatomi salah, atau watermark dari hasil gambar.
+                  </li>
+                  <li>
+                    Asisten terintegrasi seperti <span className="font-semibold">Prompt Assistant</span>, <span className="font-semibold">Translation Assistant</span>, dan <span className="font-semibold">Image Analysis Assistant</span> siap memberikan saran, menerjemahkan ide, atau menganalisis referensi visual.
+                  </li>
+                </ul>
               </section>
 
               <section>
