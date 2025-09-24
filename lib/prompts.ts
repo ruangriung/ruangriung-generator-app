@@ -3,6 +3,16 @@ import path from 'path';
 import matter from 'gray-matter';
 
 const promptsDirectory = path.join(process.cwd(), 'content/prompts');
+const READ_ONLY_ERROR_CODES = new Set(['EROFS', 'EACCES', 'EPERM']);
+
+const isReadOnlyFileSystemError = (error: unknown): error is NodeJS.ErrnoException => {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const code = (error as NodeJS.ErrnoException).code;
+  return typeof code === 'string' && READ_ONLY_ERROR_CODES.has(code);
+};
 
 const slugify = (value: string) =>
   value
@@ -73,6 +83,38 @@ const formatPrompt = (prompt: Prompt) => {
   return matter.stringify(`${prompt.promptContent}\n`, frontMatter);
 };
 
+const buildPromptFromPayload = (payload: PromptPayload, allPrompts: Prompt[]): Prompt => {
+  const nextId = allPrompts.length
+    ? (Math.max(...allPrompts.map(prompt => Number(prompt.id))) + 1).toString()
+    : '1';
+  const existingSlugs = new Set(allPrompts.map(prompt => prompt.slug));
+  const slug = generateUniqueSlug(payload.title, existingSlugs);
+  const providedDate = payload.date?.trim();
+  const date = providedDate && providedDate.length > 0
+    ? providedDate
+    : new Date().toISOString().split('T')[0];
+
+  return {
+    id: nextId,
+    slug,
+    title: payload.title.trim(),
+    author: payload.author.trim(),
+    email: payload.email?.trim() || undefined,
+    facebook: payload.facebook?.trim() || undefined,
+    image: payload.image?.trim() || undefined,
+    link: payload.link?.trim() || undefined,
+    date,
+    tool: payload.tool.trim(),
+    tags: normalizeTags(payload.tags),
+    promptContent: payload.promptContent.trim(),
+  } satisfies Prompt;
+};
+
+export interface PromptCreationResult {
+  prompt: Prompt;
+  persisted: boolean;
+}
+
 export interface PromptPayload {
   author: string;
   email?: string;
@@ -141,37 +183,35 @@ export async function getPromptBySlug(slug: string): Promise<Prompt | undefined>
   return allPrompts.find(prompt => prompt.slug === slug);
 }
 
-export async function createPrompt(payload: PromptPayload): Promise<Prompt> {
+export async function createPrompt(payload: PromptPayload): Promise<PromptCreationResult> {
   await ensureDirectoryExists();
   const allPrompts = await getAllPrompts();
-  const nextId = allPrompts.length
-    ? (Math.max(...allPrompts.map(prompt => Number(prompt.id))) + 1).toString()
-    : '1';
-  const existingSlugs = new Set(allPrompts.map(prompt => prompt.slug));
-  const slug = generateUniqueSlug(payload.title, existingSlugs);
-  const providedDate = payload.date?.trim();
-  const date = providedDate && providedDate.length > 0 ? providedDate : new Date().toISOString().split('T')[0];
-  const prompt: Prompt = {
-    id: nextId,
-    slug,
-    title: payload.title.trim(),
-    author: payload.author.trim(),
-    email: payload.email?.trim() || undefined,
-    facebook: payload.facebook?.trim() || undefined,
-    image: payload.image?.trim() || undefined,
-    link: payload.link?.trim() || undefined,
-    date,
-    tool: payload.tool.trim(),
-    tags: normalizeTags(payload.tags),
-    promptContent: payload.promptContent.trim(),
-  };
+  const prompt = buildPromptFromPayload(payload, allPrompts);
 
   const fileName = `prompt-${prompt.id}.md`;
   const filePath = path.join(promptsDirectory, fileName);
   const fileContents = formatPrompt(prompt);
-  await fs.writeFile(filePath, fileContents, 'utf8');
+  try {
+    await fs.writeFile(filePath, fileContents, 'utf8');
+    return { prompt, persisted: true } satisfies PromptCreationResult;
+  } catch (error) {
+    if (isReadOnlyFileSystemError(error)) {
+      console.warn(
+        'Prompt berhasil dibuat namun tidak dapat disimpan karena sistem berkas hanya-baca. Mengirim data prompt tanpa penyimpanan.',
+        error,
+      );
 
-  return prompt;
+      const fallbackPrompt: Prompt = {
+        ...prompt,
+        id: `${prompt.id}-${Date.now()}`,
+        slug: `${prompt.slug}-${Date.now()}`,
+      };
+
+      return { prompt: fallbackPrompt, persisted: false } satisfies PromptCreationResult;
+    }
+
+    throw error;
+  }
 }
 
 export async function updatePromptBySlug(slug: string, payload: PromptPayload): Promise<Prompt> {
