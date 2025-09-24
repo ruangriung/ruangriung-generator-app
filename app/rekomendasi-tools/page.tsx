@@ -16,7 +16,6 @@ import {
   Megaphone,
   Palette,
   Newspaper,
-  Flame,
   Facebook,
 } from 'lucide-react';
 import { AdBanner } from '@/components/AdBanner';
@@ -160,14 +159,6 @@ const toolSections: ToolSection[] = [
         href: '/artikel',
         icon: Newspaper,
         badge: 'Wawasan',
-      },
-      {
-        name: 'Battle Ignite Friendship',
-        description:
-          'Ikuti rangkuman kompetisi kreatif komunitas untuk mencari inspirasi tema dan standar kualitas karya.',
-        href: '/battle-ignite-friendship',
-        icon: Flame,
-        badge: 'Event Komunitas',
       },
     ],
   },
