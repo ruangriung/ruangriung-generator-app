@@ -157,10 +157,6 @@ export async function POST(request: Request) {
 
     const safeTags = tags.map(tag => escapeHtml(tag));
     const formattedTags = safeTags.length > 0 ? safeTags.join(', ') : '-';
-    const storageStatusLabel = persisted
-      ? 'Berhasil disimpan otomatis di server.'
-      : 'Tidak dapat disimpan otomatis (lingkungan hosting hanya-baca). Harap tindak lanjuti secara manual.';
-
     const mailOptions = {
       from: senderAddress,
       to: recipientAddress,
@@ -176,7 +172,6 @@ export async function POST(request: Request) {
         <p><strong>Tool:</strong> ${escapeHtml(tool)}</p>
         <p><strong>Tags:</strong> ${formattedTags}</p>
         <p><strong>Slug:</strong> ${escapeHtml(prompt.slug)}</p>
-        <p><strong>Status Penyimpanan:</strong> ${storageStatusLabel}</p>
         <p><strong>Isi Prompt:</strong></p>
         <pre>${escapeHtml(promptContent)}</pre>
       `,
