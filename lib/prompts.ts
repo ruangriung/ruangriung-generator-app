@@ -204,7 +204,7 @@ export async function createPrompt(payload: PromptPayload): Promise<PromptCreati
       const fallbackPrompt: Prompt = {
         ...prompt,
         id: `${prompt.id}-${Date.now()}`,
-        slug: `${prompt.slug}-${Date.now()}`,
+        slug: prompt.slug,
       };
 
       return { prompt: fallbackPrompt, persisted: false } satisfies PromptCreationResult;
