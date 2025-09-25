@@ -13,9 +13,105 @@ import ThemeToggle from '@/components/ThemeToggle';
 
 const ALL_CATEGORY_VALUE = 'Semua kategori';
 const STORES_PER_PAGE = 10;
+const MAX_PRODUCTS = 5;
 
 const DynamicTurnstile = dynamic(() => import('@/components/TurnstileWidget'), {
   ssr: false,
+});
+
+type ProductFormData = {
+  name: string;
+  price: string;
+  description: string;
+  image: string;
+};
+
+type SubmissionProduct = {
+  name: string;
+  price: string;
+  description: string;
+  image?: string;
+};
+
+type SubmissionResponse = {
+  ownerName: string;
+  email: string;
+  whatsapp?: string;
+  businessName: string;
+  businessCategory?: string;
+  categorySelection?: string;
+  location?: string;
+  description: string;
+  productHighlights?: string;
+  imageLinks?: string;
+  additionalInfo?: string;
+  products: SubmissionProduct[];
+};
+
+type SubmissionPreview = SubmissionResponse & { slug: string };
+
+type FormState = {
+  ownerName: string;
+  email: string;
+  whatsapp: string;
+  businessName: string;
+  businessCategory: string;
+  customBusinessCategory: string;
+  location: string;
+  description: string;
+  productHighlights: string;
+  imageLinks: string;
+  additionalInfo: string;
+  products: ProductFormData[];
+};
+
+const slugify = (value: string) =>
+  value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-');
+
+const generateUniqueSlug = (name: string, existingSlugs: Set<string>) => {
+  const baseSlug = slugify(name) || 'umkm';
+
+  if (!existingSlugs.has(baseSlug)) {
+    return baseSlug;
+  }
+
+  let index = 2;
+  let candidate = `${baseSlug}-${index}`;
+
+  while (existingSlugs.has(candidate)) {
+    index += 1;
+    candidate = `${baseSlug}-${index}`;
+  }
+
+  return candidate;
+};
+
+const createEmptyProduct = (): ProductFormData => ({
+  name: '',
+  price: '',
+  description: '',
+  image: '',
+});
+
+const createInitialFormState = (): FormState => ({
+  ownerName: '',
+  email: '',
+  whatsapp: '',
+  businessName: '',
+  businessCategory: '',
+  customBusinessCategory: '',
+  location: '',
+  description: '',
+  productHighlights: '',
+  imageLinks: '',
+  additionalInfo: '',
+  products: [createEmptyProduct()],
 });
 
 interface UmkmDirectoryProps {
@@ -108,20 +204,8 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
     ? 'Sembunyikan informasi dukungan etalase UMKM'
     : 'Tampilkan informasi dukungan etalase UMKM';
 
-  const [formData, setFormData] = useState({
-    ownerName: '',
-    email: '',
-    whatsapp: '',
-    businessName: '',
-    businessCategory: '',
-    customBusinessCategory: '',
-    location: '',
-    description: '',
-    productHighlights: '',
-    imageLinks: '',
-    additionalInfo: '',
-  });
-
+  const [formData, setFormData] = useState<FormState>(() => createInitialFormState());
+  const [recentSubmissions, setRecentSubmissions] = useState<SubmissionPreview[]>([]);
   const [formStatus, setFormStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [formMessage, setFormMessage] = useState('');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -192,20 +276,56 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const resetForm = () => {
-    setFormData({
-      ownerName: '',
-      email: '',
-      whatsapp: '',
-      businessName: '',
-      businessCategory: '',
-      customBusinessCategory: '',
-      location: '',
-      description: '',
-      productHighlights: '',
-      imageLinks: '',
-      additionalInfo: '',
+  const handleProductChange = (index: number, field: keyof ProductFormData, value: string) => {
+    setFormData((prev) => {
+      const nextProducts = prev.products.map((product, productIndex) => {
+        if (productIndex !== index) {
+          return product;
+        }
+
+        return {
+          ...product,
+          [field]: value,
+        } satisfies ProductFormData;
+      });
+
+      return {
+        ...prev,
+        products: nextProducts,
+      } satisfies FormState;
     });
+  };
+
+  const addProductField = () => {
+    setFormData((prev) => {
+      if (prev.products.length >= MAX_PRODUCTS) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        products: [...prev.products, createEmptyProduct()],
+      } satisfies FormState;
+    });
+  };
+
+  const removeProductField = (index: number) => {
+    setFormData((prev) => {
+      if (prev.products.length <= 1) {
+        return prev;
+      }
+
+      const nextProducts = prev.products.filter((_, productIndex) => productIndex !== index);
+
+      return {
+        ...prev,
+        products: nextProducts.length > 0 ? nextProducts : [createEmptyProduct()],
+      } satisfies FormState;
+    });
+  };
+
+  const resetForm = () => {
+    setFormData(createInitialFormState());
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -238,6 +358,20 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
 
       const finalCategory =
         selectedCategory === 'Kategori lainnya' ? customCategory : selectedCategory.trim();
+      const preparedProducts = formData.products
+        .map((product) => ({
+          name: product.name.trim(),
+          price: product.price.trim(),
+          description: product.description.trim(),
+          image: product.image.trim(),
+        }))
+        .filter((product) => product.name && product.price && product.description);
+
+      if (preparedProducts.length === 0) {
+        setFormStatus('error');
+        setFormMessage('Mohon cantumkan minimal satu produk lengkap dengan harga.');
+        return;
+      }
 
       const response = await fetch('/api/umkm-submission', {
         method: 'POST',
@@ -256,6 +390,7 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
           productHighlights: formData.productHighlights,
           imageLinks: formData.imageLinks,
           additionalInfo: formData.additionalInfo,
+          products: preparedProducts,
           token: turnstileToken,
         }),
       });
@@ -268,6 +403,25 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
 
       setFormStatus('success');
       setFormMessage(result?.message || 'Pengajuan berhasil dikirim. Kami akan segera meninjau data Anda.');
+      const submission: SubmissionResponse | undefined = result?.submission;
+
+      if (submission) {
+        setRecentSubmissions((previous) => {
+          const usedSlugs = new Set([
+            ...initialStores.map((store) => store.id),
+            ...previous.map((entry) => entry.slug),
+          ]);
+
+          const preview: SubmissionPreview = {
+            ...submission,
+            slug: generateUniqueSlug(submission.businessName, usedSlugs),
+            products: Array.isArray(submission.products) ? submission.products : [],
+          };
+
+          return [preview, ...previous].slice(0, 3);
+        });
+      }
+
       resetForm();
       setTurnstileToken('');
       setTurnstileKey((previous) => previous + 1);
@@ -281,6 +435,8 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
       );
     }
   };
+
+  const canAddMoreProducts = formData.products.length < MAX_PRODUCTS;
 
   return (
     <div className="bg-white pb-16 pt-12 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
@@ -320,6 +476,133 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
             berisi profil usaha, produk unggulan, dan akses langsung ke kontak mereka.
           </p>
         </div>
+
+        {recentSubmissions.length > 0 ? (
+          <section className="mb-10 rounded-3xl border border-indigo-200/80 bg-white/80 p-6 shadow-sm shadow-indigo-100/60 dark:border-indigo-900/40 dark:bg-slate-900/60 dark:shadow-slate-900/30 sm:p-8">
+            <header className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50 sm:text-xl">Pengajuan Terbaru</h2>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                  Ringkasan data yang baru saja dikirimkan melalui formulir. Gunakan sebagai referensi sebelum dipublikasikan.
+                </p>
+              </div>
+              <span className="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
+                Preview internal
+              </span>
+            </header>
+
+            <div className="mt-6 grid gap-6">
+              {recentSubmissions.map((submission, index) => {
+                const categoryLabel =
+                  submission.businessCategory || submission.categorySelection || 'Kategori belum diisi';
+                const contactDetails = [submission.ownerName, submission.email, submission.whatsapp]
+                  .filter((detail): detail is string => Boolean(detail && detail.length > 0))
+                  .join(' • ');
+
+                return (
+                  <article
+                    key={`${submission.slug}-${index}`}
+                    className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-950/60"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+                          {submission.businessName}
+                        </h3>
+                        <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">
+                          Slug saran: {submission.slug}
+                        </p>
+                      </div>
+                      <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
+                        {categoryLabel}
+                      </span>
+                    </div>
+                    {submission.location ? (
+                      <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Domisili: {submission.location}</p>
+                    ) : null}
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                      {submission.description}
+                    </p>
+                    {submission.productHighlights ? (
+                      <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                        <span className="font-semibold text-slate-800 dark:text-slate-100">Sorotan:</span>{' '}
+                        {submission.productHighlights}
+                      </p>
+                    ) : null}
+                    {submission.products.length > 0 ? (
+                      <div className="mt-5">
+                        <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Produk yang diajukan</h4>
+                        <ul className="mt-3 space-y-3">
+                          {submission.products.map((product, productIndex) => (
+                            <li
+                              key={`${submission.slug}-${productIndex}-${product.name}`}
+                              className="rounded-xl border border-slate-200 bg-slate-50/80 p-3 text-sm dark:border-slate-700 dark:bg-slate-900/60"
+                            >
+                              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                                <span className="font-semibold text-slate-900 dark:text-slate-100">{product.name}</span>
+                                <span className="text-indigo-600 dark:text-indigo-300">{product.price}</span>
+                              </div>
+                              <p className="mt-2 whitespace-pre-line text-slate-600 dark:text-slate-300">
+                                {product.description}
+                              </p>
+                              {product.image ? (
+                                <a
+                                  href={product.image}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="mt-2 inline-flex items-center gap-2 text-xs font-semibold text-indigo-600 transition hover:text-indigo-700 dark:text-indigo-300 dark:hover:text-indigo-200"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.5"
+                                    className="h-4 w-4"
+                                    aria-hidden="true"
+                                  >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 3h7m0 0v7m0-7L10 14" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 10v11h11" />
+                                  </svg>
+                                  Lihat tautan gambar
+                                </a>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                    <div className="mt-5 grid gap-3 text-sm text-slate-600 dark:text-slate-300 sm:grid-cols-2">
+                      <div>
+                        <p className="font-semibold text-slate-800 dark:text-slate-100">Kontak Utama</p>
+                        <p className="mt-1 break-words">{contactDetails}</p>
+                      </div>
+                      {submission.imageLinks ? (
+                        <div>
+                          <p className="font-semibold text-slate-800 dark:text-slate-100">Tautan Gambar/Katalog</p>
+                          <a
+                            href={submission.imageLinks}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-1 inline-flex break-all text-xs font-semibold text-indigo-600 transition hover:text-indigo-700 dark:text-indigo-300 dark:hover:text-indigo-200"
+                          >
+                            {submission.imageLinks}
+                          </a>
+                        </div>
+                      ) : null}
+                      {submission.additionalInfo ? (
+                        <div className="sm:col-span-2">
+                          <p className="font-semibold text-slate-800 dark:text-slate-100">Informasi Tambahan</p>
+                          <p className="mt-1 whitespace-pre-line">{submission.additionalInfo}</p>
+                        </div>
+                      ) : null}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
 
         <div className="mb-10 grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm shadow-slate-200/60 dark:border-slate-700 dark:bg-slate-900/60 dark:shadow-slate-900/40 sm:grid-cols-3 sm:items-end">
           <label className="flex flex-col gap-2 sm:col-span-2">
@@ -617,6 +900,112 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
                       className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                     />
                   </label>
+
+                  <div className="flex flex-col gap-4 text-left">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                        Produk unggulan yang ingin ditampilkan
+                      </span>
+                      <button
+                        type="button"
+                        onClick={addProductField}
+                        disabled={!canAddMoreProducts}
+                        className="inline-flex items-center gap-2 rounded-lg border border-indigo-200 px-3 py-1.5 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 disabled:cursor-not-allowed disabled:opacity-50 dark:border-indigo-900/50 dark:text-indigo-300 dark:hover:bg-indigo-900/40"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          className="h-4 w-4"
+                          aria-hidden="true"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        Tambah produk
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Tulis minimal satu produk lengkap dengan nama, harga, dan deskripsi. Tautan gambar bersifat opsional.
+                    </p>
+                    <div className="space-y-5">
+                      {formData.products.map((product, index) => (
+                        <div
+                          key={`product-${index}`}
+                          className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                              Produk {index + 1}
+                            </h3>
+                            {formData.products.length > 1 ? (
+                              <button
+                                type="button"
+                                onClick={() => removeProductField(index)}
+                                className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-400/60 dark:text-rose-300 dark:hover:bg-rose-950/40"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="1.5"
+                                  className="h-3.5 w-3.5"
+                                  aria-hidden="true"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                                Hapus
+                              </button>
+                            ) : null}
+                          </div>
+                          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                            <label className="flex flex-col gap-2 text-left">
+                              <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Nama produk</span>
+                              <input
+                                type="text"
+                                value={product.name}
+                                onChange={(event) => handleProductChange(index, 'name', event.target.value)}
+                                placeholder="Contoh: Paket Nasi Bakar Spesial"
+                                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                              />
+                            </label>
+                            <label className="flex flex-col gap-2 text-left">
+                              <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Harga</span>
+                              <input
+                                type="text"
+                                value={product.price}
+                                onChange={(event) => handleProductChange(index, 'price', event.target.value)}
+                                placeholder="Contoh: Rp28.000 / porsi"
+                                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                              />
+                            </label>
+                          </div>
+                          <label className="mt-4 flex flex-col gap-2 text-left">
+                            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Deskripsi produk</span>
+                            <textarea
+                              value={product.description}
+                              onChange={(event) => handleProductChange(index, 'description', event.target.value)}
+                              rows={3}
+                              placeholder="Ceritakan keunikan, bahan utama, atau manfaat produk"
+                              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                            />
+                          </label>
+                          <label className="mt-4 flex flex-col gap-2 text-left">
+                            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Tautan gambar produk (opsional)</span>
+                            <input
+                              type="url"
+                              value={product.image}
+                              onChange={(event) => handleProductChange(index, 'image', event.target.value)}
+                              placeholder="https://..."
+                              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                            />
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
 
                   <label className="flex flex-col gap-2 text-left">
                     <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Tautan gambar atau katalog</span>
