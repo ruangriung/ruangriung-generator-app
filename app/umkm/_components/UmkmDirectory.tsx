@@ -759,9 +759,6 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
                         sizes="(min-width: 1024px) 20vw, (min-width: 640px) 30vw, 45vw"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent" />
-                      <span className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-900 shadow-sm dark:bg-slate-900/90 dark:text-slate-100">
-                        Kurasi RuangRiung
-                      </span>
                     </div>
                     <div className="flex flex-1 flex-col justify-between px-4 py-3 text-left">
                       <div>
