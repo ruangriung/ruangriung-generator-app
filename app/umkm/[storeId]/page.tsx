@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 
 import { StoreShowcase } from '../_components/StoreShowcase';
 import { getStoreById, getStores } from '@/lib/umkm';
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface PageProps {
   params: {
@@ -78,12 +79,12 @@ export default async function StoreDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="bg-white pb-20 pt-12 text-slate-900">
+    <div className="bg-white pb-20 pt-12 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <Link
             href="/umkm"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 transition hover:text-indigo-800"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 transition hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-200"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -101,7 +102,7 @@ export default async function StoreDetailPage({ params }: PageProps) {
 
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800/60"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -116,6 +117,10 @@ export default async function StoreDetailPage({ params }: PageProps) {
             </svg>
             Kembali ke Beranda
           </Link>
+
+          <div className="w-full sm:w-auto sm:min-w-[220px]">
+            <ThemeToggle />
+          </div>
         </div>
 
         <StoreShowcase store={store} />

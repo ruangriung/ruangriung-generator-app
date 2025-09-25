@@ -69,14 +69,14 @@ export function StoreShowcase({ store }: StoreShowcaseProps) {
 
         <section className="mt-8 space-y-4">
           <header className="space-y-2">
-            <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700">
+            <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200">
               {store.category}
             </span>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{store.name}</h1>
-            <p className="text-base text-slate-600 sm:text-lg">{store.location}</p>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-4xl">{store.name}</h1>
+            <p className="text-base text-slate-600 dark:text-slate-300 sm:text-lg">{store.location}</p>
           </header>
 
-          <p className="break-words text-base leading-relaxed text-slate-700 sm:text-lg">
+          <p className="break-words text-base leading-relaxed text-slate-700 dark:text-slate-200 sm:text-lg">
             {store.description}
           </p>
 
@@ -84,7 +84,7 @@ export function StoreShowcase({ store }: StoreShowcaseProps) {
             {store.highlights.map((highlight) => (
               <li
                 key={highlight}
-                className="flex items-start gap-3 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow sm:text-base"
+                className="flex items-start gap-3 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow sm:text-base dark:bg-slate-900 dark:text-slate-200"
               >
                 <span className="mt-0.5 inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-500 text-xs font-bold text-white">
                   ✔
@@ -96,17 +96,17 @@ export function StoreShowcase({ store }: StoreShowcaseProps) {
         </section>
       </div>
 
-      <aside className="flex flex-col gap-8 rounded-3xl border border-slate-200 bg-slate-50/60 p-6 shadow-inner">
+      <aside className="flex flex-col gap-8 rounded-3xl border border-slate-200 bg-slate-50/60 p-6 shadow-inner dark:border-slate-700 dark:bg-slate-900/60">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">Hubungi {store.name}</h2>
-          <p className="mt-1 break-words text-sm text-slate-600 sm:text-base">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-50">Hubungi {store.name}</h2>
+          <p className="mt-1 break-words text-sm text-slate-600 dark:text-slate-300 sm:text-base">
             Siap membantu kebutuhan Anda melalui WhatsApp dengan balasan cepat.
           </p>
           <a
             href={`${whatsappBase}?text=${encodeURIComponent(`Halo ${store.name}! Saya tertarik dengan produk-produk Anda.`)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true" className="h-5 w-5">
               <path
@@ -119,8 +119,8 @@ export function StoreShowcase({ store }: StoreShowcaseProps) {
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">Produk Unggulan</h2>
-          <p className="mt-1 break-words text-sm text-slate-600 sm:text-base">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-50">Produk Unggulan</h2>
+          <p className="mt-1 break-words text-sm text-slate-600 dark:text-slate-300 sm:text-base">
             Klik foto produk untuk melihat tampilan penuh serta detail lengkapnya.
           </p>
 
@@ -133,12 +133,12 @@ export function StoreShowcase({ store }: StoreShowcaseProps) {
               return (
                 <article
                   key={product.name}
-                  className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                  className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900"
                 >
                   <button
                     type="button"
                     onClick={() => setActiveProduct(product)}
-                    className="group relative block h-40 w-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                    className="group relative block h-40 w-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
                   >
                     <Image
                       src={product.image}
@@ -151,10 +151,10 @@ export function StoreShowcase({ store }: StoreShowcaseProps) {
                   </button>
                   <div className="flex flex-1 flex-col gap-3 px-4 py-3 text-left">
                     <div className="flex flex-col gap-1">
-                      <h3 className="text-base font-semibold text-slate-900 sm:text-lg">{product.name}</h3>
-                      <span className="text-sm font-medium text-indigo-600 sm:text-base">{product.price}</span>
+                      <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 sm:text-lg">{product.name}</h3>
+                      <span className="text-sm font-medium text-indigo-600 dark:text-indigo-300 sm:text-base">{product.price}</span>
                     </div>
-                    <p className="break-words text-sm leading-relaxed text-slate-600 sm:text-base">
+                    <p className="break-words text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
                       {product.description}
                     </p>
                     <div className="mt-auto flex flex-wrap gap-2">
@@ -163,7 +163,7 @@ export function StoreShowcase({ store }: StoreShowcaseProps) {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`Hubungi ${store.name} untuk ${product.name} via WhatsApp`}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -180,7 +180,7 @@ export function StoreShowcase({ store }: StoreShowcaseProps) {
                       </a>
                       <Link
                         href={`/umkm`}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800/60 dark:focus-visible:ring-offset-slate-950"
                       >
                         Lihat Toko Lain
                       </Link>
@@ -212,13 +212,13 @@ export function StoreShowcase({ store }: StoreShowcaseProps) {
           onClick={() => setActiveProduct(null)}
         >
           <div
-            className="relative flex w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl shadow-slate-900/20 max-h-[90vh] sm:max-h-[85vh]"
+            className="relative flex w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl shadow-slate-900/20 max-h-[90vh] sm:max-h-[85vh] dark:bg-slate-950"
             onClick={(event) => event.stopPropagation()}
           >
             <button
               type="button"
               onClick={() => setActiveProduct(null)}
-              className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:bg-slate-900/90 dark:text-slate-200"
             >
               <span className="sr-only">Tutup pratinjau</span>
               ×
@@ -234,9 +234,9 @@ export function StoreShowcase({ store }: StoreShowcaseProps) {
               />
             </div>
             <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5 text-left sm:px-8 sm:py-6">
-              <h3 className="text-xl font-semibold text-slate-900 sm:text-2xl">{activeProduct.name}</h3>
-              <p className="text-sm font-medium text-indigo-600 sm:text-base">{activeProduct.price}</p>
-              <p className="break-words text-sm leading-relaxed text-slate-600 sm:text-base">
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-50 sm:text-2xl">{activeProduct.name}</h3>
+              <p className="text-sm font-medium text-indigo-600 dark:text-indigo-300 sm:text-base">{activeProduct.price}</p>
+              <p className="break-words text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
                 {activeProduct.description}
               </p>
             </div>
