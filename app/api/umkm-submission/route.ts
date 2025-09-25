@@ -21,11 +21,13 @@ const sanitize = (value: string | undefined | null) =>
 
 export async function POST(request: Request) {
   try {
-    const rawPayload = (await request.json()) as Partial<SubmissionPayload> | undefined;
+    const rawPayload = (await request.json()) as (Partial<SubmissionPayload> & { token?: string }) | undefined;
 
     if (!rawPayload) {
       return NextResponse.json({ message: 'Tidak ada data yang diterima.' }, { status: 400 });
     }
+
+    const token = sanitize(rawPayload.token);
 
     const submission: SubmissionPayload = {
       ownerName: sanitize(rawPayload.ownerName),
@@ -49,6 +51,40 @@ export async function POST(request: Request) {
             'Mohon lengkapi nama penanggung jawab, email, nama usaha, dan deskripsi sebelum mengirimkan formulir.',
         },
         { status: 400 },
+      );
+    }
+
+    if (!token) {
+      return NextResponse.json(
+        { message: 'Verifikasi keamanan diperlukan sebelum mengirim pengajuan.' },
+        { status: 400 },
+      );
+    }
+
+    const turnstileSecretKey = sanitize(process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY);
+
+    if (!turnstileSecretKey) {
+      console.error('CLOUDFLARE_TURNSTILE_SECRET_KEY tidak diatur.');
+      return NextResponse.json({ message: 'Konfigurasi keamanan belum lengkap di server.' }, { status: 500 });
+    }
+
+    const verificationResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret: turnstileSecretKey,
+        response: token,
+        remoteip: request.headers.get('x-forwarded-for'),
+      }),
+    });
+
+    const verificationData = (await verificationResponse.json()) as { success: boolean; ['error-codes']?: string[] };
+
+    if (!verificationData.success) {
+      console.error('Verifikasi Turnstile Gagal:', verificationData['error-codes']);
+      return NextResponse.json(
+        { message: 'Verifikasi keamanan gagal. Silakan coba lagi.' },
+        { status: 401 },
       );
     }
 

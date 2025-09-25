@@ -1,13 +1,18 @@
 "use client";
 
-import type { ChangeEvent, FormEvent } from 'react';
-import { useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
+import type { ChangeEvent, FormEvent, MouseEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 import { storeCategories, stores } from './data';
 
 const ALL_CATEGORY_VALUE = 'Semua kategori';
+
+const DynamicTurnstile = dynamic(() => import('@/components/TurnstileWidget'), {
+  ssr: false,
+});
 
 export default function UmkmPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,6 +51,49 @@ export default function UmkmPage() {
 
   const [formStatus, setFormStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [formMessage, setFormMessage] = useState('');
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileKey, setTurnstileKey] = useState(0);
+
+  const openFormModal = () => {
+    setFormStatus('idle');
+    setFormMessage('');
+    setIsFormModalOpen(true);
+  };
+
+  const closeFormModal = () => {
+    setIsFormModalOpen(false);
+    setTurnstileToken('');
+    setTurnstileKey((previous) => previous + 1);
+  };
+
+  const handleBackdropClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      closeFormModal();
+    }
+  };
+
+  useEffect(() => {
+    if (isFormModalOpen) {
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          setIsFormModalOpen(false);
+          setTurnstileToken('');
+          setTurnstileKey((previous) => previous + 1);
+        }
+      };
+
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+
+    document.body.style.overflow = '';
+  }, [isFormModalOpen]);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
@@ -76,6 +124,12 @@ export default function UmkmPage() {
       return;
     }
 
+    if (!turnstileToken) {
+      setFormStatus('error');
+      setFormMessage('Mohon selesaikan verifikasi keamanan sebelum mengirim.');
+      return;
+    }
+
     try {
       setFormStatus('loading');
       setFormMessage('');
@@ -85,7 +139,10 @@ export default function UmkmPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          token: turnstileToken,
+        }),
       });
 
       const result = await response.json();
@@ -97,6 +154,8 @@ export default function UmkmPage() {
       setFormStatus('success');
       setFormMessage(result?.message || 'Pengajuan berhasil dikirim. Kami akan segera meninjau data Anda.');
       resetForm();
+      setTurnstileToken('');
+      setTurnstileKey((previous) => previous + 1);
     } catch (error) {
       console.error(error);
       setFormStatus('error');
@@ -111,6 +170,25 @@ export default function UmkmPage() {
   return (
     <div className="bg-white pb-16 pt-12 text-slate-900">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="h-4 w-4"
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 9.75 12 4.5l9 5.25M4.5 10.5v9.75h15V10.5" />
+            </svg>
+            Kembali ke Beranda
+          </Link>
+        </div>
         <div className="mb-12 text-center">
           <span className="inline-flex rounded-full bg-indigo-100 px-4 py-1 text-sm font-medium text-indigo-700">
             Etalase UMKM
@@ -224,158 +302,264 @@ export default function UmkmPage() {
             </p>
           </div>
 
-          <form className="mx-auto mt-10 grid max-w-3xl gap-6" onSubmit={handleSubmit}>
-            <div className="grid gap-6 sm:grid-cols-2">
-              <label className="flex flex-col gap-2 text-left">
-                <span className="text-sm font-medium text-slate-700">Nama penanggung jawab</span>
-                <input
-                  type="text"
-                  name="ownerName"
-                  value={formData.ownerName}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
-                />
-              </label>
-              <label className="flex flex-col gap-2 text-left">
-                <span className="text-sm font-medium text-slate-700">Email aktif</span>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
-                />
-              </label>
-              <label className="flex flex-col gap-2 text-left">
-                <span className="text-sm font-medium text-slate-700">Nomor WhatsApp</span>
-                <input
-                  type="tel"
-                  name="whatsapp"
-                  value={formData.whatsapp}
-                  onChange={handleInputChange}
-                  placeholder="Contoh: 6281234567890"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
-                />
-              </label>
-              <label className="flex flex-col gap-2 text-left">
-                <span className="text-sm font-medium text-slate-700">Nama UMKM</span>
-                <input
-                  type="text"
-                  name="businessName"
-                  value={formData.businessName}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
-                />
-              </label>
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2">
-              <label className="flex flex-col gap-2 text-left">
-                <span className="text-sm font-medium text-slate-700">Kategori utama</span>
-                <select
-                  name="businessCategory"
-                  value={formData.businessCategory}
-                  onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
-                >
-                  <option value="">Pilih kategori</option>
-                  {storeCategories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                  <option value="Kategori lainnya">Kategori lainnya</option>
-                </select>
-              </label>
-              <label className="flex flex-col gap-2 text-left">
-                <span className="text-sm font-medium text-slate-700">Domisili usaha</span>
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  placeholder="Kota/Kabupaten, Provinsi"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
-                />
-              </label>
-            </div>
-
-            <label className="flex flex-col gap-2 text-left">
-              <span className="text-sm font-medium text-slate-700">Deskripsi singkat usaha</span>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                required
-                rows={4}
-                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
-              />
-            </label>
-
-            <label className="flex flex-col gap-2 text-left">
-              <span className="text-sm font-medium text-slate-700">Sorotan produk/jasa</span>
-              <textarea
-                name="productHighlights"
-                value={formData.productHighlights}
-                onChange={handleInputChange}
-                rows={3}
-                placeholder="Boleh cantumkan daftar singkat produk unggulan atau layanan utama"
-                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
-              />
-            </label>
-
-            <label className="flex flex-col gap-2 text-left">
-              <span className="text-sm font-medium text-slate-700">Tautan gambar atau katalog produk</span>
-              <textarea
-                name="imageLinks"
-                value={formData.imageLinks}
-                onChange={handleInputChange}
-                rows={3}
-                placeholder="Contoh: https://drive.google.com/... atau tautan marketplace"
-                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
-              />
-            </label>
-
-            <label className="flex flex-col gap-2 text-left">
-              <span className="text-sm font-medium text-slate-700">Informasi tambahan (opsional)</span>
-              <textarea
-                name="additionalInfo"
-                value={formData.additionalInfo}
-                onChange={handleInputChange}
-                rows={3}
-                placeholder="Cerita brand, pencapaian, atau kanal media sosial"
-                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
-              />
-            </label>
-
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <button
-                type="submit"
-                disabled={formStatus === 'loading'}
-                className="inline-flex items-center justify-center rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-400/50 transition hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-100 disabled:cursor-not-allowed disabled:opacity-70"
+          <div className="mx-auto mt-10 flex max-w-xl flex-col items-center gap-4 text-center">
+            <p className="text-sm text-slate-600 sm:text-base">
+              Tekan tombol di bawah ini untuk membuka formulir pengajuan. Anda dapat menggulir isi formulir secara nyaman,
+              termasuk saat diakses melalui ponsel.
+            </p>
+            <button
+              type="button"
+              onClick={openFormModal}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/40 transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 focus:ring-offset-indigo-100"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className="h-5 w-5"
+                aria-hidden="true"
               >
-                {formStatus === 'loading' ? 'Mengirim data…' : 'Kirim pengajuan UMKM'}
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Buka Formulir Pengajuan
+            </button>
+          </div>
+        </section>
+        {isFormModalOpen ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 px-4 py-10"
+            role="presentation"
+            onClick={handleBackdropClick}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="umkm-submission-title"
+              className="relative w-full max-w-3xl rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={closeFormModal}
+                className="absolute right-4 top-4 inline-flex items-center justify-center rounded-full border border-slate-200 bg-white p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2"
+                aria-label="Tutup formulir UMKM"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
               </button>
 
-              <p
-                className={`text-sm ${
-                  formStatus === 'success'
-                    ? 'text-emerald-600'
-                    : formStatus === 'error'
-                    ? 'text-rose-600'
-                    : 'text-slate-500'
-                }`}
-                role="status"
-                aria-live="polite"
-              >
-                {formMessage}
-              </p>
+              <div className="max-h-[min(90vh,48rem)] overflow-y-auto px-6 py-10 sm:px-10">
+                <div className="mx-auto max-w-2xl text-left">
+                  <h2 id="umkm-submission-title" className="text-2xl font-semibold text-slate-900 sm:text-3xl">
+                    Formulir Pengajuan UMKM
+                  </h2>
+                  <p className="mt-3 text-sm text-slate-600 sm:text-base">
+                    Lengkapi informasi berikut agar tim kurasi kami dapat memproses dan menampilkan UMKM Anda di Ruang Riung.
+                    Semua kolom dapat digulir dan tetap nyaman dibaca, termasuk pada layar ponsel.
+                  </p>
+                </div>
+
+                <form className="mx-auto mt-8 grid max-w-2xl gap-6" onSubmit={handleSubmit}>
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <label className="flex flex-col gap-2 text-left">
+                      <span className="text-sm font-medium text-slate-700">Nama penanggung jawab</span>
+                      <input
+                        type="text"
+                        name="ownerName"
+                        value={formData.ownerName}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-2 text-left">
+                      <span className="text-sm font-medium text-slate-700">Email aktif</span>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-2 text-left">
+                      <span className="text-sm font-medium text-slate-700">Nomor WhatsApp</span>
+                      <input
+                        type="tel"
+                        name="whatsapp"
+                        value={formData.whatsapp}
+                        onChange={handleInputChange}
+                        placeholder="Contoh: 6281234567890"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-2 text-left">
+                      <span className="text-sm font-medium text-slate-700">Nama UMKM</span>
+                      <input
+                        type="text"
+                        name="businessName"
+                        value={formData.businessName}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
+                      />
+                    </label>
+                  </div>
+
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <label className="flex flex-col gap-2 text-left">
+                      <span className="text-sm font-medium text-slate-700">Kategori utama</span>
+                      <select
+                        name="businessCategory"
+                        value={formData.businessCategory}
+                        onChange={handleInputChange}
+                        className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
+                      >
+                        <option value="">Pilih kategori</option>
+                        {storeCategories.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                        <option value="Kategori lainnya">Kategori lainnya</option>
+                      </select>
+                    </label>
+                    <label className="flex flex-col gap-2 text-left">
+                      <span className="text-sm font-medium text-slate-700">Domisili usaha</span>
+                      <input
+                        type="text"
+                        name="location"
+                        value={formData.location}
+                        onChange={handleInputChange}
+                        placeholder="Kota/Kabupaten, Provinsi"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
+                      />
+                    </label>
+                  </div>
+
+                  <label className="flex flex-col gap-2 text-left">
+                    <span className="text-sm font-medium text-slate-700">Deskripsi singkat usaha</span>
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      required
+                      rows={4}
+                      className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
+                    />
+                  </label>
+
+                  <label className="flex flex-col gap-2 text-left">
+                    <span className="text-sm font-medium text-slate-700">Sorotan produk/jasa</span>
+                    <textarea
+                      name="productHighlights"
+                      value={formData.productHighlights}
+                      onChange={handleInputChange}
+                      rows={4}
+                      placeholder="Ceritakan produk unggulan atau layanan utama"
+                      className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
+                    />
+                  </label>
+
+                  <label className="flex flex-col gap-2 text-left">
+                    <span className="text-sm font-medium text-slate-700">Tautan gambar atau katalog</span>
+                    <input
+                      type="url"
+                      name="imageLinks"
+                      value={formData.imageLinks}
+                      onChange={handleInputChange}
+                      placeholder="Contoh: https://drive.google.com/your-folder"
+                      className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
+                    />
+                  </label>
+
+                  <label className="flex flex-col gap-2 text-left">
+                    <span className="text-sm font-medium text-slate-700">Informasi tambahan</span>
+                    <textarea
+                      name="additionalInfo"
+                      value={formData.additionalInfo}
+                      onChange={handleInputChange}
+                      rows={4}
+                      placeholder="Berikan informasi tambahan seperti promo, jam operasional, dsb."
+                      className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
+                    />
+                  </label>
+
+                  <div className="flex flex-col gap-4 text-left">
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                      <p className="font-medium text-slate-700">Verifikasi keamanan</p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Centang captcha Cloudflare Turnstile di bawah ini sebelum mengirimkan formulir.
+                      </p>
+                      <div className="mt-4">
+                        <DynamicTurnstile
+                          key={turnstileKey}
+                          onSuccess={(token) => setTurnstileToken(token)}
+                          options={{ theme: 'auto' }}
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={formStatus === 'loading'}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/40 transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:ring-offset-2 focus:ring-offset-indigo-100 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {formStatus === 'loading' ? (
+                        <>
+                          <svg
+                            className="h-4 w-4 animate-spin"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                            />
+                          </svg>
+                          Mengirim...
+                        </>
+                      ) : (
+                        'Kirim Pengajuan'
+                      )}
+                    </button>
+                    {formStatus !== 'idle' ? (
+                      <p
+                        className={`text-sm ${
+                          formStatus === 'success' ? 'text-emerald-600' : 'text-rose-600'
+                        }`}
+                      >
+                        {formMessage}
+                      </p>
+                    ) : null}
+                  </div>
+                </form>
+              </div>
             </div>
-          </form>
-        </section>
+          </div>
+        ) : null}
       </div>
     </div>
   );
