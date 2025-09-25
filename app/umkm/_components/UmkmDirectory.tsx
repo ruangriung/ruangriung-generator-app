@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import type { ChangeEvent, FormEvent, MouseEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Check, Copy, HeartHandshake, X } from 'lucide-react';
+import { ArrowUpDown, MapPin, Sparkles, Search } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -14,6 +14,17 @@ import ThemeToggle from '@/components/ThemeToggle';
 const ALL_CATEGORY_VALUE = 'Semua kategori';
 const STORES_PER_PAGE = 10;
 const MAX_PRODUCTS = 5;
+const ALL_LOCATION_VALUE = 'Semua lokasi';
+const DEFAULT_SORT_OPTION = 'featured' as const;
+
+type SortOption = typeof DEFAULT_SORT_OPTION | 'name-asc' | 'name-desc' | 'location-asc';
+
+const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
+  { value: DEFAULT_SORT_OPTION, label: 'Kurasi unggulan' },
+  { value: 'name-asc', label: 'Nama A – Z' },
+  { value: 'name-desc', label: 'Nama Z – A' },
+  { value: 'location-asc', label: 'Lokasi A – Z' },
+];
 
 const DynamicTurnstile = dynamic(() => import('@/components/TurnstileWidget'), {
   ssr: false,
@@ -122,47 +133,108 @@ interface UmkmDirectoryProps {
 export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirectoryProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(ALL_CATEGORY_VALUE);
+  const [selectedLocation, setSelectedLocation] = useState(ALL_LOCATION_VALUE);
+  const [sortOption, setSortOption] = useState<SortOption>(DEFAULT_SORT_OPTION);
   const [currentStorePage, setCurrentStorePage] = useState(1);
   const storeListRef = useRef<HTMLDivElement | null>(null);
-  const [isDonationOpen, setIsDonationOpen] = useState(false);
-  const [hasCopiedDonation, setHasCopiedDonation] = useState(false);
-  const donationCopyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const filteredStores = useMemo(() => {
-    return initialStores.filter((store) => {
+  const uniqueLocations = useMemo(() => {
+    return Array.from(new Set(initialStores.map((store) => store.location)))
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b, 'id-ID', { sensitivity: 'base' }));
+  }, [initialStores]);
+
+  const totalStores = initialStores.length;
+  const totalCategories = categories.length;
+  const totalLocations = uniqueLocations.length;
+
+  const numberFormatter = useMemo(() => new Intl.NumberFormat('id-ID'), []);
+
+  const heroStats = useMemo(
+    () => [
+      {
+        label: 'UMKM aktif',
+        value: numberFormatter.format(totalStores),
+        description: 'Produk UMKM terpopuler yang paling dicari komunitas',
+      },
+      {
+        label: 'Kategori pilihan',
+        value: numberFormatter.format(totalCategories),
+        description: 'Mulai dari kuliner, fesyen, hingga jasa kreatif',
+      },
+      {
+        label: 'Kota & kabupaten',
+        value: numberFormatter.format(totalLocations),
+        description: 'Jejaring pelaku usaha lokal di seluruh nusantara',
+      },
+    ],
+    [numberFormatter, totalCategories, totalLocations, totalStores],
+  );
+
+  const curatedTestimonial = useMemo(
+    () => ({
+      quote:
+        '“Listing RuangRiung membantu kami ditemukan komunitas baru. Cerita yang mereka susun membuat calon pelanggan merasa dekat dengan usaha kami.”',
+      author: 'Riana, Pendiri Kopi Searah',
+      role: 'UMKM kuliner binaan sejak 2023',
+    }),
+    [],
+  );
+
+  const processedStores = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    const filtered = initialStores.filter((store) => {
       const matchCategory =
         selectedCategory === ALL_CATEGORY_VALUE || store.category === selectedCategory;
-      const normalizedSearch = searchTerm.trim().toLowerCase();
+      const matchLocation =
+        selectedLocation === ALL_LOCATION_VALUE || store.location === selectedLocation;
 
       if (!normalizedSearch) {
-        return matchCategory;
+        return matchCategory && matchLocation;
       }
 
       const haystack = [store.name, store.tagline, store.location, store.category]
         .join(' ')
         .toLowerCase();
 
-      return matchCategory && haystack.includes(normalizedSearch);
+      return matchCategory && matchLocation && haystack.includes(normalizedSearch);
     });
-  }, [initialStores, searchTerm, selectedCategory]);
+
+    const sorted = [...filtered].sort((first, second) => {
+      switch (sortOption) {
+        case 'name-asc':
+          return first.name.localeCompare(second.name, 'id-ID', { sensitivity: 'base' });
+        case 'name-desc':
+          return second.name.localeCompare(first.name, 'id-ID', { sensitivity: 'base' });
+        case 'location-asc':
+          return first.location.localeCompare(second.location, 'id-ID', { sensitivity: 'base' });
+        case 'featured':
+        default:
+          return first.category.localeCompare(second.category, 'id-ID', { sensitivity: 'base' });
+      }
+    });
+
+    return sorted;
+  }, [initialStores, searchTerm, selectedCategory, selectedLocation, sortOption]);
 
   const totalStorePages = useMemo(() => {
-    if (filteredStores.length === 0) {
+    if (processedStores.length === 0) {
       return 1;
     }
 
-    return Math.ceil(filteredStores.length / STORES_PER_PAGE);
-  }, [filteredStores.length]);
+    return Math.ceil(processedStores.length / STORES_PER_PAGE);
+  }, [processedStores.length]);
 
   const paginatedStores = useMemo(() => {
     const startIndex = (currentStorePage - 1) * STORES_PER_PAGE;
 
-    return filteredStores.slice(startIndex, startIndex + STORES_PER_PAGE);
-  }, [currentStorePage, filteredStores]);
+    return processedStores.slice(startIndex, startIndex + STORES_PER_PAGE);
+  }, [currentStorePage, processedStores]);
 
   useEffect(() => {
     setCurrentStorePage(1);
-  }, [searchTerm, selectedCategory]);
+  }, [searchTerm, selectedCategory, selectedLocation, sortOption]);
 
   useEffect(() => {
     if (currentStorePage > totalStorePages) {
@@ -179,30 +251,6 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
-
-  const handleCopyDonation = async () => {
-    try {
-      await navigator.clipboard.writeText('081-330-763-633');
-      setHasCopiedDonation(true);
-
-      if (donationCopyTimeoutRef.current) {
-        clearTimeout(donationCopyTimeoutRef.current);
-      }
-
-      donationCopyTimeoutRef.current = setTimeout(() => {
-        setHasCopiedDonation(false);
-        donationCopyTimeoutRef.current = null;
-      }, 2000);
-    } catch (error) {
-      console.error('Gagal menyalin nomor donasi:', error);
-    }
-  };
-
-  const isDonationFeatureEnabled = false;
-
-  const donationToggleLabel = isDonationOpen
-    ? 'Sembunyikan informasi dukungan etalase UMKM'
-    : 'Tampilkan informasi dukungan etalase UMKM';
 
   const [formData, setFormData] = useState<FormState>(() => createInitialFormState());
   const [recentSubmissions, setRecentSubmissions] = useState<SubmissionPreview[]>([]);
@@ -252,14 +300,6 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isFormModalOpen]);
-
-  useEffect(() => {
-    return () => {
-      if (donationCopyTimeoutRef.current) {
-        clearTimeout(donationCopyTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
@@ -464,18 +504,46 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
             <ThemeToggle variant="umkm" />
           </div>
         </div>
-        <div className="mb-12 text-center">
-          <span className="inline-flex rounded-full bg-indigo-100 px-4 py-1 text-sm font-medium text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200">
-            Etalase UMKM
-          </span>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-4xl">
-            Temukan UMKM Inspiratif dari Berbagai Penjuru Nusantara
-          </h1>
-          <p className="mt-4 text-base text-slate-600 dark:text-slate-300 sm:text-lg">
-            Jelajahi katalog UMKM pilihan kami. Ketuk salah satu toko untuk membuka halaman etalase lengkap
-            berisi profil usaha, produk unggulan, dan akses langsung ke kontak mereka.
-          </p>
-        </div>
+        <section className="mb-12 overflow-hidden rounded-3xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-slate-50 p-8 shadow-sm shadow-indigo-100/70 dark:border-indigo-900/50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 dark:shadow-slate-900/40 sm:p-12">
+          <div className="mx-auto max-w-4xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-1 text-sm font-medium text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200">
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
+              Etalase UMKM
+            </span>
+            <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-4xl">
+              Temukan UMKM Inspiratif dari Berbagai Penjuru Nusantara
+            </h1>
+            <p className="mt-4 text-base text-slate-600 dark:text-slate-300 sm:text-lg">
+              Jelajahi katalog UMKM pilihan kami. Setiap profil menonjolkan kekuatan produk, kisah di balik usaha, dan cara
+              tercepat menghubungi pemiliknya.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-6 sm:grid-cols-3">
+            {heroStats.map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-2xl border border-white/60 bg-white/80 p-6 text-left shadow-sm backdrop-blur dark:border-slate-800/60 dark:bg-slate-900/70"
+              >
+                <p className="text-sm font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">
+                  {stat.label}
+                </p>
+                <p className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-50">{stat.value}</p>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{stat.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <figure className="mt-10 rounded-2xl border border-indigo-100/80 bg-white/80 p-6 text-left shadow-sm dark:border-indigo-900/40 dark:bg-slate-950/60">
+            <blockquote className="text-base italic text-slate-700 dark:text-slate-200 sm:text-lg">{curatedTestimonial.quote}</blockquote>
+            <figcaption className="mt-4 text-sm font-medium text-indigo-700 dark:text-indigo-300">
+              {curatedTestimonial.author}
+              <span className="mt-1 block text-xs font-normal uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                {curatedTestimonial.role}
+              </span>
+            </figcaption>
+          </figure>
+        </section>
 
         {recentSubmissions.length > 0 ? (
           <section className="mb-10 rounded-3xl border border-indigo-200/80 bg-white/80 p-6 shadow-sm shadow-indigo-100/60 dark:border-indigo-900/40 dark:bg-slate-900/60 dark:shadow-slate-900/30 sm:p-8">
@@ -604,16 +672,19 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
           </section>
         ) : null}
 
-        <div className="mb-10 grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm shadow-slate-200/60 dark:border-slate-700 dark:bg-slate-900/60 dark:shadow-slate-900/40 sm:grid-cols-3 sm:items-end">
+        <section className="mb-10 grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm shadow-slate-200/60 dark:border-slate-700 dark:bg-slate-900/60 dark:shadow-slate-900/40 sm:grid-cols-4 sm:items-end">
           <label className="flex flex-col gap-2 sm:col-span-2">
             <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Cari toko atau kata kunci</span>
-            <input
-              type="search"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Misal: kopi, batik, Yogyakarta"
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-            />
+            <div className="relative">
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Misal: kopi, batik, Yogyakarta"
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 pl-11 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+            </div>
           </label>
 
           <label className="flex flex-col gap-2">
@@ -621,7 +692,7 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
             <select
               value={selectedCategory}
               onChange={(event) => setSelectedCategory(event.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
             >
               <option value={ALL_CATEGORY_VALUE}>Semua kategori</option>
               {categories.map((category) => (
@@ -631,67 +702,117 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
               ))}
             </select>
           </label>
-        </div>
+
+          <label className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Pilih lokasi</span>
+            <select
+              value={selectedLocation}
+              onChange={(event) => setSelectedLocation(event.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+            >
+              <option value={ALL_LOCATION_VALUE}>Semua lokasi</option>
+              {uniqueLocations.map((location) => (
+                <option key={location} value={location}>
+                  {location}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Urutkan daftar</span>
+            <div className="relative">
+              <select
+                value={sortOption}
+                onChange={(event) => setSortOption(event.target.value as SortOption)}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 pr-10 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              >
+                {SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <ArrowUpDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+            </div>
+          </label>
+        </section>
 
         <div ref={storeListRef}>
-          {filteredStores.length > 0 ? (
+          {processedStores.length > 0 ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6">
-              {paginatedStores.map((store) => (
-              <Link
-                key={store.id}
-                href={`/umkm/${store.id}`}
-                className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-900 dark:hover:shadow-slate-900/60 dark:focus-visible:ring-offset-slate-950"
-              >
-                <div className="relative h-32 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                  <Image
-                    src={store.heroImage}
-                    alt={store.name}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    sizes="(min-width: 1024px) 20vw, (min-width: 640px) 30vw, 45vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent" />
-                </div>
-                <div className="flex flex-1 flex-col justify-between px-4 py-3 text-left">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">{store.category}</p>
-                    <h2 className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100 sm:text-base">{store.name}</h2>
-                    <p className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-slate-300 sm:text-sm">{store.tagline}</p>
-                  </div>
-                  <p className="mt-3 flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      className="h-4 w-4"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 21c4.97-4.03 8-7.459 8-11a8 8 0 1 0-16 0c0 3.541 3.03 6.97 8 11z"
+              {paginatedStores.map((store) => {
+                const featuredProduct = store.products[0];
+
+                return (
+                  <Link
+                    key={store.id}
+                    href={`/umkm/${store.id}`}
+                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-900 dark:hover:shadow-slate-900/60 dark:focus-visible:ring-offset-slate-950"
+                  >
+                    <div className="relative h-32 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                      <Image
+                        src={store.heroImage}
+                        alt={store.name}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        sizes="(min-width: 1024px) 20vw, (min-width: 640px) 30vw, 45vw"
                       />
-                      <circle cx="12" cy="10" r="2.5" />
-                    </svg>
-                    {store.location}
-                  </p>
-                </div>
-              </Link>
-              ))}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent" />
+                    </div>
+                    <div className="flex flex-1 flex-col justify-between px-4 py-3 text-left">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">
+                          {store.category}
+                        </p>
+                        <h2 className="mt-1 text-sm font-semibold text-slate-900 transition-colors duration-200 group-hover:text-indigo-700 dark:text-slate-100 dark:group-hover:text-indigo-300 sm:text-base">
+                          {store.name}
+                        </h2>
+                        <p className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-slate-300 sm:text-sm">
+                          {store.tagline}
+                        </p>
+                        {featuredProduct ? (
+                          <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-indigo-50 px-3 py-2 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
+                            <Sparkles className="h-4 w-4" aria-hidden="true" />
+                            <span className="truncate">{featuredProduct.name}</span>
+                            <span aria-hidden="true">•</span>
+                            <span className="truncate">{featuredProduct.price}</span>
+                          </div>
+                        ) : null}
+                      </div>
+                      <div className="mt-4 flex flex-col gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin className="h-4 w-4" aria-hidden="true" />
+                          {store.location}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-indigo-600 transition-colors duration-200 group-hover:text-indigo-700 dark:text-indigo-300 dark:group-hover:text-indigo-200">
+                          Lihat profil lengkap
+                          <span aria-hidden="true">→</span>
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300">
               <p className="text-base font-semibold text-slate-800 dark:text-slate-100">Hmm, belum ada hasil yang cocok.</p>
               <p className="mt-2 text-sm">
-                Coba ubah kata kunci pencarian atau pilih kategori lain untuk menemukan UMKM yang Anda butuhkan.
+                Coba ubah kata kunci pencarian, pilih kategori atau lokasi lain, atau kirimkan UMKM rekomendasi Anda melalui formulir pengajuan.
               </p>
+              <button
+                type="button"
+                onClick={openFormModal}
+                className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-white px-4 py-2 text-xs font-semibold text-indigo-700 shadow-sm transition hover:bg-indigo-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-indigo-900/50 dark:bg-slate-950 dark:text-indigo-200 dark:hover:bg-slate-900"
+              >
+                Ajukan UMKM sekarang
+              </button>
             </div>
           )}
         </div>
 
-        {filteredStores.length > STORES_PER_PAGE ? (
+        {processedStores.length > STORES_PER_PAGE ? (
           <Pagination
             currentPage={currentStorePage}
             totalPages={totalStorePages}
@@ -737,8 +858,11 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
-              Buka Formulir Pengajuan
+              Daftarkan UMKM Anda Sekarang
             </button>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Estimasi peninjauan 3–5 hari kerja. Kami akan mengonfirmasi melalui email atau WhatsApp.
+            </p>
           </div>
         </section>
         {isFormModalOpen ? (
@@ -779,7 +903,7 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
                     Formulir Pengajuan UMKM
                   </h2>
                   <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-                    Lengkapi informasi berikut agar tim kurasi kami dapat memproses dan menampilkan UMKM Anda di Ruang Riung.
+                    Lengkapi informasi berikut agar tim kami dapat meninjau dan menampilkan UMKM Anda di Ruang Riung.
                     Semua kolom dapat digulir dan tetap nyaman dibaca, termasuk pada layar ponsel.
                   </p>
                 </div>
@@ -1096,85 +1220,6 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
         ) : null}
       </div>
 
-      {isDonationFeatureEnabled ? (
-        <>
-          <button
-            type="button"
-            onClick={() => setIsDonationOpen((previous) => !previous)}
-            className="fixed right-4 z-50 flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-xl shadow-indigo-600/40 transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 sm:right-6"
-            style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
-            aria-expanded={isDonationOpen}
-            aria-controls="umkm-donation-card"
-            aria-pressed={isDonationOpen}
-            aria-label={donationToggleLabel}
-            title={donationToggleLabel}
-          >
-            <HeartHandshake className="h-5 w-5" />
-            <span className="hidden sm:inline">Dukung Etalase</span>
-            <span className="sr-only">Dukung Etalase UMKM</span>
-          </button>
-
-          {isDonationOpen ? (
-            <div
-              id="umkm-donation-card"
-              className="fixed right-4 z-50 w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-indigo-200 bg-white p-5 text-left shadow-2xl dark:border-indigo-900/40 dark:bg-slate-950 sm:right-6 sm:w-[calc(100%-3rem)]"
-              style={{ bottom: 'calc(6.5rem + env(safe-area-inset-bottom, 0px))' }}
-              role="complementary"
-              aria-label="Informasi dukungan Etalase UMKM"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-lg font-bold text-indigo-700 dark:text-indigo-300">Dukung Etalase UMKM</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                    Bantu RuangRiung menjaga keberlanjutan etalase UMKM dengan donasi sukarela. Kirimkan dukungan melalui e-wallet ke nomor
-                    <span className="font-semibold text-slate-900 dark:text-slate-100"> 081-330-763-633</span> atas nama
-                    <span className="font-semibold text-slate-900 dark:text-slate-100"> Arif Tirtana</span>.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsDonationOpen(false)}
-                  className="rounded-full bg-indigo-50 p-1 text-indigo-600 transition hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:bg-indigo-900/30 dark:text-indigo-200 dark:hover:bg-indigo-900/60"
-                  aria-label="Tutup informasi donasi"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              <div className="mt-4 space-y-4">
-                <div className="flex items-center justify-between rounded-xl bg-indigo-50 p-3 text-sm text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200">
-                  <div>
-                    <p className="font-semibold">Nomor E-Wallet</p>
-                    <p className="font-mono text-base">081-330-763-633</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleCopyDonation}
-                    className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                  >
-                    {hasCopiedDonation ? (
-                      <>
-                        <Check className="h-4 w-4" />
-                        <span>Disalin</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-4 w-4" />
-                        <span>Salin</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                <p className="rounded-xl bg-indigo-50 p-3 text-xs leading-relaxed text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200">
-                  Dukungan Anda membantu kami terus menampilkan UMKM inspiratif, melakukan kurasi, dan memperluas jangkauan usaha lokal.
-                  Terima kasih telah menjadi bagian dari perjalanan ini!
-                </p>
-              </div>
-            </div>
-          ) : null}
-        </>
-      ) : null}
     </div>
   );
 }
