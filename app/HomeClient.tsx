@@ -455,6 +455,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
           </div>
         </div>
       )}
+
     </div>
   );
 }

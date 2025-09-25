@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Share2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import AdBanner from '@/components/AdBanner';
@@ -21,6 +21,9 @@ interface PromptDetailClientProps {
 export default function PromptDetailClient({ prompt, prompts }: PromptDetailClientProps) {
   const currentPrompt = prompt;
   const [promptCollection, setPromptCollection] = useState(() => sortPrompts(prompts));
+  const [shareFeedback, setShareFeedback] = useState<'idle' | 'success' | 'error'>('idle');
+  const [shareMessage, setShareMessage] = useState('');
+  const shareTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const relatedPrompts = useMemo(() => {
     return promptCollection
@@ -43,6 +46,52 @@ export default function PromptDetailClient({ prompt, prompts }: PromptDetailClie
       const filtered = previous.filter(item => item.slug !== createdPrompt.slug);
       return sortPrompts([createdPrompt, ...filtered]);
     });
+  };
+
+  useEffect(() => {
+    return () => {
+      if (shareTimeoutRef.current) {
+        clearTimeout(shareTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleSharePrompt = async () => {
+    if (shareTimeoutRef.current) {
+      clearTimeout(shareTimeoutRef.current);
+      shareTimeoutRef.current = null;
+    }
+
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: currentPrompt.title,
+          text: `Lihat prompt "${currentPrompt.title}" di RuangRiung`,
+          url: shareUrl,
+        });
+        setShareFeedback('success');
+        setShareMessage('Tautan prompt berhasil dibagikan.');
+      } else if (navigator.clipboard && shareUrl) {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareFeedback('success');
+        setShareMessage('Tautan prompt disalin ke clipboard.');
+      } else {
+        setShareFeedback('error');
+        setShareMessage('Peramban tidak mendukung fitur berbagi otomatis.');
+        return;
+      }
+    } catch (error) {
+      console.error('Gagal membagikan prompt:', error);
+      setShareFeedback('error');
+      setShareMessage('Gagal membagikan tautan prompt. Silakan coba lagi.');
+    }
+
+    shareTimeoutRef.current = window.setTimeout(() => {
+      setShareFeedback('idle');
+      setShareMessage('');
+    }, 2500);
   };
 
   return (
@@ -105,8 +154,31 @@ export default function PromptDetailClient({ prompt, prompts }: PromptDetailClie
               onSuccess={handlePromptCreated}
             />
           </div>
-          <div className="flex w-full justify-end sm:w-auto">
-            <CopyButton text={currentPrompt.promptContent} />
+          <div className="flex w-full flex-col items-end gap-2 sm:w-auto">
+            <div className="flex w-full justify-end gap-2 sm:w-auto">
+              <button
+                type="button"
+                onClick={handleSharePrompt}
+                className="inline-flex items-center rounded bg-blue-600 px-3 py-1 text-sm font-semibold text-white shadow transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              >
+                <Share2 size={16} />
+                <span className="ml-2">Bagikan</span>
+              </button>
+              <CopyButton text={currentPrompt.promptContent} />
+            </div>
+            {shareMessage ? (
+              <p
+                role="status"
+                aria-live="polite"
+                className={`text-xs ${
+                  shareFeedback === 'success'
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-rose-600 dark:text-rose-400'
+                }`}
+              >
+                {shareMessage}
+              </p>
+            ) : null}
           </div>
         </div>
         <div className="prose prose-lg max-w-none dark:prose-invert">
