@@ -102,6 +102,10 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
     }
   };
 
+  const donationToggleLabel = isDonationOpen
+    ? 'Sembunyikan informasi dukungan etalase UMKM'
+    : 'Tampilkan informasi dukungan etalase UMKM';
+
   const [formData, setFormData] = useState({
     ownerName: '',
     email: '',
@@ -703,18 +707,24 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
       <button
         type="button"
         onClick={() => setIsDonationOpen((previous) => !previous)}
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        className="fixed right-4 z-50 flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-xl shadow-indigo-600/40 transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 sm:right-6"
+        style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
         aria-expanded={isDonationOpen}
         aria-controls="umkm-donation-card"
+        aria-pressed={isDonationOpen}
+        aria-label={donationToggleLabel}
+        title={donationToggleLabel}
       >
         <HeartHandshake className="h-5 w-5" />
         <span className="hidden sm:inline">Dukung Etalase</span>
+        <span className="sr-only">Dukung Etalase UMKM</span>
       </button>
 
       {isDonationOpen ? (
         <div
           id="umkm-donation-card"
-          className="fixed bottom-24 right-6 z-40 w-[calc(100%-3rem)] max-w-sm rounded-2xl border border-indigo-200 bg-white p-5 text-left shadow-2xl dark:border-indigo-900/40 dark:bg-slate-950"
+          className="fixed right-4 z-50 w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-indigo-200 bg-white p-5 text-left shadow-2xl dark:border-indigo-900/40 dark:bg-slate-950 sm:right-6 sm:w-[calc(100%-3rem)]"
+          style={{ bottom: 'calc(6.5rem + env(safe-area-inset-bottom, 0px))' }}
           role="complementary"
           aria-label="Informasi dukungan Etalase UMKM"
         >
@@ -737,34 +747,49 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
             </button>
           </div>
 
-          <div className="mt-4 flex items-center justify-between rounded-xl bg-indigo-50 p-3 text-sm text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200">
-            <div>
-              <p className="font-semibold">Nomor E-Wallet</p>
-              <p className="font-mono text-base">081-330-763-633</p>
+          <div className="mt-4 space-y-4">
+            <div className="flex items-center justify-between rounded-xl bg-indigo-50 p-3 text-sm text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200">
+              <div>
+                <p className="font-semibold">Nomor E-Wallet</p>
+                <p className="font-mono text-base">081-330-763-633</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyDonation}
+                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              >
+                {hasCopiedDonation ? (
+                  <>
+                    <Check className="h-4 w-4" />
+                    <span>Disalin</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4" />
+                    <span>Salin</span>
+                  </>
+                )}
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={handleCopyDonation}
-              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            >
-              {hasCopiedDonation ? (
-                <>
-                  <Check className="h-4 w-4" />
-                  <span>Disalin</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4" />
-                  <span>Salin</span>
-                </>
-              )}
-            </button>
-          </div>
 
-          <p className="mt-4 rounded-xl bg-indigo-50 p-3 text-xs leading-relaxed text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200">
-            Dukungan Anda membantu kami terus menampilkan UMKM inspiratif, melakukan kurasi, dan memperluas jangkauan usaha lokal.
-            Terima kasih telah menjadi bagian dari perjalanan ini!
-          </p>
+            <div className="rounded-xl border border-indigo-100 bg-white p-4 text-center shadow-sm dark:border-indigo-900/40 dark:bg-slate-950/80">
+              <Image
+                src="/assets/shareqr.png"
+                alt="Kode QR dukungan RuangRiung"
+                width={240}
+                height={240}
+                className="mx-auto h-40 w-40 object-contain"
+              />
+              <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                Pindai kode QR ini untuk membagikan halaman donasi RuangRiung kepada teman dan komunitas Anda.
+              </p>
+            </div>
+
+            <p className="rounded-xl bg-indigo-50 p-3 text-xs leading-relaxed text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200">
+              Dukungan Anda membantu kami terus menampilkan UMKM inspiratif, melakukan kurasi, dan memperluas jangkauan usaha lokal.
+              Terima kasih telah menjadi bagian dari perjalanan ini!
+            </p>
+          </div>
         </div>
       ) : null}
     </div>
