@@ -9,6 +9,7 @@ type SubmissionPayload = {
   whatsapp?: string;
   businessName: string;
   businessCategory?: string;
+  categorySelection?: string;
   location?: string;
   description: string;
   productHighlights?: string;
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
       whatsapp: sanitize(rawPayload.whatsapp),
       businessName: sanitize(rawPayload.businessName),
       businessCategory: sanitize(rawPayload.businessCategory),
+      categorySelection: sanitize(rawPayload.categorySelection),
       location: sanitize(rawPayload.location),
       description: sanitize(rawPayload.description),
       productHighlights: sanitize(rawPayload.productHighlights),
@@ -106,12 +108,31 @@ export async function POST(request: Request) {
 
     const recipient = sanitize(process.env.UMKM_SUBMISSION_RECIPIENT) || nodemailerUser;
 
+    const categorySummary = (() => {
+      const finalCategory = submission.businessCategory;
+      const selection = submission.categorySelection;
+
+      if (finalCategory && selection && finalCategory !== selection) {
+        return `<p><strong>Kategori:</strong> ${finalCategory} <span style="color:#64748b;">(pilihan awal: ${selection})</span></p>`;
+      }
+
+      if (finalCategory) {
+        return `<p><strong>Kategori:</strong> ${finalCategory}</p>`;
+      }
+
+      if (selection) {
+        return `<p><strong>Pilihan kategori:</strong> ${selection}</p>`;
+      }
+
+      return '';
+    })();
+
     const messageLines = [
       `<p><strong>Nama Penanggung Jawab:</strong> ${submission.ownerName}</p>`,
       `<p><strong>Email:</strong> ${submission.email}</p>`,
       submission.whatsapp ? `<p><strong>WhatsApp:</strong> ${submission.whatsapp}</p>` : '',
       `<p><strong>Nama UMKM:</strong> ${submission.businessName}</p>`,
-      submission.businessCategory ? `<p><strong>Kategori:</strong> ${submission.businessCategory}</p>` : '',
+      categorySummary,
       submission.location ? `<p><strong>Domisili:</strong> ${submission.location}</p>` : '',
       `<p><strong>Deskripsi:</strong><br>${submission.description.replace(/\n/g, '<br>')}</p>`,
       submission.productHighlights

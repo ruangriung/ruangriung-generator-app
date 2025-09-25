@@ -42,6 +42,7 @@ export default function UmkmPage() {
     whatsapp: '',
     businessName: '',
     businessCategory: '',
+    customBusinessCategory: '',
     location: '',
     description: '',
     productHighlights: '',
@@ -97,6 +98,16 @@ export default function UmkmPage() {
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
+
+    if (name === 'businessCategory') {
+      setFormData((prev) => ({
+        ...prev,
+        businessCategory: value,
+        customBusinessCategory: value === 'Kategori lainnya' ? prev.customBusinessCategory : '',
+      }));
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -107,6 +118,7 @@ export default function UmkmPage() {
       whatsapp: '',
       businessName: '',
       businessCategory: '',
+      customBusinessCategory: '',
       location: '',
       description: '',
       productHighlights: '',
@@ -118,9 +130,18 @@ export default function UmkmPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    const selectedCategory = formData.businessCategory;
+    const customCategory = formData.customBusinessCategory.trim();
+
     if (!formData.ownerName || !formData.email || !formData.businessName || !formData.description) {
       setFormStatus('error');
       setFormMessage('Mohon lengkapi minimal nama penanggung jawab, email, nama usaha, dan deskripsi.');
+      return;
+    }
+
+    if (selectedCategory === 'Kategori lainnya' && !customCategory) {
+      setFormStatus('error');
+      setFormMessage('Tuliskan kategori usaha Anda pada kolom yang tersedia.');
       return;
     }
 
@@ -134,13 +155,26 @@ export default function UmkmPage() {
       setFormStatus('loading');
       setFormMessage('');
 
+      const finalCategory =
+        selectedCategory === 'Kategori lainnya' ? customCategory : selectedCategory.trim();
+
       const response = await fetch('/api/umkm-submission', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
+          ownerName: formData.ownerName,
+          email: formData.email,
+          whatsapp: formData.whatsapp,
+          businessName: formData.businessName,
+          businessCategory: finalCategory,
+          categorySelection: selectedCategory,
+          location: formData.location,
+          description: formData.description,
+          productHighlights: formData.productHighlights,
+          imageLinks: formData.imageLinks,
+          additionalInfo: formData.additionalInfo,
           token: turnstileToken,
         }),
       });
@@ -436,6 +470,20 @@ export default function UmkmPage() {
                         <option value="Kategori lainnya">Kategori lainnya</option>
                       </select>
                     </label>
+                    {formData.businessCategory === 'Kategori lainnya' && (
+                      <label className="flex flex-col gap-2 text-left sm:col-span-2">
+                        <span className="text-sm font-medium text-slate-700">Tuliskan kategori usaha</span>
+                        <input
+                          type="text"
+                          name="customBusinessCategory"
+                          value={formData.customBusinessCategory}
+                          onChange={handleInputChange}
+                          required
+                          placeholder="Contoh: Kuliner sehat, Jasa desain interior, dsb."
+                          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
+                        />
+                      </label>
+                    )}
                     <label className="flex flex-col gap-2 text-left">
                       <span className="text-sm font-medium text-slate-700">Domisili usaha</span>
                       <input
