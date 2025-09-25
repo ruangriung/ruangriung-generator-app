@@ -15,6 +15,7 @@ interface Store {
   name: string;
   category: string;
   location: string;
+  whatsappNumber: string;
   tagline: string;
   heroImage: string;
   description: string;
@@ -28,6 +29,7 @@ const stores: Store[] = [
     name: 'Nusantara Coffee Roasters',
     category: 'Kopi Spesialti',
     location: 'Bandung, Jawa Barat',
+    whatsappNumber: '6281234567001',
     tagline: 'Mempersembahkan biji kopi single origin terbaik dari seluruh Nusantara.',
     heroImage:
       'https://images.unsplash.com/photo-1507133750040-4a8f57021571?auto=format&fit=crop&w=800&q=80',
@@ -70,6 +72,7 @@ const stores: Store[] = [
     name: 'Batik Pradana',
     category: 'Batik Tulis',
     location: 'Solo, Jawa Tengah',
+    whatsappNumber: '6281234567002',
     tagline: 'Menghidupkan warisan budaya melalui batik tulis kontemporer.',
     heroImage:
       'https://images.unsplash.com/photo-1591769225440-811ad7d9e0d1?auto=format&fit=crop&w=800&q=80',
@@ -112,6 +115,7 @@ const stores: Store[] = [
     name: 'Rempah Ceria',
     category: 'Bumbu Masak',
     location: 'Yogyakarta, DI Yogyakarta',
+    whatsappNumber: '6281234567003',
     tagline: 'Bumbu instan rumahan dengan rasa autentik Indonesia.',
     heroImage:
       'https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&w=800&q=80',
@@ -154,6 +158,7 @@ const stores: Store[] = [
     name: 'Rumah Bambu Craft',
     category: 'Dekorasi Rumah',
     location: 'Garut, Jawa Barat',
+    whatsappNumber: '6281234567004',
     tagline: 'Dekorasi rumah ramah lingkungan dari bambu terpilih.',
     heroImage:
       'https://images.unsplash.com/photo-1600585154340-0ef3c08cf8b3?auto=format&fit=crop&w=800&q=80',
@@ -196,6 +201,7 @@ const stores: Store[] = [
     name: 'Vegan Hijau Bistro',
     category: 'Kuliner Sehat',
     location: 'Jakarta Selatan, DKI Jakarta',
+    whatsappNumber: '6281234567005',
     tagline: 'Kuliner nabati lezat dengan bahan organik lokal.',
     heroImage:
       'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&w=800&q=80',
@@ -238,6 +244,7 @@ const stores: Store[] = [
     name: 'Cahaya Silverworks',
     category: 'Perhiasan Perak',
     location: 'Kota Gede, DI Yogyakarta',
+    whatsappNumber: '6281234567006',
     tagline: 'Perhiasan perak handmade dengan detail ukir tradisional.',
     heroImage:
       'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=800&q=80',
@@ -280,6 +287,7 @@ const stores: Store[] = [
     name: 'Dodol Garut Kenanga',
     category: 'Oleh-oleh Tradisional',
     location: 'Garut, Jawa Barat',
+    whatsappNumber: '6281234567007',
     tagline: 'Dodol legit dengan resep turun-temurun keluarga Kenanga.',
     heroImage:
       'https://images.unsplash.com/photo-1517677129300-07b130802f46?auto=format&fit=crop&w=800&q=80',
@@ -322,6 +330,7 @@ const stores: Store[] = [
     name: 'Eco Laundry Lab',
     category: 'Produk Kebersihan',
     location: 'Malang, Jawa Timur',
+    whatsappNumber: '6281234567008',
     tagline: 'Detergen ramah lingkungan dengan teknologi enzim alami.',
     heroImage:
       'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
@@ -364,6 +373,7 @@ const stores: Store[] = [
     name: 'Studio Keramik Lumera',
     category: 'Kerajinan Keramik',
     location: 'Bali, Indonesia',
+    whatsappNumber: '6281234567009',
     tagline: 'Keramik handmade bertekstur organik untuk hunian modern.',
     heroImage:
       'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80',
@@ -406,6 +416,7 @@ const stores: Store[] = [
     name: 'Aroma Therapy Atelier',
     category: 'Aromaterapi',
     location: 'Bogor, Jawa Barat',
+    whatsappNumber: '6281234567010',
     tagline: 'Minyak esensial dan lilin aromaterapi crafted by hand.',
     heroImage:
       'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=800&q=80',
@@ -448,6 +459,7 @@ const stores: Store[] = [
     name: 'Tenun Pelangi Flores',
     category: 'Tekstil Tenun',
     location: 'Ende, Nusa Tenggara Timur',
+    whatsappNumber: '6281234567011',
     tagline: 'Tenun ikat warna-warni dari penenun perempuan Flores.',
     heroImage:
       'https://images.unsplash.com/photo-1617032212157-5563d9739dc6?auto=format&fit=crop&w=800&q=80',
@@ -490,6 +502,7 @@ const stores: Store[] = [
     name: 'Madu Hutan Lestari',
     category: 'Produk Natural',
     location: 'Kutai, Kalimantan Timur',
+    whatsappNumber: '6281234567012',
     tagline: 'Madu murni panen liar dari hutan tropis Kalimantan.',
     heroImage:
       'https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=800&q=80',
@@ -532,6 +545,7 @@ const stores: Store[] = [
     name: 'Atma Leather Studio',
     category: 'Aksesoris Kulit',
     location: 'Bandung, Jawa Barat',
+    whatsappNumber: '6281234567013',
     tagline: 'Dompet dan tas kulit handmade dengan personalisasi inisial.',
     heroImage:
       'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=800&q=80',
@@ -574,6 +588,7 @@ const stores: Store[] = [
     name: 'Re:Create Studio',
     category: 'Produk Daur Ulang',
     location: 'Surabaya, Jawa Timur',
+    whatsappNumber: '6281234567014',
     tagline: 'Produk lifestyle dari plastik daur ulang yang trendi.',
     heroImage:
       'https://images.unsplash.com/photo-1538688423619-a81d3f23454b?auto=format&fit=crop&w=800&q=80',
@@ -616,6 +631,7 @@ const stores: Store[] = [
     name: 'Kopisa Botolan',
     category: 'Minuman Siap Saji',
     location: 'Semarang, Jawa Tengah',
+    whatsappNumber: '6281234567015',
     tagline: 'Kopi susu kekinian dalam botol kaca yang ramah lingkungan.',
     heroImage:
       'https://images.unsplash.com/photo-1459755486867-b55449bb39ff?auto=format&fit=crop&w=800&q=80',
@@ -797,35 +813,64 @@ export default function UmkmPage() {
                     Klik foto produk untuk melihat tampilan lebih besar dalam modal popup.
                   </p>
                   <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                    {selectedStore.products.map((product) => (
-                      <article
-                        key={product.name}
-                        className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setActiveImage(product.image)}
-                          className="group relative block h-40 w-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                    {selectedStore.products.map((product) => {
+                      const whatsappMessage = encodeURIComponent(
+                        `Halo ${selectedStore.name}! Saya tertarik dengan ${product.name} seharga ${product.price}. ${product.description} Mohon informasinya.`,
+                      );
+                      const whatsappHref = `https://wa.me/${selectedStore.whatsappNumber}?text=${whatsappMessage}`;
+
+                      return (
+                        <article
+                          key={product.name}
+                          className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
                         >
-                          <Image
-                            src={product.image}
-                            alt={product.name}
-                            fill
-                            className="object-cover transition-transform duration-300 group-hover:scale-105"
-                            sizes="(min-width: 1024px) 220px, (min-width: 640px) 45vw, 90vw"
-                          />
-                        </button>
-                        <div className="flex flex-1 flex-col gap-1 px-4 py-3 text-left">
-                          <h4 className="text-base font-semibold text-slate-900">
-                            {product.name}
-                          </h4>
-                          <span className="text-sm font-medium text-indigo-600">{product.price}</span>
-                          <p className="text-sm leading-relaxed text-slate-600">
-                            {product.description}
-                          </p>
-                        </div>
-                      </article>
-                    ))}
+                          <button
+                            type="button"
+                            onClick={() => setActiveImage(product.image)}
+                            className="group relative block h-40 w-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                          >
+                            <Image
+                              src={product.image}
+                              alt={product.name}
+                              fill
+                              className="object-cover transition-transform duration-300 group-hover:scale-105"
+                              sizes="(min-width: 1024px) 220px, (min-width: 640px) 45vw, 90vw"
+                            />
+                          </button>
+                          <div className="flex flex-1 flex-col gap-2 px-4 py-3 text-left">
+                            <div>
+                              <h4 className="text-base font-semibold text-slate-900">
+                                {product.name}
+                              </h4>
+                              <span className="text-sm font-medium text-indigo-600">{product.price}</span>
+                            </div>
+                            <p className="text-sm leading-relaxed text-slate-600">
+                              {product.description}
+                            </p>
+                            <a
+                              href={whatsappHref}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={`Hubungi ${selectedStore.name} untuk ${product.name} via WhatsApp`}
+                              className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 32 32"
+                                aria-hidden="true"
+                                className="h-4 w-4"
+                              >
+                                <path
+                                  fill="currentColor"
+                                  d="M16.05 4A11.93 11.93 0 0 0 4 15.94a11.84 11.84 0 0 0 1.62 5.98L4 28l6.27-1.64a12.08 12.08 0 0 0 5.78 1.48h.01A12 12 0 0 0 16.05 4m5.56 17.23a2.61 2.61 0 0 1-1.79 1.23c-.48.07-1.1.13-1.79-.11c-.41-.13-.94-.3-1.63-.59c-2.87-1.23-4.73-4.12-4.87-4.31s-1.16-1.55-1.16-2.95s.74-2.08 1-2.37s.65-.36.87-.36h.62c.19 0 .47-.08.74.57c.28.66.95 2.29 1.03 2.45s.16.36.03.58s-.19.37-.37.57s-.38.44-.54.6s-.22.32-.1.52a8.93 8.93 0 0 0 1.66 2.14a7.57 7.57 0 0 0 2.4 1.45c.3.11.48.09.66-.05s.76-.88.96-1.18s.4-.25.66-.15s1.69.8 1.98.94s.48.22.55.34a2.39 2.39 0 0 1-.17 1.27"
+                                />
+                              </svg>
+                              Hubungi via WhatsApp
+                            </a>
+                          </div>
+                        </article>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
