@@ -258,9 +258,18 @@ export default function PromptClient({ prompts }: PromptClientProps) {
               </h5>
               <p className="font-normal text-gray-500 dark:text-gray-400">
                 Oleh{' '}
-                {prompt.link || prompt.facebook ? (
+                {prompt.link ? (
                   <a
-                    href={prompt.link || prompt.facebook}
+                    href={prompt.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    {highlightMatches(prompt.author, searchTerm)}
+                  </a>
+                ) : prompt.facebook ? (
+                  <a
+                    href={prompt.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
@@ -271,6 +280,30 @@ export default function PromptClient({ prompts }: PromptClientProps) {
                   <>{highlightMatches(prompt.author, searchTerm)}</>
                 )}
               </p>
+              {(prompt.link || prompt.facebook) && (
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
+                  {prompt.link && (
+                    <a
+                      href={prompt.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      Website
+                    </a>
+                  )}
+                  {prompt.facebook && (
+                    <a
+                      href={prompt.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      Facebook
+                    </a>
+                  )}
+                </div>
+              )}
               <p className="mb-3 text-sm text-gray-500 dark:text-gray-400">
                 Tanggal: {new Date(prompt.date).toLocaleDateString('id-ID')}
               </p>
