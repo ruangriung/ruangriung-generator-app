@@ -5,6 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import type { Product, Store } from '../data';
+import Pagination from '@/components/Pagination';
+
+const PRODUCTS_PER_PAGE = 4;
 
 interface StoreShowcaseProps {
   store: Store;
@@ -12,7 +15,15 @@ interface StoreShowcaseProps {
 
 export function StoreShowcase({ store }: StoreShowcaseProps) {
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
+  const [currentProductPage, setCurrentProductPage] = useState(1);
   const whatsappBase = useMemo(() => `https://wa.me/${store.whatsappNumber}`, [store.whatsappNumber]);
+
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(store.products.length / PRODUCTS_PER_PAGE));
+  }, [store.products.length]);
+
+  const startIndex = (currentProductPage - 1) * PRODUCTS_PER_PAGE;
+  const paginatedProducts = store.products.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -27,6 +38,18 @@ export function StoreShowcase({ store }: StoreShowcaseProps) {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
+
+  useEffect(() => {
+    setActiveProduct(null);
+    setCurrentProductPage(1);
+  }, [store.id]);
+
+  useEffect(() => {
+    if (currentProductPage > totalPages) {
+      setCurrentProductPage(totalPages);
+      setActiveProduct(null);
+    }
+  }, [currentProductPage, totalPages]);
 
   return (
     <div className="mt-10 grid gap-10 lg:mt-12 lg:grid-cols-[1.1fr_1fr]">
@@ -99,7 +122,7 @@ export function StoreShowcase({ store }: StoreShowcaseProps) {
           </p>
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {store.products.map((product) => {
+            {paginatedProducts.map((product) => {
               const whatsappMessage = encodeURIComponent(
                 `Halo ${store.name}! Saya tertarik dengan ${product.name} seharga ${product.price}. ${product.description} Mohon informasinya.`,
               );
@@ -162,6 +185,17 @@ export function StoreShowcase({ store }: StoreShowcaseProps) {
               );
             })}
           </div>
+
+          {totalPages > 1 ? (
+            <Pagination
+              currentPage={currentProductPage}
+              totalPages={totalPages}
+              onPageChange={(page) => {
+                setCurrentProductPage(page);
+                setActiveProduct(null);
+              }}
+            />
+          ) : null}
         </div>
       </aside>
 
