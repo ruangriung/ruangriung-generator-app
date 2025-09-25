@@ -666,6 +666,10 @@ export const stores: Store[] = [
   },
 ];
 
+export const storeCategories = Array.from(new Set(stores.map((store) => store.category))).sort((a, b) =>
+  a.localeCompare(b, 'id-ID', { sensitivity: 'base' }),
+);
+
 export function getStoreById(storeId: string): Store | undefined {
   return stores.find((store) => store.id === storeId);
 }
