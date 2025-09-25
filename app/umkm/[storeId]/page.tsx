@@ -119,7 +119,7 @@ export default async function StoreDetailPage({ params }: PageProps) {
           </Link>
 
           <div className="w-full sm:w-auto sm:min-w-[220px]">
-            <ThemeToggle />
+            <ThemeToggle variant="umkm" />
           </div>
         </div>
 

@@ -29,7 +29,6 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
   const [currentStorePage, setCurrentStorePage] = useState(1);
   const storeListRef = useRef<HTMLDivElement | null>(null);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
-  const [isQrZoomOpen, setIsQrZoomOpen] = useState(false);
   const [hasCopiedDonation, setHasCopiedDonation] = useState(false);
   const donationCopyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -146,42 +145,16 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
   };
 
   useEffect(() => {
-    if (isFormModalOpen) {
-      const handleKeyDown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape') {
-          setIsFormModalOpen(false);
-          setTurnstileToken('');
-          setTurnstileKey((previous) => previous + 1);
-        }
-      };
-
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
-
-      return () => {
-        if (!isQrZoomOpen) {
-          document.body.style.overflow = '';
-        }
-        window.removeEventListener('keydown', handleKeyDown);
-      };
-    }
-
-    if (!isQrZoomOpen) {
+    if (!isFormModalOpen) {
       document.body.style.overflow = '';
-    }
-  }, [isFormModalOpen, isQrZoomOpen]);
-
-  useEffect(() => {
-    if (!isQrZoomOpen) {
-      if (!isFormModalOpen) {
-        document.body.style.overflow = '';
-      }
       return;
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setIsQrZoomOpen(false);
+        setIsFormModalOpen(false);
+        setTurnstileToken('');
+        setTurnstileKey((previous) => previous + 1);
       }
     };
 
@@ -189,18 +162,10 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
+      document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
-      if (!isFormModalOpen) {
-        document.body.style.overflow = '';
-      }
     };
-  }, [isQrZoomOpen, isFormModalOpen]);
-
-  useEffect(() => {
-    if (!isDonationOpen) {
-      setIsQrZoomOpen(false);
-    }
-  }, [isDonationOpen]);
+  }, [isFormModalOpen]);
 
   useEffect(() => {
     return () => {
@@ -338,7 +303,7 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
           </Link>
 
           <div className="w-full sm:w-auto sm:min-w-[220px]">
-            <ThemeToggle />
+            <ThemeToggle variant="umkm" />
           </div>
         </div>
         <div className="mb-12 text-center">
@@ -808,70 +773,9 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
               </button>
             </div>
 
-            <div className="rounded-xl border border-indigo-100 bg-white p-4 text-center shadow-sm dark:border-indigo-900/40 dark:bg-slate-950/80">
-              <button
-                type="button"
-                onClick={() => setIsQrZoomOpen(true)}
-                className="group mx-auto flex flex-col items-center gap-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                aria-label="Perbesar kode QR dukungan RuangRiung"
-              >
-                <Image
-                  src="/assets/shareqr.png"
-                  alt="Kode QR dukungan RuangRiung"
-                  width={240}
-                  height={240}
-                  className="h-40 w-40 rounded-lg border border-indigo-100 object-contain transition group-hover:scale-[1.02] group-focus-visible:scale-[1.02]"
-                />
-                <span className="text-xs font-medium text-indigo-600 group-hover:underline">
-                  Ketuk untuk memperbesar kode QR
-                </span>
-              </button>
-              <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-                Pindai kode QR ini untuk membagikan halaman donasi RuangRiung kepada teman dan komunitas Anda.
-              </p>
-            </div>
-
             <p className="rounded-xl bg-indigo-50 p-3 text-xs leading-relaxed text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200">
               Dukungan Anda membantu kami terus menampilkan UMKM inspiratif, melakukan kurasi, dan memperluas jangkauan usaha lokal.
               Terima kasih telah menjadi bagian dari perjalanan ini!
-            </p>
-          </div>
-        </div>
-      ) : null}
-
-      {isQrZoomOpen ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Perbesar kode QR dukungan RuangRiung"
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/80 p-4"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) {
-              setIsQrZoomOpen(false);
-            }
-          }}
-        >
-          <div className="relative w-full max-w-md rounded-2xl border border-indigo-200 bg-white p-6 shadow-2xl dark:border-indigo-900/60 dark:bg-slate-950">
-            <button
-              type="button"
-              onClick={() => setIsQrZoomOpen(false)}
-              className="absolute right-3 top-3 rounded-full bg-indigo-50 p-1.5 text-indigo-700 transition hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:bg-indigo-900/40 dark:text-indigo-200 dark:hover:bg-indigo-900/70"
-              aria-label="Tutup perbesaran kode QR"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <Image
-              src="/assets/shareqr.png"
-              alt="Kode QR dukungan RuangRiung"
-              width={480}
-              height={480}
-              className="mx-auto h-auto w-full max-w-xs rounded-xl border border-indigo-100 bg-white object-contain dark:border-indigo-900/60"
-              priority
-            />
-
-            <p className="mt-4 text-center text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              Arahkan kamera Anda dengan mantap ke kode QR ini. Anda juga dapat menyimpan gambar dengan menekan dan menahan selagi kode diperbesar.
             </p>
           </div>
         </div>
