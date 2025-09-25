@@ -29,6 +29,7 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
   const [currentStorePage, setCurrentStorePage] = useState(1);
   const storeListRef = useRef<HTMLDivElement | null>(null);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
+  const [isQrZoomOpen, setIsQrZoomOpen] = useState(false);
   const [hasCopiedDonation, setHasCopiedDonation] = useState(false);
   const donationCopyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -102,6 +103,10 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
     }
   };
 
+  const donationToggleLabel = isDonationOpen
+    ? 'Sembunyikan informasi dukungan etalase UMKM'
+    : 'Tampilkan informasi dukungan etalase UMKM';
+
   const [formData, setFormData] = useState({
     ownerName: '',
     email: '',
@@ -154,13 +159,48 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
       window.addEventListener('keydown', handleKeyDown);
 
       return () => {
-        document.body.style.overflow = '';
+        if (!isQrZoomOpen) {
+          document.body.style.overflow = '';
+        }
         window.removeEventListener('keydown', handleKeyDown);
       };
     }
 
-    document.body.style.overflow = '';
-  }, [isFormModalOpen]);
+    if (!isQrZoomOpen) {
+      document.body.style.overflow = '';
+    }
+  }, [isFormModalOpen, isQrZoomOpen]);
+
+  useEffect(() => {
+    if (!isQrZoomOpen) {
+      if (!isFormModalOpen) {
+        document.body.style.overflow = '';
+      }
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsQrZoomOpen(false);
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      if (!isFormModalOpen) {
+        document.body.style.overflow = '';
+      }
+    };
+  }, [isQrZoomOpen, isFormModalOpen]);
+
+  useEffect(() => {
+    if (!isDonationOpen) {
+      setIsQrZoomOpen(false);
+    }
+  }, [isDonationOpen]);
 
   useEffect(() => {
     return () => {
@@ -703,18 +743,24 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
       <button
         type="button"
         onClick={() => setIsDonationOpen((previous) => !previous)}
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        className="fixed right-4 z-50 flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-xl shadow-indigo-600/40 transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 sm:right-6"
+        style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
         aria-expanded={isDonationOpen}
         aria-controls="umkm-donation-card"
+        aria-pressed={isDonationOpen}
+        aria-label={donationToggleLabel}
+        title={donationToggleLabel}
       >
         <HeartHandshake className="h-5 w-5" />
         <span className="hidden sm:inline">Dukung Etalase</span>
+        <span className="sr-only">Dukung Etalase UMKM</span>
       </button>
 
       {isDonationOpen ? (
         <div
           id="umkm-donation-card"
-          className="fixed bottom-24 right-6 z-40 w-[calc(100%-3rem)] max-w-sm rounded-2xl border border-indigo-200 bg-white p-5 text-left shadow-2xl dark:border-indigo-900/40 dark:bg-slate-950"
+          className="fixed right-4 z-50 w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-indigo-200 bg-white p-5 text-left shadow-2xl dark:border-indigo-900/40 dark:bg-slate-950 sm:right-6 sm:w-[calc(100%-3rem)]"
+          style={{ bottom: 'calc(6.5rem + env(safe-area-inset-bottom, 0px))' }}
           role="complementary"
           aria-label="Informasi dukungan Etalase UMKM"
         >
@@ -737,34 +783,97 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
             </button>
           </div>
 
-          <div className="mt-4 flex items-center justify-between rounded-xl bg-indigo-50 p-3 text-sm text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200">
-            <div>
-              <p className="font-semibold">Nomor E-Wallet</p>
-              <p className="font-mono text-base">081-330-763-633</p>
+          <div className="mt-4 space-y-4">
+            <div className="flex items-center justify-between rounded-xl bg-indigo-50 p-3 text-sm text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200">
+              <div>
+                <p className="font-semibold">Nomor E-Wallet</p>
+                <p className="font-mono text-base">081-330-763-633</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyDonation}
+                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              >
+                {hasCopiedDonation ? (
+                  <>
+                    <Check className="h-4 w-4" />
+                    <span>Disalin</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4" />
+                    <span>Salin</span>
+                  </>
+                )}
+              </button>
             </div>
+
+            <div className="rounded-xl border border-indigo-100 bg-white p-4 text-center shadow-sm dark:border-indigo-900/40 dark:bg-slate-950/80">
+              <button
+                type="button"
+                onClick={() => setIsQrZoomOpen(true)}
+                className="group mx-auto flex flex-col items-center gap-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                aria-label="Perbesar kode QR dukungan RuangRiung"
+              >
+                <Image
+                  src="/assets/shareqr.png"
+                  alt="Kode QR dukungan RuangRiung"
+                  width={240}
+                  height={240}
+                  className="h-40 w-40 rounded-lg border border-indigo-100 object-contain transition group-hover:scale-[1.02] group-focus-visible:scale-[1.02]"
+                />
+                <span className="text-xs font-medium text-indigo-600 group-hover:underline">
+                  Ketuk untuk memperbesar kode QR
+                </span>
+              </button>
+              <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                Pindai kode QR ini untuk membagikan halaman donasi RuangRiung kepada teman dan komunitas Anda.
+              </p>
+            </div>
+
+            <p className="rounded-xl bg-indigo-50 p-3 text-xs leading-relaxed text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200">
+              Dukungan Anda membantu kami terus menampilkan UMKM inspiratif, melakukan kurasi, dan memperluas jangkauan usaha lokal.
+              Terima kasih telah menjadi bagian dari perjalanan ini!
+            </p>
+          </div>
+        </div>
+      ) : null}
+
+      {isQrZoomOpen ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Perbesar kode QR dukungan RuangRiung"
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/80 p-4"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setIsQrZoomOpen(false);
+            }
+          }}
+        >
+          <div className="relative w-full max-w-md rounded-2xl border border-indigo-200 bg-white p-6 shadow-2xl dark:border-indigo-900/60 dark:bg-slate-950">
             <button
               type="button"
-              onClick={handleCopyDonation}
-              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              onClick={() => setIsQrZoomOpen(false)}
+              className="absolute right-3 top-3 rounded-full bg-indigo-50 p-1.5 text-indigo-700 transition hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:bg-indigo-900/40 dark:text-indigo-200 dark:hover:bg-indigo-900/70"
+              aria-label="Tutup perbesaran kode QR"
             >
-              {hasCopiedDonation ? (
-                <>
-                  <Check className="h-4 w-4" />
-                  <span>Disalin</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4" />
-                  <span>Salin</span>
-                </>
-              )}
+              <X className="h-4 w-4" />
             </button>
-          </div>
 
-          <p className="mt-4 rounded-xl bg-indigo-50 p-3 text-xs leading-relaxed text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200">
-            Dukungan Anda membantu kami terus menampilkan UMKM inspiratif, melakukan kurasi, dan memperluas jangkauan usaha lokal.
-            Terima kasih telah menjadi bagian dari perjalanan ini!
-          </p>
+            <Image
+              src="/assets/shareqr.png"
+              alt="Kode QR dukungan RuangRiung"
+              width={480}
+              height={480}
+              className="mx-auto h-auto w-full max-w-xs rounded-xl border border-indigo-100 bg-white object-contain dark:border-indigo-900/60"
+              priority
+            />
+
+            <p className="mt-4 text-center text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              Arahkan kamera Anda dengan mantap ke kode QR ini. Anda juga dapat menyimpan gambar dengan menekan dan menahan selagi kode diperbesar.
+            </p>
+          </div>
         </div>
       ) : null}
     </div>
