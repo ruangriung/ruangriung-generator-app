@@ -7,7 +7,7 @@ const title = 'Etalase UMKM Inspiratif | Ruang Riung';
 const description =
   'Jelajahi UMKM pilihan Ruang Riung lengkap dengan detail produk, foto, dan kontak WhatsApp untuk langsung terhubung dengan pelaku usaha lokal.';
 const pageUrl = 'https://www.ruangriung.id/umkm';
-const ogImage = 'https://www.ruangriung.id/og-umkm.jpg';
+const ogImage = 'https://www.ruangriung.id/og-image/og-umkm.jpg';
 
 export const metadata: Metadata = {
   title,
