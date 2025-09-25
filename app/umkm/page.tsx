@@ -7,8 +7,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { storeCategories, stores } from './data';
+import Pagination from '@/components/Pagination';
 
 const ALL_CATEGORY_VALUE = 'Semua kategori';
+const STORES_PER_PAGE = 10;
 
 const DynamicTurnstile = dynamic(() => import('@/components/TurnstileWidget'), {
   ssr: false,
@@ -17,6 +19,7 @@ const DynamicTurnstile = dynamic(() => import('@/components/TurnstileWidget'), {
 export default function UmkmPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(ALL_CATEGORY_VALUE);
+  const [currentStorePage, setCurrentStorePage] = useState(1);
 
   const filteredStores = useMemo(() => {
     return stores.filter((store) => {
@@ -35,6 +38,30 @@ export default function UmkmPage() {
       return matchCategory && haystack.includes(normalizedSearch);
     });
   }, [searchTerm, selectedCategory]);
+
+  const totalStorePages = useMemo(() => {
+    if (filteredStores.length === 0) {
+      return 1;
+    }
+
+    return Math.ceil(filteredStores.length / STORES_PER_PAGE);
+  }, [filteredStores.length]);
+
+  const paginatedStores = useMemo(() => {
+    const startIndex = (currentStorePage - 1) * STORES_PER_PAGE;
+
+    return filteredStores.slice(startIndex, startIndex + STORES_PER_PAGE);
+  }, [currentStorePage, filteredStores]);
+
+  useEffect(() => {
+    setCurrentStorePage(1);
+  }, [searchTerm, selectedCategory]);
+
+  useEffect(() => {
+    if (currentStorePage > totalStorePages) {
+      setCurrentStorePage(totalStorePages);
+    }
+  }, [currentStorePage, totalStorePages]);
 
   const [formData, setFormData] = useState({
     ownerName: '',
@@ -267,7 +294,7 @@ export default function UmkmPage() {
 
         {filteredStores.length > 0 ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6">
-            {filteredStores.map((store) => (
+            {paginatedStores.map((store) => (
               <Link
                 key={store.id}
                 href={`/umkm/${store.id}`}
@@ -319,6 +346,16 @@ export default function UmkmPage() {
               Coba ubah kata kunci pencarian atau pilih kategori lain untuk menemukan UMKM yang Anda butuhkan.
             </p>
           </div>
+        )}
+
+        {filteredStores.length > STORES_PER_PAGE ? (
+          <Pagination
+            currentPage={currentStorePage}
+            totalPages={totalStorePages}
+            onPageChange={setCurrentStorePage}
+          />
+        ) : (
+          null
         )}
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-gradient-to-br from-indigo-50 via-white to-cyan-50 p-8 shadow-sm shadow-indigo-100/70 sm:p-12">
