@@ -129,9 +129,18 @@ export default function PromptDetailClient({ prompt, prompts }: PromptDetailClie
         <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">{currentPrompt.title}</h1>
         <p className="text-lg text-gray-600 dark:text-gray-300">
           By{' '}
-          {currentPrompt.link || currentPrompt.facebook ? (
+          {currentPrompt.link ? (
             <a
-              href={currentPrompt.link || currentPrompt.facebook}
+              href={currentPrompt.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              {currentPrompt.author}
+            </a>
+          ) : currentPrompt.facebook ? (
+            <a
+              href={currentPrompt.facebook}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:underline"
@@ -142,6 +151,30 @@ export default function PromptDetailClient({ prompt, prompts }: PromptDetailClie
             currentPrompt.author
           )}
         </p>
+        {(currentPrompt.link || currentPrompt.facebook) && (
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
+            {currentPrompt.link && (
+              <a
+                href={currentPrompt.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                Website
+              </a>
+            )}
+            {currentPrompt.facebook && (
+              <a
+                href={currentPrompt.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                Facebook
+              </a>
+            )}
+          </div>
+        )}
         <p className="text-md text-gray-500 dark:text-gray-400 mb-2">
           Tanggal: {new Date(currentPrompt.date).toLocaleDateString('id-ID')}
         </p>
@@ -201,9 +234,18 @@ export default function PromptDetailClient({ prompt, prompts }: PromptDetailClie
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       Oleh{' '}
-                      {relatedPrompt.link || relatedPrompt.facebook ? (
+                      {relatedPrompt.link ? (
                         <a
-                          href={relatedPrompt.link || relatedPrompt.facebook}
+                          href={relatedPrompt.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          {relatedPrompt.author}
+                        </a>
+                      ) : relatedPrompt.facebook ? (
+                        <a
+                          href={relatedPrompt.facebook}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:underline"
@@ -214,6 +256,30 @@ export default function PromptDetailClient({ prompt, prompts }: PromptDetailClie
                         relatedPrompt.author
                       )}
                     </p>
+                    {(relatedPrompt.link || relatedPrompt.facebook) && (
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                        {relatedPrompt.link && (
+                          <a
+                            href={relatedPrompt.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            Website
+                          </a>
+                        )}
+                        {relatedPrompt.facebook && (
+                          <a
+                            href={relatedPrompt.facebook}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            Facebook
+                          </a>
+                        )}
+                      </div>
+                    )}
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
                       Tool:{' '}
                       <span className="font-semibold text-gray-700 dark:text-gray-300">
