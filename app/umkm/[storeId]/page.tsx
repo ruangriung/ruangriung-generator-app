@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `${store.name} • Etalase UMKM Ruang Riung`;
   const description = `${store.description} Temukan produk unggulan, keunikan layanan, dan hubungi langsung ${store.name}.`;
-  const url = `https://www.ruangriung.id/umkm/${store.id}`;
+  const url = `https://www.ruangriung.my.id/umkm/${store.id}`;
   const keywords = [
     store.name,
     store.category,

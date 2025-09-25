@@ -3,11 +3,11 @@ import type { Metadata } from 'next';
 import { UmkmDirectory } from './_components/UmkmDirectory';
 import { getStores } from '@/lib/umkm';
 
-const title = 'Etalase UMKM Inspiratif | Ruang Riung';
+const title = 'Etalase UMKM Inspiratif | RuangRiung';
 const description =
-  'Jelajahi UMKM pilihan Ruang Riung lengkap dengan detail produk, foto, dan kontak WhatsApp untuk langsung terhubung dengan pelaku usaha lokal.';
-const pageUrl = 'https://www.ruangriung.id/umkm';
-const ogImage = 'https://www.ruangriung.id/og-image/og-umkm.jpg';
+  'Jelajahi UMKM pilihan RuangRiung lengkap dengan detail produk, foto, dan kontak WhatsApp untuk langsung terhubung dengan pelaku usaha lokal.';
+const pageUrl = 'https://www.ruangriung.my.id/umkm';
+const ogImage = '/og-image/og-umkm.jpg';
 
 export const metadata: Metadata = {
   title,
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     'produk lokal',
     'bisnis Indonesia',
     'katalog UMKM',
-    'Ruang Riung',
+    'RuangRiung',
   ],
   robots: {
     index: true,
@@ -32,13 +32,13 @@ export const metadata: Metadata = {
     description,
     url: pageUrl,
     type: 'website',
-    siteName: 'Ruang Riung',
+    siteName: 'RuangRiung',
     images: [
       {
         url: ogImage,
         width: 1200,
         height: 630,
-        alt: 'Etalase UMKM Ruang Riung',
+        alt: 'Etalase UMKM RuangRiung',
       },
     ],
   },
