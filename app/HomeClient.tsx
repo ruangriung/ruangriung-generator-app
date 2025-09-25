@@ -9,6 +9,7 @@ import {
   Facebook,
   Mail,
   LayoutGrid,
+  Building2,
   EarthIcon,
   BookOpen,
   QrCode,
@@ -157,7 +158,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         </p>
       </header>
 
-      <div className="w-full max-w-4xl mb-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="w-full max-w-4xl mb-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         <Link
           href="/kumpulan-prompt"
           className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
@@ -169,14 +170,29 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
           <Rss size={18} />
           <span>Artikel</span>
         </Link>
-        <a href="https://www.facebook.com/groups/1182261482811767/?ref=share&mibextid=lOuIew" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-blue-600 text-white font-semibold text-sm rounded-lg shadow-md hover:bg-blue-700 transition-colors">
-          <Facebook size={18} />
-          <span>Gabung Grup</span>
-        </a>
+        <Link
+          href="/umkm"
+          className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
+        >
+          <Building2 size={18} />
+          <span>UMKM</span>
+        </Link>
         <Link href="/kontak" className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
           <Mail size={18} />
           <span>Email Kami</span>
         </Link>
+      </div>
+
+      <div className="w-full max-w-4xl mb-6">
+        <a
+          href="https://www.facebook.com/groups/1182261482811767/?ref=share&mibextid=lOuIew"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex w-full items-center justify-center gap-3 rounded-xl bg-blue-600 px-5 py-4 text-base font-semibold text-white shadow-lg transition-colors hover:bg-blue-700"
+        >
+          <Facebook size={20} />
+          <span>Gabung Grup</span>
+        </a>
       </div>
 
       <div className="w-full max-w-4xl mb-6">
