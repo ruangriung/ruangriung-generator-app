@@ -3,6 +3,13 @@ import nodemailer from 'nodemailer';
 
 const REQUIRED_FIELDS = ['ownerName', 'email', 'businessName', 'description'] as const;
 
+type SubmissionProduct = {
+  name: string;
+  price: string;
+  description: string;
+  image?: string;
+};
+
 type SubmissionPayload = {
   ownerName: string;
   email: string;
@@ -15,10 +22,42 @@ type SubmissionPayload = {
   productHighlights?: string;
   imageLinks?: string;
   additionalInfo?: string;
+  products: SubmissionProduct[];
 };
 
 const sanitize = (value: string | undefined | null) =>
   typeof value === 'string' ? value.trim() : '';
+
+const sanitizeProducts = (value: unknown): SubmissionProduct[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((entry) => {
+      if (!entry || typeof entry !== 'object') {
+        return undefined;
+      }
+
+      const record = entry as Record<string, unknown>;
+      const name = sanitize(record.name as string);
+      const price = sanitize(record.price as string);
+      const description = sanitize(record.description as string);
+      const image = sanitize(record.image as string);
+
+      if (!name || !price || !description) {
+        return undefined;
+      }
+
+      return {
+        name,
+        price,
+        description,
+        image: image || undefined,
+      } satisfies SubmissionProduct;
+    })
+    .filter((product): product is SubmissionProduct => Boolean(product));
+};
 
 export async function POST(request: Request) {
   try {
@@ -42,6 +81,7 @@ export async function POST(request: Request) {
       productHighlights: sanitize(rawPayload.productHighlights),
       imageLinks: sanitize(rawPayload.imageLinks),
       additionalInfo: sanitize(rawPayload.additionalInfo),
+      products: sanitizeProducts(rawPayload.products),
     };
 
     const missingFields = REQUIRED_FIELDS.filter((field) => !submission[field] || submission[field]?.length === 0);
@@ -127,6 +167,22 @@ export async function POST(request: Request) {
       return '';
     })();
 
+    const productLines = submission.products.length
+      ? [
+          '<h3>Produk Unggulan</h3>',
+          '<ul>',
+          ...submission.products.map(
+            (product) =>
+              `<li><strong>${product.name}</strong> — ${product.price}<br>${product.description.replace(/\n/g, '<br>')}${
+                product.image
+                  ? `<br>Gambar: <a href="${product.image}" target="_blank" rel="noopener noreferrer">${product.image}</a>`
+                  : ''
+              }</li>`,
+          ),
+          '</ul>',
+        ]
+      : [];
+
     const messageLines = [
       `<p><strong>Nama Penanggung Jawab:</strong> ${submission.ownerName}</p>`,
       `<p><strong>Email:</strong> ${submission.email}</p>`,
@@ -144,6 +200,7 @@ export async function POST(request: Request) {
       submission.additionalInfo
         ? `<p><strong>Informasi Tambahan:</strong><br>${submission.additionalInfo.replace(/\n/g, '<br>')}</p>`
         : '',
+      ...productLines,
     ].filter(Boolean);
 
     await transporter.sendMail({
@@ -157,12 +214,10 @@ export async function POST(request: Request) {
       `,
     });
 
-    return NextResponse.json(
-      {
-        message: 'Terima kasih! Data UMKM Anda sudah kami terima. Tim kami akan segera menindaklanjuti.',
-      },
-      { status: 200 },
-    );
+    return NextResponse.json({
+      message: 'Terima kasih! Data UMKM Anda sudah kami terima. Tim kami akan segera menindaklanjuti.',
+      submission,
+    });
   } catch (error) {
     console.error('Terjadi kesalahan saat memproses pengajuan UMKM:', error);
     return NextResponse.json(
