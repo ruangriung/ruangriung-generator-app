@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import type { Product, Store } from '../data';
+import type { Product, Store } from '@/lib/umkm/types';
 import Pagination from '@/components/Pagination';
 
 const PRODUCTS_PER_PAGE = 4;

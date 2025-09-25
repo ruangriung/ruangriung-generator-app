@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { StoreShowcase } from '../_components/StoreShowcase';
-import { getStoreById, stores } from '../data';
+import { getStoreById, getStores } from '@/lib/umkm';
 
 interface PageProps {
   params: {
@@ -11,12 +11,13 @@ interface PageProps {
   };
 }
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const stores = await getStores();
   return stores.map((store) => ({ storeId: store.id }));
 }
 
-export function generateMetadata({ params }: PageProps): Metadata {
-  const store = getStoreById(params.storeId);
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const store = await getStoreById(params.storeId);
 
   if (!store) {
     return {
@@ -47,8 +48,8 @@ export function generateMetadata({ params }: PageProps): Metadata {
   };
 }
 
-export default function StoreDetailPage({ params }: PageProps) {
-  const store = getStoreById(params.storeId);
+export default async function StoreDetailPage({ params }: PageProps) {
+  const store = await getStoreById(params.storeId);
 
   if (!store) {
     notFound();
