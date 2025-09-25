@@ -4,7 +4,7 @@ slug: "ranjat-wijayakusuma"
 title: "Ranjat Wijayakusuma"
 author: "awanbyru"
 facebook: "https://www.facebook.com/awanbyru"
-website: "https://awanbyru.com"
+link: "https://awanbyru.com"
 date: "2025-09-25"
 tool: "Imagen 4 Ultra"
 tags:
