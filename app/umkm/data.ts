@@ -666,27 +666,6 @@ export const stores: Store[] = [
   },
 ];
 
-export function slugifyProductName(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)+/g, '');
-}
-
 export function getStoreById(storeId: string): Store | undefined {
   return stores.find((store) => store.id === storeId);
-}
-
-export function getProductBySlug(storeId: string, productSlug: string): {
-  store: Store | undefined;
-  product: Product | undefined;
-} {
-  const store = getStoreById(storeId);
-  const product = store?.products.find(
-    (item) => slugifyProductName(item.name) === productSlug,
-  );
-
-  return { store, product };
 }
