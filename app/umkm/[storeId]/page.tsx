@@ -23,20 +23,42 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {
       title: 'UMKM tidak ditemukan | Ruang Riung',
       description: 'Toko UMKM yang Anda cari tidak tersedia dalam katalog Ruang Riung.',
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 
   const title = `${store.name} • Etalase UMKM Ruang Riung`;
   const description = `${store.description} Temukan produk unggulan, keunikan layanan, dan hubungi langsung ${store.name}.`;
+  const url = `https://www.ruangriung.id/umkm/${store.id}`;
+  const keywords = [
+    store.name,
+    store.category,
+    store.location,
+    'UMKM',
+    'pelaku usaha lokal',
+    'Ruang Riung',
+  ];
 
   return {
     title,
     description,
+    keywords,
+    robots: {
+      index: true,
+      follow: true,
+    },
+    alternates: {
+      canonical: url,
+    },
     openGraph: {
       title,
       description,
       type: 'website',
-      url: `https://www.ruangriung.id/umkm/${store.id}`,
+      url,
+      siteName: 'Ruang Riung',
       images: store.heroImage ? [{ url: store.heroImage, width: 1200, height: 630, alt: store.name }] : undefined,
     },
     twitter: {
