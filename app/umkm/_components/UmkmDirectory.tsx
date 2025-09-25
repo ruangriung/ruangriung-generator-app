@@ -155,7 +155,7 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
       {
         label: 'UMKM aktif',
         value: numberFormatter.format(totalStores),
-        description: 'Telah melalui proses kurasi manual RuangRiung',
+        description: 'Produk UMKM terpopuler yang paling dicari komunitas',
       },
       {
         label: 'Kategori pilihan',
@@ -174,7 +174,7 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
   const curatedTestimonial = useMemo(
     () => ({
       quote:
-        '“Listing RuangRiung membantu kami ditemukan komunitas baru. Narasi kurasi mereka membuat calon pelanggan merasa dekat dengan cerita usaha kami.”',
+        '“Listing RuangRiung membantu kami ditemukan komunitas baru. Cerita yang mereka susun membuat calon pelanggan merasa dekat dengan usaha kami.”',
       author: 'Riana, Pendiri Kopi Searah',
       role: 'UMKM kuliner binaan sejak 2023',
     }),
@@ -514,8 +514,8 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
               Temukan UMKM Inspiratif dari Berbagai Penjuru Nusantara
             </h1>
             <p className="mt-4 text-base text-slate-600 dark:text-slate-300 sm:text-lg">
-              Jelajahi katalog UMKM pilihan kami. Setiap profil sudah dikurasi agar Anda langsung memahami kekuatan produk,
-              kisah di balik usaha, dan cara tercepat menghubungi pemiliknya.
+              Jelajahi katalog UMKM pilihan kami. Setiap profil menonjolkan kekuatan produk, kisah di balik usaha, dan cara
+              tercepat menghubungi pemiliknya.
             </p>
           </div>
 
@@ -864,7 +864,7 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
               Daftarkan UMKM Anda Sekarang
             </button>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Estimasi kurasi 3–5 hari kerja. Kami akan mengonfirmasi melalui email atau WhatsApp.
+              Estimasi peninjauan 3–5 hari kerja. Kami akan mengonfirmasi melalui email atau WhatsApp.
             </p>
           </div>
         </section>
@@ -906,7 +906,7 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
                     Formulir Pengajuan UMKM
                   </h2>
                   <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
-                    Lengkapi informasi berikut agar tim kurasi kami dapat memproses dan menampilkan UMKM Anda di Ruang Riung.
+                    Lengkapi informasi berikut agar tim kami dapat meninjau dan menampilkan UMKM Anda di Ruang Riung.
                     Semua kolom dapat digulir dan tetap nyaman dibaca, termasuk pada layar ponsel.
                   </p>
                 </div>
