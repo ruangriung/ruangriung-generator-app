@@ -75,6 +75,26 @@ export default function ProductDetailPage({ params }: PageProps) {
   return (
     <div className="bg-white pb-16 pt-12 text-slate-900">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 transition hover:text-indigo-800"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="h-4 w-4"
+              aria-hidden="true"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+            Kembali ke Beranda
+          </Link>
+        </div>
+
         <nav className="mb-6 flex items-center gap-2 text-sm text-slate-500">
           <Link href="/umkm" className="transition hover:text-slate-900">
             UMKM
