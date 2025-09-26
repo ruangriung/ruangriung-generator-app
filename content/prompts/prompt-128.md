@@ -4,7 +4,7 @@ slug: "psychedelic-tiny-planet-dreamscape"
 title: "Psychedelic Tiny Planet Dreamscape"
 author: "Arif Tirtana"
 facebook: "https://www.facebook.com/ayicktigabelas"
-website: "https://www.ariftirtana.my.id"
+link: "https://www.ariftirtana.my.id"
 date: "2025-09-26"
 tool: "Dall-E 3, Custom GPT, Microsoft Designer"
 tags:
