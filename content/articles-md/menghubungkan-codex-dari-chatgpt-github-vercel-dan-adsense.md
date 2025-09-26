@@ -1,6 +1,6 @@
 ---
 title: Jalan Santai Menghubungkan Codex ChatGPT ke GitHub, Vercel, Website, dan AdSense
-date: 2025-08-18
+date: 2025-09-26
 author: Tim RuangRiung
 category: Monetisasi
 tags: ['Codex', 'ChatGPT', 'GitHub', 'Vercel', 'AdSense', 'monetisasi', 'website']
