@@ -12,7 +12,7 @@ Cuan bukan sekadar kata ajaib; ia adalah denyut nadi yang membuat saya menyalaka
 
 ## Bab 1: Menyapa Codex sebagai Rekan Satu Tim
 
-Saya selalu memulai cerita ini dengan memperkenalkan Codex yang hidup di fitur ChatGPT. Ia bukan sekadar mesin; ia bagai rekan satu tim yang sabar. Kita bisa memintanya membuat kerangka Next.js, membantu menulis API routes, atau menjelaskan konsep TypeScript ketika kepala sedang penuh. Untuk menggali lebih dalam tentang cara kerja Codex di ekosistem RuangRiung, sempatkan membaca [panduan menulis prompt JSON](/articles/panduan-menulis-prompt-json) yang mengajarkan bagaimana mengubah kebutuhan manusiawi menjadi instruksi jelas bagi mesin.
+Saya selalu memulai cerita ini dengan memperkenalkan Codex yang hidup di fitur ChatGPT. Ia bukan sekadar mesin; ia bagai rekan satu tim yang sabar. Kita bisa memintanya membuat kerangka Next.js, membantu menulis API routes, atau menjelaskan konsep TypeScript ketika kepala sedang penuh. Untuk menggali lebih dalam tentang cara kerja Codex di ekosistem RuangRiung, sempatkan membaca [panduan menulis prompt JSON](/artikel/panduan-menulis-prompt-json) yang mengajarkan bagaimana mengubah kebutuhan manusiawi menjadi instruksi jelas bagi mesin.
 
 Ajak Codex berdialog hangat. Contohnya, saya sering menulis, "Codex, tolong buatkan halaman landing bertema produktivitas dengan hero, daftar fitur, dan form berlangganan." Responnya menjadi titik awal kita menata kode secara rapi.
 
@@ -26,7 +26,7 @@ Bayangkan ruang kerja yang harum kopi dan ditemani playlist favorit. Agar cerita
 4. **Jalankan `pnpm install`** untuk memasang dependensi.
 5. **Uji aplikasi lokal** dengan `pnpm dev` dan buka `http://localhost:3000` sambil mengecek pengalaman pengguna.
 
-Jika ingin memahami bagaimana konten bisa tampil konsisten di berbagai perangkat, Anda dapat menengok [mengenal fitur PWA](/articles/mengenal-fitur-pwa) yang menyoroti aspek performa dan caching.
+Jika ingin memahami bagaimana konten bisa tampil konsisten di berbagai perangkat, Anda dapat menengok [mengenal fitur PWA](/artikel/mengenal-fitur-pwa) yang menyoroti aspek performa dan caching.
 
 ## Bab 3: Mengarsipkan Kisah di GitHub
 
@@ -42,7 +42,7 @@ Di GitHub saya merasa memiliki galeri yang menyimpan setiap momen kecil. Setiap 
    git push -u origin main
    ```
 3. **Aktifkan proteksi branch** agar perubahan besar menempuh proses review.
-4. **Gunakan Issues dan Projects** sebagai papan perasaan: catat ide, bug, dan milestone. Teknik mengelola prioritas juga dibahas dalam [mengupas algoritma Facebook Pro](/articles/mengupas-algoritma-facebook-pro) yang relevan untuk perencanaan konten lintas kanal.
+4. **Gunakan Issues dan Projects** sebagai papan perasaan: catat ide, bug, dan milestone. Teknik mengelola prioritas juga dibahas dalam [mengupas algoritma Facebook Pro](/artikel/mengupas-algoritma-facebook-pro) yang relevan untuk perencanaan konten lintas kanal.
 
 ## Bab 4: Menyulap GitHub Menjadi Website Lewat Vercel
 
@@ -54,13 +54,13 @@ Saat pertama kali menekan tombol deploy di Vercel, saya selalu merasakan gemetar
 4. **Pantau log build** sambil menyeruput minuman favorit. Jika ada error, ajak Codex mencari solusinya.
 5. **Bagikan URL preview** kepada teman atau komunitas RuangRiung untuk mendapat umpan balik emosional sekaligus teknis.
 
-Untuk memperdalam strategi optimasi interaksi pengguna, Anda bisa membaca [tips fitur edit gambar real-time](/articles/tips-fitur-edit-gambar-real-time) yang mengupas performa front-end.
+Untuk memperdalam strategi optimasi interaksi pengguna, Anda bisa membaca [tips fitur edit gambar real-time](/artikel/tips-fitur-edit-gambar-real-time) yang mengupas performa front-end.
 
 ## Bab 5: Mempersiapkan Website Menyambut AdSense
 
 Sebelum mengajukan AdSense, saya memastikan website terasa seperti rumah nyaman bagi pengunjung:
 
-- **Isi dengan konten orisinal** yang konsisten. Rangkai cerita ala [membangun dunia fantasi dengan AI Storyteller](/articles/membangun-dunia-fantasi-anda-dengan-ai-storyteller) agar tiap halaman mengundang rasa penasaran.
+- **Isi dengan konten orisinal** yang konsisten. Rangkai cerita ala [membangun dunia fantasi dengan AI Storyteller](/artikel/membangun-dunia-fantasi-anda-dengan-ai-storyteller) agar tiap halaman mengundang rasa penasaran.
 - **Pastikan navigasi terang benderang**: header, footer, dan sitemap memberi arahan jelas.
 - **Optimalkan kecepatan** menggunakan gambar terkompresi, lazy loading, dan dukungan CDN Vercel.
 - **Sediakan halaman legal** seperti Privacy Policy dan Terms of Service untuk menunjukkan profesionalisme.
@@ -74,7 +74,7 @@ Mengajukan AdSense ibarat mengirim surat cinta yang penuh harapan. Berikut langk
 3. **Verifikasi kepemilikan situs** melalui meta tag atau file HTML yang diunggah ke root.
 4. **Perbarui konten secara berkala** selama masa review (biasanya 3–14 hari) agar Google melihat aktivitas alami.
 
-Jangan lupa meninjau [panduan menilai kualitas gambar AI](/articles/panduan-menilai-kualitas-gambar-ai) untuk memastikan semua aset visual memenuhi standar kualitas yang disukai AdSense.
+Jangan lupa meninjau [panduan menilai kualitas gambar AI](/artikel/panduan-menilai-kualitas-gambar-ai) untuk memastikan semua aset visual memenuhi standar kualitas yang disukai AdSense.
 
 ## Bab 7: Menempatkan Script AdSense Tanpa Merusak Cerita
 
@@ -142,11 +142,11 @@ Perjalanan tidak berhenti setelah iklan tampil. Saya selalu menulis jurnal mingg
 - **Kualitas konten** dengan menggunakan Codex sebagai editor yang mengusulkan perbaikan.
 - **Eksperimen A/B** pada posisi iklan tanpa mengorbankan kenyamanan pengguna.
 
-Lengkapi eksplorasi Anda dengan membaca [menguasai komposisi gambar AI](/articles/menguasai-komposisi-gambar-ai) untuk meningkatkan estetika visual yang mendorong waktu kunjungan lebih lama.
+Lengkapi eksplorasi Anda dengan membaca [menguasai komposisi gambar AI](/artikel/menguasai-komposisi-gambar-ai) untuk meningkatkan estetika visual yang mendorong waktu kunjungan lebih lama.
 
 ## Penutup: Dari Cerita Menjadi Penghasilan
 
 Ketika semua langkah terjalin, saya merasa seperti menutup buku harian dengan senyum. Codex membantu menulis kode, GitHub menjaga histori, Vercel menayangkan karya, dan AdSense memberi apresiasi dalam bentuk pendapatan. Perjalanan ini santai, emosional, namun tetap bertumpu pada prinsip ilmiah. Semoga kisah saya membuat Anda yakin bahwa cuan bukan sekadar fantasi—ia bisa hadir melalui integrasi yang sabar dan konsisten.
 
-Jika Anda membutuhkan versi yang lebih terstruktur dan formal, silakan baca [Strategi Formal Menghubungkan Codex ChatGPT, GitHub, Vercel, dan Google AdSense untuk Cuan Berkelanjutan](/articles/menghubungkan-codex-dari-chatgpt-github-vercel-dan-adsense). Jadikan kedua kisah ini sebagai pasangan kompas: satu menjaga alur emosi, satunya lagi menegakkan langkah sistematis.
+Jika Anda membutuhkan versi yang lebih terstruktur dan formal, silakan baca [Strategi Formal Menghubungkan Codex ChatGPT, GitHub, Vercel, dan Google AdSense untuk Cuan Berkelanjutan](/artikel/menghubungkan-codex-dari-chatgpt-github-vercel-dan-adsense). Jadikan kedua kisah ini sebagai pasangan kompas: satu menjaga alur emosi, satunya lagi menegakkan langkah sistematis.
 
