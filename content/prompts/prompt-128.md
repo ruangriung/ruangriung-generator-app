@@ -24,7 +24,7 @@ Bayangkan sebuah karya seni fantasi vertikal yang menampilkan planet mungil mela
 
 Latar menampilkan kebocoran cahaya, efek neon, dan komponen sistem suara abstrak yang menyatu dengan not-not musik melayang. Palet warnanya pekat dan berani—biru tua, oranye menyala, hijau zamrud, dan emas berpendar dengan percikan warna lain yang kontras. Komposisi padat ini memadukan simbolisme kematian, energi musik, dan imajinasi visual dalam sebuah lanskap mimpi penuh gerak.
 
-Kunjungi portofolio lengkap kreator di [website resmi Arif Tirtana](https://www.ariftirtana.my.id) untuk eksplorasi karya lain yang sama intensnya.
+Kunjungi portofolio lengkap kreator di [website resmi Arif Tirtana](https://www.ariftirtana.my.id) untuk eksplorasi karya lain yang sama intensnya, dan ikuti pembaruan terkininya melalui [Facebook](https://www.facebook.com/ayicktigabelas).
 
 ## English
 
@@ -32,14 +32,5 @@ Imagine a vertical fantasy artwork featuring a floating tiny planet suspended in
 
 The background glows with neon flares, abstract sound-system components, and drifting musical notes that blend seamlessly with the architecture. Bold, dark tones dominate the palette—deep blues, blazing oranges, emerald greens, and radiant gold punctuated by vivid accents. This dense composition merges symbolism of death, musical energy, and boundless imagination into a motion-filled dreamscape.
 
-Discover more high-energy experiments by visiting the creator’s official site: [https://www.ariftirtana.my.id](https://www.ariftirtana.my.id).
-
-## Metadata
-
-- **Nama Kreator:** Arif Tirtana
-- **Tanggal Rilis:** 26 September 2025
-- **Facebook:** https://www.facebook.com/ayicktigabelas
-- **Website:** https://www.ariftirtana.my.id
-- **Format:** Ilustrasi digital vertikal
-- **Tema:** Fantasi, musik, simbolisme kematian
+Discover more high-energy experiments by visiting the creator’s official site: [https://www.ariftirtana.my.id](https://www.ariftirtana.my.id), and stay connected via [Facebook](https://www.facebook.com/ayicktigabelas).
 
