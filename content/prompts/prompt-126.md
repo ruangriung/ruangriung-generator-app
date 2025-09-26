@@ -5,7 +5,13 @@ title: "Nanonanostyke"
 author: "Kokosima"
 date: "2025-09-26"
 tool: "Gemini"
-tags: []
+tags:
+  - seni digital
+  - fantasi
+  - nusantara
+  - budaya
+  - ornamen emas
+  - 3d
 ---
 
 Ultra-detailed digital artwork, subject based on reference photo (keep exact face details, do not alter identity). Subject in a dynamic pose, captured in 3D space, interacting with the ornate surroundings. The figure touches, leans on, or emerges from the majestic Nusantara-inspired ornamental structures, as if alive within the intricate world.
