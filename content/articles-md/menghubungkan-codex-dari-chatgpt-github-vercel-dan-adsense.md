@@ -8,7 +8,7 @@ image: /v1/assets/ruangriung.png
 summary: Narasi formal namun tetap menggugah tentang cara membangun alur kerja Codex, GitHub, Vercel, dan Google AdSense agar website pribadi memperoleh pendapatan stabil di luar Facebook.
 ---
 
-Bayangkan saya sedang duduk di sebuah sudut kedai kopi, memperhatikan laptop yang menyala dengan penuh harap. Di hadapan saya terbentang pertanyaan yang mungkin juga Anda rasakan: bagaimana caranya mendapatkan penghasilan daring tanpa harus bergantung pada ekosistem Facebook? Melalui artikel ini, saya akan menuntun Anda menapaki setiap tahap integrasi Codex dari fitur ChatGPT dengan GitHub, Vercel, hingga penayangan Google AdSense di website pribadi. Pendekatan yang saya paparkan bersifat formal, runtut, namun tetap memelihara kedekatan emosional agar Anda percaya diri menjalankan seluruh proses.
+Bayangkan saya sedang duduk di sebuah sudut kedai kopi, memperhatikan laptop yang menyala dengan penuh harap. Di hadapan saya terbentang pertanyaan yang mungkin juga Anda rasakan: bagaimana caranya mendapatkan penghasilan daring tanpa harus bergantung pada ekosistem Facebook? Melalui artikel ini, saya akan menuntun Anda menapaki setiap tahap integrasi Codex dari fitur ChatGPT dengan GitHub, Vercel, hingga penayangan Google AdSense di website pribadi. Pendekatan yang saya paparkan bersifat formal, runtut, namun tetap memelihara kedekatan emosional agar Anda percaya diri menjalankan seluruh proses. Jika Anda membutuhkan narasi pendamping yang lebih santai, silakan jelajahi [Cuan Mengalir Terus Tanpa Batasan Algoritma](/articles/cuan-rencana-workflow-codex-github-vercel-adsense) sebagai pasangan bacaan yang saling menguatkan.
 
 ## Episode 1: Memahami Peran Codex dalam Proses Kreatif
 
