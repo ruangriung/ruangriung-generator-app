@@ -13,15 +13,6 @@ tags:
   - fractal patterns
   - rotating frame
   - ominous
-  - dark fantasy
 ---
-
-## Bahasa Indonesia
-
-Sebuah adegan gelap nan mengancam dengan bingkai berputar menampilkan sosok menyeramkan bertanduk tajam dan terpuntir, kepalanya muncul dari dinding rapuh penuh bata dan mortar yang mengelupas. Latar belakang dipenuhi fraktal berputar dalam gradasi ungu dan biru yang berdenyut, sementara sosok tersebut mengambil pose dinamis dengan tangan terentang, cakar panjang, dan tubuh diselimuti nyala api intens. Asap abstrak membubung lembut ke atas, menyatu dengan kabut hijau mistis yang memancarkan cahaya dunia lain, menghadirkan atmosfer menghantui.
-
-Ekspresi wajahnya meringis grotesk dengan mata bercahaya yang menembus kegelapan. Kulit merah tua yang diselimuti bayangan gelap semakin menegaskan kesan ancaman. Detail fraktal yang sangat rumit memenuhi setiap sudut komposisi, menambah rasa kekacauan dan energi supernatural pada karya ini.
-
-## English
 
 a dark and ominous scene with a rotating frame, a menacing figure with sharp twisted horns, its head emerging from a worn crumbling wall with exposed bricks and mortar, amidst a backdrop of vibrant swirling fractals in shades of purple and blue, assuming a dynamic pose with outstretched hands, long sharp claws, and intense flames engulfing its body, abstract smoke wafts upward in a fluid motion, set against a eerie green haze with an otherworldly glow, evoking a haunting and terrifying atmosphere, with an abundance of intricate abstract fractal patterns, the figure's facial features are twisted in a grotesque grimace, with glowing eyes that seem to pierce through the darkness, its skin a deep crimson red with darker shadows accentuating its menacing appearance.
