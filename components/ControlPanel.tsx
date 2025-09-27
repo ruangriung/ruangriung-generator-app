@@ -105,15 +105,50 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       }
 
       const result = await response.json();
-      const newPrompt = result.choices[0].message.content.replace(/"/g, '');
-      setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }));
-      return newPrompt;
+      const aiContent = result?.choices?.[0]?.message?.content ?? '';
+      const trimmedContent = aiContent.trim();
+
+      let cleanedContent = trimmedContent;
+      if (trimmedContent.length >= 2) {
+        const firstChar = trimmedContent[0];
+        const lastChar = trimmedContent[trimmedContent.length - 1];
+        if ((firstChar === '"' || firstChar === '\'') && lastChar === firstChar) {
+          cleanedContent = trimmedContent.slice(1, -1).trim();
+        }
+      }
+
+      return cleanedContent || trimmedContent;
     } catch (error: any) {
       console.error("Gagal memanggil API prompt:", error);
       toast.error(`Terjadi kesalahan saat berkomunikasi dengan AI: ${error.message}`);
-      setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: "Gagal menghasilkan prompt. Silakan coba lagi." }));
       throw error;
     }
+  };
+
+  const mergePromptWithEnhancement = (originalPrompt: string, enhancedPrompt: string) => {
+    const trimmedOriginal = originalPrompt.trim();
+    const trimmedEnhanced = enhancedPrompt.trim();
+
+    if (!trimmedOriginal) {
+      return trimmedEnhanced;
+    }
+
+    if (!trimmedEnhanced) {
+      return trimmedOriginal;
+    }
+
+    const normalizedOriginal = trimmedOriginal.toLowerCase();
+    const normalizedEnhanced = trimmedEnhanced.toLowerCase();
+
+    if (normalizedEnhanced.includes(normalizedOriginal)) {
+      return trimmedEnhanced;
+    }
+
+    if (normalizedOriginal.includes(normalizedEnhanced)) {
+      return trimmedOriginal;
+    }
+
+    return `${trimmedOriginal}\n\n${trimmedEnhanced}`;
   };
 
   const handleRandomPrompt = async () => {
@@ -132,14 +167,21 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
         Make it visually descriptive, concise, and DO NOT use quotation marks in your response.
     `;
 
+    const randomPromptPromise = callPromptApi(randomPromptInstruction, 0.10).then((newPrompt) => {
+      setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }));
+      return newPrompt;
+    });
+
     toast.promise(
-      callPromptApi(randomPromptInstruction, 0.10),
+      randomPromptPromise,
       {
         loading: 'Finding a random prompt idea...',
         success: 'Random prompt created successfully!',
         error: 'Failed to create a random prompt.',
       }
-    ).finally(() => setIsRandomizing(false));
+    );
+
+    randomPromptPromise.finally(() => setIsRandomizing(false));
   };
 
   const handleEnhancePrompt = async () => {
@@ -148,14 +190,30 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       return;
     }
     setIsEnhancing(true);
+    const originalPrompt = settings.prompt;
+
+    const enhancePromise = callPromptApi(
+      `Enhance and add more visual details to the following image prompt, but keep it concise: "${settings.prompt}". Do not use or remove quotation marks in your response.`
+    ).then((enhancedPrompt) => {
+      const mergedPrompt = mergePromptWithEnhancement(originalPrompt, enhancedPrompt);
+      setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: mergedPrompt }));
+      return mergedPrompt;
+    });
+
     toast.promise(
-      callPromptApi(`Enhance and add more visual details to the following image prompt, but keep it concise: "${settings.prompt}". Do not use or remove quotation marks in your response.`),
+      enhancePromise,
       {
         loading: 'Enhancing prompt...',
         success: 'Prompt enhanced successfully!',
         error: 'Failed to enhance prompt.',
       }
-    ).finally(() => setIsEnhancing(false));
+    );
+
+    enhancePromise
+      .catch(() => {
+        setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: originalPrompt }));
+      })
+      .finally(() => setIsEnhancing(false));
   };
 
   const handleSavePrompt = () => {
@@ -236,14 +294,21 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       {"setting": "serene forest", "elements": ["magical creatures", "starry night"], "mood": "fantasy"}
       Please ensure the output is valid JSON and nothing else.
     `;
+    const jsonPromptPromise = callPromptApi(jsonInstruction, 0.2).then((newPrompt) => {
+      setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }));
+      return newPrompt;
+    });
+
     toast.promise(
-      callPromptApi(jsonInstruction, 0.2),
+      jsonPromptPromise,
       {
         loading: 'Generating JSON from prompt...',
         success: 'JSON generated successfully!',
         error: 'Failed to generate JSON.',
       }
-    ).finally(() => setIsGeneratingJson(false));
+    );
+
+    jsonPromptPromise.finally(() => setIsGeneratingJson(false));
   };
 
 
