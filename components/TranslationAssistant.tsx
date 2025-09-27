@@ -73,7 +73,6 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
         body: JSON.stringify({
           model: 'openai',
           messages: [{ role: 'user', content: combinedPrompt }],
-          temperature: 0.7,
         }),
       });
 
