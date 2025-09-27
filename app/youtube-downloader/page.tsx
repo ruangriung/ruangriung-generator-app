@@ -71,6 +71,11 @@ const faqs = [
       'Belum. Tombol unduh bersifat simulasi sehingga Anda bebas menghubungkannya ke API internal yang sudah memproses video dengan aman.',
   },
   {
+    question: 'Dimana saya bisa mendapatkan API untuk mengunduh video YouTube?',
+    answer:
+      'YouTube tidak menyediakan API resmi untuk mengunduh video karena melanggar Ketentuan Layanan mereka. Anda perlu menyiapkan layanan server-side sendiri—misalnya dengan pustaka open-source seperti yt-dlp atau ytdl-core—dan membatasi penggunaannya hanya untuk konten yang Anda miliki haknya.',
+  },
+  {
     question: 'Bagaimana cara menyiapkan backend unduhan yang legal?',
     answer:
       'Gunakan pustaka seperti yt-dlp di server Anda sendiri dan batasi akses hanya untuk konten berlisensi atau milik Anda. Sertakan autentikasi dan pembatasan kuota.',
