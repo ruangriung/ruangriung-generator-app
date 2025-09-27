@@ -5,6 +5,7 @@ title: "Chibi Punk"
 author: "Guntur"
 date: "2025-09-27"
 tool: "RuangRiung (Flux)"
+image: "https://www.facebook.com/share/p/1BhTw2JZ1W/"
 tags:
   - chibi art
   - punk style
