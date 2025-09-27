@@ -49,14 +49,47 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
     const textToTranslate = inputText.trim();
 
     const combinedPrompt = `${promptInstruction}\n\nTeks: "${textToTranslate}"`;
-    const urlWithToken = `https://text.pollinations.ai/openai?token=${process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN}`;
+
+    const POLLINATIONS_TEXT_API_BASE_URL = 'https://text.pollinations.ai';
+    const POLLINATIONS_OPENAI_ENDPOINT = `${POLLINATIONS_TEXT_API_BASE_URL}/openai`;
+    const POLLINATIONS_TOKEN = process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN?.trim();
+    const POLLINATIONS_REFERRER = 'ruangriung.my.id';
+
+    const buildPollinationsUrl = (baseUrl: string) => {
+      try {
+        const url = new URL(baseUrl);
+        if (POLLINATIONS_TOKEN) {
+          url.searchParams.set('token', POLLINATIONS_TOKEN);
+        } else {
+          url.searchParams.set('referrer', POLLINATIONS_REFERRER);
+        }
+        return url.toString();
+      } catch (error) {
+        console.warn('Gagal membangun URL Pollinations:', error);
+        const searchParam = POLLINATIONS_TOKEN
+          ? `token=${encodeURIComponent(POLLINATIONS_TOKEN)}`
+          : `referrer=${encodeURIComponent(POLLINATIONS_REFERRER)}`;
+        const separator = baseUrl.includes('?') ? '&' : '?';
+        return `${baseUrl}${separator}${searchParam}`;
+      }
+    };
+
+    const getPollinationsHeaders = () => {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (POLLINATIONS_TOKEN) {
+        headers.Authorization = `Bearer ${POLLINATIONS_TOKEN}`;
+      }
+      return headers;
+    };
+
+    const urlWithToken = buildPollinationsUrl(POLLINATIONS_OPENAI_ENDPOINT);
 
     try {
       const response = await fetch(urlWithToken, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getPollinationsHeaders(),
         body: JSON.stringify({
           model: 'openai',
           messages: [{ role: 'user', content: combinedPrompt }],
