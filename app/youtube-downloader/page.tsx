@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
 import {
+  Activity,
   AlertTriangle,
+  Boxes,
   Clock,
   Download,
   FileAudio2,
   FileVideo2,
+  KeyRound,
+  LifeBuoy,
+  ServerCog,
   ShieldCheck,
   Sparkles,
 } from 'lucide-react';
@@ -61,6 +66,57 @@ const steps = [
     title: '3. Hubungkan ke backend',
     description:
       'Gunakan fetch/axios untuk memanggil layanan server-side seperti yt-dlp. Pastikan Anda hanya mengunduh konten yang sah secara hukum.',
+  },
+];
+
+const productionRoadmap = [
+  {
+    title: 'Rancang layanan backend',
+    description:
+      'Pisahkan pipeline unduhan ke dalam service khusus agar beban berat pemrosesan video tidak mengganggu aplikasi utama.',
+    actionItems: [
+      'Pilih pustaka downloader (yt-dlp/ytdl-core) dan bungkus dalam REST/Queue worker.',
+      'Gunakan storage sementara (S3 kompatibel) untuk hasil unduhan.',
+      'Batasi ukuran file & durasi video sejak awal.',
+    ],
+    icon: ServerCog,
+  },
+  {
+    title: 'Amankan akses & kepatuhan',
+    description:
+      'Pastikan hanya pengguna resmi yang bisa meminta unduhan serta catat audit log untuk memudahkan pemeriksaan.',
+    actionItems: [
+      'Implementasikan autentikasi + otorisasi (API key, OAuth, atau session).',
+      'Tambahkan rate limiting & kuota penggunaan per pengguna.',
+      'Simulasikan review legal terhadap konten yang diunduh.',
+    ],
+    icon: KeyRound,
+  },
+  {
+    title: 'Otomasi kualitas & pemantauan',
+    description:
+      'Monitoring menyeluruh akan membantu Anda mendeteksi error downloader, kegagalan worker, maupun penyalahgunaan.',
+    actionItems: [
+      'Integrasikan log terstruktur (contoh: pino, Winston, Datadog).',
+      'Aktifkan alert berdasarkan metrik antrian & tingkat keberhasilan.',
+      'Siapkan fallback & retry otomatis jika unduhan gagal.',
+    ],
+    icon: Activity,
+  },
+];
+
+const productionChecklist = [
+  {
+    label: 'CI/CD build & test otomatis (pnpm lint, pnpm test, pnpm build)',
+    icon: Boxes,
+  },
+  {
+    label: 'Observabilitas: log terpusat + tracing request downloader',
+    icon: LifeBuoy,
+  },
+  {
+    label: 'Dokumentasi internal mengenai batas konten & SOP takedown',
+    icon: ShieldCheck,
   },
 ];
 
@@ -140,6 +196,59 @@ export default function YouTubeDownloaderPage() {
               <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">{description}</p>
             </div>
           ))}
+        </section>
+
+        <section className="grid gap-8 rounded-3xl bg-white/80 p-8 shadow-2xl ring-1 ring-purple-100 backdrop-blur dark:bg-gray-900/80 dark:ring-purple-500/30 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Roadmap menuju produksi</h2>
+              <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                Ikuti rangkaian pekerjaan prioritas ini agar integrasi downloader Anda siap digunakan secara luas tanpa melanggar ketentuan platform maupun standar keamanan perusahaan.
+              </p>
+            </div>
+            <div className="space-y-4">
+              {productionRoadmap.map(({ title, description, actionItems, icon: Icon }) => (
+                <article key={title} className="flex gap-4 rounded-2xl border border-purple-100 bg-white/80 p-5 shadow-inner dark:border-purple-500/30 dark:bg-gray-950/50">
+                  <span className="mt-1 rounded-full bg-purple-100 p-3 text-purple-600 shadow-sm dark:bg-purple-500/20 dark:text-purple-200">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <div className="space-y-2">
+                    <h3 className="text-base font-semibold text-gray-800 dark:text-gray-100">{title}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{description}</p>
+                    <ul className="list-disc space-y-1 pl-5 text-sm text-gray-600 dark:text-gray-400">
+                      {actionItems.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+          <aside className="flex flex-col gap-6 rounded-2xl border border-purple-100 bg-gradient-to-b from-purple-600/90 via-purple-700/90 to-purple-800/90 p-6 text-purple-50 shadow-xl dark:border-purple-500/40 dark:from-purple-500/60 dark:via-purple-600/60 dark:to-purple-700/60">
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Checklist sebelum live</h3>
+              <p className="text-sm text-purple-100/80">
+                Pastikan tiap butir berikut telah ditandai selesai sebelum membuka akses publik atau bermitra dengan klien.
+              </p>
+            </div>
+            <ul className="space-y-4">
+              {productionChecklist.map(({ label, icon: Icon }) => (
+                <li key={label} className="flex items-start gap-3 rounded-xl bg-white/10 p-4 shadow-inner">
+                  <span className="rounded-full bg-white/20 p-2 text-purple-50">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <p className="text-sm leading-snug text-purple-50/95">{label}</p>
+                </li>
+              ))}
+            </ul>
+            <div className="rounded-xl bg-white/10 p-4 text-xs text-purple-50/80 shadow-inner">
+              <p className="font-semibold uppercase tracking-wide">Deployment tip</p>
+              <p className="mt-2">
+                Siapkan environment variabel seperti <code className="rounded bg-white/20 px-1 py-0.5 font-mono text-[11px]">YTDLP_BINARY_PATH</code> dan <code className="rounded bg-white/20 px-1 py-0.5 font-mono text-[11px]">DOWNLOAD_BUCKET_URL</code> di platform hosting Anda agar worker dapat berjalan stabil.
+              </p>
+            </div>
+          </aside>
         </section>
 
         <section className="grid gap-6 rounded-3xl bg-gray-900/90 px-6 py-10 text-gray-100 shadow-2xl dark:bg-black/60 sm:px-10">
