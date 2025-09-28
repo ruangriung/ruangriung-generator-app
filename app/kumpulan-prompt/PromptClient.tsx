@@ -76,6 +76,60 @@ export default function PromptClient({ prompts }: PromptClientProps) {
     return Array.from(tools).sort((a, b) => a.localeCompare(b, 'id'));
   }, [promptList]);
 
+  const recommendedTags = useMemo(() => {
+    const tagCount = new Map<string, number>();
+
+    promptList.forEach(prompt => {
+      prompt.tags.forEach(tag => {
+        tagCount.set(tag, (tagCount.get(tag) ?? 0) + 1);
+      });
+    });
+
+    return Array.from(tagCount.entries())
+      .sort((a, b) => {
+        if (a[1] !== b[1]) {
+          return b[1] - a[1];
+        }
+
+        return a[0].localeCompare(b[0], 'id');
+      })
+      .slice(0, 6)
+      .map(([tag, count]) => ({ tag, count }));
+  }, [promptList]);
+
+  const recommendedTools = useMemo(() => {
+    const toolCount = new Map<string, number>();
+
+    promptList.forEach(prompt => {
+      if (prompt.tool) {
+        toolCount.set(prompt.tool, (toolCount.get(prompt.tool) ?? 0) + 1);
+      }
+    });
+
+    return Array.from(toolCount.entries())
+      .sort((a, b) => {
+        if (a[1] !== b[1]) {
+          return b[1] - a[1];
+        }
+
+        return a[0].localeCompare(b[0], 'id');
+      })
+      .slice(0, 4)
+      .map(([tool, count]) => ({ tool, count }));
+  }, [promptList]);
+
+  const featuredPrompts = useMemo(() => promptList.slice(0, 3), [promptList]);
+
+  const createPromptPreview = useCallback((value: string, limit = 160) => {
+    const normalized = value.replace(/\s+/g, ' ').trim();
+
+    if (normalized.length <= limit) {
+      return normalized;
+    }
+
+    return `${normalized.slice(0, limit).trim()}…`;
+  }, []);
+
   const suggestions = usePromptSuggestions(promptList, searchTerm);
 
   const hasActiveFilters = useMemo(
@@ -198,6 +252,40 @@ export default function PromptClient({ prompts }: PromptClientProps) {
     scrollToPromptListTop();
   }, [scrollToPromptListTop]);
 
+  const applyTagFilter = useCallback(
+    (value: string) => {
+      setSelectedTag(current => {
+        const nextValue = current === value ? '' : value;
+
+        if (current !== nextValue) {
+          hasInteractedWithPaginationRef.current = true;
+          setCurrentPage(1);
+          scrollToPromptListTop();
+        }
+
+        return nextValue;
+      });
+    },
+    [scrollToPromptListTop],
+  );
+
+  const applyToolFilter = useCallback(
+    (value: string) => {
+      setSelectedTool(current => {
+        const nextValue = current === value ? '' : value;
+
+        if (current !== nextValue) {
+          hasInteractedWithPaginationRef.current = true;
+          setCurrentPage(1);
+          scrollToPromptListTop();
+        }
+
+        return nextValue;
+      });
+    },
+    [scrollToPromptListTop],
+  );
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 flex justify-center">
@@ -293,7 +381,7 @@ export default function PromptClient({ prompts }: PromptClientProps) {
             <select
               id="prompt-tag"
               value={selectedTag}
-              onChange={e => setSelectedTag(e.target.value)}
+              onChange={e => applyTagFilter(e.target.value)}
               className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-500/40"
             >
               <option value="">Semua Tag</option>
@@ -311,7 +399,7 @@ export default function PromptClient({ prompts }: PromptClientProps) {
             <select
               id="prompt-tool"
               value={selectedTool}
-              onChange={e => setSelectedTool(e.target.value)}
+              onChange={e => applyToolFilter(e.target.value)}
               className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-500/40"
             >
               <option value="">Semua Alat</option>
@@ -425,6 +513,133 @@ export default function PromptClient({ prompts }: PromptClientProps) {
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
+      )}
+
+
+      {(featuredPrompts.length > 0 || recommendedTags.length > 0 || recommendedTools.length > 0) && (
+        <div className="mt-12 space-y-12">
+          {featuredPrompts.length > 0 && (
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Prompt Pilihan Minggu Ini</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Dipilih otomatis dari kiriman terbaru yang banyak diminati komunitas.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    hasInteractedWithPaginationRef.current = true;
+                    setCurrentPage(1);
+                    scrollToPromptListTop();
+                  }}
+                  className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500/60 dark:text-blue-400"
+                >
+                  Lihat semua prompt
+                </button>
+              </div>
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                {featuredPrompts.map(prompt => (
+                  <Link
+                    key={prompt.id}
+                    href={`/kumpulan-prompt/${prompt.slug}`}
+                    className="group flex h-full flex-col justify-between rounded-xl border border-gray-100 bg-gray-50 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-md dark:border-gray-800 dark:bg-gray-800/60 dark:hover:border-blue-700 dark:hover:bg-gray-800"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <span>{prompt.tool}</span>
+                        <span>{new Date(prompt.date).toLocaleDateString('id-ID')}</span>
+                      </div>
+                      <h3 className="mt-3 text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-gray-100 dark:group-hover:text-blue-300">
+                        {highlightMatches(prompt.title, searchTerm)}
+                      </h3>
+                      <p className="mt-2 text-sm text-gray-600 line-clamp-4 dark:text-gray-300">
+                        {highlightMatches(createPromptPreview(prompt.promptContent), searchTerm)}
+                      </p>
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {prompt.tags.map(tag => (
+                        <span
+                          key={tag}
+                          className="inline-block rounded-full bg-blue-100 px-2.5 py-0.5 text-[11px] font-semibold text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {(recommendedTags.length > 0 || recommendedTools.length > 0) && (
+            <div className="grid gap-6 lg:grid-cols-3">
+              <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-6 shadow-sm dark:border-blue-900/40 dark:bg-blue-900/20 lg:col-span-2">
+                <h2 className="text-xl font-semibold text-blue-900 dark:text-blue-100">Rekomendasi Tag Populer</h2>
+                <p className="mt-1 text-sm text-blue-900/70 dark:text-blue-100/70">
+                  Pilih salah satu tag berikut untuk langsung memfilter daftar prompt dan menemukan inspirasi yang sedang ramai digunakan.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {recommendedTags.map(({ tag, count }) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => applyTagFilter(tag)}
+                      className="inline-flex items-center gap-2 rounded-full border border-blue-300 bg-white px-4 py-2 text-sm font-medium text-blue-800 shadow-sm transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-blue-700 dark:bg-blue-900/60 dark:text-blue-100 dark:hover:bg-blue-900"
+                    >
+                      <span>#{tag}</span>
+                      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-200">
+                        {count}
+                      </span>
+                    </button>
+                  ))}
+                  {recommendedTags.length === 0 && (
+                    <p className="text-sm text-blue-900/70 dark:text-blue-100/70">
+                      Tag akan muncul secara otomatis ketika prompt baru ditambahkan.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4 rounded-2xl border border-blue-100 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Shortcut Alat Favorit</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Klik untuk melihat koleksi prompt terbaik berdasarkan alat populer pilihan komunitas.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {recommendedTools.map(({ tool, count }) => (
+                      <button
+                        key={tool}
+                        type="button"
+                        onClick={() => applyToolFilter(tool)}
+                        className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                      >
+                        <span>{tool}</span>
+                        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-200">
+                          {count}
+                        </span>
+                      </button>
+                    ))}
+                    {recommendedTools.length === 0 && (
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Alat populer akan muncul setelah data tersedia.</p>
+                    )}
+                  </div>
+                </div>
+                <div className="rounded-lg border border-dashed border-gray-200 p-4 dark:border-gray-700">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Tips eksplorasi</p>
+                  <ul className="mt-2 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    <li>• Kombinasikan pencarian kata kunci dengan filter tag untuk hasil yang lebih presisi.</li>
+                    <li>• Manfaatkan panel saran otomatis ketika mengetik untuk menemukan judul atau kreator serupa.</li>
+                    <li>• Buka halaman detail prompt untuk menyalin instruksi lengkap dan pelajari variasi outputnya.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
     </div>
