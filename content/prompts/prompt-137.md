@@ -4,7 +4,7 @@ slug: "mesas-surealis-cracked-face"
 title: "Mesas Surealis Cracked Face"
 author: "Arif Tirtana"
 facebook: "https://web.facebook.com/ayicktigabelas"
-website: "https://ariftirtana.my.id"
+link: "https://ariftirtana.my.id"
 date: "2025-09-28"
 tool: "Dall-E 3, Microsoft Designer"
 tags:
