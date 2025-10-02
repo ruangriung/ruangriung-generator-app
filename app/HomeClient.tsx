@@ -195,27 +195,6 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         </a>
       </div>
 
-      <div className="w-full max-w-4xl mb-6">
-        <Link
-          href="/konten-kreator"
-          className="group w-full inline-flex items-center justify-between gap-4 px-6 py-5 rounded-2xl bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white font-bold shadow-xl transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-purple-300 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900"
-        >
-          <div className="flex items-center gap-4">
-            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/20">
-              <Megaphone className="h-6 w-6 animate-pulse transition-transform group-hover:scale-110" />
-              <span className="absolute -right-1 -top-1 h-3 w-3 animate-ping rounded-full bg-yellow-300" aria-hidden />
-            </span>
-            <div className="text-left">
-              <p className="text-lg sm:text-xl leading-tight">Build Your Personal Brand Here</p>
-              <p className="text-sm sm:text-base font-normal text-white/80">
-                Masuk ke etalase konten kreator kami dan dapatkan eksposur lebih untuk karya terbaikmu.
-              </p>
-            </div>
-          </div>
-          <ArrowRight className="h-6 w-6 transition-transform duration-200 group-hover:translate-x-1" />
-        </Link>
-      </div>
-
       <div className="w-full max-w-4xl mb-4 flex flex-col sm:flex-row gap-4">
         <PromptSubmissionTrigger
           className="w-full sm:flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset hover:bg-blue-700 transition-colors"
@@ -326,6 +305,27 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
 
       <div className="w-full max-w-4xl mt-16">
         <AdBanner dataAdSlot="5961316189" />
+      </div>
+
+      <div className="w-full max-w-4xl mt-10 mb-6">
+        <Link
+          href="/konten-kreator"
+          className="group w-full inline-flex items-center justify-between gap-4 px-6 py-5 rounded-2xl bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white font-bold shadow-xl transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-purple-300 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900"
+        >
+          <div className="flex items-center gap-4">
+            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/20">
+              <Megaphone className="h-6 w-6 animate-pulse transition-transform group-hover:scale-110" />
+              <span className="absolute -right-1 -top-1 h-3 w-3 animate-ping rounded-full bg-yellow-300" aria-hidden />
+            </span>
+            <div className="text-left">
+              <p className="text-lg sm:text-xl leading-tight">Build Your Personal Brand Here</p>
+              <p className="text-sm sm:text-base font-normal text-white/80">
+                Masuk ke etalase konten kreator kami dan dapatkan eksposur lebih untuk karya terbaikmu.
+              </p>
+            </div>
+          </div>
+          <ArrowRight className="h-6 w-6 transition-transform duration-200 group-hover:translate-x-1" />
+        </Link>
       </div>
 
       <div className="w-full mt-16">
