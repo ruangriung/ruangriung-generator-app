@@ -62,7 +62,7 @@ const mergeUniqueModels = (...modelGroups: string[][]): string[] => {
   return Array.from(uniqueModels.values());
 };
 
-const FALLBACK_MODELS = ['seeddream', 'flux', 'turbo', 'gptimage', 'kontext'];
+const DEFAULT_BASE_MODELS = ['flux'];
 const PREMIUM_MODELS = ['DALL-E 3', 'Leonardo'];
 
 export default function Generator() {
@@ -71,7 +71,7 @@ export default function Generator() {
     return {
       prompt: initialPrompt,
       negativePrompt: '',
-      model: 'seeddream',
+      model: 'flux',
       cfg_scale: 7,
       width: 1024,
       height: 1792,
@@ -91,7 +91,7 @@ export default function Generator() {
   const [apiKeys, setApiKeys] = useState({ dalle: '', leonardo: '' });
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [modelList, setModelList] = useState<string[]>(() => mergeUniqueModels(FALLBACK_MODELS, PREMIUM_MODELS));
+  const [modelList, setModelList] = useState<string[]>(() => mergeUniqueModels(DEFAULT_BASE_MODELS, PREMIUM_MODELS));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Portrait');
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -119,11 +119,23 @@ export default function Generator() {
         if (!response.ok) throw new Error(`Gagal mengambil model: ${response.statusText}`);
         const data = await response.json();
         const fetchedModels = extractModelNames(data);
-        const combinedModels = mergeUniqueModels(FALLBACK_MODELS, fetchedModels, PREMIUM_MODELS);
+        const combinedModels = fetchedModels.length
+          ? mergeUniqueModels(fetchedModels, PREMIUM_MODELS)
+          : mergeUniqueModels(DEFAULT_BASE_MODELS, PREMIUM_MODELS);
+
         setModelList(combinedModels);
+
+        if (fetchedModels.length) {
+          const normalizedModels = new Set(combinedModels.map(model => model.toLowerCase()));
+          setSettings(prev => {
+            if (normalizedModels.has(prev.model.toLowerCase())) return prev;
+            const fallbackModel = fetchedModels[0] ?? DEFAULT_BASE_MODELS[0];
+            return fallbackModel ? { ...prev, model: fallbackModel } : prev;
+          });
+        }
       } catch (error) {
         console.error("Error mengambil model gambar:", error);
-        setModelList(mergeUniqueModels(FALLBACK_MODELS, PREMIUM_MODELS));
+        setModelList(mergeUniqueModels(DEFAULT_BASE_MODELS, PREMIUM_MODELS));
       }
     };
     fetchImageModels();
