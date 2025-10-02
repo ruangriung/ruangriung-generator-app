@@ -28,6 +28,43 @@ const getRandomDefaultPrompt = () => {
   return DEFAULT_PROMPTS[Math.floor(Math.random() * DEFAULT_PROMPTS.length)];
 };
 
+const extractModelNames = (rawData: unknown): string[] => {
+  if (!Array.isArray(rawData)) return [];
+
+  return rawData
+    .map(item => {
+      if (typeof item === 'string') return item;
+      if (item && typeof item === 'object') {
+        if ('name' in item && typeof (item as { name?: unknown }).name === 'string') {
+          return (item as { name: string }).name;
+        }
+        if ('model' in item && typeof (item as { model?: unknown }).model === 'string') {
+          return (item as { model: string }).model;
+        }
+      }
+      return '';
+    })
+    .filter((name): name is string => typeof name === 'string' && name.trim().length > 0);
+};
+
+const mergeUniqueModels = (...modelGroups: string[][]): string[] => {
+  const uniqueModels = new Map<string, string>();
+
+  modelGroups.flat().forEach(model => {
+    const trimmed = model.trim();
+    if (!trimmed) return;
+    const key = trimmed.toLowerCase();
+    if (!uniqueModels.has(key)) {
+      uniqueModels.set(key, trimmed);
+    }
+  });
+
+  return Array.from(uniqueModels.values());
+};
+
+const FALLBACK_MODELS = ['seeddream', 'flux', 'turbo', 'gptimage', 'kontext'];
+const PREMIUM_MODELS = ['DALL-E 3', 'Leonardo'];
+
 export default function Generator() {
   const [settings, setSettings] = useState<GeneratorSettings>(() => {
     const initialPrompt = getRandomDefaultPrompt();
@@ -54,7 +91,7 @@ export default function Generator() {
   const [apiKeys, setApiKeys] = useState({ dalle: '', leonardo: '' });
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [modelList, setModelList] = useState<string[]>([]);
+  const [modelList, setModelList] = useState<string[]>(() => mergeUniqueModels(FALLBACK_MODELS, PREMIUM_MODELS));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Portrait');
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -81,11 +118,12 @@ export default function Generator() {
         const response = await fetch('https://image.pollinations.ai/models');
         if (!response.ok) throw new Error(`Gagal mengambil model: ${response.statusText}`);
         const data = await response.json();
-        let fetchedModels: string[] = Array.isArray(data) ? data : ['flux', 'turbo'];
-        setModelList([...new Set([...fetchedModels, 'seeddream', 'DALL-E 3', 'Leonardo'])]);
+        const fetchedModels = extractModelNames(data);
+        const combinedModels = mergeUniqueModels(FALLBACK_MODELS, fetchedModels, PREMIUM_MODELS);
+        setModelList(combinedModels);
       } catch (error) {
         console.error("Error mengambil model gambar:", error);
-        setModelList(['seeddream', 'flux', 'turbo', 'gptimage', 'kontext', 'DALL-E 3', 'Leonardo']);
+        setModelList(mergeUniqueModels(FALLBACK_MODELS, PREMIUM_MODELS));
       }
     };
     fetchImageModels();
