@@ -34,7 +34,7 @@ export default function Generator() {
     return {
       prompt: initialPrompt,
       negativePrompt: '',
-      model: 'flux',
+      model: 'seeddream',
       cfg_scale: 7,
       width: 1024,
       height: 1792,
@@ -82,10 +82,10 @@ export default function Generator() {
         if (!response.ok) throw new Error(`Gagal mengambil model: ${response.statusText}`);
         const data = await response.json();
         let fetchedModels: string[] = Array.isArray(data) ? data : ['flux', 'turbo'];
-        setModelList([...new Set([...fetchedModels, 'DALL-E 3', 'Leonardo'])]);
+        setModelList([...new Set([...fetchedModels, 'seeddream', 'DALL-E 3', 'Leonardo'])]);
       } catch (error) {
         console.error("Error mengambil model gambar:", error);
-        setModelList(['flux', 'turbo', 'gptimage', 'kontext', 'DALL-E 3', 'Leonardo']);
+        setModelList(['seeddream', 'flux', 'turbo', 'gptimage', 'kontext', 'DALL-E 3', 'Leonardo']);
       }
     };
     fetchImageModels();
