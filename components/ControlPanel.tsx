@@ -49,6 +49,7 @@ interface ControlPanelProps {
 
 export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, onModelSelect, onSurpriseMe }: ControlPanelProps) {
   const { status } = useSession();
+  const isAuthenticated = status === 'authenticated';
   const [editingField, setEditingField] = useState<null | 'prompt' | 'negativePrompt'>(null);
   const [isRandomizing, setIsRandomizing] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
@@ -318,35 +319,33 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     <>
       <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
 
-        {status === 'authenticated' ? (
-          <details className="w-full group mb-6">
-            <summary className="flex items-center justify-between p-4 bg-light-bg dark:bg-dark-bg rounded-lg cursor-pointer list-none shadow-neumorphic-button dark:shadow-dark-neumorphic-button transition-shadow">
-              <div className="flex items-center gap-x-2">
-                <Settings className="w-5 h-5 text-purple-600" />
-                <span className="font-medium text-gray-700 dark:text-gray-300">
-                  Pengaturan Lanjutan
-                </span>
-              </div>
-              <ChevronDown className="w-5 h-5 text-purple-600 transition-transform duration-300 group-open:rotate-90" />
-            </summary>
-            <AdvancedSettings
-              settings={settings}
-              setSettings={setSettings}
-              models={models}
-              aspectRatio={aspectRatio}
-              onAspectRatioChange={onAspectRatioChange}
-              onManualDimensionChange={onManualDimensionChange}
-              onImageQualityChange={onImageQualityChange}
-              onModelSelect={onModelSelect}
-              className="mt-0 pt-0"
-            />
-          </details>
-        ) : (
-          <LockedAccordion
-            title="Pengaturan Lanjutan"
-            className="mb-6"
+        <details className="w-full group mb-6">
+          <summary className="flex items-center justify-between p-4 bg-light-bg dark:bg-dark-bg rounded-lg cursor-pointer list-none shadow-neumorphic-button dark:shadow-dark-neumorphic-button transition-shadow">
+            <div className="flex items-center gap-x-2">
+              <Settings className="w-5 h-5 text-purple-600" />
+              <span className="font-medium text-gray-700 dark:text-gray-300">
+                Pengaturan Lanjutan
+              </span>
+            </div>
+            <ChevronDown className="w-5 h-5 text-purple-600 transition-transform duration-300 group-open:rotate-90" />
+          </summary>
+          {!isAuthenticated && (
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 px-4">
+              Anda belum masuk. Beberapa fitur tertentu mungkin tetap terkunci, tetapi Anda bisa mengubah pengaturan lanjutan di sini.
+            </p>
+          )}
+          <AdvancedSettings
+            settings={settings}
+            setSettings={setSettings}
+            models={models}
+            aspectRatio={aspectRatio}
+            onAspectRatioChange={onAspectRatioChange}
+            onManualDimensionChange={onManualDimensionChange}
+            onImageQualityChange={onImageQualityChange}
+            onModelSelect={onModelSelect}
+            className="mt-0 pt-0"
           />
-        )}
+        </details>
 
 
         {/* Textarea Prompt Utama */}
