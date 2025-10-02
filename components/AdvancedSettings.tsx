@@ -54,6 +54,9 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
     </div>
   );
 
+  const imageToImageModels = ['nanobanana', 'seedream', 'kontext'];
+  const isImageToImageModel = imageToImageModels.includes(settings.model.toLowerCase());
+
   return (
     <div className={`mt-6 p-6 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset ${className || ''}`}>
         <div className="mb-6">
@@ -140,10 +143,22 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
             <input type="number" id="seed" value={settings.seed} onChange={(e) => handleSettingChange('seed', e.target.value)} className={inputStyle} />
           </div>
            {/* -- KONTROL UNTUK PARAMETER BARU -- */}
-          <div className="md:col-span-2">
-            <LabelWithIcon icon={Link2} text="URL Gambar Input (Image-to-Image)" htmlFor="inputImage" />
-            <input type="text" id="inputImage" value={settings.inputImage} onChange={(e) => handleSettingChange('inputImage', e.target.value)} className={inputStyle} placeholder="https://example.com/image.jpg (opsional)" />
-          </div>
+          {isImageToImageModel && (
+            <div className="md:col-span-2">
+              <LabelWithIcon icon={Link2} text="URL Gambar Input (Image-to-Image)" htmlFor="inputImage" />
+              <input
+                type="text"
+                id="inputImage"
+                value={settings.inputImage}
+                onChange={(e) => handleSettingChange('inputImage', e.target.value)}
+                className={inputStyle}
+                placeholder="https://example.com/image.jpg (opsional)"
+              />
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                Works best with models like nanobanana, seedream, or kontext. Paste direct image links to guide the generation.
+              </p>
+            </div>
+          )}
           <div className={checkboxContainerStyle}>
             <input id="private" type="checkbox" checked={settings.private} onChange={(e) => handleSettingChange('private', e.target.checked)} className={checkboxStyle} />
             <label htmlFor="private" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 cursor-pointer"><Lock size={16}/>Mode Privat</label>
