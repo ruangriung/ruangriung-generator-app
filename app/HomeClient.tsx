@@ -297,9 +297,11 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         <AdBanner dataAdSlot="6897039624" />
       </div>
 
-      <div className="w-full max-w-4xl flex flex-col gap-4 mb-4">
+      <div className="w-full max-w-4xl flex flex-col gap-4 mb-4 md:flex-row md:items-stretch md:gap-6">
         <AuthButton />
-        <ThemeToggle />
+        <div className="w-full md:w-auto md:self-stretch">
+          <ThemeToggle />
+        </div>
       </div>
 
       <main className="w-full flex flex-col items-center">

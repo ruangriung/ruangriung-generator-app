@@ -64,6 +64,7 @@ const mergeUniqueModels = (...modelGroups: string[][]): string[] => {
 
 const DEFAULT_BASE_MODELS = ['flux'];
 const PREMIUM_MODELS = ['DALL-E 3', 'Leonardo'];
+const IMAGE_TO_IMAGE_MODELS = new Set(['nanobanana', 'seedream', 'kontext']);
 
 export default function Generator() {
   const [settings, setSettings] = useState<GeneratorSettings>(() => {
@@ -130,7 +131,13 @@ export default function Generator() {
           setSettings(prev => {
             if (normalizedModels.has(prev.model.toLowerCase())) return prev;
             const fallbackModel = fetchedModels[0] ?? DEFAULT_BASE_MODELS[0];
-            return fallbackModel ? { ...prev, model: fallbackModel } : prev;
+            if (!fallbackModel) return prev;
+            const shouldClearInput = !IMAGE_TO_IMAGE_MODELS.has(fallbackModel.toLowerCase());
+            return {
+              ...prev,
+              model: fallbackModel,
+              ...(shouldClearInput ? { inputImage: '' } : {}),
+            };
           });
         }
       } catch (error) {
@@ -192,12 +199,20 @@ export default function Generator() {
     setSettings(prev => ({ ...prev, imageQuality: quality }));
   };
 
+  const applyModelSelection = (model: string) => {
+    setSettings(prev => ({
+      ...prev,
+      model,
+      ...(IMAGE_TO_IMAGE_MODELS.has(model.toLowerCase()) ? {} : { inputImage: '' }),
+    }));
+  };
+
   const handleModelSelect = (model: string) => {
     if (model === 'DALL-E 3' || model === 'Leonardo') {
       setModelRequiringKey(model);
       setIsApiKeyModalOpen(true);
     } else {
-      setSettings(prev => ({ ...prev, model }));
+      applyModelSelection(model);
     }
   };
 
@@ -205,12 +220,12 @@ export default function Generator() {
     if (modelRequiringKey === 'DALL-E 3') {
       setApiKeys(prev => ({ ...prev, dalle: apiKey }));
       localStorage.setItem('dalle_api_key', apiKey);
-      setSettings(prev => ({ ...prev, model: 'DALL-E 3' }));
+      applyModelSelection('DALL-E 3');
       toast.success('API Key DALL-E 3 disimpan!');
     } else if (modelRequiringKey === 'Leonardo') {
       setApiKeys(prev => ({ ...prev, leonardo: apiKey }));
       localStorage.setItem('leonardo_api_key', apiKey);
-      setSettings(prev => ({ ...prev, model: 'Leonardo' }));
+      applyModelSelection('Leonardo');
       toast.success('API Key Leonardo disimpan!');
     }
     setModelRequiringKey('');
@@ -249,7 +264,7 @@ export default function Generator() {
         if (isPrivate) params.append('private', 'true');
         if (safe) params.append('safe', 'true');
         if (transparent && model === 'gptimage') params.append('transparent', 'true');
-        if (inputImage && (model === 'kontext' || model === 'gptimage')) params.append('image', inputImage);
+        if (inputImage && (IMAGE_TO_IMAGE_MODELS.has(model.toLowerCase()) || model === 'gptimage')) params.append('image', inputImage);
 
         finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?${params.toString()}`;
 
@@ -259,7 +274,7 @@ export default function Generator() {
 
       } catch (error: any) {
         toast.error(error.message || `Gagal membuat gambar #${i + 1}`);
-        setSettings(prev => ({...prev, model: 'flux'}));
+        applyModelSelection('flux');
         return null;
       }
     });
