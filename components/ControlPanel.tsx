@@ -30,7 +30,7 @@ export interface GeneratorSettings {
   private: boolean;
   safe: boolean;
   transparent: boolean;
-  inputImage: string;
+  inputImages: string[];
 }
 
 interface ControlPanelProps {

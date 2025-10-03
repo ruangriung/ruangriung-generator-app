@@ -2,7 +2,7 @@
 'use client';
 
 import { GeneratorSettings } from './ControlPanel';
-import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sparkles, ImageIcon, Sprout, ChevronDown, Lock, Shield, EyeOff, Link2 } from 'lucide-react';
+import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sparkles, ImageIcon, Sprout, ChevronDown, Lock, Shield, EyeOff, Link2, Plus, X } from 'lucide-react';
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
 
 interface AdvancedSettingsProps {
@@ -56,6 +56,36 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
 
   const imageToImageModels = ['nanobanana', 'seedream', 'kontext'];
   const isImageToImageModel = imageToImageModels.includes(settings.model.toLowerCase());
+  const MAX_REFERENCE_IMAGES = 4;
+
+  const handleReferenceImageChange = (index: number, url: string) => {
+    setSettings(prev => {
+      const updated = [...(prev.inputImages ?? [])];
+      updated[index] = url;
+      return { ...prev, inputImages: updated };
+    });
+  };
+
+  const handleAddReferenceImage = () => {
+    setSettings(prev => {
+      const currentImages = prev.inputImages ?? [];
+      if (currentImages.length >= MAX_REFERENCE_IMAGES) return prev;
+      return { ...prev, inputImages: [...currentImages, ''] };
+    });
+  };
+
+  const handleRemoveReferenceImage = (index: number) => {
+    setSettings(prev => {
+      const currentImages = prev.inputImages ?? [];
+      if (currentImages.length === 0) return prev;
+      const updated = currentImages.filter((_, i) => i !== index);
+      return { ...prev, inputImages: updated.length ? updated : [''] };
+    });
+  };
+
+  const referenceImagesRaw = settings.inputImages ?? [];
+  const filledReferenceCount = referenceImagesRaw.filter(url => url.trim().length > 0).length;
+  const referenceImages = referenceImagesRaw.length ? referenceImagesRaw : [''];
 
   return (
     <div className={`mt-6 p-6 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset ${className || ''}`}>
@@ -145,15 +175,42 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
            {/* -- KONTROL UNTUK PARAMETER BARU -- */}
           {isImageToImageModel && (
             <div className="md:col-span-2">
-              <LabelWithIcon icon={Link2} text="URL Gambar Input (Image-to-Image)" htmlFor="inputImage" />
-              <input
-                type="text"
-                id="inputImage"
-                value={settings.inputImage}
-                onChange={(e) => handleSettingChange('inputImage', e.target.value)}
-                className={inputStyle}
-                placeholder="https://example.com/image.jpg (opsional)"
-              />
+              <div className="flex items-center justify-between mb-2">
+                <LabelWithIcon icon={Link2} text="Reference Images (Image-to-Image)" />
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{filledReferenceCount}/{MAX_REFERENCE_IMAGES} images</span>
+              </div>
+              <div className="space-y-3">
+                {referenceImages.map((url, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      value={url}
+                      onChange={(e) => handleReferenceImageChange(index, e.target.value)}
+                      className={`${inputStyle} flex-1`}
+                      placeholder={`https://example.com/reference-${index + 1}.jpg`}
+                    />
+                    {referenceImages.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveReferenceImage(index)}
+                        className="p-2 text-gray-500 hover:text-red-500 transition-colors"
+                        aria-label={`Remove reference image ${index + 1}`}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {referenceImages.length < MAX_REFERENCE_IMAGES && (
+                <button
+                  type="button"
+                  onClick={handleAddReferenceImage}
+                  className="mt-3 inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-purple-600 hover:text-purple-700"
+                >
+                  <Plus className="w-4 h-4" /> Add image
+                </button>
+              )}
               <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                 Works best with models like nanobanana, seedream, or kontext. Paste direct image links to guide the generation.
               </p>
