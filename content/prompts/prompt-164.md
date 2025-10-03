@@ -3,7 +3,7 @@ id: "164"
 slug: "voodoo-shaman"
 title: "Voodoo Shaman"
 author: "Seno Pati"
-date: "2025-10-03"
+date: "2025-10-04"
 tool: "Seedream"
 tags:
   - voodoo
