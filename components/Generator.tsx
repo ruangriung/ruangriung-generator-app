@@ -65,6 +65,8 @@ const mergeUniqueModels = (...modelGroups: string[][]): string[] => {
 const DEFAULT_BASE_MODELS = ['flux'];
 const PREMIUM_MODELS = ['DALL-E 3', 'Leonardo'];
 const IMAGE_TO_IMAGE_MODELS = new Set(['nanobanana', 'seedream', 'kontext']);
+const MAX_REFERENCE_IMAGES = 4;
+const createEmptyReferenceImages = () => [''];
 
 export default function Generator() {
   const [settings, setSettings] = useState<GeneratorSettings>(() => {
@@ -83,7 +85,7 @@ export default function Generator() {
       private: false,
       safe: false,
       transparent: false,
-      inputImage: '',
+      inputImages: createEmptyReferenceImages(),
     };
   });
 
@@ -136,7 +138,7 @@ export default function Generator() {
             return {
               ...prev,
               model: fallbackModel,
-              ...(shouldClearInput ? { inputImage: '' } : {}),
+              ...(shouldClearInput ? { inputImages: createEmptyReferenceImages() } : {}),
             };
           });
         }
@@ -203,7 +205,7 @@ export default function Generator() {
     setSettings(prev => ({
       ...prev,
       model,
-      ...(IMAGE_TO_IMAGE_MODELS.has(model.toLowerCase()) ? {} : { inputImage: '' }),
+      ...(IMAGE_TO_IMAGE_MODELS.has(model.toLowerCase()) ? {} : { inputImages: createEmptyReferenceImages() }),
     }));
   };
 
@@ -248,7 +250,7 @@ export default function Generator() {
     setSettings(prev => ({...prev, seed: newRandomSeed}));
     let currentSeed = newRandomSeed;
 
-    const { model, prompt, negativePrompt, width, height, imageQuality, batchSize, artStyle, private: isPrivate, safe, transparent, inputImage, cfg_scale } = settings;
+    const { model, prompt, negativePrompt, width, height, imageQuality, batchSize, artStyle, private: isPrivate, safe, transparent, inputImages = [], cfg_scale } = settings;
     const fullPrompt = `${prompt}${artStyle}`;
 
     const generatePromises = Array(batchSize).fill(0).map(async (_, i) => {
@@ -264,7 +266,12 @@ export default function Generator() {
         if (isPrivate) params.append('private', 'true');
         if (safe) params.append('safe', 'true');
         if (transparent && model === 'gptimage') params.append('transparent', 'true');
-        if (inputImage && (IMAGE_TO_IMAGE_MODELS.has(model.toLowerCase()) || model === 'gptimage')) params.append('image', inputImage);
+        const referenceImages = inputImages
+          .filter(url => typeof url === 'string' && url.trim().length > 0)
+          .slice(0, MAX_REFERENCE_IMAGES);
+        if (referenceImages.length && (IMAGE_TO_IMAGE_MODELS.has(model.toLowerCase()) || model === 'gptimage')) {
+          referenceImages.forEach(url => params.append('image', url));
+        }
 
         finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?${params.toString()}`;
 
@@ -333,7 +340,7 @@ export default function Generator() {
       private: false, // Reset ke default
       safe: false, // Reset ke default
       transparent: false, // Reset ke default
-      inputImage: '', // Kosongkan input image
+      inputImages: createEmptyReferenceImages(), // Kosongkan input image
     }));
     setAspectRatio(randomAspectRatioPreset);
     toast.success("Pengaturan diacak! Tekan 'Buat Gambar' untuk melihat hasilnya.");
