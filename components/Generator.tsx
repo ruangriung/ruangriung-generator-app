@@ -68,6 +68,48 @@ const IMAGE_TO_IMAGE_MODELS = new Set(['nanobanana', 'seedream', 'kontext']);
 const MAX_REFERENCE_IMAGES = 4;
 const createEmptyReferenceImages = () => [''];
 
+const sanitizeStoredSettings = (data: unknown): Partial<GeneratorSettings> | null => {
+  if (!data || typeof data !== 'object') return null;
+
+  const raw = data as Record<string, unknown>;
+  const sanitized: Partial<GeneratorSettings> = {};
+
+  if (typeof raw.prompt === 'string') sanitized.prompt = raw.prompt;
+  if (typeof raw.negativePrompt === 'string') sanitized.negativePrompt = raw.negativePrompt;
+  if (typeof raw.model === 'string') sanitized.model = raw.model;
+  if (typeof raw.cfg_scale === 'number' && Number.isFinite(raw.cfg_scale)) sanitized.cfg_scale = raw.cfg_scale;
+  if (typeof raw.width === 'number' && Number.isFinite(raw.width)) sanitized.width = raw.width;
+  if (typeof raw.height === 'number' && Number.isFinite(raw.height)) sanitized.height = raw.height;
+  if (typeof raw.seed === 'number' && Number.isFinite(raw.seed)) sanitized.seed = raw.seed;
+  if (typeof raw.artStyle === 'string') sanitized.artStyle = raw.artStyle;
+  if (typeof raw.batchSize === 'number' && Number.isFinite(raw.batchSize)) sanitized.batchSize = raw.batchSize;
+
+  if (typeof raw.imageQuality === 'string' && ['Standar', 'HD', 'Ultra'].includes(raw.imageQuality)) {
+    sanitized.imageQuality = raw.imageQuality as GeneratorSettings['imageQuality'];
+  }
+
+  if (typeof raw.private === 'boolean') sanitized.private = raw.private;
+  if (typeof raw.safe === 'boolean') sanitized.safe = raw.safe;
+  if (typeof raw.transparent === 'boolean') sanitized.transparent = raw.transparent;
+
+  if (Array.isArray(raw.inputImages)) {
+    const cleanedImages = raw.inputImages
+      .map(image => (typeof image === 'string' ? image.trim() : ''))
+      .filter(Boolean)
+      .slice(0, MAX_REFERENCE_IMAGES);
+    sanitized.inputImages = cleanedImages.length > 0 ? cleanedImages : createEmptyReferenceImages();
+  }
+
+  return Object.keys(sanitized).length > 0 ? sanitized : null;
+};
+
+const determineAspectRatio = (width: number, height: number): AspectRatioPreset => {
+  if (width === 1024 && height === 1024) return 'Kotak';
+  if (width === 1024 && height === 1792) return 'Portrait';
+  if (width === 1792 && height === 1024) return 'Lansekap';
+  return 'Custom';
+};
+
 export default function Generator() {
   const [settings, setSettings] = useState<GeneratorSettings>(() => {
     const initialPrompt = getRandomDefaultPrompt();
@@ -104,16 +146,38 @@ export default function Generator() {
   const initialDefaultPromptRef = useRef(settings.prompt);
 
   useEffect(() => {
+    let hasStoredSettings = false;
+
     try {
-      const unsavedPrompt = localStorage.getItem('ruangriung_unsaved_prompt');
-      if (unsavedPrompt) {
-        if (settings.prompt === initialDefaultPromptRef.current || settings.prompt === '') {
-          setSettings(prev => ({ ...prev, prompt: unsavedPrompt }));
+      const storedSettings = localStorage.getItem('ruangriung_generator_settings');
+      if (storedSettings) {
+        const parsedSettings = JSON.parse(storedSettings);
+        const sanitizedSettings = sanitizeStoredSettings(parsedSettings);
+        if (sanitizedSettings) {
+          hasStoredSettings = true;
+          setSettings(prev => {
+            const nextSettings = { ...prev, ...sanitizedSettings };
+            setAspectRatio(determineAspectRatio(nextSettings.width, nextSettings.height));
+            return nextSettings;
+          });
         }
       }
+
+      if (!hasStoredSettings) {
+        const unsavedPrompt = localStorage.getItem('ruangriung_unsaved_prompt');
+        if (unsavedPrompt) {
+          setSettings(prev => {
+            if (prev.prompt === initialDefaultPromptRef.current || prev.prompt === '') {
+              return { ...prev, prompt: unsavedPrompt };
+            }
+            return prev;
+          });
+        }
+      }
+
       const savedHistory = localStorage.getItem('ruangriung_history');
       if (savedHistory) setHistory(JSON.parse(savedHistory));
-    } catch (error) { console.error("Gagal memuat riwayat:", error); }
+    } catch (error) { console.error("Gagal memuat pengaturan atau riwayat:", error); }
     finally { setIsHistoryLoaded(true); }
 
     const fetchImageModels = async () => {
@@ -154,6 +218,14 @@ export default function Generator() {
     if (savedDalleKey) setApiKeys(prev => ({ ...prev, dalle: savedDalleKey }));
     if (savedLeonardoKey) setApiKeys(prev => ({ ...prev, leonardo: savedLeonardoKey }));
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ruangriung_generator_settings', JSON.stringify(settings));
+    } catch (error) {
+      console.error("Gagal menyimpan pengaturan generator:", error);
+    }
+  }, [settings]);
 
   useEffect(() => {
     if (isHistoryLoaded) {
