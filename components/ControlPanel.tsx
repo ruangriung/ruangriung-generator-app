@@ -15,6 +15,24 @@ import LockedAccordion from './LockedAccordion';
 import toast from 'react-hot-toast';
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
 
+const TEXT_MODEL_DATA: {
+  name: string;
+  description: string;
+  input_modalities: string[];
+  output_modalities: string[];
+}[] = [
+  { name: 'deepseek', description: 'DeepSeek V3', input_modalities: ['text'], output_modalities: ['text'] },
+  { name: 'deepseek-reasoning', description: 'DeepSeek R1 0528', input_modalities: ['text'], output_modalities: ['text'] },
+  { name: 'grok', description: 'xAI Grok-3 Mini', input_modalities: ['text'], output_modalities: ['text'] },
+  { name: 'llamascout', description: 'Llama 4 Scout 17B', input_modalities: ['text'], output_modalities: ['text'] },
+  { name: 'mistral', description: 'Mistral Small 3.1 24B', input_modalities: ['text', 'image'], output_modalities: ['text'] },
+  { name: 'openai', description: 'OpenAI GPT-4o Mini', input_modalities: ['text', 'image'], output_modalities: ['text'] },
+  { name: 'openai-fast', description: 'OpenAI GPT-4.1 Nano', input_modalities: ['text', 'image'], output_modalities: ['text'] },
+  { name: 'openai-large', description: 'OpenAI GPT-4.1', input_modalities: ['text', 'image'], output_modalities: ['text'] },
+  { name: 'phi', description: 'Phi-4 Mini Instruct', input_modalities: ['text', 'image', 'audio'], output_modalities: ['text'] },
+  { name: 'rtist', description: 'Rtist', input_modalities: ['text'], output_modalities: ['text'] },
+  { name: 'midijourney', description: 'MIDIjourney', input_modalities: ['text'], output_modalities: ['text'] },
+];
 
 export interface GeneratorSettings {
   prompt: string;
@@ -56,6 +74,32 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
   const [isSaving, setIsSaving] = useState(false);
   const [savedPrompts, setSavedPrompts] = useState<string[]>([]);
   const [isGeneratingJson, setIsGeneratingJson] = useState(false);
+  const [enhancementModels, setEnhancementModels] = useState<{ name: string; description: string }[]>([]);
+  const [selectedEnhancementModel, setSelectedEnhancementModel] = useState('openai');
+
+  useEffect(() => {
+    const relevantModels = TEXT_MODEL_DATA.filter(
+      (model) => model.input_modalities.includes('text') && model.output_modalities.includes('text')
+    ).map(({ name, description }) => ({ name, description }));
+
+    if (relevantModels.length > 0) {
+      setEnhancementModels(relevantModels);
+      if (relevantModels.some((model) => model.name === 'openai')) {
+        setSelectedEnhancementModel('openai');
+      } else {
+        setSelectedEnhancementModel(relevantModels[0].name);
+      }
+    } else {
+      const fallbackModels = [
+        { name: 'openai', description: 'OpenAI GPT-4o Mini' },
+        { name: 'mistral', description: 'Mistral Small 3.1 24B' },
+        { name: 'grok', description: 'xAI Grok-3 Mini' },
+        { name: 'deepseek', description: 'DeepSeek V3' },
+      ];
+      setEnhancementModels(fallbackModels);
+      setSelectedEnhancementModel('openai');
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -85,16 +129,14 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
   };
 
   const callPromptApi = async (promptForApi: string, temperature = 0.5) => {
-    const urlWithToken = `https://text.pollinations.ai/openai?token=${process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN}`;
-
     try {
-      const response = await fetch(urlWithToken, {
+      const response = await fetch('https://text.pollinations.ai/openai', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'openai',
+          model: selectedEnhancementModel,
           messages: [{ role: 'user', content: promptForApi }],
           temperature: temperature,
         }),
@@ -413,6 +455,32 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
         {/* Tombol Generate dan Aksi Prompt lainnya */}
         <div className="mt-4 pt-4 border-t border-gray-300 dark:border-gray-600 flex flex-col justify-center items-center gap-3">
+          <div className="w-full">
+            <label htmlFor="enhancement-model" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+              Pilih Model AI untuk Bantuan Prompt
+            </label>
+            <div className="relative">
+              <select
+                id="enhancement-model"
+                value={selectedEnhancementModel}
+                onChange={(event) => setSelectedEnhancementModel(event.target.value)}
+                className="w-full appearance-none p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800 dark:text-gray-200"
+                disabled={enhancementModels.length === 0}
+              >
+                {enhancementModels.length > 0 ? (
+                  enhancementModels.map((model) => (
+                    <option key={model.name} value={model.name} className="bg-white dark:bg-gray-700">
+                      {model.description} ({model.name})
+                    </option>
+                  ))
+                ) : (
+                  <option>Memuat...</option>
+                )}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
+            </div>
+          </div>
+
           <button
             onClick={onGenerate}
             className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150 w-full"
