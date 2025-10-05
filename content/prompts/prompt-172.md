@@ -5,7 +5,7 @@ title: "Cyborg Binaries Code Matrix"
 author: "Arif Tirtana"
 link: "https://www.ariftirtana.my.id"
 facebook: "https://web.facebook.com/ayicktigabelas"
-image: ""
+image: "https://www.facebook.com/share/p/1BX9bao49q/"
 date: "2025-10-05"
 tool: "Dall-E 3"
 tags:
