@@ -51,5 +51,34 @@ Artikel dan contoh prompt berada pada direktori `content` dan dimuat dari berkas
 - `pnpm start` – menjalankan aplikasi hasil build
 - `pnpm lint` – menjalankan ESLint
 
+## Tanya Jawab Umum
+
+### Bisakah aplikasi memiliki dashboard yang hanya dapat diakses admin?
+Ya, Anda dapat menambahkan dashboard yang dibatasi untuk admin dengan mengombinasikan autentikasi dan pemeriksaan peran. Contoh alur kerjanya:
+
+1. Gunakan penyedia autentikasi seperti NextAuth, Supabase Auth, atau Firebase Authentication untuk memverifikasi identitas pengguna.
+2. Simpan informasi peran (misalnya `role: "admin"`) pada basis data atau token sesi pengguna.
+3. Buat *middleware* atau komponen pelindung halaman (protected route) yang memeriksa status login dan peran pengguna sebelum merender dashboard.
+4. Redirect pengguna non-admin ke halaman lain (misalnya beranda) bila tidak memenuhi syarat.
+
+Setelah akses admin dibatasi, dashboard bisa difungsikan sebagai pusat kontrol aktivitas, misalnya:
+
+- Mengelola antrian konten yang dikirim pengguna seperti prompt, profil, dan data UMKM sebelum diterbitkan.
+- Memberikan aksi moderasi (setujui, revisi, tolak) serta menambahkan catatan internal untuk tiap pengajuan.
+- Menampilkan metrik penting (jumlah pengajuan baru, status publikasi, aktivitas terakhir) agar admin dapat memantau keadaan sistem secara menyeluruh.
+
+Dengan pola ini, hanya akun dengan peran admin yang akan mengakses dashboard, sementara pengguna lainnya tetap diarahkan ke halaman publik. Semua proses kurasi dan manajemen data pun terpusat di satu tempat yang aman.
+
+### Apa saja yang perlu disiapkan saat deploy ke Vercel?
+Saat melakukan deploy ke Vercel, pastikan hal-hal berikut:
+
+- **Variabel lingkungan**: isi semua variabel pada menu *Project Settings > Environment Variables* di Vercel sesuai nilai yang tercantum di bagian [Variabel Lingkungan](#variabel-lingkungan).
+- **Build Command**: gunakan perintah `pnpm build` dan set *Install Command* ke `pnpm install --frozen-lockfile` agar dependensi konsisten.
+- **Output Directory**: biarkan default (`.next`) karena proyek ini menggunakan Next.js 14.
+- **Versi Node.js & pnpm**: opsional tetapi disarankan menyesuaikan versi dengan yang digunakan secara lokal melalui file `package.json` atau `engines` bila diperlukan.
+- **Pengaturan Domain**: apabila memerlukan domain khusus, konfigurasikan di tab *Domains* dan arahkan DNS ke Vercel.
+
+Setelah konfigurasi tersebut, Anda cukup menyambungkan repository Git ke Vercel dan setiap push ke branch yang dipilih akan memicu deploy otomatis.
+
 ## Lisensi
 Proyek ini menggunakan lisensi ISC seperti yang tercantum pada `package.json`.
