@@ -67,27 +67,78 @@ const PREMIUM_MODELS = ['DALL-E 3', 'Leonardo'];
 const IMAGE_TO_IMAGE_MODELS = new Set(['nanobanana', 'seedream', 'kontext']);
 const MAX_REFERENCE_IMAGES = 4;
 const createEmptyReferenceImages = () => [''];
+const GENERATOR_SETTINGS_STORAGE_KEY = 'ruangriung_generator_settings';
+
+const createDefaultSettings = (): GeneratorSettings => {
+  const initialPrompt = getRandomDefaultPrompt();
+  return {
+    prompt: initialPrompt,
+    negativePrompt: '',
+    model: 'flux',
+    cfg_scale: 7,
+    width: 1024,
+    height: 1792,
+    seed: Math.floor(Math.random() * 1000000),
+    artStyle: '',
+    batchSize: 1,
+    imageQuality: 'Ultra',
+    private: false,
+    safe: false,
+    transparent: false,
+    inputImages: createEmptyReferenceImages(),
+  };
+};
+
+const determineAspectRatioFromDimensions = (width: number, height: number): AspectRatioPreset => {
+  if (width === 1024 && height === 1024) return 'Kotak';
+  if (width === 1024 && height === 1792) return 'Portrait';
+  if (width === 1792 && height === 1024) return 'Lansekap';
+  return 'Custom';
+};
+
+const sanitizeStoredSettings = (rawSettings: unknown, fallback: GeneratorSettings): GeneratorSettings => {
+  if (!rawSettings || typeof rawSettings !== 'object') {
+    return fallback;
+  }
+
+  const candidate = rawSettings as Partial<GeneratorSettings>;
+  const isValidNumber = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
+  const validImageQualities: GeneratorSettings['imageQuality'][] = ['Standar', 'HD', 'Ultra'];
+
+  const sanitizedInputImages = Array.isArray(candidate.inputImages)
+    ? candidate.inputImages.filter((image): image is string => typeof image === 'string').slice(0, MAX_REFERENCE_IMAGES)
+    : fallback.inputImages;
+
+  const normalizedInputImages = sanitizedInputImages.length > 0 ? [...sanitizedInputImages] : createEmptyReferenceImages();
+  const minimumReferenceSlots = Math.max(fallback.inputImages?.length ?? 0, 1);
+  while (normalizedInputImages.length < minimumReferenceSlots) {
+    normalizedInputImages.push('');
+  }
+
+  const sanitizeBoolean = (value: unknown, defaultValue: boolean) => (typeof value === 'boolean' ? value : defaultValue);
+
+  return {
+    prompt: typeof candidate.prompt === 'string' ? candidate.prompt : fallback.prompt,
+    negativePrompt: typeof candidate.negativePrompt === 'string' ? candidate.negativePrompt : fallback.negativePrompt,
+    model: typeof candidate.model === 'string' ? candidate.model : fallback.model,
+    cfg_scale: isValidNumber(candidate.cfg_scale) ? candidate.cfg_scale : fallback.cfg_scale,
+    width: isValidNumber(candidate.width) ? candidate.width : fallback.width,
+    height: isValidNumber(candidate.height) ? candidate.height : fallback.height,
+    seed: isValidNumber(candidate.seed) ? candidate.seed : fallback.seed,
+    artStyle: typeof candidate.artStyle === 'string' ? candidate.artStyle : fallback.artStyle,
+    batchSize: isValidNumber(candidate.batchSize) ? Math.max(1, Math.round(candidate.batchSize)) : fallback.batchSize,
+    imageQuality: validImageQualities.includes(candidate.imageQuality as GeneratorSettings['imageQuality'])
+      ? (candidate.imageQuality as GeneratorSettings['imageQuality'])
+      : fallback.imageQuality,
+    private: sanitizeBoolean(candidate.private, fallback.private),
+    safe: sanitizeBoolean(candidate.safe, fallback.safe),
+    transparent: sanitizeBoolean(candidate.transparent, fallback.transparent),
+    inputImages: normalizedInputImages,
+  };
+};
 
 export default function Generator() {
-  const [settings, setSettings] = useState<GeneratorSettings>(() => {
-    const initialPrompt = getRandomDefaultPrompt();
-    return {
-      prompt: initialPrompt,
-      negativePrompt: '',
-      model: 'flux',
-      cfg_scale: 7,
-      width: 1024,
-      height: 1792,
-      seed: Math.floor(Math.random() * 1000000),
-      artStyle: '',
-      batchSize: 1,
-      imageQuality: 'Ultra',
-      private: false,
-      safe: false,
-      transparent: false,
-      inputImages: createEmptyReferenceImages(),
-    };
-  });
+  const [settings, setSettings] = useState<GeneratorSettings>(createDefaultSettings);
 
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [modelRequiringKey, setModelRequiringKey] = useState<'DALL-E 3' | 'Leonardo' | ''>('');
@@ -99,15 +150,39 @@ export default function Generator() {
   const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Portrait');
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isHistoryLoaded, setIsHistoryLoaded] = useState(false);
+  const [isSettingsHydrated, setIsSettingsHydrated] = useState(false);
 
   const imageDisplayRef = useRef<HTMLDivElement>(null);
   const initialDefaultPromptRef = useRef(settings.prompt);
+  const initialSettingsRef = useRef<GeneratorSettings>();
+  if (!initialSettingsRef.current) {
+    initialSettingsRef.current = settings;
+  }
 
   useEffect(() => {
     try {
+      const storedSettings = localStorage.getItem(GENERATOR_SETTINGS_STORAGE_KEY);
+      if (storedSettings) {
+        const parsedSettings = JSON.parse(storedSettings);
+        const fallbackSettings = initialSettingsRef.current ?? createDefaultSettings();
+        const sanitizedSettings = sanitizeStoredSettings(parsedSettings, fallbackSettings);
+        initialDefaultPromptRef.current = sanitizedSettings.prompt || fallbackSettings.prompt;
+        setSettings(sanitizedSettings);
+        setAspectRatio(determineAspectRatioFromDimensions(sanitizedSettings.width, sanitizedSettings.height));
+      }
+    } catch (error) {
+      console.error("Gagal memuat pengaturan generator:", error);
+    } finally {
+      setIsSettingsHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      const initialPromptValue = initialSettingsRef.current?.prompt ?? '';
       const unsavedPrompt = localStorage.getItem('ruangriung_unsaved_prompt');
       if (unsavedPrompt) {
-        if (settings.prompt === initialDefaultPromptRef.current || settings.prompt === '') {
+        if (initialPromptValue === initialDefaultPromptRef.current || initialPromptValue === '') {
           setSettings(prev => ({ ...prev, prompt: unsavedPrompt }));
         }
       }
@@ -162,6 +237,15 @@ export default function Generator() {
       } catch (error) { console.error("Gagal menyimpan riwayat:", error); }
     }
   }, [history, isHistoryLoaded]);
+
+  useEffect(() => {
+    if (!isSettingsHydrated) return;
+    try {
+      localStorage.setItem(GENERATOR_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+    } catch (error) {
+      console.error("Gagal menyimpan pengaturan generator:", error);
+    }
+  }, [settings, isSettingsHydrated]);
 
   useEffect(() => {
     if (settings.prompt !== initialDefaultPromptRef.current) {
