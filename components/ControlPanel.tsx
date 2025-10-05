@@ -13,28 +13,9 @@ import TranslationAssistant from './TranslationAssistant';
 import ImageAnalysisAssistant from './ImageAnalysisAssistant';
 import LockedAccordion from './LockedAccordion';
 import toast from 'react-hot-toast';
-import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
+import { DEFAULT_TEXT_MODEL, getTextModelOptions, resolveSelectedTextModel, TextModelOption } from '@/lib/textModels';
 
 const ENHANCEMENT_MODEL_STORAGE_KEY = 'ruangriung_enhancement_model';
-
-const TEXT_MODEL_DATA: {
-  name: string;
-  description: string;
-  input_modalities: string[];
-  output_modalities: string[];
-}[] = [
-  { name: 'deepseek', description: 'DeepSeek V3', input_modalities: ['text'], output_modalities: ['text'] },
-  { name: 'deepseek-reasoning', description: 'DeepSeek R1 0528', input_modalities: ['text'], output_modalities: ['text'] },
-  { name: 'grok', description: 'xAI Grok-3 Mini', input_modalities: ['text'], output_modalities: ['text'] },
-  { name: 'llamascout', description: 'Llama 4 Scout 17B', input_modalities: ['text'], output_modalities: ['text'] },
-  { name: 'mistral', description: 'Mistral Small 3.1 24B', input_modalities: ['text', 'image'], output_modalities: ['text'] },
-  { name: 'openai', description: 'OpenAI GPT-4o Mini', input_modalities: ['text', 'image'], output_modalities: ['text'] },
-  { name: 'openai-fast', description: 'OpenAI GPT-4.1 Nano', input_modalities: ['text', 'image'], output_modalities: ['text'] },
-  { name: 'openai-large', description: 'OpenAI GPT-4.1', input_modalities: ['text', 'image'], output_modalities: ['text'] },
-  { name: 'phi', description: 'Phi-4 Mini Instruct', input_modalities: ['text', 'image', 'audio'], output_modalities: ['text'] },
-  { name: 'rtist', description: 'Rtist', input_modalities: ['text'], output_modalities: ['text'] },
-  { name: 'midijourney', description: 'MIDIjourney', input_modalities: ['text'], output_modalities: ['text'] },
-];
 
 export interface GeneratorSettings {
   prompt: string;
@@ -76,10 +57,13 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
   const [isSaving, setIsSaving] = useState(false);
   const [savedPrompts, setSavedPrompts] = useState<string[]>([]);
   const [isGeneratingJson, setIsGeneratingJson] = useState(false);
-  const [enhancementModels, setEnhancementModels] = useState<{ name: string; description: string }[]>([]);
-  const [selectedEnhancementModel, setSelectedEnhancementModel] = useState('openai');
+  const [enhancementModels, setEnhancementModels] = useState<TextModelOption[]>([]);
+  const [selectedEnhancementModel, setSelectedEnhancementModel] = useState(DEFAULT_TEXT_MODEL);
 
   useEffect(() => {
+    const availableModels = getTextModelOptions();
+    setEnhancementModels(availableModels);
+
     let storedEnhancementModel: string | null = null;
     try {
       storedEnhancementModel = localStorage.getItem(ENHANCEMENT_MODEL_STORAGE_KEY);
@@ -87,39 +71,8 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       console.error("Gagal membaca model bantuan prompt dari localStorage:", error);
     }
 
-    const relevantModels = TEXT_MODEL_DATA.filter(
-      (model) => model.input_modalities.includes('text') && model.output_modalities.includes('text')
-    ).map(({ name, description }) => ({ name, description }));
-
-    if (relevantModels.length > 0) {
-      setEnhancementModels(relevantModels);
-      if (
-        storedEnhancementModel &&
-        relevantModels.some((model) => model.name === storedEnhancementModel)
-      ) {
-        setSelectedEnhancementModel(storedEnhancementModel);
-      } else if (relevantModels.some((model) => model.name === 'openai')) {
-        setSelectedEnhancementModel('openai');
-      } else {
-        setSelectedEnhancementModel(relevantModels[0].name);
-      }
-    } else {
-      const fallbackModels = [
-        { name: 'openai', description: 'OpenAI GPT-4o Mini' },
-        { name: 'mistral', description: 'Mistral Small 3.1 24B' },
-        { name: 'grok', description: 'xAI Grok-3 Mini' },
-        { name: 'deepseek', description: 'DeepSeek V3' },
-      ];
-      setEnhancementModels(fallbackModels);
-      if (
-        storedEnhancementModel &&
-        fallbackModels.some((model) => model.name === storedEnhancementModel)
-      ) {
-        setSelectedEnhancementModel(storedEnhancementModel);
-      } else {
-        setSelectedEnhancementModel('openai');
-      }
-    }
+    const resolvedModel = resolveSelectedTextModel(storedEnhancementModel, availableModels, DEFAULT_TEXT_MODEL);
+    setSelectedEnhancementModel(resolvedModel);
   }, []);
 
   useEffect(() => {

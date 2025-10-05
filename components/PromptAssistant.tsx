@@ -7,6 +7,7 @@ import Accordion from './Accordion';
 import ButtonSpinner from './ButtonSpinner';
 import toast from 'react-hot-toast';
 import TextareaModal from './TextareaModal';
+import { DEFAULT_TEXT_MODEL, getTextModelOptions, resolveSelectedTextModel, TextModelOption } from '@/lib/textModels';
 
 interface PromptAssistantProps {
   onUsePrompt: (prompt: string) => void;
@@ -32,61 +33,16 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
   const [isGeneratingAssistantPrompt, setIsGeneratingAssistantPrompt] = useState(false);
   const [isAssistantPromptCopied, setIsAssistantPromptCopied] = useState(false);
   
-  const [models, setModels] = useState<{name: string, description: string}[]>([]);
-  const [selectedModel, setSelectedModel] = useState('openai');
+  const [models, setModels] = useState<TextModelOption[]>([]);
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_TEXT_MODEL);
   const [editingField, setEditingField] = useState<null | 'subject' | 'details'>(null);
 
   // --- PERUBAHAN LOGIKA FETCH DIMULAI DI SINI ---
   useEffect(() => {
-    const fetchTextModels = async () => {
-      try {
-        // Data model langsung dari informasi yang Anda berikan
-        const modelData = [
-          {"name": "deepseek", "description": "DeepSeek V3", "input_modalities": ["text"], "output_modalities": ["text"]},
-          {"name": "deepseek-reasoning", "description": "DeepSeek R1 0528", "input_modalities": ["text"], "output_modalities": ["text"]},
-          {"name": "grok", "description": "xAI Grok-3 Mini", "input_modalities": ["text"], "output_modalities": ["text"]},
-          {"name": "llamascout", "description": "Llama 4 Scout 17B", "input_modalities": ["text"], "output_modalities": ["text"]},
-          {"name": "mistral", "description": "Mistral Small 3.1 24B", "input_modalities": ["text", "image"], "output_modalities": ["text"]},
-          {"name": "openai", "description": "OpenAI GPT-4o Mini", "input_modalities": ["text", "image"], "output_modalities": ["text"]},
-          {"name": "openai-fast", "description": "OpenAI GPT-4.1 Nano", "input_modalities": ["text", "image"], "output_modalities": ["text"]},
-          {"name": "openai-large", "description": "OpenAI GPT-4.1", "input_modalities": ["text", "image"], "output_modalities": ["text"]},
-          {"name": "phi", "description": "Phi-4 Mini Instruct", "input_modalities": ["text", "image", "audio"], "output_modalities": ["text"]},
-          {"name": "rtist", "description": "Rtist", "input_modalities": ["text"], "output_modalities": ["text"]},
-          {"name": "midijourney", "description": "MIDIjourney", "input_modalities": ["text"], "output_modalities": ["text"]}
-        ];
-
-        // Filter model yang relevan untuk Asisten Prompt (inputnya teks, outputnya teks)
-        const relevantModels = modelData.filter(model => 
-          model.input_modalities.includes('text') && model.output_modalities.includes('text')
-        ).map(model => ({ name: model.name, description: model.description }));
-
-        if (relevantModels.length > 0) {
-          setModels(relevantModels);
-          // Set 'openai' sebagai default jika tersedia
-          if (relevantModels.some(m => m.name === 'openai')) {
-            setSelectedModel('openai');
-          } else {
-            setSelectedModel(relevantModels[0].name);
-          }
-        } else {
-           // Fallback jika tidak ada model yang cocok
-           throw new Error('Tidak ada model teks yang relevan ditemukan');
-        }
-      } catch (error) {
-          console.error("Gagal memproses daftar model:", error);
-          // Daftar fallback yang solid jika terjadi kesalahan
-          const fallbackModels = [
-              { name: 'openai', description: 'OpenAI GPT-4o Mini' },
-              { name: 'mistral', description: 'Mistral Small 3.1 24B' },
-              { name: 'grok', description: 'xAI Grok-3 Mini' },
-              { name: 'deepseek', description: 'DeepSeek V3' }
-          ];
-          setModels(fallbackModels);
-          setSelectedModel('openai');
-      }
-    };
-    
-    fetchTextModels();
+    const availableModels = getTextModelOptions();
+    setModels(availableModels);
+    const resolvedModel = resolveSelectedTextModel(DEFAULT_TEXT_MODEL, availableModels, DEFAULT_TEXT_MODEL);
+    setSelectedModel(resolvedModel);
   }, []);
   // --- AKHIR PERUBAHAN LOGIKA FETCH ---
 
