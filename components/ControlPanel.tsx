@@ -502,7 +502,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
             >
               {isGeneratingJson ? <ButtonSpinner /> : <Braces size={16} />} <span>JSON</span>
             </button>
-            <div className="col-span-2 sm:col-span-1 order-5 sm:order-4 flex flex-col gap-2 w-full">
+            <div className="col-span-2 sm:col-span-1 order-5 sm:order-4 flex flex-col gap-2 w-full sm:hidden">
               <label htmlFor="enhancement-model" className="text-sm font-medium text-gray-600 dark:text-gray-300">
                 Pilih Model AI untuk Bantuan Prompt
               </label>
@@ -535,6 +535,32 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
             >
                 <Save size={16} /> <span>{isSaving ? 'Tersimpan!' : 'Simpan'}</span>
             </button>
+          </div>
+
+          <div className="hidden w-full flex-col gap-2 sm:flex">
+            <label htmlFor="enhancement-model-desktop" className="text-sm font-medium text-gray-600 dark:text-gray-300">
+              Pilih Model AI untuk Bantuan Prompt
+            </label>
+            <div className="relative">
+              <select
+                id="enhancement-model-desktop"
+                value={selectedEnhancementModel}
+                onChange={(event) => setSelectedEnhancementModel(event.target.value)}
+                className="w-full appearance-none p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800 dark:text-gray-200"
+                disabled={enhancementModels.length === 0}
+              >
+                {enhancementModels.length > 0 ? (
+                  enhancementModels.map((model) => (
+                    <option key={model.name} value={model.name} className="bg-white dark:bg-gray-700">
+                      {model.description} ({model.name})
+                    </option>
+                  ))
+                ) : (
+                  <option>Memuat...</option>
+                )}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
+            </div>
           </div>
         </div>
 
