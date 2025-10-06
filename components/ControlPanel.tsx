@@ -455,32 +455,6 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
         {/* Tombol Generate dan Aksi Prompt lainnya */}
         <div className="mt-4 pt-4 border-t border-gray-300 dark:border-gray-600 flex flex-col justify-center items-center gap-3">
-          <div className="w-full">
-            <label htmlFor="enhancement-model" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
-              Pilih Model AI untuk Bantuan Prompt
-            </label>
-            <div className="relative">
-              <select
-                id="enhancement-model"
-                value={selectedEnhancementModel}
-                onChange={(event) => setSelectedEnhancementModel(event.target.value)}
-                className="w-full appearance-none p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800 dark:text-gray-200"
-                disabled={enhancementModels.length === 0}
-              >
-                {enhancementModels.length > 0 ? (
-                  enhancementModels.map((model) => (
-                    <option key={model.name} value={model.name} className="bg-white dark:bg-gray-700">
-                      {model.description} ({model.name})
-                    </option>
-                  ))
-                ) : (
-                  <option>Memuat...</option>
-                )}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
-            </div>
-          </div>
-
           <button
             onClick={onGenerate}
             className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150 w-full"
@@ -499,23 +473,48 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
             )}
           </button>
 
-          <div className="grid grid-cols-2 gap-3 w-full mt-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            <button onClick={handleRandomPrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing || isGeneratingJson}>
+          <div className="grid grid-cols-1 gap-3 w-full mt-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            <button onClick={handleRandomPrompt} className={`${featureButtonStyle} order-1 sm:order-1`} disabled={isRandomizing || isEnhancing || isGeneratingJson}>
                 {isRandomizing ? <ButtonSpinner /> : <Shuffle size={16} />} <span>Acak Prompt</span>
             </button>
-            <button onClick={onSurpriseMe} className={featureButtonStyle} disabled={isLoading || isRandomizing || isEnhancing || isGeneratingJson}>
+            <button onClick={onSurpriseMe} className={`${featureButtonStyle} order-2 sm:order-2`} disabled={isLoading || isRandomizing || isEnhancing || isGeneratingJson}>
                 <FlaskConical size={16} /> <span>Surprise Me!</span>
             </button>
-            <button onClick={handleEnhancePrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}>
+            <button onClick={handleEnhancePrompt} className={`${featureButtonStyle} order-3 sm:order-3`} disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}>
                 {isEnhancing ? <ButtonSpinner /> : <Wand2 size={16} />} <span>Sempurnakan</span>
             </button>
-            <button onClick={handleGenerateJsonPrompt} className={featureButtonStyle} disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}>
+            <div className="col-span-2 sm:col-span-1 order-4 sm:order-4 flex flex-col gap-2 w-full">
+              <label htmlFor="enhancement-model" className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                Pilih Model AI untuk Bantuan Prompt
+              </label>
+              <div className="relative">
+                <select
+                  id="enhancement-model"
+                  value={selectedEnhancementModel}
+                  onChange={(event) => setSelectedEnhancementModel(event.target.value)}
+                  className="w-full appearance-none p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800 dark:text-gray-200"
+                  disabled={enhancementModels.length === 0}
+                >
+                  {enhancementModels.length > 0 ? (
+                    enhancementModels.map((model) => (
+                      <option key={model.name} value={model.name} className="bg-white dark:bg-gray-700">
+                        {model.description} ({model.name})
+                      </option>
+                    ))
+                  ) : (
+                    <option>Memuat...</option>
+                  )}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
+              </div>
+            </div>
+            <button onClick={handleGenerateJsonPrompt} className={`${featureButtonStyle} order-5 sm:order-5`} disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}>
                 {isGeneratingJson ? <ButtonSpinner /> : <Braces size={16} />} <span>JSON</span>
             </button>
             {/* PERUBAHAN DI SINI: Menambahkan kelas col-span-2 sm:col-span-1 */}
             <button
               onClick={handleSavePrompt}
-              className={`${featureButtonStyle} ${isSaving ? '!text-green-500' : ''} col-span-2 sm:col-span-1`}
+              className={`${featureButtonStyle} ${isSaving ? '!text-green-500' : ''} col-span-2 sm:col-span-1 order-6 sm:order-6`}
               disabled={isSaving || !settings.prompt}
             >
                 <Save size={16} /> <span>{isSaving ? 'Tersimpan!' : 'Simpan'}</span>
