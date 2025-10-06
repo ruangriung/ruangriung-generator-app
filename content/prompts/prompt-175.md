@@ -4,7 +4,7 @@ slug: "junji-ito-style"
 title: "Absurd Junji Ito Style Illusion"
 author: "Endikull"
 date: "2025-10-06"
-tool: "Midjourney, Stable Diffusion"
+tool: "Dall-E 3"
 tags:
   - Horror Illustration
   - Junji Ito Style
