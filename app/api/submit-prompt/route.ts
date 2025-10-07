@@ -98,6 +98,11 @@ export async function POST(request: Request) {
       );
     }
 
+    const skipEmail =
+      typeof body.skipEmail === 'string'
+        ? body.skipEmail.toLowerCase() === 'true'
+        : Boolean(body.skipEmail);
+
     const turnstileSecretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
     if (!turnstileSecretKey) {
       console.error('CLOUDFLARE_TURNSTILE_SECRET_KEY tidak diatur.');
@@ -135,49 +140,51 @@ export async function POST(request: Request) {
       tags,
     });
 
-    const nodemailerUser = sanitizeString(process.env.NODEMAILER_EMAIL);
-    const nodemailerPass = sanitizeString(process.env.NODEMAILER_APP_PASSWORD);
+    if (!skipEmail) {
+      const nodemailerUser = sanitizeString(process.env.NODEMAILER_EMAIL);
+      const nodemailerPass = sanitizeString(process.env.NODEMAILER_APP_PASSWORD);
 
-    if (!nodemailerUser || !nodemailerPass) {
-      console.error('NODEMAILER_EMAIL atau NODEMAILER_APP_PASSWORD belum diatur.');
-      return NextResponse.json(
-        { message: 'Layanan email belum dikonfigurasi dengan benar.' },
-        { status: 500 },
-      );
+      if (!nodemailerUser || !nodemailerPass) {
+        console.error('NODEMAILER_EMAIL atau NODEMAILER_APP_PASSWORD belum diatur.');
+        return NextResponse.json(
+          { message: 'Layanan email belum dikonfigurasi dengan benar.' },
+          { status: 500 },
+        );
+      }
+
+      const transportOptions = createTransportOptions(nodemailerUser, nodemailerPass);
+      const transporter = nodemailer.createTransport(transportOptions);
+
+      const senderAddress = sanitizeString(process.env.NODEMAILER_FROM) || nodemailerUser;
+      const recipientAddress =
+        sanitizeString(process.env.PROMPT_SUBMISSION_RECIPIENT) ||
+        sanitizeString(process.env.CONTACT_EMAIL_RECIPIENT) ||
+        nodemailerUser;
+
+      const safeTags = tags.map(tag => escapeHtml(tag));
+      const formattedTags = safeTags.length > 0 ? safeTags.join(', ') : '-';
+      const mailOptions = {
+        from: senderAddress,
+        to: recipientAddress,
+        subject: `Submission Prompt Baru: ${escapeHtml(title)}`,
+        html: `
+          <h2>Submission Prompt Baru</h2>
+          <p><strong>Nama Pengirim:</strong> ${escapeHtml(author)}</p>
+          <p><strong>Email Pengirim:</strong> ${escapeHtml(email)}</p>
+          <p><strong>Link Facebook:</strong> ${formatOptionalValue(facebook)}</p>
+          <p><strong>Link:</strong> ${formatOptionalValue(link)}</p>
+          <p><strong>Link Gambar:</strong> ${formatOptionalValue(image)}</p>
+          <p><strong>Judul Prompt:</strong> ${escapeHtml(title)}</p>
+          <p><strong>Tool:</strong> ${escapeHtml(tool)}</p>
+          <p><strong>Tags:</strong> ${formattedTags}</p>
+          <p><strong>Slug:</strong> ${escapeHtml(prompt.slug)}</p>
+          <p><strong>Isi Prompt:</strong></p>
+          <pre>${escapeHtml(promptContent)}</pre>
+        `,
+      };
+
+      await transporter.sendMail(mailOptions);
     }
-
-    const transportOptions = createTransportOptions(nodemailerUser, nodemailerPass);
-    const transporter = nodemailer.createTransport(transportOptions);
-
-    const senderAddress = sanitizeString(process.env.NODEMAILER_FROM) || nodemailerUser;
-    const recipientAddress =
-      sanitizeString(process.env.PROMPT_SUBMISSION_RECIPIENT) ||
-      sanitizeString(process.env.CONTACT_EMAIL_RECIPIENT) ||
-      nodemailerUser;
-
-    const safeTags = tags.map(tag => escapeHtml(tag));
-    const formattedTags = safeTags.length > 0 ? safeTags.join(', ') : '-';
-    const mailOptions = {
-      from: senderAddress,
-      to: recipientAddress,
-      subject: `Submission Prompt Baru: ${escapeHtml(title)}`,
-      html: `
-        <h2>Submission Prompt Baru</h2>
-        <p><strong>Nama Pengirim:</strong> ${escapeHtml(author)}</p>
-        <p><strong>Email Pengirim:</strong> ${escapeHtml(email)}</p>
-        <p><strong>Link Facebook:</strong> ${formatOptionalValue(facebook)}</p>
-        <p><strong>Link:</strong> ${formatOptionalValue(link)}</p>
-        <p><strong>Link Gambar:</strong> ${formatOptionalValue(image)}</p>
-        <p><strong>Judul Prompt:</strong> ${escapeHtml(title)}</p>
-        <p><strong>Tool:</strong> ${escapeHtml(tool)}</p>
-        <p><strong>Tags:</strong> ${formattedTags}</p>
-        <p><strong>Slug:</strong> ${escapeHtml(prompt.slug)}</p>
-        <p><strong>Isi Prompt:</strong></p>
-        <pre>${escapeHtml(promptContent)}</pre>
-      `,
-    };
-
-    await transporter.sendMail(mailOptions);
 
     if (persisted) {
       revalidatePath('/kumpulan-prompt');
@@ -185,7 +192,9 @@ export async function POST(request: Request) {
     }
 
     const successMessage = persisted
-      ? 'Prompt berhasil dikirim!'
+      ? skipEmail
+        ? 'Prompt berhasil dikirim dan langsung ditayangkan di katalog.'
+        : 'Prompt berhasil dikirim!'
       : 'Prompt berhasil dikirim, namun diperlukan peninjauan manual sebelum dipublikasikan.';
 
     return NextResponse.json(
@@ -194,7 +203,10 @@ export async function POST(request: Request) {
     );
 
   } catch (error: any) {
-    console.error('Gagal mengirim email:', error);
-    return NextResponse.json({ message: 'Gagal mengirim email.', error: error.message }, { status: 500 });
+    console.error('Gagal memproses pengiriman prompt:', error);
+    return NextResponse.json(
+      { message: 'Gagal memproses pengiriman prompt.', error: error.message },
+      { status: 500 },
+    );
   }
 }
