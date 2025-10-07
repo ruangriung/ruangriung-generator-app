@@ -80,5 +80,16 @@ Saat melakukan deploy ke Vercel, pastikan hal-hal berikut:
 
 Setelah konfigurasi tersebut, Anda cukup menyambungkan repository Git ke Vercel dan setiap push ke branch yang dipilih akan memicu deploy otomatis.
 
+### Mengapa prompt yang baru dikirim langsung muncul di halaman kumpulan prompt?
+Halaman daftar (`app/kumpulan-prompt/page.tsx`) dan detail prompt (`app/kumpulan-prompt/[slug]/page.tsx`) mengekspor `export const revalidate = 0;`. Di Next.js 14, nilai `revalidate` mengatur caching untuk halaman yang digenerasi secara statis. Angka `0` berarti halaman tidak pernah di-cache dan selalu dirender ulang di sisi server untuk setiap permintaan.
+
+Alurnya sebagai berikut:
+
+1. Pengguna mengirim prompt baru dan data tersimpan melalui API/basis data.
+2. Saat halaman daftar atau detail diakses, Next.js menjalankan fungsi server (`getAllPrompts` atau `getPromptBySlug`) tanpa mengambil versi cache.
+3. Karena halaman tidak di-cache, data terbaru langsung diproses dan diteruskan ke komponen klien (`PromptClient` atau `PromptDetailClient`).
+
+Dengan demikian, kiriman prompt baru akan langsung terlihat tanpa perlu menunggu revalidasi periodik ataupun menghapus cache secara manual.
+
 ## Lisensi
 Proyek ini menggunakan lisensi ISC seperti yang tercantum pada `package.json`.
