@@ -46,6 +46,38 @@ export default function PromptSubmissionPageClient() {
           <p className="mt-2 text-sm text-emerald-800 dark:text-emerald-300/80">
             Format front matter akan otomatis mengikuti standar RuangRiung sehingga prompt Anda siap tampil bersama koleksi lain.
           </p>
+          <div className="mt-8 text-left">
+            <div className="rounded-2xl border border-emerald-200 bg-white/70 p-6 shadow-inner dark:border-emerald-400/30 dark:bg-emerald-950/30">
+              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-500 dark:text-emerald-300">
+                Preview prompt yang baru ditambahkan
+              </p>
+              <h3 className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">{prompt.title}</h3>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                Oleh <span className="font-medium text-slate-900 dark:text-white">{prompt.author}</span>
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium">
+                {prompt.tags.map(tag => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-200"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+                {prompt.tags.length === 0 ? (
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+                    Tidak ada tag
+                  </span>
+                ) : null}
+              </div>
+              <div className="mt-4 rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/80 p-4 text-sm leading-relaxed text-emerald-900 dark:border-emerald-400/30 dark:bg-emerald-900/40 dark:text-emerald-100">
+                <p className="whitespace-pre-line">{prompt.promptContent}</p>
+              </div>
+              <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
+                Slug otomatis: <span className="font-medium text-slate-700 dark:text-slate-200">{prompt.slug}</span>
+              </p>
+            </div>
+          </div>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <button
               type="button"

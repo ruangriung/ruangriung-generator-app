@@ -87,7 +87,7 @@ export default function PromptSubmissionPageForm({ onCancel, onSuccess }: Prompt
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...payload, token }),
+        body: JSON.stringify({ ...payload, token, skipEmail: true }),
       });
 
       const data = await response.json();
