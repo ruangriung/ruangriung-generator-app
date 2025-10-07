@@ -5,6 +5,36 @@ import matter from 'gray-matter';
 const promptsDirectory = path.join(process.cwd(), 'content/prompts');
 const READ_ONLY_ERROR_CODES = new Set(['EROFS', 'EACCES', 'EPERM']);
 
+type TransientPromptStore = {
+  prompts: Map<string, Prompt>;
+};
+
+const globalPromptStore = globalThis as typeof globalThis & {
+  __transientPromptStore?: TransientPromptStore;
+};
+
+const getTransientPromptStore = (): TransientPromptStore => {
+  if (!globalPromptStore.__transientPromptStore) {
+    globalPromptStore.__transientPromptStore = {
+      prompts: new Map<string, Prompt>(),
+    } satisfies TransientPromptStore;
+  }
+
+  return globalPromptStore.__transientPromptStore;
+};
+
+const addTransientPrompt = (prompt: Prompt) => {
+  getTransientPromptStore().prompts.set(prompt.slug, prompt);
+};
+
+const removeTransientPrompt = (slug: string) => {
+  getTransientPromptStore().prompts.delete(slug);
+};
+
+const listTransientPrompts = (): Prompt[] => {
+  return Array.from(getTransientPromptStore().prompts.values());
+};
+
 const isReadOnlyFileSystemError = (error: unknown): error is NodeJS.ErrnoException => {
   if (!error || typeof error !== 'object') {
     return false;
@@ -44,8 +74,30 @@ const ensureDirectoryExists = async () => {
   try {
     await fs.access(promptsDirectory);
   } catch {
-    await fs.mkdir(promptsDirectory, { recursive: true });
+    try {
+      await fs.mkdir(promptsDirectory, { recursive: true });
+    } catch (error) {
+      if (!isReadOnlyFileSystemError(error)) {
+        throw error;
+      }
+    }
   }
+};
+
+const getPromptSortValue = (prompt: Prompt) => {
+  const numericId = Number.parseInt(prompt.id, 10);
+
+  if (!Number.isNaN(numericId)) {
+    return numericId;
+  }
+
+  const dateValue = Date.parse(prompt.date);
+
+  if (!Number.isNaN(dateValue)) {
+    return dateValue;
+  }
+
+  return 0;
 };
 
 const generateUniqueSlug = (title: string, existingSlugs: Set<string>) => {
@@ -144,9 +196,11 @@ export interface Prompt {
 }
 
 export async function getAllPrompts(): Promise<Prompt[]> {
+  let persistedPrompts: Prompt[] = [];
+
   try {
     const fileNames = await fs.readdir(promptsDirectory);
-    const allPrompts = await Promise.all(
+    persistedPrompts = await Promise.all(
       fileNames
         .filter(fileName => fileName.endsWith('.md'))
         .map(async fileName => {
@@ -168,14 +222,28 @@ export async function getAllPrompts(): Promise<Prompt[]> {
             promptContent: content.trim(),
           };
           return prompt;
-        })
+        }),
     );
-    return allPrompts.sort((a, b) => Number(b.id) - Number(a.id));
   } catch (error) {
-    // If the directory doesn't exist, return an empty array
-    console.log("Could not read prompts directory, returning empty array.");
-    return [];
+    // If the directory doesn't exist or cannot be read, continue with transient prompts only
+    console.log('Could not read prompts directory, returning transient prompts only.');
   }
+
+  const transientPrompts = listTransientPrompts();
+  const promptMap = new Map<string, Prompt>();
+
+  transientPrompts.forEach(prompt => {
+    promptMap.set(prompt.slug, prompt);
+  });
+
+  persistedPrompts.forEach(prompt => {
+    promptMap.set(prompt.slug, prompt);
+    removeTransientPrompt(prompt.slug);
+  });
+
+  return Array.from(promptMap.values()).sort(
+    (a, b) => getPromptSortValue(b) - getPromptSortValue(a),
+  );
 }
 
 export async function getPromptBySlug(slug: string): Promise<Prompt | undefined> {
@@ -193,6 +261,7 @@ export async function createPrompt(payload: PromptPayload): Promise<PromptCreati
   const fileContents = formatPrompt(prompt);
   try {
     await fs.writeFile(filePath, fileContents, 'utf8');
+    removeTransientPrompt(prompt.slug);
     return { prompt, persisted: true } satisfies PromptCreationResult;
   } catch (error) {
     if (isReadOnlyFileSystemError(error)) {
@@ -201,13 +270,9 @@ export async function createPrompt(payload: PromptPayload): Promise<PromptCreati
         error,
       );
 
-      const fallbackPrompt: Prompt = {
-        ...prompt,
-        id: `${prompt.id}-${Date.now()}`,
-        slug: prompt.slug,
-      };
+      addTransientPrompt(prompt);
 
-      return { prompt: fallbackPrompt, persisted: false } satisfies PromptCreationResult;
+      return { prompt, persisted: false } satisfies PromptCreationResult;
     }
 
     throw error;

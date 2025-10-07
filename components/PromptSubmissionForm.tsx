@@ -41,6 +41,7 @@ export default function PromptSubmissionForm({
   const [facebook, setFacebook] = useState('');
   const [link, setLink] = useState('');
   const [image, setImage] = useState('');
+  const [date, setDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState('');
@@ -66,6 +67,7 @@ export default function PromptSubmissionForm({
     setFacebook(prompt?.facebook ?? '');
     setLink(prompt?.link ?? '');
     setImage(prompt?.image ?? '');
+    setDate(prompt?.date ?? '');
     setSubmitStatus(null);
     setFeedbackMessage('');
     setCaptchaError(false);
@@ -103,6 +105,7 @@ export default function PromptSubmissionForm({
     setSubmitStatus(null);
     setFeedbackMessage('');
 
+    const normalizedDate = date.trim();
     const payload = {
       author: author.trim(),
       email: email.trim(),
@@ -113,6 +116,7 @@ export default function PromptSubmissionForm({
       promptContent: promptContent.trim(),
       tool: tool.trim(),
       tags: parseTags(tags),
+      date: normalizedDate || undefined,
     };
 
     try {
@@ -120,7 +124,7 @@ export default function PromptSubmissionForm({
       const method = isEditMode ? 'PATCH' : 'POST';
       const body = {
         ...payload,
-        ...(isEditMode ? { date: initialPrompt?.date } : { token }),
+        ...(isEditMode ? {} : { token }),
       };
 
       const headers: HeadersInit = {
@@ -161,6 +165,7 @@ export default function PromptSubmissionForm({
         setFacebook(prompt.facebook ?? '');
         setLink(prompt.link ?? '');
         setImage(prompt.image ?? '');
+        setDate(prompt.date ?? '');
       } else {
         setAuthor('');
         setEmail('');
@@ -171,6 +176,7 @@ export default function PromptSubmissionForm({
         setFacebook('');
         setLink('');
         setImage('');
+        setDate('');
         setToken('');
       }
 
@@ -179,7 +185,7 @@ export default function PromptSubmissionForm({
         ? 'Prompt berhasil diperbarui dan perubahan langsung ditayangkan.'
         : persisted
             ? 'Prompt berhasil dikirim dan langsung dipublikasikan.'
-            : 'Prompt berhasil dikirim. Tim kami akan meninjau dan memublikasikannya secara manual.';
+            : 'Prompt berhasil dikirim dan langsung ditampilkan di katalog dengan penyimpanan sementara.';
       setFeedbackMessage(successMessage);
 
       onSuccess?.(prompt);
@@ -281,6 +287,21 @@ export default function PromptSubmissionForm({
               required
               className="w-full p-2 border rounded mb-4 dark:bg-gray-700"
             />
+            <div className="mb-4">
+              <label htmlFor="prompt-date" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                Tanggal Publikasi (opsional)
+              </label>
+              <input
+                id="prompt-date"
+                type="date"
+                value={date}
+                onChange={e => setDate(e.target.value)}
+                className="mt-2 w-full p-2 border rounded dark:bg-gray-700"
+              />
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                Kosongkan untuk menggunakan tanggal hari ini secara otomatis.
+              </p>
+            </div>
             <input
               type="text"
               placeholder="Tags (pisahkan dengan koma)"

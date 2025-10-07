@@ -31,7 +31,7 @@ export default function PromptSubmissionPageClient() {
     const { prompt, persisted } = result;
     const persistenceMessage = persisted
       ? 'Prompt Anda sudah langsung tampil di halaman kumpulan prompt.'
-      : 'Prompt Anda akan kami tinjau terlebih dahulu sebelum dipublikasikan.';
+      : 'Prompt Anda sudah langsung tampil di katalog dan akan kami simpan permanen setelah peninjauan.';
 
     return (
       <div className="mx-auto max-w-3xl px-4 pb-16 sm:px-6 lg:px-8">
@@ -54,6 +54,10 @@ export default function PromptSubmissionPageClient() {
               <h3 className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">{prompt.title}</h3>
               <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
                 Oleh <span className="font-medium text-slate-900 dark:text-white">{prompt.author}</span>
+              </p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Tanggal publikasi:{' '}
+                <span className="font-medium text-slate-700 dark:text-slate-200">{prompt.date}</span>
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium">
                 {prompt.tags.map(tag => (

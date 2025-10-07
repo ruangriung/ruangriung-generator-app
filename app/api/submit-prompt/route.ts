@@ -90,6 +90,7 @@ export async function POST(request: Request) {
     const tool = sanitizeString(body.tool);
     const tags = ensureStringArray(body.tags);
     const token = sanitizeString(body.token);
+    const date = sanitizeOptionalString(body.date);
 
     if (!author || !email || !title || !promptContent || !tool || !token) {
       return NextResponse.json(
@@ -138,6 +139,7 @@ export async function POST(request: Request) {
       promptContent,
       tool,
       tags,
+      date,
     });
 
     if (!skipEmail) {
@@ -163,6 +165,7 @@ export async function POST(request: Request) {
 
       const safeTags = tags.map(tag => escapeHtml(tag));
       const formattedTags = safeTags.length > 0 ? safeTags.join(', ') : '-';
+      const formattedDate = formatOptionalValue(date);
       const mailOptions = {
         from: senderAddress,
         to: recipientAddress,
@@ -174,6 +177,7 @@ export async function POST(request: Request) {
           <p><strong>Link Facebook:</strong> ${formatOptionalValue(facebook)}</p>
           <p><strong>Link:</strong> ${formatOptionalValue(link)}</p>
           <p><strong>Link Gambar:</strong> ${formatOptionalValue(image)}</p>
+          <p><strong>Tanggal Publikasi:</strong> ${formattedDate}</p>
           <p><strong>Judul Prompt:</strong> ${escapeHtml(title)}</p>
           <p><strong>Tool:</strong> ${escapeHtml(tool)}</p>
           <p><strong>Tags:</strong> ${formattedTags}</p>
