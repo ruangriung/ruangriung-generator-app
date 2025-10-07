@@ -37,6 +37,7 @@ export default function PromptSubmissionPageForm({ onCancel, onSuccess }: Prompt
   const [facebook, setFacebook] = useState('');
   const [link, setLink] = useState('');
   const [image, setImage] = useState('');
+  const [date, setDate] = useState('');
   const [token, setToken] = useState('');
   const [captchaError, setCaptchaError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,6 +53,7 @@ export default function PromptSubmissionPageForm({ onCancel, onSuccess }: Prompt
     setFacebook('');
     setLink('');
     setImage('');
+    setDate('');
     setToken('');
     setCaptchaError(false);
     setSubmitError(null);
@@ -69,6 +71,7 @@ export default function PromptSubmissionPageForm({ onCancel, onSuccess }: Prompt
     setIsSubmitting(true);
     setSubmitError(null);
 
+    const normalizedDate = date.trim();
     const payload = {
       author: author.trim(),
       email: email.trim(),
@@ -79,6 +82,7 @@ export default function PromptSubmissionPageForm({ onCancel, onSuccess }: Prompt
       promptContent: promptContent.trim(),
       tool: tool.trim(),
       tags: parseTags(tags),
+      date: normalizedDate || undefined,
     };
 
     try {
@@ -274,6 +278,21 @@ export default function PromptSubmissionPageForm({ onCancel, onSuccess }: Prompt
                 Gunakan URL gambar beresolusi tinggi (jika ada) untuk mempercantik katalog prompt.
               </p>
             </div>
+          </div>
+          <div>
+            <label htmlFor="date" className="text-sm font-medium text-slate-700 dark:text-slate-200">
+              Tanggal Publikasi (opsional)
+            </label>
+            <input
+              id="date"
+              type="date"
+              value={date}
+              onChange={event => setDate(event.target.value)}
+              className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-blue-400 dark:focus:ring-blue-500/40"
+            />
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+              Kosongkan untuk menggunakan tanggal hari ini secara otomatis.
+            </p>
           </div>
           <div>
             <label htmlFor="tags" className="text-sm font-medium text-slate-700 dark:text-slate-200">
