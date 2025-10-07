@@ -88,6 +88,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
+export const revalidate = 0;
+
 export default async function PromptDetailPage({ params }: { params: { slug: string } }) {
   const prompts = await getAllPrompts();
   const prompt = prompts.find(currentPrompt => currentPrompt.slug === params.slug);
