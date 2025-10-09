@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { Prompt } from '@/lib/prompts';
 
 const DynamicTurnstile = dynamic(() => import('./TurnstileWidget'), {
@@ -13,10 +14,11 @@ const DynamicTurnstile = dynamic(() => import('./TurnstileWidget'), {
 
 interface PromptSubmissionFormProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   mode?: 'create' | 'edit';
   initialPrompt?: Prompt;
   onSuccess?: (prompt: Prompt) => void;
+  variant?: 'modal' | 'page';
 }
 
 const parseTags = (value: string) =>
@@ -31,6 +33,7 @@ export default function PromptSubmissionForm({
   mode = 'create',
   initialPrompt,
   onSuccess,
+  variant = 'modal',
 }: PromptSubmissionFormProps) {
   const [author, setAuthor] = useState('');
   const [email, setEmail] = useState('');
@@ -48,11 +51,22 @@ export default function PromptSubmissionForm({
   const [token, setToken] = useState('');
   const [adminToken, setAdminToken] = useState('');
   const [captchaError, setCaptchaError] = useState(false);
+  const [createdPrompt, setCreatedPrompt] = useState<Prompt | null>(null);
 
   const isEditMode = mode === 'edit';
+  const isStandalone = variant === 'page';
+  const isFormVisible = isStandalone || isOpen;
+
+  const containerClasses = useMemo(
+    () =>
+      isStandalone
+        ? 'w-full rounded-2xl bg-white p-6 shadow-lg dark:bg-gray-800 sm:p-8'
+        : 'w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800 sm:p-8 max-h-[calc(100vh-2rem)] overflow-y-auto',
+    [isStandalone],
+  );
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isFormVisible) {
       setToken('');
       return;
     }
@@ -72,12 +86,15 @@ export default function PromptSubmissionForm({
     setFeedbackMessage('');
     setCaptchaError(false);
     setAdminToken('');
-  }, [isOpen, initialPrompt]);
+    setCreatedPrompt(isEditMode ? prompt ?? null : null);
+  }, [isFormVisible, initialPrompt, isEditMode]);
 
   const handleClose = () => {
-    onClose();
+    onClose?.();
     setSubmitStatus(null);
     setFeedbackMessage('');
+    setCaptchaError(false);
+    setCreatedPrompt(isEditMode ? initialPrompt ?? null : null);
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -188,6 +205,7 @@ export default function PromptSubmissionForm({
             : 'Prompt berhasil dikirim dan langsung ditampilkan di katalog dengan penyimpanan sementara.';
       setFeedbackMessage(successMessage);
 
+      setCreatedPrompt(prompt);
       onSuccess?.(prompt);
     } catch (error: any) {
       console.error('Prompt submission failed:', error);
@@ -200,139 +218,154 @@ export default function PromptSubmissionForm({
     }
   };
 
-  if (!isOpen) {
+  if (!isFormVisible) {
     return null;
   }
 
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black bg-opacity-50 p-4 sm:items-center sm:p-6"
-    >
-      <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800 sm:p-8 max-h-[calc(100vh-2rem)] overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-6">
-          {isEditMode ? 'Edit Prompt' : 'Kirim Prompt Anda'}
-        </h2>
-        {submitStatus === 'success' ? (
-          <div className="text-green-500 text-center">
-            <p>{feedbackMessage}</p>
+  const formContent = (
+    <div className={containerClasses}>
+      <h2 className="text-2xl font-bold mb-6">
+        {isEditMode ? 'Edit Prompt' : 'Kirim Prompt Anda'}
+      </h2>
+      {submitStatus === 'success' ? (
+        <div className="text-green-500 text-center">
+          <p>{feedbackMessage}</p>
+          {isStandalone && createdPrompt ? (
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Link
+                href={`/kumpulan-prompt/${createdPrompt.slug}`}
+                className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-blue-700"
+              >
+                Lihat Detail Prompt
+              </Link>
+              <Link
+                href="/kumpulan-prompt"
+                className="inline-flex items-center justify-center rounded-lg border border-blue-600 px-4 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-50 dark:border-blue-400 dark:text-blue-300 dark:hover:bg-blue-500/10"
+              >
+                Jelajahi Kumpulan Prompt
+              </Link>
+            </div>
+          ) : (
             <button
               onClick={handleClose}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Tutup
             </button>
+          )}
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 mb-4">
+            <input
+              type="text"
+              placeholder="Nama Anda"
+              value={author}
+              onChange={e => setAuthor(e.target.value)}
+              required
+              className="p-3 border rounded-lg dark:bg-gray-700"
+            />
+            <input
+              type="email"
+              placeholder="Email Anda"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required={!isEditMode}
+              className="p-3 border rounded-lg dark:bg-gray-700"
+            />
           </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <input
+            type="url"
+            placeholder="Link Facebook (opsional)"
+            value={facebook}
+            onChange={e => setFacebook(e.target.value)}
+            className="w-full p-3 border rounded-lg mb-4 dark:bg-gray-700"
+          />
+          <input
+            type="url"
+            placeholder="Link Referensi (opsional)"
+            value={link}
+            onChange={e => setLink(e.target.value)}
+            className="w-full p-3 border rounded-lg mb-4 dark:bg-gray-700"
+          />
+          <input
+            type="url"
+            placeholder="Link Gambar (opsional)"
+            value={image}
+            onChange={e => setImage(e.target.value)}
+            className="w-full p-3 border rounded-lg mb-4 dark:bg-gray-700"
+          />
+          <input
+            type="text"
+            placeholder="Judul Prompt"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            required
+            className="w-full p-3 border rounded-lg mb-4 dark:bg-gray-700"
+          />
+          <textarea
+            placeholder="Isi Prompt"
+            value={promptContent}
+            onChange={e => setPromptContent(e.target.value)}
+            required
+            rows={6}
+            className="w-full p-3 border rounded-lg mb-4 dark:bg-gray-700"
+          ></textarea>
+          <input
+            type="text"
+            placeholder="Tool yang Digunakan (e.g., DALL-E 3)"
+            value={tool}
+            onChange={e => setTool(e.target.value)}
+            required
+            className="w-full p-3 border rounded-lg mb-4 dark:bg-gray-700"
+          />
+          <div className="mb-4">
+            <label htmlFor="prompt-date" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+              Tanggal Publikasi (opsional)
+            </label>
+            <input
+              id="prompt-date"
+              type="date"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              className="mt-2 w-full p-3 border rounded-lg dark:bg-gray-700"
+            />
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              Kosongkan untuk menggunakan tanggal hari ini secara otomatis.
+            </p>
+          </div>
+          <input
+            type="text"
+            placeholder="Tags (pisahkan dengan koma)"
+            value={tags}
+            onChange={e => setTags(e.target.value)}
+            className="w-full p-3 border rounded-lg mb-6 dark:bg-gray-700"
+          />
+
+          {isEditMode && (
+            <div className="mb-6">
               <input
-                type="text"
-                placeholder="Nama Anda"
-                value={author}
-                onChange={e => setAuthor(e.target.value)}
+                type="password"
+                placeholder="Token admin"
+                value={adminToken}
+                onChange={e => setAdminToken(e.target.value)}
+                className="w-full p-3 border rounded-lg dark:bg-gray-700"
                 required
-                className="p-2 border rounded dark:bg-gray-700"
-              />
-              <input
-                type="email"
-                placeholder="Email Anda"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required={!isEditMode}
-                className="p-2 border rounded dark:bg-gray-700"
-              />
-            </div>
-            <input
-              type="url"
-              placeholder="Link Facebook (opsional)"
-              value={facebook}
-              onChange={e => setFacebook(e.target.value)}
-              className="w-full p-2 border rounded mb-4 dark:bg-gray-700"
-            />
-            <input
-              type="url"
-              placeholder="Link Referensi (opsional)"
-              value={link}
-              onChange={e => setLink(e.target.value)}
-              className="w-full p-2 border rounded mb-4 dark:bg-gray-700"
-            />
-            <input
-              type="url"
-              placeholder="Link Gambar (opsional)"
-              value={image}
-              onChange={e => setImage(e.target.value)}
-              className="w-full p-2 border rounded mb-4 dark:bg-gray-700"
-            />
-            <input
-              type="text"
-              placeholder="Judul Prompt"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              required
-              className="w-full p-2 border rounded mb-4 dark:bg-gray-700"
-            />
-            <textarea
-              placeholder="Isi Prompt"
-              value={promptContent}
-              onChange={e => setPromptContent(e.target.value)}
-              required
-              rows={6}
-              className="w-full p-2 border rounded mb-4 dark:bg-gray-700"
-            ></textarea>
-            <input
-              type="text"
-              placeholder="Tool yang Digunakan (e.g., DALL-E 3)"
-              value={tool}
-              onChange={e => setTool(e.target.value)}
-              required
-              className="w-full p-2 border rounded mb-4 dark:bg-gray-700"
-            />
-            <div className="mb-4">
-              <label htmlFor="prompt-date" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                Tanggal Publikasi (opsional)
-              </label>
-              <input
-                id="prompt-date"
-                type="date"
-                value={date}
-                onChange={e => setDate(e.target.value)}
-                className="mt-2 w-full p-2 border rounded dark:bg-gray-700"
               />
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                Kosongkan untuk menggunakan tanggal hari ini secara otomatis.
+                Masukkan token admin untuk memverifikasi hak edit.
               </p>
             </div>
-            <input
-              type="text"
-              placeholder="Tags (pisahkan dengan koma)"
-              value={tags}
-              onChange={e => setTags(e.target.value)}
-              className="w-full p-2 border rounded mb-6 dark:bg-gray-700"
-            />
+          )}
 
-            {isEditMode && (
-              <div className="mb-6">
-                <input
-                  type="password"
-                  placeholder="Token admin"
-                  value={adminToken}
-                  onChange={e => setAdminToken(e.target.value)}
-                  className="w-full p-2 border rounded dark:bg-gray-700"
-                  required
-                />
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                  Masukkan token admin untuk memverifikasi hak edit.
-                </p>
-              </div>
-            )}
+          {!isEditMode && (
+            <div className="flex justify-center mb-6">
+              <DynamicTurnstile onSuccess={setToken} />
+            </div>
+          )}
 
-            {!isEditMode && (
-              <div className="flex justify-center mb-6">
-                <DynamicTurnstile onSuccess={setToken} />
-              </div>
-            )}
-
-            <div className="flex justify-end gap-4">
+          <div className="flex justify-end gap-4">
+            {!isStandalone && (
               <button
                 type="button"
                 onClick={handleClose}
@@ -340,24 +373,34 @@ export default function PromptSubmissionForm({
               >
                 Batal
               </button>
-              <button
-                type="submit"
-                disabled={isSubmitting || (!isEditMode && !token)}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-500"
-              >
-                {isSubmitting ? 'Mengirim...' : isEditMode ? 'Simpan Perubahan' : 'Kirim'}
-              </button>
-            </div>
+            )}
+            <button
+              type="submit"
+              disabled={isSubmitting || (!isEditMode && !token)}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-500"
+            >
+              {isSubmitting ? 'Mengirim...' : isEditMode ? 'Simpan Perubahan' : 'Kirim'}
+            </button>
+          </div>
 
-            {captchaError && !isEditMode && (
-              <p className="text-red-500 mt-4">Silakan selesaikan verifikasi keamanan.</p>
-            )}
-            {submitStatus === 'error' && (
-              <p className="text-red-500 mt-4">{feedbackMessage}</p>
-            )}
-          </form>
-        )}
-      </div>
+          {captchaError && !isEditMode && (
+            <p className="text-red-500 mt-4">Silakan selesaikan verifikasi keamanan.</p>
+          )}
+          {submitStatus === 'error' && (
+            <p className="text-red-500 mt-4">{feedbackMessage}</p>
+          )}
+        </form>
+      )}
+    </div>
+  );
+
+  if (isStandalone) {
+    return formContent;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black bg-opacity-50 p-4 sm:items-center sm:p-6">
+      {formContent}
     </div>
   );
 }
