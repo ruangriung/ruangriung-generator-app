@@ -18,6 +18,7 @@ import {
   Megaphone,
   ArrowRight,
   HelpCircle,
+  Bot,
 } from 'lucide-react';
 import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
@@ -177,6 +178,13 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
           <Building2 size={18} />
           <span>UMKM</span>
         </Link>
+        <Link
+          href="/asisten-ai"
+          className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
+        >
+          <Bot size={18} />
+          <span>Asisten AI</span>
+        </Link>
         <Link href="/kontak" className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
           <Mail size={18} />
           <span>Email Kami</span>
@@ -285,6 +293,16 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
                             >
                                 <MessageSquare size={18} />
                                 <span>Bubble Komentar</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                href="/asisten-ai"
+                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
+                                onClick={() => setIsToolsMenuOpen(false)}
+                            >
+                                <Bot size={18} />
+                                <span>Asisten AI</span>
                             </Link>
                         </li>
                     </ul>
