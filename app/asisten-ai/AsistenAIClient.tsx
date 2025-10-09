@@ -248,32 +248,6 @@ export default function AsistenAIClient() {
           </div>
         </header>
 
-        <section className="rounded-2xl border border-purple-100 bg-white/70 p-4 shadow-neumorphic dark:border-purple-900/60 dark:bg-gray-900/70 dark:shadow-dark-neumorphic">
-          <div className="flex items-center gap-2 text-sm font-semibold text-purple-700 dark:text-purple-300">
-            <Sparkles size={18} /> Template Percakapan Cepat
-          </div>
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Klik salah satu bubble di bawah untuk langsung mengirim instruksi ke Asisten AI.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-3">
-            {quickTemplates.map((template) => (
-              <button
-                key={template.title}
-                onClick={() => handleTemplateClick(template.prompt)}
-                className="group flex max-w-sm flex-1 cursor-pointer flex-col gap-1 rounded-2xl border border-purple-200/60 bg-white/90 px-4 py-3 text-left shadow-sm transition hover:-translate-y-1 hover:border-purple-500 hover:shadow-md dark:border-purple-900/40 dark:bg-gray-900/60 dark:hover:border-purple-400"
-              >
-                <span className="flex items-center gap-2 text-sm font-semibold text-purple-700 dark:text-purple-300">
-                  {template.icon}
-                  {template.title}
-                </span>
-                <span className="text-xs text-gray-600 transition group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-100">
-                  {template.description}
-                </span>
-              </button>
-            ))}
-          </div>
-        </section>
-
         <div className="flex flex-1 flex-col gap-4 lg:flex-row">
           <aside
             className={`z-20 w-full max-w-sm flex-shrink-0 rounded-2xl border border-gray-200 bg-white/80 shadow-lg transition-transform duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-900/70 lg:static lg:translate-x-0 ${
@@ -367,6 +341,36 @@ export default function AsistenAIClient() {
             </header>
 
             <div ref={scrollContainerRef} className="flex h-[55vh] flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 text-white shadow-lg">
+                  <Sparkles size={20} />
+                </div>
+                <div className="flex w-full flex-col gap-3 rounded-2xl bg-purple-50/80 p-4 text-gray-700 shadow-inner dark:bg-purple-950/40 dark:text-gray-200">
+                  <div>
+                    <p className="text-sm font-semibold">Template Percakapan Cepat</p>
+                    <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
+                      Gunakan bubble di bawah ini untuk langsung mengirim instruksi dan memulai percakapan.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {quickTemplates.map((template) => (
+                      <button
+                        key={template.title}
+                        onClick={() => handleTemplateClick(template.prompt)}
+                        className="group flex min-w-[180px] max-w-xs flex-1 cursor-pointer flex-col gap-1 rounded-2xl border border-purple-200/70 bg-white/90 px-3 py-2 text-left text-sm shadow transition hover:-translate-y-0.5 hover:border-purple-500 hover:shadow-md dark:border-purple-800/60 dark:bg-gray-900/70 dark:hover:border-purple-400"
+                      >
+                        <span className="flex items-center gap-2 font-semibold text-purple-700 dark:text-purple-300">
+                          {template.icon}
+                          {template.title}
+                        </span>
+                        <span className="text-xs text-gray-600 transition group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-100">
+                          {template.description}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
               {activeChat.messages.length === 0 && !isLoading && (
                 <div className="flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400">
                   <MessageSquare size={42} />
