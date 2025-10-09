@@ -304,16 +304,6 @@ export default function PromptClient({ prompts }: PromptClientProps) {
           className="mt-6 px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition duration-300 shadow-lg"
           onSuccess={handlePromptCreated}
         />
-        <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-          Ingin pengalaman pengiriman penuh?{' '}
-          <Link
-            href="/kumpulan-prompt/kirim"
-            className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
-          >
-            Buka halaman kirim prompt
-          </Link>
-          .
-        </p>
       </div>
 
       <div className="mb-10 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
