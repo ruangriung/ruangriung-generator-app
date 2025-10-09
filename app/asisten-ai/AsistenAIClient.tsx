@@ -224,33 +224,35 @@ export default function AsistenAIClient() {
   const isImageModeActive = imageGenerationModels.includes(activeChat.model);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-purple-50 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 pb-12 pt-10 sm:px-6 lg:px-8">
-        <header className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="inline-flex items-center gap-2 rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700 dark:bg-purple-900/40 dark:text-purple-200">
-                <Bot size={16} /> Asisten AI RuangRiung
-              </p>
-              <h1 className="mt-3 text-3xl font-bold text-gray-900 dark:text-gray-100 sm:text-4xl">
-                Satu Ruang Percakapan untuk Semua Ide Kreatifmu
-              </h1>
-              <p className="mt-2 max-w-2xl text-sm text-gray-600 dark:text-gray-300 sm:text-base">
-                Mulai brainstorming, menulis copy, hingga menganalisis gambar langsung dari satu halaman penuh. Gunakan template bubble untuk memicu percakapan instan atau ajukan pertanyaanmu sendiri.
-              </p>
-            </div>
-            <button
-              onClick={startNewChat}
-              className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-purple-500"
-            >
-              <Plus size={18} /> Chat Baru
-            </button>
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-white via-purple-50 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
+      <div className="mx-auto flex w-full flex-1 flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <p className="inline-flex items-center gap-2 rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700 dark:bg-purple-900/40 dark:text-purple-200">
+              <Bot size={16} /> Asisten AI RuangRiung
+            </p>
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 sm:text-2xl">Percakapan Aktif</h1>
           </div>
-        </header>
+          <button
+            onClick={startNewChat}
+            className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-purple-500"
+          >
+            <Plus size={18} /> Chat Baru
+          </button>
+        </div>
 
-        <div className="flex flex-1 flex-col gap-4 lg:flex-row">
+        <div className="relative flex flex-1 min-h-0 flex-col gap-4 lg:flex-row">
+          {isSidebarOpen && (
+            <button
+              type="button"
+              aria-label="Tutup riwayat"
+              className="fixed inset-0 z-10 bg-black/40 transition-opacity lg:hidden"
+              onClick={() => setIsSidebarOpen(false)}
+            />
+          )}
+
           <aside
-            className={`z-20 w-full max-w-sm flex-shrink-0 rounded-2xl border border-gray-200 bg-white/80 shadow-lg transition-transform duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-900/70 lg:static lg:translate-x-0 ${
+            className={`absolute inset-y-0 left-0 z-20 flex h-full w-full max-w-sm flex-shrink-0 transform flex-col rounded-2xl border border-gray-200 bg-white/85 shadow-lg transition-transform duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-900/70 lg:relative lg:inset-auto lg:translate-x-0 ${
               isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
             }`}
           >
@@ -275,7 +277,7 @@ export default function AsistenAIClient() {
                 <Trash2 size={14} />
               </button>
             </div>
-            <div className="h-[50vh] space-y-2 overflow-y-auto px-4 pb-4">
+            <div className="flex-1 space-y-2 overflow-y-auto px-4 pb-4">
               {sessions.map((session) => (
                 <div
                   key={session.id}
@@ -327,7 +329,7 @@ export default function AsistenAIClient() {
             </div>
           </aside>
 
-          <main className="flex-1 rounded-2xl border border-gray-200 bg-white/90 shadow-xl dark:border-gray-800 dark:bg-gray-900/70">
+          <main className="flex flex-1 min-h-0 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/90 shadow-xl dark:border-gray-800 dark:bg-gray-900/70">
             <header className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-800">
               <div>
                 <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Percakapan aktif</p>
@@ -340,12 +342,12 @@ export default function AsistenAIClient() {
               </div>
             </header>
 
-            <div ref={scrollContainerRef} className="flex h-[55vh] flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6">
+            <div ref={scrollContainerRef} className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 text-white shadow-lg">
                   <Sparkles size={20} />
                 </div>
-                <div className="flex w-full flex-col gap-3 rounded-2xl bg-purple-50/80 p-4 text-gray-700 shadow-inner dark:bg-purple-950/40 dark:text-gray-200">
+                <div className="flex w-full shrink-0 flex-col gap-3 rounded-2xl bg-purple-50/80 p-4 text-gray-700 shadow-inner dark:bg-purple-950/40 dark:text-gray-200">
                   <div>
                     <p className="text-sm font-semibold">Template Percakapan Cepat</p>
                     <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
