@@ -3,6 +3,7 @@ id: "186"
 slug: "payung-ruangriung"
 title: "Payung RuangRiung"
 author: "Guntur Reksa"
+facebook: "https://www.facebook.com/share/17F2nyUMUw/"
 date: "2025-10-09"
 tool: "Flux"
 tags:
