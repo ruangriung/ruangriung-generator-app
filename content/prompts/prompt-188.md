@@ -3,6 +3,7 @@ id: "188"
 slug: "whispers-in-smoke"
 title: "Whispers in Smoke"
 author: "Koko ajeeb"
+facebook: "https://web.facebook.com/koko.ajeeb"
 date: "2025-10-10"
 tool: "Imagen 4"
 tags:
