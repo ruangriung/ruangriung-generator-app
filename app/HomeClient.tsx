@@ -18,6 +18,7 @@ import {
   Megaphone,
   ArrowRight,
   HelpCircle,
+  RefreshCw,
 } from 'lucide-react';
 import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
@@ -285,6 +286,16 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
                             >
                                 <MessageSquare size={18} />
                                 <span>Bubble Komentar</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                href="/v1/random-spinner.html"
+                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
+                                onClick={() => setIsToolsMenuOpen(false)}
+                            >
+                                <RefreshCw size={18} />
+                                <span>Random Spinner</span>
                             </Link>
                         </li>
                     </ul>
