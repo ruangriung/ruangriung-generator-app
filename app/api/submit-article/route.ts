@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import {
+  createEmailTransporter,
+  sanitizeEmailAddresses,
+  sanitizeSenderAddress,
+} from '@/lib/email';
 
 const ensureStringArray = (value: unknown): string[] => {
   if (Array.isArray(value)) {
@@ -80,13 +84,20 @@ export async function POST(request: Request) {
       );
     }
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.NODEMAILER_EMAIL,
-        pass: process.env.NODEMAILER_APP_PASSWORD,
-      },
-    });
+    let transporter;
+    let nodemailerUser;
+
+    try {
+      const emailTransport = createEmailTransporter();
+      transporter = emailTransport.transporter;
+      nodemailerUser = emailTransport.nodemailerUser;
+    } catch (error) {
+      console.error('Konfigurasi email belum lengkap untuk submission artikel.', error);
+      return NextResponse.json(
+        { message: 'Konfigurasi email belum lengkap di server.' },
+        { status: 500 },
+      );
+    }
 
     const normalizedSummary = typeof summary === 'string' ? summary : '';
     const normalizedCategory = typeof category === 'string' ? category : '';
@@ -108,9 +119,25 @@ export async function POST(request: Request) {
       <pre>${escapeHtml(normalizedReferences || '-')}</pre>
     `;
 
+    const senderAddress = sanitizeSenderAddress(process.env.NODEMAILER_FROM, nodemailerUser);
+    const recipients = sanitizeEmailAddresses([
+      process.env.ARTICLE_SUBMISSION_RECIPIENT,
+      process.env.CONTACT_EMAIL_RECIPIENT,
+      nodemailerUser,
+      'ayicktigabelas@gmail.com',
+    ]);
+
+    if (recipients.length === 0) {
+      console.error('Tidak ada alamat email penerima yang valid untuk submission artikel.');
+      return NextResponse.json(
+        { message: 'Konfigurasi email penerima belum lengkap di server.' },
+        { status: 500 },
+      );
+    }
+
     const mailOptions = {
-      from: process.env.NODEMAILER_EMAIL,
-      to: 'ayicktigabelas@gmail.com',
+      from: senderAddress,
+      to: recipients.join(', '),
       subject: `Submission Artikel Baru: ${normalizedTitle}`,
       html,
     };

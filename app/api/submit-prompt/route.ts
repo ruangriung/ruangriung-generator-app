@@ -1,73 +1,20 @@
 
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
-import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { revalidatePath } from 'next/cache';
 import { createPrompt } from '@/lib/prompts';
+import {
+  createEmailTransporter,
+  sanitizeEmail,
+  sanitizeEmailAddresses,
+  sanitizeSenderAddress,
+  sanitizeString,
+} from '@/lib/email';
 
 const DEFAULT_PROMPT_NOTIFICATION_EMAIL = 'ayicktigabelas@gmail.com';
-
-const sanitizeString = (value: unknown): string =>
-  typeof value === 'string' ? value.trim() : '';
 
 const sanitizeOptionalString = (value: unknown): string | undefined => {
   const sanitized = sanitizeString(value);
   return sanitized.length > 0 ? sanitized : undefined;
-};
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const normalizeEmailAddress = (
-  value: unknown,
-): { address: string; formatted: string } | null => {
-  if (typeof value !== 'string') {
-    return null;
-  }
-
-  let input = value.trim();
-
-  if (!input) {
-    return null;
-  }
-
-  if (input.toLowerCase().startsWith('mailto:')) {
-    input = input.slice(7);
-  }
-
-  const angleBracketMatch = input.match(/^(.*)<([^>]+)>$/);
-  let address = input;
-  let displayName: string | undefined;
-
-  if (angleBracketMatch) {
-    displayName = angleBracketMatch[1]?.trim().replace(/^"|"$/g, '');
-    address = angleBracketMatch[2]?.trim() ?? '';
-  }
-
-  if (!EMAIL_REGEX.test(address)) {
-    return null;
-  }
-
-  const formatted = displayName ? `${displayName} <${address}>` : address;
-
-  return { address, formatted };
-};
-
-const sanitizeEmail = (value: unknown): string => {
-  const normalized = normalizeEmailAddress(value);
-  return normalized?.address ?? '';
-};
-
-const sanitizeSenderAddress = (
-  value: unknown,
-  fallback: string,
-) => {
-  const normalized = normalizeEmailAddress(value);
-  if (normalized) {
-    return normalized.formatted;
-  }
-
-  const fallbackNormalized = normalizeEmailAddress(fallback);
-  return fallbackNormalized?.formatted ?? fallback;
 };
 
 const ensureStringArray = (value: unknown): string[] => {
@@ -97,65 +44,6 @@ const escapeHtml = (value: string) =>
 
 const formatOptionalValue = (value: string | undefined) =>
   value && value.length > 0 ? escapeHtml(value) : '-';
-
-const sanitizeEmailAddresses = (values: Array<string | undefined>) => {
-  const seen = new Set<string>();
-  const recipients: string[] = [];
-
-  values.forEach(value => {
-    const normalized = normalizeEmailAddress(value);
-
-    if (!normalized) {
-      return;
-    }
-
-    const key = normalized.address.toLowerCase();
-
-    if (seen.has(key)) {
-      return;
-    }
-
-    seen.add(key);
-    recipients.push(normalized.formatted);
-  });
-
-  return recipients;
-};
-
-const createTransportOptions = (
-  user: string,
-  pass: string,
-): SMTPTransport.Options => {
-  const configuredService = sanitizeString(process.env.NODEMAILER_SERVICE);
-
-  if (configuredService) {
-    return {
-      service: configuredService,
-      auth: {
-        user,
-        pass,
-      },
-    } satisfies SMTPTransport.Options;
-  }
-
-  const host = sanitizeString(process.env.NODEMAILER_SMTP_HOST) || 'smtp.gmail.com';
-  const port = process.env.NODEMAILER_SMTP_PORT
-    ? Number(process.env.NODEMAILER_SMTP_PORT)
-    : 465;
-  const secure = process.env.NODEMAILER_SMTP_SECURE
-    ? process.env.NODEMAILER_SMTP_SECURE === 'true'
-    : true;
-
-  return {
-    host,
-    port,
-    secure,
-    auth: {
-      user,
-      pass,
-    },
-  } satisfies SMTPTransport.Options;
-};
 
 export async function POST(request: Request) {
   try {
@@ -224,19 +112,20 @@ export async function POST(request: Request) {
     });
 
     if (!skipEmail) {
-      const nodemailerUser = sanitizeEmail(process.env.NODEMAILER_EMAIL);
-      const nodemailerPass = sanitizeString(process.env.NODEMAILER_APP_PASSWORD);
+      let transporter;
+      let nodemailerUser;
 
-      if (!nodemailerUser || !nodemailerPass) {
+      try {
+        const emailTransport = createEmailTransporter();
+        transporter = emailTransport.transporter;
+        nodemailerUser = emailTransport.nodemailerUser;
+      } catch (error) {
         console.error('NODEMAILER_EMAIL atau NODEMAILER_APP_PASSWORD belum diatur.');
         return NextResponse.json(
           { message: 'Layanan email belum dikonfigurasi dengan benar.' },
           { status: 500 },
         );
       }
-
-      const transportOptions = createTransportOptions(nodemailerUser, nodemailerPass);
-      const transporter = nodemailer.createTransport(transportOptions);
 
       const senderAddress = sanitizeSenderAddress(process.env.NODEMAILER_FROM, nodemailerUser);
       const recipientAddresses = sanitizeEmailAddresses([

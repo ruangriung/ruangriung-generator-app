@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import {
+  createEmailTransporter,
+  sanitizeEmailAddresses,
+  sanitizeSenderAddress,
+  sanitizeString,
+} from '@/lib/email';
 
 type ProfileSubmission = {
   name: string;
@@ -63,7 +68,7 @@ const socials: Array<{ key: keyof ProfileSubmission; label: string }> = [
   { key: 'website', label: fieldLabels.website },
 ];
 
-const sanitize = (value: unknown): string => (typeof value === 'string' ? value.trim() : '');
+const sanitize = (value: unknown): string => sanitizeString(value);
 
 const escapeHtml = (value: string) =>
   value
@@ -159,18 +164,36 @@ export async function POST(request: Request) {
       );
     }
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.NODEMAILER_EMAIL,
-        pass: process.env.NODEMAILER_APP_PASSWORD,
-      },
-    });
+    let transporter;
+    let nodemailerUser;
 
-    const recipient =
-      process.env.CREATOR_PROFILE_RECIPIENT ||
-      process.env.CONTACT_EMAIL_RECIPIENT ||
-      'ayicktigabelas@gmail.com';
+    try {
+      const emailTransport = createEmailTransporter();
+      transporter = emailTransport.transporter;
+      nodemailerUser = emailTransport.nodemailerUser;
+    } catch (error) {
+      console.error('Konfigurasi email belum lengkap untuk submission profil.', error);
+      return NextResponse.json(
+        { message: 'Konfigurasi email belum lengkap di server.' },
+        { status: 500 },
+      );
+    }
+
+    const senderAddress = sanitizeSenderAddress(process.env.NODEMAILER_FROM, nodemailerUser);
+    const recipients = sanitizeEmailAddresses([
+      process.env.CREATOR_PROFILE_RECIPIENT,
+      process.env.CONTACT_EMAIL_RECIPIENT,
+      nodemailerUser,
+      'ayicktigabelas@gmail.com',
+    ]);
+
+    if (recipients.length === 0) {
+      console.error('Tidak ada alamat email penerima yang valid untuk submission profil.');
+      return NextResponse.json(
+        { message: 'Konfigurasi email penerima belum lengkap di server.' },
+        { status: 500 },
+      );
+    }
 
     const socialsSection = socials
       .map(({ key, label }) => createListItem(label, submission[key]))
@@ -208,10 +231,12 @@ export async function POST(request: Request) {
       </ul>
     `;
 
+    const replyToAddress = sanitizeSenderAddress(submission.contactEmail, submission.contactEmail);
+
     await transporter.sendMail({
-      from: process.env.NODEMAILER_EMAIL,
-      to: recipient,
-      replyTo: submission.contactEmail,
+      from: senderAddress,
+      to: recipients.join(', '),
+      replyTo: replyToAddress,
       subject: `Pengajuan Profil Konten Kreator - ${submission.name}`,
       html,
     });
