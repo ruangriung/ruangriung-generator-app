@@ -15,6 +15,61 @@ const sanitizeOptionalString = (value: unknown): string | undefined => {
   return sanitized.length > 0 ? sanitized : undefined;
 };
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const normalizeEmailAddress = (
+  value: unknown,
+): { address: string; formatted: string } | null => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  let input = value.trim();
+
+  if (!input) {
+    return null;
+  }
+
+  if (input.toLowerCase().startsWith('mailto:')) {
+    input = input.slice(7);
+  }
+
+  const angleBracketMatch = input.match(/^(.*)<([^>]+)>$/);
+  let address = input;
+  let displayName: string | undefined;
+
+  if (angleBracketMatch) {
+    displayName = angleBracketMatch[1]?.trim().replace(/^"|"$/g, '');
+    address = angleBracketMatch[2]?.trim() ?? '';
+  }
+
+  if (!EMAIL_REGEX.test(address)) {
+    return null;
+  }
+
+  const formatted = displayName ? `${displayName} <${address}>` : address;
+
+  return { address, formatted };
+};
+
+const sanitizeEmail = (value: unknown): string => {
+  const normalized = normalizeEmailAddress(value);
+  return normalized?.address ?? '';
+};
+
+const sanitizeSenderAddress = (
+  value: unknown,
+  fallback: string,
+) => {
+  const normalized = normalizeEmailAddress(value);
+  if (normalized) {
+    return normalized.formatted;
+  }
+
+  const fallbackNormalized = normalizeEmailAddress(fallback);
+  return fallbackNormalized?.formatted ?? fallback;
+};
+
 const ensureStringArray = (value: unknown): string[] => {
   if (Array.isArray(value)) {
     return value
@@ -45,22 +100,26 @@ const formatOptionalValue = (value: string | undefined) =>
 
 const sanitizeEmailAddresses = (values: Array<string | undefined>) => {
   const seen = new Set<string>();
+  const recipients: string[] = [];
 
-  return values
-    .map(value => sanitizeString(value))
-    .filter(value => {
-      if (!value) {
-        return false;
-      }
+  values.forEach(value => {
+    const normalized = normalizeEmailAddress(value);
 
-      const normalized = value.toLowerCase();
-      if (seen.has(normalized)) {
-        return false;
-      }
+    if (!normalized) {
+      return;
+    }
 
-      seen.add(normalized);
-      return true;
-    });
+    const key = normalized.address.toLowerCase();
+
+    if (seen.has(key)) {
+      return;
+    }
+
+    seen.add(key);
+    recipients.push(normalized.formatted);
+  });
+
+  return recipients;
 };
 
 const createTransportOptions = (
@@ -103,7 +162,7 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     const author = sanitizeString(body.author);
-    const email = sanitizeString(body.email);
+    const email = sanitizeEmail(body.email);
     const facebook = sanitizeOptionalString(body.facebook);
     const image = sanitizeOptionalString(body.image);
     const link = sanitizeOptionalString(body.link);
@@ -116,7 +175,7 @@ export async function POST(request: Request) {
 
     if (!author || !email || !title || !promptContent || !tool || !token) {
       return NextResponse.json(
-        { message: 'Semua kolom, termasuk verifikasi, harus diisi.' },
+        { message: 'Semua kolom wajib diisi dengan benar, termasuk email dan verifikasi keamanan.' },
         { status: 400 }
       );
     }
@@ -165,7 +224,7 @@ export async function POST(request: Request) {
     });
 
     if (!skipEmail) {
-      const nodemailerUser = sanitizeString(process.env.NODEMAILER_EMAIL);
+      const nodemailerUser = sanitizeEmail(process.env.NODEMAILER_EMAIL);
       const nodemailerPass = sanitizeString(process.env.NODEMAILER_APP_PASSWORD);
 
       if (!nodemailerUser || !nodemailerPass) {
@@ -179,7 +238,7 @@ export async function POST(request: Request) {
       const transportOptions = createTransportOptions(nodemailerUser, nodemailerPass);
       const transporter = nodemailer.createTransport(transportOptions);
 
-      const senderAddress = sanitizeString(process.env.NODEMAILER_FROM) || nodemailerUser;
+      const senderAddress = sanitizeSenderAddress(process.env.NODEMAILER_FROM, nodemailerUser);
       const recipientAddresses = sanitizeEmailAddresses([
         process.env.PROMPT_SUBMISSION_RECIPIENT,
         process.env.CONTACT_EMAIL_RECIPIENT,
@@ -202,7 +261,7 @@ export async function POST(request: Request) {
       const mailOptions = {
         from: senderAddress,
         to: recipientAddresses.join(', '),
-        replyTo: sanitizeString(email),
+        replyTo: email,
         subject: `Submission Prompt Baru: ${escapeHtml(title)}`,
         text:
           `Submission Prompt Baru\n\n` +
