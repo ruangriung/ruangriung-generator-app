@@ -5,6 +5,8 @@ import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { revalidatePath } from 'next/cache';
 import { createPrompt } from '@/lib/prompts';
 
+const DEFAULT_PROMPT_NOTIFICATION_EMAIL = 'ayicktigabelas@gmail.com';
+
 const sanitizeString = (value: unknown): string =>
   typeof value === 'string' ? value.trim() : '';
 
@@ -40,6 +42,26 @@ const escapeHtml = (value: string) =>
 
 const formatOptionalValue = (value: string | undefined) =>
   value && value.length > 0 ? escapeHtml(value) : '-';
+
+const sanitizeEmailAddresses = (values: Array<string | undefined>) => {
+  const seen = new Set<string>();
+
+  return values
+    .map(value => sanitizeString(value))
+    .filter(value => {
+      if (!value) {
+        return false;
+      }
+
+      const normalized = value.toLowerCase();
+      if (seen.has(normalized)) {
+        return false;
+      }
+
+      seen.add(normalized);
+      return true;
+    });
+};
 
 const createTransportOptions = (
   user: string,
@@ -158,18 +180,43 @@ export async function POST(request: Request) {
       const transporter = nodemailer.createTransport(transportOptions);
 
       const senderAddress = sanitizeString(process.env.NODEMAILER_FROM) || nodemailerUser;
-      const recipientAddress =
-        sanitizeString(process.env.PROMPT_SUBMISSION_RECIPIENT) ||
-        sanitizeString(process.env.CONTACT_EMAIL_RECIPIENT) ||
-        nodemailerUser;
+      const recipientAddresses = sanitizeEmailAddresses([
+        process.env.PROMPT_SUBMISSION_RECIPIENT,
+        process.env.CONTACT_EMAIL_RECIPIENT,
+        nodemailerUser,
+        DEFAULT_PROMPT_NOTIFICATION_EMAIL,
+      ]);
+
+      if (recipientAddresses.length === 0) {
+        console.error('Tidak ada alamat email penerima yang valid untuk notifikasi prompt.');
+        return NextResponse.json(
+          { message: 'Layanan email belum dikonfigurasi dengan benar.' },
+          { status: 500 },
+        );
+      }
 
       const safeTags = tags.map(tag => escapeHtml(tag));
       const formattedTags = safeTags.length > 0 ? safeTags.join(', ') : '-';
       const formattedDate = formatOptionalValue(date);
+      const plainTags = tags.length > 0 ? tags.join(', ') : '-';
       const mailOptions = {
         from: senderAddress,
-        to: recipientAddress,
+        to: recipientAddresses.join(', '),
+        replyTo: sanitizeString(email),
         subject: `Submission Prompt Baru: ${escapeHtml(title)}`,
+        text:
+          `Submission Prompt Baru\n\n` +
+          `Nama Pengirim: ${author}\n` +
+          `Email Pengirim: ${email}\n` +
+          `Link Facebook: ${facebook ?? '-'}\n` +
+          `Link: ${link ?? '-'}\n` +
+          `Link Gambar: ${image ?? '-'}\n` +
+          `Tanggal Publikasi: ${date ?? '-'}\n` +
+          `Judul Prompt: ${title}\n` +
+          `Tool: ${tool}\n` +
+          `Tags: ${plainTags}\n` +
+          `Slug: ${prompt.slug}\n\n` +
+          `Isi Prompt:\n${promptContent}`,
         html: `
           <h2>Submission Prompt Baru</h2>
           <p><strong>Nama Pengirim:</strong> ${escapeHtml(author)}</p>
