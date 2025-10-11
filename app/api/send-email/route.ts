@@ -1,29 +1,61 @@
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import {
+  createEmailTransporter,
+  sanitizeEmailAddresses,
+  sanitizeSenderAddress,
+  sanitizeString,
+} from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
-    const { name, email, subject, message } = await request.json();
+    const body = await request.json();
+    const name = sanitizeString(body.name);
+    const email = sanitizeString(body.email);
+    const subject = sanitizeString(body.subject);
+    const message = sanitizeString(body.message);
 
     // Validasi input sederhana (opsional, bisa lebih kompleks)
     if (!name || !email || !subject || !message) {
       return NextResponse.json({ message: 'Semua kolom wajib diisi.' }, { status: 400 });
     }
 
-    // Konfigurasi transporter Nodemailer
-    // Menggunakan SMTP Gmail
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.NODEMAILER_EMAIL,
-        pass: process.env.NODEMAILER_APP_PASSWORD,
-      },
-    });
+    let transporter;
+    let nodemailerUser;
+
+    try {
+      const emailTransport = createEmailTransporter();
+      transporter = emailTransport.transporter;
+      nodemailerUser = emailTransport.nodemailerUser;
+    } catch (error) {
+      console.error('Konfigurasi Nodemailer belum lengkap:', error);
+      return NextResponse.json(
+        { message: 'Konfigurasi email server belum lengkap. Silakan hubungi administrator.' },
+        { status: 500 },
+      );
+    }
+
+    const senderAddress = sanitizeSenderAddress(`"${name}" <${nodemailerUser}>`, nodemailerUser);
+    const recipients = sanitizeEmailAddresses([
+      process.env.CONTACT_EMAIL_RECIPIENT,
+      nodemailerUser,
+      'ayicktigabelas@gmail.com',
+    ]);
+
+    if (recipients.length === 0) {
+      console.error('Tidak ada alamat email penerima yang valid untuk API send-email.');
+      return NextResponse.json(
+        { message: 'Konfigurasi email penerima belum lengkap di server.' },
+        { status: 500 },
+      );
+    }
 
     // Konfigurasi opsi email
+    const replyToAddress = sanitizeSenderAddress(email, email);
+
     const mailOptions = {
-      from: process.env.NODEMAILER_EMAIL, // Email pengirim (Gmail Anda)
-      to: 'ayicktigabelas@gmail.com', // Ganti dengan email tujuan Anda (misal: email kontak Anda)
+      from: senderAddress,
+      to: recipients.join(', '),
+      replyTo: replyToAddress,
       subject: `Pesan dari Website: ${subject}`,
       html: `
         <p><strong>Nama:</strong> ${name}</p>

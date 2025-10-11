@@ -1,11 +1,22 @@
 // app/api/contact/route.ts
 
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer'; // Pastikan nodemailer sudah terinstal
+import {
+  createEmailTransporter,
+  sanitizeEmail,
+  sanitizeEmailAddresses,
+  sanitizeSenderAddress,
+  sanitizeString,
+} from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
-    const { name, email, subject, message, token } = await request.json();
+    const body = await request.json();
+    const name = sanitizeString(body.name);
+    const email = sanitizeEmail(body.email);
+    const subject = sanitizeString(body.subject);
+    const message = sanitizeString(body.message);
+    const token = sanitizeString(body.token);
 
     if (!name || !email || !subject || !message || !token) {
       return NextResponse.json({ message: 'Semua kolom, termasuk verifikasi, harus diisi.' }, { status: 400 });
@@ -38,17 +49,38 @@ export async function POST(request: Request) {
 
     // Jika verifikasi Turnstile berhasil, lanjutkan mengirim email
     // Konfigurasi Gmail (gunakan app password, bukan password biasa)
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.NODEMAILER_EMAIL, // alamat Gmail dari env Vercel
-        pass: process.env.NODEMAILER_APP_PASSWORD, // app password Gmail dari env Vercel
-      },
-    });
+    let transporter;
+    let nodemailerUser;
+
+    try {
+      const emailTransport = createEmailTransporter();
+      transporter = emailTransport.transporter;
+      nodemailerUser = emailTransport.nodemailerUser;
+    } catch (error) {
+      console.error('Konfigurasi Nodemailer belum lengkap:', error);
+      return NextResponse.json(
+        { message: 'Konfigurasi email server belum lengkap. Silakan hubungi administrator.' },
+        { status: 500 },
+      );
+    }
+
+    const senderAddress = sanitizeSenderAddress(`"${name}" <${nodemailerUser}>`, nodemailerUser);
+    const recipients = sanitizeEmailAddresses([
+      process.env.CONTACT_EMAIL_RECIPIENT,
+      nodemailerUser,
+    ]);
+
+    if (recipients.length === 0) {
+      console.error('Tidak ada alamat email penerima yang valid untuk formulir kontak.');
+      return NextResponse.json(
+        { message: 'Konfigurasi email penerima belum diatur dengan benar.' },
+        { status: 500 },
+      );
+    }
 
     await transporter.sendMail({
-      from: `"${name}" <${process.env.NODEMAILER_EMAIL}>`,
-      to: process.env.CONTACT_EMAIL_RECIPIENT || process.env.NODEMAILER_EMAIL, // fallback ke user jika tidak diisi
+      from: senderAddress,
+      to: recipients.join(', '),
       replyTo: email,
       subject: `Kontak: ${subject}`,
       html: `

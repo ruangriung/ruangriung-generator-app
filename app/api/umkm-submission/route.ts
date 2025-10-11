@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import {
+  createEmailTransporter,
+  sanitizeEmailAddresses,
+  sanitizeSenderAddress,
+  sanitizeString,
+} from '@/lib/email';
 
 const REQUIRED_FIELDS = ['ownerName', 'email', 'businessName', 'description'] as const;
 
@@ -25,8 +30,7 @@ type SubmissionPayload = {
   products: SubmissionProduct[];
 };
 
-const sanitize = (value: string | undefined | null) =>
-  typeof value === 'string' ? value.trim() : '';
+const sanitize = (value: string | undefined | null) => sanitizeString(value);
 
 const sanitizeProducts = (value: unknown): SubmissionProduct[] => {
   if (!Array.isArray(value)) {
@@ -130,23 +134,35 @@ export async function POST(request: Request) {
       );
     }
 
-    const nodemailerUser = sanitize(process.env.NODEMAILER_EMAIL);
-    const nodemailerPass = sanitize(process.env.NODEMAILER_APP_PASSWORD);
+    let transporter;
+    let nodemailerUser;
 
-    if (!nodemailerUser || !nodemailerPass) {
-      console.error('Konfigurasi email belum lengkap.');
-      return NextResponse.json({ message: 'Konfigurasi email belum lengkap di server.' }, { status: 500 });
+    try {
+      const emailTransport = createEmailTransporter();
+      transporter = emailTransport.transporter;
+      nodemailerUser = emailTransport.nodemailerUser;
+    } catch (error) {
+      console.error('Konfigurasi email belum lengkap.', error);
+      return NextResponse.json(
+        { message: 'Konfigurasi email belum lengkap di server.' },
+        { status: 500 },
+      );
     }
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: nodemailerUser,
-        pass: nodemailerPass,
-      },
-    });
+    const senderAddress = sanitizeSenderAddress(process.env.NODEMAILER_FROM, nodemailerUser);
+    const recipients = sanitizeEmailAddresses([
+      process.env.UMKM_SUBMISSION_RECIPIENT,
+      process.env.CONTACT_EMAIL_RECIPIENT,
+      nodemailerUser,
+    ]);
 
-    const recipient = sanitize(process.env.UMKM_SUBMISSION_RECIPIENT) || nodemailerUser;
+    if (recipients.length === 0) {
+      console.error('Tidak ada alamat email penerima yang valid untuk pengajuan UMKM.');
+      return NextResponse.json(
+        { message: 'Konfigurasi email penerima belum lengkap di server.' },
+        { status: 500 },
+      );
+    }
 
     const categorySummary = (() => {
       const finalCategory = submission.businessCategory;
@@ -203,10 +219,15 @@ export async function POST(request: Request) {
       ...productLines,
     ].filter(Boolean);
 
+    const replyToCandidates = sanitizeEmailAddresses([
+      `${submission.ownerName} <${submission.email}>`,
+    ]);
+    const replyToAddress = replyToCandidates[0];
+
     await transporter.sendMail({
-      from: `Katalog UMKM <${nodemailerUser}>`,
-      to: recipient,
-      replyTo: `${submission.ownerName} <${submission.email}>`,
+      from: senderAddress,
+      to: recipients.join(', '),
+      ...(replyToAddress ? { replyTo: replyToAddress } : {}),
       subject: `Pengajuan UMKM Baru: ${submission.businessName}`,
       html: `
         <h2>Pengajuan UMKM Baru</h2>
