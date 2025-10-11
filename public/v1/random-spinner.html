@@ -39,116 +39,277 @@
     <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-accent: #8b5cf6;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --text-dark: #1f2937;
+            --text-light: #f9fafb;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-bg-dark: rgba(30, 41, 59, 0.85);
+            --border-color: rgba(79, 70, 229, 0.25);
+            --shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Poppins', Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            color: var(--text-dark);
+            background: radial-gradient(circle at top left, rgba(79, 70, 229, 0.25), transparent 55%),
+                        radial-gradient(circle at top right, rgba(34, 197, 94, 0.25), transparent 45%),
+                        radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.25), transparent 45%),
+                        #f3f4f6;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px 120px;
             transition: background-color 0.3s, color 0.3s;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(34, 197, 94, 0.1));
+            z-index: -2;
         }
 
         body.dark-mode {
-            background-color: #333;
-            color: #fff;
+            color: var(--text-light);
+            background: radial-gradient(circle at top left, rgba(79, 70, 229, 0.35), transparent 55%),
+                        radial-gradient(circle at top right, rgba(34, 197, 94, 0.35), transparent 45%),
+                        radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.35), transparent 45%),
+                        #0f172a;
+        }
+
+        .page-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
         .logo {
-            width: 100%;
-            max-width: 800px;
-            height: auto;
-            margin-bottom: 20px;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
         .logo img {
-            width: 100%;
+            width: 160px;
             height: auto;
-            border-radius: 10px;
+            border-radius: 18px;
+            box-shadow: 0 12px 25px rgba(15, 23, 42, 0.15);
+            transition: var(--transition);
         }
 
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 800px;
-            width: 100%;
-            transition: background-color 0.3s, color 0.3s;
+        .logo img:hover {
+            transform: translateY(-6px);
         }
 
-        body.dark-mode .container {
-            background-color: #444;
+        .tagline {
+            font-size: 18px;
+            font-weight: 500;
+            color: rgba(17, 24, 39, 0.7);
+        }
+
+        body.dark-mode .tagline {
+            color: rgba(241, 245, 249, 0.8);
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            border: none;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn i {
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-accent));
             color: #fff;
+            box-shadow: 0 14px 30px rgba(79, 70, 229, 0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 35px rgba(79, 70, 229, 0.45);
+        }
+
+        .btn-ghost {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(79, 70, 229, 0.18);
+        }
+
+        body.dark-mode .btn-ghost {
+            background: rgba(148, 163, 184, 0.12);
+            color: var(--text-light);
+        }
+
+        body.dark-mode .btn-ghost:hover {
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(18px);
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        body.dark-mode .card {
+            background: var(--card-bg-dark);
+            border-color: rgba(148, 163, 184, 0.12);
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.45);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
         }
 
         h1 {
-            margin-bottom: 20px;
-            font-size: 24px;
-            color: #333;
+            margin: 0 0 12px;
+            font-size: 32px;
+            color: inherit;
         }
 
-        body.dark-mode h1 {
-            color: #fff;
+        .subtitle {
+            margin-bottom: 24px;
+            color: rgba(17, 24, 39, 0.65);
+        }
+
+        body.dark-mode .subtitle {
+            color: rgba(241, 245, 249, 0.75);
         }
 
         textarea {
             width: 100%;
-            height: 100px;
-            margin-bottom: 20px;
-            padding: 10px;
+            height: 130px;
+            margin-bottom: 16px;
+            padding: 16px;
             font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            resize: none;
-            box-sizing: border-box;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: rgba(255, 255, 255, 0.92);
+            resize: vertical;
+            transition: var(--transition);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: rgba(79, 70, 229, 0.5);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
         }
 
         body.dark-mode textarea {
-            background-color: #555;
-            color: #fff;
-            border-color: #777;
+            background: rgba(15, 23, 42, 0.75);
+            color: var(--text-light);
+            border-color: rgba(148, 163, 184, 0.25);
         }
 
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            background-color: #28a745;
-            color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+        input[type="text"] {
             width: 100%;
-            max-width: 200px;
-            margin: 0 auto;
-            transition: transform 0.2s ease, background-color 0.3s;
+            padding: 12px 16px;
+            margin-bottom: 18px;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            font-size: 15px;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.92);
         }
 
-        button:hover {
-            transform: scale(1.05);
+        input[type="text"]:focus {
+            outline: none;
+            border-color: rgba(34, 197, 94, 0.45);
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
         }
 
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
+        body.dark-mode input[type="text"] {
+            background: rgba(15, 23, 42, 0.75);
+            color: var(--text-light);
+            border-color: rgba(148, 163, 184, 0.25);
+        }
+
+        #spinButton {
+            width: 100%;
+            justify-content: center;
+            font-size: 18px;
+            padding: 14px 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #spinButton::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.25), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        #spinButton:hover::after {
+            opacity: 1;
+        }
+
+        #spinButton:disabled {
+            background: rgba(148, 163, 184, 0.6);
+            box-shadow: none;
+            transform: none;
         }
 
         #progressBar {
             width: 100%;
-            height: 10px;
-            background-color: #e0e0e0;
-            border-radius: 5px;
-            margin-top: 20px;
+            height: 12px;
+            background-color: rgba(148, 163, 184, 0.25);
+            border-radius: 999px;
+            margin-top: 10px;
             overflow: hidden;
             display: none;
         }
@@ -156,28 +317,42 @@
         #progressBarFill {
             width: 0;
             height: 100%;
-            background-color: #28a745;
+            background: linear-gradient(135deg, var(--primary), var(--success));
             transition: width 0.1s linear;
         }
 
         #result {
-            margin-top: 20px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
+            margin-top: 24px;
+            font-size: 26px;
+            font-weight: 600;
+            color: var(--primary);
+            padding: 20px;
+            border-radius: 18px;
+            background: rgba(79, 70, 229, 0.08);
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #result::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.4), transparent 55%);
+            opacity: 0.6;
         }
 
         #result span.hasil-text {
-            color: #28a745; /* Warna hijau untuk kata "Hasil" */
-            font-weight: bold;
+            color: var(--text-dark);
         }
 
         body.dark-mode #result {
-            color: #fff;
+            color: #c7d2fe;
+            background: rgba(79, 70, 229, 0.2);
         }
 
         body.dark-mode #result span.hasil-text {
-            color: #4caf50; /* Warna hijau yang lebih terang untuk dark mode */
+            color: #e0e7ff;
         }
 
         .spinner {
@@ -190,157 +365,412 @@
             100% { transform: rotate(360deg); }
         }
 
-        #history {
-            margin-top: 20px;
-            text-align: left;
+        .advanced-settings {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .setting-card {
+            background: rgba(79, 70, 229, 0.08);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .setting-card:hover {
+            transform: translateY(-2px);
+        }
+
+        body.dark-mode .setting-card {
+            background: rgba(79, 70, 229, 0.15);
+        }
+
+        .setting-card label {
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        input[type="range"] {
             width: 100%;
+            accent-color: var(--primary);
+        }
+
+        .toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle input {
+            display: none;
+        }
+
+        .toggle-switch {
+            width: 46px;
+            height: 26px;
+            background: rgba(148, 163, 184, 0.5);
+            border-radius: 999px;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            transition: var(--transition);
+            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+        }
+
+        .toggle input:checked + .toggle-switch {
+            background: linear-gradient(135deg, var(--success), var(--primary));
+        }
+
+        .toggle input:checked + .toggle-switch::after {
+            transform: translateX(18px);
+        }
+
+        #history {
+            margin-top: 32px;
+        }
+
+        .history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
         #historyList {
-            list-style-type: none;
+            list-style: none;
             padding: 0;
+            margin: 20px 0 0;
+            display: grid;
+            gap: 12px;
         }
 
         #historyList li {
-            background-color: #f9f9f9;
-            padding: 10px;
-            margin-bottom: 5px;
-            border-radius: 5px;
-            transition: background-color 0.3s, color 0.3s;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 14px 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            justify-content: space-between;
+            transition: var(--transition);
+        }
+
+        #historyList li:hover {
+            transform: translateX(4px);
         }
 
         body.dark-mode #historyList li {
-            background-color: #555;
-            color: #fff;
+            background: rgba(15, 23, 42, 0.7);
+            border-color: rgba(148, 163, 184, 0.2);
+        }
+
+        .history-badge {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(79, 70, 229, 0.15);
+            color: var(--primary);
+        }
+
+        body.dark-mode .history-badge {
+            background: rgba(99, 102, 241, 0.25);
+            color: #c7d2fe;
+        }
+
+        .history-time {
+            font-size: 12px;
+            color: rgba(17, 24, 39, 0.55);
+        }
+
+        body.dark-mode .history-time {
+            color: rgba(226, 232, 240, 0.65);
+        }
+
+        #historyEmpty {
+            margin: 20px 0 0;
+            color: rgba(17, 24, 39, 0.55);
+            font-style: italic;
+        }
+
+        body.dark-mode #historyEmpty {
+            color: rgba(226, 232, 240, 0.65);
+        }
+
+        .preset-card {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .preset-description {
+            margin: 0;
+            color: rgba(17, 24, 39, 0.6);
+        }
+
+        body.dark-mode .preset-description {
+            color: rgba(226, 232, 240, 0.7);
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        .preset-item {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-start;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .preset-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 35px rgba(79, 70, 229, 0.12);
+        }
+
+        body.dark-mode .preset-item {
+            background: rgba(15, 23, 42, 0.75);
+            border-color: rgba(148, 163, 184, 0.25);
+        }
+
+        .preset-item span {
+            font-size: 14px;
+            color: rgba(17, 24, 39, 0.55);
+        }
+
+        body.dark-mode .preset-item span {
+            color: rgba(226, 232, 240, 0.65);
+        }
+
+        .tips {
+            margin-top: 12px;
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(79, 70, 229, 0.08);
+            color: rgba(17, 24, 39, 0.7);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        body.dark-mode .tips {
+            background: rgba(79, 70, 229, 0.15);
+            color: rgba(226, 232, 240, 0.75);
         }
 
         #resetButton {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #dc3545;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #themeToggle {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #28a745;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #customButtonText {
+            margin-top: 18px;
             width: 100%;
-            max-width: 200px;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+            padding: 12px 20px;
         }
 
-        /* Floating Facebook Button */
+        #resetButton:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        footer {
+            margin-top: 48px;
+            text-align: center;
+            font-size: 14px;
+            color: rgba(17, 24, 39, 0.55);
+        }
+
+        footer a {
+            color: var(--primary);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        body.dark-mode footer {
+            color: rgba(226, 232, 240, 0.65);
+        }
+
+        body.dark-mode footer a {
+            color: #c7d2fe;
+        }
+
         .floating-facebook {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #1877f2; /* Warna Facebook */
+            bottom: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, #1877f2, #1d4ed8);
             color: #fff;
             border: none;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 58px;
+            height: 58px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 22px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease;
+            box-shadow: 0 20px 35px rgba(24, 119, 242, 0.35);
+            transition: var(--transition);
+            z-index: 5;
         }
 
         .floating-facebook:hover {
-            transform: scale(1.1);
+            transform: translateY(-4px) scale(1.05);
         }
 
-        /* Footer */
-        footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 14px;
-            color: #666;
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
-        body.dark-mode footer a{
-            color: #ccc;
-        }
-
-        /* Responsif untuk layar kecil */
         @media (max-width: 768px) {
+            body {
+                padding: 24px 16px 120px;
+            }
+
+            .logo img {
+                width: 130px;
+            }
+
             h1 {
-                font-size: 20px;
-            }
-
-            textarea {
-                font-size: 14px;
-            }
-
-            button {
-                font-size: 14px;
-                max-width: 150px;
+                font-size: 26px;
             }
 
             #result {
-                font-size: 20px;
+                font-size: 22px;
+            }
+
+            .advanced-settings {
+                grid-template-columns: 1fr;
+            }
+
+            .floating-facebook {
+                bottom: 16px;
+                right: 16px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Logo Ruangriung di luar form dengan link ke home -->
-    <div class="logo">
-        <a href="https://www.ariftirtana.com" target="_blank">
-            <img id="logoImage" src="logo-light.png" alt="Ruangriung Logo - Random Spinner">
-        </a>
-        <!-- Tombol Dark Mode di bawah logo -->
-        <button id="themeToggle">Toggle Dark Mode</button>
-    </div>
+    <div class="page-wrapper">
+        <header class="logo-section">
+            <div class="logo">
+                <a href="https://www.ariftirtana.com" target="_blank" rel="noopener">
+                    <img id="logoImage" src="logo-light.png" alt="Ruangriung Logo - Random Spinner">
+                </a>
+                <div class="tagline">Putar roda keberuntungan dengan sekali klik!</div>
+            </div>
+            <div class="actions">
+                <button id="themeToggle" class="btn btn-ghost" type="button">
+                    <i class="fas fa-moon"></i>
+                    <span>Toggle Mode</span>
+                </button>
+            </div>
+        </header>
 
-    <!-- Form Random Spinner -->
-    <div class="container">
-        <h1>Random Spinner</h1>
-        <textarea id="inputText" placeholder="Masukkan teks atau nama, pisahkan dengan koma"></textarea>
-        <input type="text" id="customButtonText" placeholder="Custom Nama Tombol">
-        <button id="spinButton">
-            <i class="fas fa-sync-alt spinner" id="spinnerIcon"></i>
-            <span id="buttonText">Putar!</span>
-        </button>
-        <div id="progressBar">
-            <div id="progressBarFill"></div>
-        </div>
-        <div id="result"></div>
-        <!-- Tombol Reset dipindahkan ke bawah hasil -->
-        <button id="resetButton">Reset</button>
-        <div id="history">
-            <h2>History Hasil</h2>
+        <main class="content-grid">
+            <section class="card">
+                <h1>Random Spinner</h1>
+                <p class="subtitle">Masukkan nama, tugas, hadiah, atau ide kegiatan. Kami akan mengacaknya dengan efek visual yang seru.</p>
+
+                <textarea id="inputText" placeholder="Contoh: Andi, Budi, Sinta, Gita"></textarea>
+                <input type="text" id="customButtonText" placeholder="Custom Nama Tombol">
+
+                <div class="advanced-settings">
+                    <div class="setting-card">
+                        <label for="spinDuration">Durasi Putar <span><span id="spinDurationValue">3</span> detik</span></label>
+                        <input type="range" id="spinDuration" min="1" max="8" value="3">
+                    </div>
+                    <div class="setting-card">
+                        <div class="toggle">
+                            <label for="allowRepeat">Izinkan hasil terulang</label>
+                            <div>
+                                <input type="checkbox" id="allowRepeat">
+                                <span class="toggle-switch"></span>
+                            </div>
+                        </div>
+                        <small>Matikan untuk memastikan setiap item hanya muncul sekali sampai di-reset.</small>
+                    </div>
+                </div>
+
+                <button id="spinButton" class="btn btn-primary" type="button">
+                    <i class="fas fa-rotate spinner" id="spinnerIcon"></i>
+                    <span id="buttonText">Putar!</span>
+                </button>
+                <div id="progressBar">
+                    <div id="progressBarFill"></div>
+                </div>
+                <div id="result"></div>
+                <button id="resetButton" class="btn btn-ghost" type="button">
+                    <i class="fas fa-undo"></i>
+                    Reset
+                </button>
+            </section>
+
+            <aside class="card preset-card">
+                <h2>Ide Cepat</h2>
+                <p class="preset-description">Butuh inspirasi? Pilih salah satu preset di bawah untuk mengisi spinner secara instan.</p>
+                <div class="preset-grid" id="presetGrid"></div>
+                <div class="tips">
+                    <strong>Tips:</strong>
+                    <ul>
+                        <li>Gunakan durasi yang lebih lama untuk menambah rasa penasaran.</li>
+                        <li>Aktifkan confetti dan suara agar momen kemenangan makin meriah.</li>
+                        <li>Gunakan mode gelap saat menampilkan di proyektor.</li>
+                    </ul>
+                </div>
+            </aside>
+        </main>
+
+        <section id="history" class="card">
+            <div class="history-header">
+                <h2>History Hasil</h2>
+                <button id="clearHistory" class="btn btn-ghost" type="button">
+                    <i class="fas fa-broom"></i>
+                    Bersihkan
+                </button>
+            </div>
             <ul id="historyList"></ul>
-        </div>
+            <p id="historyEmpty">Belum ada hasil. Putar spinner untuk melihat riwayat di sini.</p>
+        </section>
+
+        <footer>
+            &copy; <span id="currentYear"></span> Ruangriung Team dibuat dengan ♥️ oleh <a href="https://ariftirtana.com" target="_blank" rel="noopener">ArifTirtana.com</a>
+        </footer>
     </div>
 
     <!-- Floating Facebook Button -->
-    <button class="floating-facebook" onclick="window.open('https://www.facebook.com/groups/1182261482811767/?ref=share&mibextid=lOuIew', '_blank')">
+    <button class="floating-facebook" onclick="window.open('https://www.facebook.com/groups/1182261482811767/?ref=share&mibextid=lOuIew', '_blank')" aria-label="Bergabung dengan komunitas di Facebook">
         <i class="fab fa-facebook-f"></i>
     </button>
-
-    <!-- Footer -->
-    <footer>
-        &copy; <span id="currentYear"></span> Ruangriung Team dibuat dengan ♥️ oleh <a href="https://ariftirtana.com" target="_blank">ArifTirtana.com</a>
-    </footer>
 
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -353,21 +783,107 @@
 
         // History hasil
         const historyList = document.getElementById('historyList');
+        const historyEmptyState = document.getElementById('historyEmpty');
+        const clearHistoryButton = document.getElementById('clearHistory');
+
+        // Preset ide
+        const presetGrid = document.getElementById('presetGrid');
+        const presets = [
+            {
+                title: 'Pembagian Kelompok',
+                emoji: '👥',
+                items: ['Kelompok 1', 'Kelompok 2', 'Kelompok 3', 'Kelompok 4', 'Kelompok 5']
+            },
+            {
+                title: 'Games Ice Breaking',
+                emoji: '🎉',
+                items: ['Tebak Kata', 'Tantangan Menari', 'Bernyanyi', 'Joget Bebas', 'Cerita Lucu']
+            },
+            {
+                title: 'Hadiah Doorprize',
+                emoji: '🎁',
+                items: ['Voucher Belanja', 'Merchandise', 'Tumbler Eksklusif', 'Snack Box', 'Pulsa 100K']
+            },
+            {
+                title: 'Rencana Makan Siang',
+                emoji: '🍱',
+                items: ['Nasi Goreng', 'Ayam Bakar', 'Sushi', 'Bakso', 'Salad Buah']
+            },
+            {
+                title: 'Ide Konten',
+                emoji: '💡',
+                items: ['Tips Produktif', 'Cerita Komunitas', 'Tutorial Singkat', 'Behind The Scene', 'Fun Fact']
+            },
+            {
+                title: 'Truth or Dare',
+                emoji: '🎯',
+                items: ['Truth', 'Dare']
+            }
+        ];
+
+        const toast = Swal.mixin({
+            toast: true,
+            position: 'top',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+
+        presets.forEach(preset => {
+            const button = document.createElement('button');
+            button.className = 'preset-item';
+            button.type = 'button';
+            button.innerHTML = `
+                <strong>${preset.emoji} ${preset.title}</strong>
+                <span>${preset.items.length} pilihan siap pakai</span>
+            `;
+            button.addEventListener('click', () => {
+                const textarea = document.getElementById('inputText');
+                textarea.value = preset.items.join(', ');
+                textarea.dispatchEvent(new Event('input'));
+                toast.fire({ icon: 'info', title: `${preset.title} dimuat` });
+            });
+            presetGrid.appendChild(button);
+        });
 
         // Daftar item yang tersedia untuk diacak
         let availableItems = [];
 
+        const updateHistoryEmptyState = () => {
+            historyEmptyState.style.display = historyList.children.length === 0 ? 'block' : 'none';
+        };
+
+        updateHistoryEmptyState();
+
         // Fungsi untuk menambahkan hasil ke history
         function addToHistory(result) {
             const li = document.createElement('li');
-            li.textContent = result;
+            const timestamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            li.innerHTML = `
+                <span class="history-badge">#${historyList.children.length + 1}</span>
+                <span>${result}</span>
+                <span class="history-time">${timestamp}</span>
+            `;
             historyList.appendChild(li);
+            updateHistoryEmptyState();
         }
+
+        clearHistoryButton.addEventListener('click', () => {
+            historyList.innerHTML = '';
+            availableItems = [];
+            updateHistoryEmptyState();
+            toast.fire({ icon: 'success', title: 'History dibersihkan' });
+        });
 
         // Custom nama tombol
         document.getElementById('customButtonText').addEventListener('input', function () {
             const customText = this.value;
             document.getElementById('buttonText').textContent = customText || 'Putar!';
+        });
+
+        // Reset available items ketika input diubah
+        document.getElementById('inputText').addEventListener('input', function () {
+            availableItems = [];
         });
 
         // Toggle Dark Mode
@@ -379,34 +895,68 @@
             // Ganti logo berdasarkan mode
             if (document.body.classList.contains('dark-mode')) {
                 logoImage.src = 'logo-dark.png'; // Logo untuk dark mode
+                themeToggle.querySelector('i').classList.replace('fa-moon', 'fa-sun');
             } else {
                 logoImage.src = 'logo-light.png'; // Logo untuk light mode
+                themeToggle.querySelector('i').classList.replace('fa-sun', 'fa-moon');
             }
+        });
+
+        const spinDurationInput = document.getElementById('spinDuration');
+        const spinDurationValue = document.getElementById('spinDurationValue');
+        const allowRepeatCheckbox = document.getElementById('allowRepeat');
+
+        spinDurationInput.addEventListener('input', () => {
+            spinDurationValue.textContent = spinDurationInput.value;
         });
 
         // Reset
         document.getElementById('resetButton').addEventListener('click', function () {
             document.getElementById('inputText').value = '';
+            document.getElementById('result').style.display = 'none';
             document.getElementById('result').textContent = '';
-            document.getElementById('historyList').innerHTML = '';
-            availableItems = []; // Reset daftar item yang tersedia
+            historyList.innerHTML = '';
+            availableItems = [];
+            updateHistoryEmptyState();
+            toast.fire({ icon: 'success', title: 'Spinner di-reset' });
         });
 
         // Spinner
         document.getElementById('spinButton').addEventListener('click', function () {
             const inputText = document.getElementById('inputText').value;
-            let items = inputText.split(',').map(item => item.trim()).filter(item => item.length > 0);
+            const items = inputText.split(',').map(item => item.trim()).filter(item => item.length > 0);
 
-            // Jika daftar item yang tersedia kosong, isi ulang dengan semua item
-            if (availableItems.length === 0) {
+            if (items.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Input kosong',
+                    text: 'Masukkan minimal satu pilihan sebelum memutar spinner.'
+                });
+                return;
+            }
+
+            const allowRepeat = allowRepeatCheckbox.checked;
+
+            if (!allowRepeat && availableItems.length === 0) {
                 availableItems = [...items];
             }
 
-            if (availableItems.length === 0) {
+            if (!allowRepeat && availableItems.length === 0) {
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Semua item sudah terpilih! Silakan reset untuk memulai lagi.',
+                    icon: 'info',
+                    title: 'Semua pilihan sudah terambil',
+                    text: 'Tekan reset atau aktifkan opsi "Izinkan hasil terulang" untuk memulai lagi.'
+                });
+                return;
+            }
+
+            const pool = allowRepeat ? items : availableItems;
+
+            if (pool.length === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Tidak ada pilihan tersedia',
+                    text: 'Silakan tambahkan pilihan baru atau reset spinner.'
                 });
                 return;
             }
@@ -419,16 +969,16 @@
             document.getElementById('progressBar').style.display = 'block';
 
             // Mainkan efek suara
+            spinSound.currentTime = 0;
             spinSound.play();
 
-            // Animasi progress bar
             const progressBarFill = document.getElementById('progressBarFill');
-            const spinDuration = 3000; // Durasi spinner (3 detik)
+            const spinDuration = parseInt(spinDurationInput.value, 10) * 1000;
             const startTime = Date.now();
 
             const updateProgressBar = () => {
                 const elapsedTime = Date.now() - startTime;
-                const progress = (elapsedTime / spinDuration) * 100;
+                const progress = Math.min((elapsedTime / spinDuration) * 100, 100);
                 progressBarFill.style.width = `${progress}%`;
 
                 if (elapsedTime < spinDuration) {
@@ -436,56 +986,52 @@
                 }
             };
 
+            progressBarFill.style.width = '0';
             updateProgressBar();
 
-            // Animasi spinner
             const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
             resultDiv.textContent = 'Memutar...';
 
             const spinInterval = setInterval(() => {
-                const randomIndex = Math.floor(Math.random() * availableItems.length);
-                resultDiv.textContent = availableItems[randomIndex];
-            }, 100);
+                const randomIndex = Math.floor(Math.random() * pool.length);
+                resultDiv.textContent = pool[randomIndex];
+            }, 120);
 
             setTimeout(() => {
                 clearInterval(spinInterval);
-                const randomIndex = Math.floor(Math.random() * availableItems.length);
-                const result = availableItems[randomIndex];
-                resultDiv.innerHTML = `<span class="hasil-text">Hasil:</span> ${result}`; // Modifikasi di sini
+                const randomIndex = Math.floor(Math.random() * pool.length);
+                const result = pool[randomIndex];
+                resultDiv.innerHTML = `<span class="hasil-text">Hasil:</span> ${result}`;
 
-                // Hapus item yang sudah terpilih dari daftar yang tersedia
-                availableItems.splice(randomIndex, 1);
+                if (!allowRepeat) {
+                    const removeIndex = availableItems.indexOf(result);
+                    if (removeIndex > -1) {
+                        availableItems.splice(removeIndex, 1);
+                    }
+                }
 
-                // Tampilkan SweetAlert2 dan confetti
-                const quotes = [
-                    "Selamat! Kamu hebat!",
-                    "Mantap! Hasilnya keren!",
-                    "Lanjutkan! Semangat!",
-                ];
-                const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
                 Swal.fire({
                     icon: 'success',
                     title: 'Hasil Acak',
-                    text: `Selamat! Hasilnya adalah: ${result}\n${randomQuote}`,
-                    confirmButtonText: 'OK',
+                    text: `Selamat! Hasilnya adalah: ${result}`,
+                    confirmButtonText: 'Oke'
                 }).then(() => {
-                    // Trigger confetti
                     confetti({
-                        particleCount: 150,
-                        spread: 60,
+                        particleCount: 160,
+                        spread: 75,
                         origin: { y: 0.6 },
-                        colors: ['#ff0000', '#00ff00', '#0000ff'],
+                        colors: ['#6366f1', '#22c55e', '#f97316']
                     });
-                    // Mainkan efek suara
+                    resultSound.currentTime = 0;
                     resultSound.play();
                 });
 
-                // Tambahkan ke history
                 addToHistory(result);
 
                 // Reset tombol dan progress bar
                 spinButton.disabled = false;
-                document.getElementById('buttonText').textContent = 'Putar!';
+                document.getElementById('buttonText').textContent = document.getElementById('customButtonText').value || 'Putar!';
                 document.getElementById('spinnerIcon').style.display = 'none';
                 document.getElementById('progressBar').style.display = 'none';
                 progressBarFill.style.width = '0';
