@@ -59,6 +59,12 @@ export const sanitizeSenderAddress = (value: unknown, fallback: string): string 
   return fallbackNormalized?.formatted ?? fallback;
 };
 
+const splitEmailCandidates = (value: string) =>
+  value
+    .split(/[;,\n]+/)
+    .map(part => part.trim())
+    .filter(part => part.length > 0);
+
 export const sanitizeEmailAddresses = (values: Array<string | undefined | null>) => {
   const seen = new Set<string>();
   const recipients: string[] = [];
@@ -97,12 +103,9 @@ export const sanitizeEmailAddresses = (values: Array<string | undefined | null>)
       return;
     }
 
-    if (trimmed.includes(',')) {
-      trimmed
-        .split(',')
-        .map(part => part.trim())
-        .forEach(part => addNormalized(normalizeEmailAddress(part)));
-    }
+    splitEmailCandidates(trimmed).forEach(candidate => {
+      addNormalized(normalizeEmailAddress(candidate));
+    });
   });
 
   return recipients;
@@ -127,7 +130,7 @@ export const createTransportOptions = (user: string, pass: string): SMTPTranspor
   const secureSetting = sanitizeString(process.env.NODEMAILER_SMTP_SECURE).toLowerCase();
   const secure = secureSetting
     ? ['true', '1', 'yes', 'on'].includes(secureSetting)
-    : true;
+    : port === 465;
 
   return {
     host,
