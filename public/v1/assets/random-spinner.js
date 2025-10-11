@@ -40,6 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ];
 
+    const spinButton = document.getElementById('spinButton');
+
     const toast = Swal.mixin({
         toast: true,
         position: 'top',
@@ -66,6 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     let availableItems = [];
+    let poolInitialized = false;
+    let isSpinning = false;
+
+    const parseItems = (value) =>
+        value
+            .split(',')
+            .map((item) => item.trim())
+            .filter((item) => item.length > 0);
 
     const updateHistoryEmptyState = () => {
         historyEmptyState.style.display = historyList.children.length === 0 ? 'block' : 'none';
@@ -87,20 +97,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     clearHistoryButton.addEventListener('click', () => {
         historyList.innerHTML = '';
-        availableItems = [];
+        resetAvailableItems();
         updateHistoryEmptyState();
+        updateSpinButtonState();
         toast.fire({ icon: 'success', title: 'History dibersihkan' });
     });
 
     const customButtonText = document.getElementById('customButtonText');
+    const buttonText = document.getElementById('buttonText');
+    const spinnerIcon = document.getElementById('spinnerIcon');
+    const progressBar = document.getElementById('progressBar');
+
     customButtonText.addEventListener('input', function () {
         const customText = this.value;
-        document.getElementById('buttonText').textContent = customText || 'Putar!';
+        if (!isSpinning && !spinButton.disabled) {
+            buttonText.textContent = customText || 'Putar!';
+        }
     });
 
     const inputText = document.getElementById('inputText');
     inputText.addEventListener('input', function () {
-        availableItems = [];
+        resetAvailableItems();
+        updateSpinButtonState();
     });
 
     const themeToggle = document.getElementById('themeToggle');
@@ -122,6 +140,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const spinDurationValue = document.getElementById('spinDurationValue');
     const allowRepeatCheckbox = document.getElementById('allowRepeat');
 
+    function getCurrentItems() {
+        return parseItems(inputText.value);
+    }
+
+    function resetAvailableItems() {
+        availableItems = [];
+        poolInitialized = false;
+    }
+
+    function updateSpinButtonState() {
+        const allowRepeatActive = allowRepeatCheckbox.checked;
+        const items = getCurrentItems();
+        const exhausted = !allowRepeatActive && poolInitialized && availableItems.length === 0 && items.length > 0;
+        const shouldDisable = isSpinning || exhausted;
+
+        spinButton.disabled = shouldDisable;
+        spinButton.classList.toggle('is-disabled', !isSpinning && exhausted);
+
+        if (!spinButton.disabled && !isSpinning && buttonText.textContent === 'Semua hasil terpakai') {
+            buttonText.textContent = customButtonText.value || 'Putar!';
+        }
+    }
+
     spinDurationInput.addEventListener('input', () => {
         spinDurationValue.textContent = spinDurationInput.value;
     });
@@ -130,8 +171,13 @@ document.addEventListener('DOMContentLoaded', () => {
         allowRepeatCheckbox.setAttribute('aria-checked', allowRepeatCheckbox.checked.toString());
     };
 
-    allowRepeatCheckbox.addEventListener('change', syncToggleState);
+    allowRepeatCheckbox.addEventListener('change', () => {
+        resetAvailableItems();
+        syncToggleState();
+        updateSpinButtonState();
+    });
     syncToggleState();
+    updateSpinButtonState();
 
     document.getElementById('resetButton').addEventListener('click', () => {
         inputText.value = '';
@@ -139,16 +185,14 @@ document.addEventListener('DOMContentLoaded', () => {
         resultDiv.style.display = 'none';
         resultDiv.textContent = '';
         historyList.innerHTML = '';
-        availableItems = [];
+        resetAvailableItems();
         updateHistoryEmptyState();
+        updateSpinButtonState();
         toast.fire({ icon: 'success', title: 'Spinner di-reset' });
     });
 
-    document.getElementById('spinButton').addEventListener('click', () => {
-        const items = inputText.value
-            .split(',')
-            .map((item) => item.trim())
-            .filter((item) => item.length > 0);
+    spinButton.addEventListener('click', () => {
+        const items = getCurrentItems();
 
         if (items.length === 0) {
             Swal.fire({
@@ -161,17 +205,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const allowRepeat = allowRepeatCheckbox.checked;
 
-        if (!allowRepeat && availableItems.length === 0) {
-            availableItems = [...items];
-        }
+        if (!allowRepeat) {
+            if (!poolInitialized) {
+                availableItems = [...items];
+                poolInitialized = true;
+            }
 
-        if (!allowRepeat && availableItems.length === 0) {
-            Swal.fire({
-                icon: 'info',
-                title: 'Semua pilihan sudah terambil',
-                text: 'Tekan reset atau aktifkan opsi "Izinkan hasil terulang" untuk memulai lagi.'
-            });
-            return;
+            if (availableItems.length === 0) {
+                updateSpinButtonState();
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Semua pilihan sudah terambil',
+                    text: 'Tekan reset atau aktifkan opsi "Izinkan hasil terulang" untuk memulai lagi.'
+                });
+                return;
+            }
         }
 
         const pool = allowRepeat ? items : availableItems;
@@ -185,11 +233,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const spinButton = document.getElementById('spinButton');
+        isSpinning = true;
         spinButton.disabled = true;
-        document.getElementById('buttonText').textContent = 'Memutar...';
-        document.getElementById('spinnerIcon').style.display = 'inline-block';
-        document.getElementById('progressBar').style.display = 'block';
+        spinButton.classList.remove('is-disabled');
+        buttonText.textContent = 'Memutar...';
+        spinnerIcon.style.display = 'inline-block';
+        progressBar.style.display = 'block';
 
         spinSound.currentTime = 0;
         spinSound.play();
@@ -233,6 +282,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
+            const noMoreItems = !allowRepeat && availableItems.length === 0;
+
             Swal.fire({
                 icon: 'success',
                 title: 'Hasil Acak',
@@ -247,14 +298,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 resultSound.currentTime = 0;
                 resultSound.play();
+
+                if (noMoreItems) {
+                    toast.fire({ icon: 'info', title: 'Semua pilihan telah digunakan' });
+                }
             });
 
             addToHistory(result);
 
-            spinButton.disabled = false;
-            document.getElementById('buttonText').textContent = customButtonText.value || 'Putar!';
-            document.getElementById('spinnerIcon').style.display = 'none';
-            document.getElementById('progressBar').style.display = 'none';
+            isSpinning = false;
+            updateSpinButtonState();
+            const buttonLabel = customButtonText.value || 'Putar!';
+            buttonText.textContent = spinButton.disabled ? 'Semua hasil terpakai' : buttonLabel;
+            spinnerIcon.style.display = 'none';
+            progressBar.style.display = 'none';
             progressBarFill.style.width = '0';
         }, spinDuration);
     });
