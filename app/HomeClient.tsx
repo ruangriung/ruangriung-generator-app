@@ -172,6 +172,13 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
           <span>Artikel</span>
         </Link>
         <Link
+          href="/facebook-pro-insight"
+          className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
+        >
+          <Megaphone size={18} />
+          <span>InsightRanker FB Pro</span>
+        </Link>
+        <Link
           href="/umkm"
           className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
         >
