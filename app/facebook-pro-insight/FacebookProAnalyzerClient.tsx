@@ -479,48 +479,73 @@ export default function FacebookProAnalyzerClient() {
             <TrendingUp className="h-5 w-5 text-purple-500" />
           </div>
           <div className="overflow-hidden rounded-xl border border-gray-200/60 dark:border-gray-700/60">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50/90 dark:bg-gray-800/80">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                    Parameter
-                  </th>
+            <div className="hidden overflow-x-auto md:block">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50/90 dark:bg-gray-800/80">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                      Parameter
+                    </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
                     Skor
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
                     Insight Otomatis
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                    Rekomendasi
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white/80 dark:divide-gray-800 dark:bg-gray-900/60">
-                {(analysis?.scores ?? []).map((row) => (
-                  <tr key={row.parameter}>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">{row.parameter}</td>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                      Rekomendasi
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white/80 dark:divide-gray-800 dark:bg-gray-900/60">
+                  {(analysis?.scores ?? []).map((row) => (
+                    <tr key={row.parameter}>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">{row.parameter}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
                       <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-semibold text-gray-700 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-100">
                         {row.score}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{row.insight}</td>
-                    <td className="px-4 py-3 text-sm text-purple-700 dark:text-purple-300">{row.recommendation}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <td className="px-4 py-3 text-sm text-purple-700 dark:text-purple-300">{row.recommendation}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="grid gap-4 md:hidden">
+              {(analysis?.scores ?? []).map((row) => (
+                <div
+                  key={`${row.parameter}-mobile`}
+                  className="rounded-2xl border border-gray-200 bg-white/90 p-4 text-sm shadow-sm dark:border-gray-700 dark:bg-gray-900/60"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">{row.parameter}</p>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-700 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-100">
+                      {row.score}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-gray-600 dark:text-gray-300">{row.insight}</p>
+                  <p className="mt-2 text-purple-700 dark:text-purple-300">{row.recommendation}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
         <div className="space-y-6 rounded-2xl bg-light-bg p-6 shadow-neumorphic-card dark:bg-dark-bg dark:shadow-dark-neumorphic-card">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Opportunities Radar</h3>
-          <ul className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+          <ul className="grid gap-3 text-sm text-gray-600 sm:grid-cols-2 sm:gap-4 dark:text-gray-300">
             {(analysis?.opportunities ?? []).map((opportunity, index) => (
-              <li key={index} className="flex items-start gap-3 rounded-xl border border-purple-100 bg-purple-50/70 px-4 py-3 text-purple-700 dark:border-purple-500/40 dark:bg-purple-500/10 dark:text-purple-200">
-                <Sparkles className="mt-1 h-4 w-4 flex-shrink-0" />
-                <span>{opportunity}</span>
+              <li
+                key={index}
+                className="flex flex-col gap-2 rounded-xl border border-purple-100 bg-purple-50/70 px-4 py-3 text-purple-700 shadow-sm transition-colors hover:border-purple-200 hover:bg-purple-100/70 dark:border-purple-500/40 dark:bg-purple-500/10 dark:text-purple-200"
+              >
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <Sparkles className="h-4 w-4" />
+                  <span>Peluang #{index + 1}</span>
+                </div>
+                <span className="text-xs leading-relaxed text-purple-800 dark:text-purple-100">{opportunity}</span>
               </li>
             ))}
           </ul>
