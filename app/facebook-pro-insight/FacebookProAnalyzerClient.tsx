@@ -150,6 +150,57 @@ const ANALYTICS_FEATURES = [
   },
 ];
 
+const QUALITY_GUIDE: Array<{
+  level: AnalysisResult['qualityLevel'];
+  description: string;
+  quickTip: string;
+}> = [
+  {
+    level: 'Kreatif',
+    description: 'Eksekusi istimewa dengan kejutan konseptual yang kuat.',
+    quickTip: 'Pertahankan storytelling dan dokumentasikan resep suksesnya.',
+  },
+  {
+    level: 'Menarik',
+    description: 'Fondasi kokoh dan mudah dipahami, tinggal diberi sentuhan personal.',
+    quickTip: 'Sisipi pengalaman nyata atau twist visual untuk naik kelas.',
+  },
+  {
+    level: 'Standar',
+    description: 'Aman untuk tayang tetapi belum meninggalkan kesan mendalam.',
+    quickTip: 'Tata ulang sudut pandang atau format supaya lebih segar.',
+  },
+  {
+    level: 'Buruk',
+    description: 'Pesan kabur atau tidak relevan dengan audiens target.',
+    quickTip: 'Perjelas tujuan konten dan gunakan bahasa yang lebih akrab.',
+  },
+];
+
+const SAMPLE_PRESETS: Array<{ id: string; name: string; description: string; content: string }> = [
+  {
+    id: 'product-launch',
+    name: 'Peluncuran Produk Lifestyle',
+    description: 'Caption promosi produk wearable dengan sentuhan storytelling.',
+    content:
+      'Hey #RuangCreators! Minggu ini kami rilis smartwatch Aurora Vibe. Fokus kami simpel: bantu kamu fokus tanpa kecanduan layar. Bayangkan jam tangan yang auto-switch ke mode sunyi saat kamu mulai olahraga, tapi kembali aktif saat kamu selesai. Video teaser-nya nunjukin bagaimana warna layar mengikuti mood. Kami pengin tahu, menurut kalian fitur mana yang paling bikin penasaran? Drop di komentar ya!',
+  },
+  {
+    id: 'event-recap',
+    name: 'Rekap Event Komunitas',
+    description: 'Ringkasan kegiatan komunitas lokal beserta ajakan bergabung.',
+    content:
+      'Terima kasih untuk 250+ kreator yang hadir di #RuangRiung Meetup Bandung! Dari sesi micro-storytelling, workshop AI copywriting, sampai open mic, semua bikin vibes kreatifnya terasa banget. Minggu depan kami coba format co-creation clinic. Mau ikutan jadi mentor atau peserta? Tulis “AYO” di kolom komentar, kami bakal DM detail lengkapnya.',
+  },
+  {
+    id: 'public-service',
+    name: 'Pesan Layanan Publik',
+    description: 'Informasi singkat untuk edukasi audiens luas.',
+    content:
+      'Buat teman-teman di kota pesisir, BMKG baru saja merilis peringatan dini gelombang tinggi untuk 48 jam ke depan. Tolong batasi aktivitas pelayaran kecil, pastikan anak-anak nggak bermain terlalu dekat bibir pantai, dan simpan nomor darurat setempat. Kami juga menyiapkan infografik singkat untuk dibagikan ulang di story kalian. Stay safe dan saling kabari ya!',
+  },
+];
+
 const qualityFromScore = (score: number): AnalysisResult['qualityLevel'] => {
   if (score >= 85) return 'Kreatif';
   if (score >= 70) return 'Menarik';
@@ -222,6 +273,7 @@ export default function FacebookProAnalyzerClient() {
   const [error, setError] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(FALLBACK_ANALYSIS);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [activePreset, setActivePreset] = useState<string>('');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -351,7 +403,10 @@ export default function FacebookProAnalyzerClient() {
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Panel Analisis Konten</h2>
             <button
               type="button"
-              onClick={() => setContent(DEFAULT_PROMPT_CONTENT)}
+              onClick={() => {
+                setContent(DEFAULT_PROMPT_CONTENT);
+                setActivePreset('');
+              }}
               className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
             >
               <RefreshCw className="h-4 w-4" />
@@ -359,10 +414,48 @@ export default function FacebookProAnalyzerClient() {
             </button>
           </div>
 
+          <div className="rounded-2xl border border-dashed border-purple-200 bg-purple-50/50 p-4 text-sm text-purple-800 dark:border-purple-500/40 dark:bg-purple-500/10 dark:text-purple-100">
+            <p className="font-semibold uppercase tracking-widest text-xs text-purple-500 dark:text-purple-200">Cara cepat</p>
+            <ol className="mt-2 list-decimal space-y-1 pl-4">
+              <li>Tempelkan caption, deskripsi, atau ringkasan konten yang ingin diendus.</li>
+              <li>Pilih model Pollinations.ai yang paling sesuai dengan gaya bahasa Anda.</li>
+              <li>Klik <strong>Jalankan Analisis InsightRanker</strong> dan baca insight yang muncul di panel kanan.</li>
+            </ol>
+            <p className="mt-3 text-xs text-purple-600 dark:text-purple-200/80">Tip: gunakan preset di bawah untuk contoh konten jika ingin mencoba cepat.</p>
+          </div>
+
           <div className="space-y-2">
             <label htmlFor="content" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Konten Facebook Pro yang Ingin Dianalisis
             </label>
+            <div className="flex flex-col gap-3 lg:flex-row">
+              <div className="flex-1">
+                <select
+                  value={activePreset}
+                  onChange={(event) => {
+                    const presetId = event.target.value;
+                    setActivePreset(presetId);
+                    const preset = SAMPLE_PRESETS.find((item) => item.id === presetId);
+                    if (preset) {
+                      setContent(preset.content);
+                    }
+                  }}
+                  className="w-full rounded-xl border border-transparent bg-white/90 px-4 py-3 text-sm font-medium text-gray-800 shadow-inner focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/60 dark:bg-gray-800/80 dark:text-gray-100"
+                >
+                  <option value="">Pilih preset contoh konten (opsional)</option>
+                  {SAMPLE_PRESETS.map((preset) => (
+                    <option key={preset.id} value={preset.id}>
+                      {preset.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {activePreset && (
+                <div className="rounded-xl border border-purple-200 bg-purple-50/70 px-4 py-3 text-xs text-purple-700 dark:border-purple-500/40 dark:bg-purple-500/10 dark:text-purple-200">
+                  {SAMPLE_PRESETS.find((preset) => preset.id === activePreset)?.description}
+                </div>
+              )}
+            </div>
             <textarea
               id="content"
               value={content}
@@ -468,6 +561,21 @@ export default function FacebookProAnalyzerClient() {
                 </li>
               ))}
             </ul>
+          </div>
+          <div className="rounded-2xl bg-white/10 p-5 backdrop-blur">
+            <h4 className="text-lg font-semibold">Panduan Membaca Indikator</h4>
+            <p className="mt-2 text-sm text-purple-100/90">
+              Gunakan legenda berikut untuk mempermudah memahami warna dan rekomendasi InsightRanker.
+            </p>
+            <div className="mt-4 space-y-3 text-sm">
+              {QUALITY_GUIDE.map((guide) => (
+                <div key={guide.level} className="rounded-xl border border-white/20 bg-white/10 p-3">
+                  <p className="text-xs uppercase tracking-widest text-purple-200">{guide.level} — {QUALITY_LABELS[guide.level]}</p>
+                  <p className="mt-1 text-purple-50/90">{guide.description}</p>
+                  <p className="mt-2 text-xs text-purple-200/80">Cepat dipraktekkan: {guide.quickTip}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
