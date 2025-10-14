@@ -109,6 +109,132 @@ type ContentDraftSuggestion = {
   angle?: string;
 };
 
+function cleanCandidateString(value: unknown): string {
+  if (typeof value !== 'string') return '';
+  return value
+    .replace(/^[\s"'`]+/, '')
+    .replace(/["'`]+$/, '')
+    .replace(/^[-•\d)]+\s*/, '')
+    .trim();
+}
+
+function tryParseJson(input: string): any | null {
+  try {
+    return JSON.parse(input);
+  } catch (error) {
+    console.debug('JSON parse attempt failed', error);
+    return null;
+  }
+}
+
+function parseJsonLike(content: string): any | null {
+  if (!content) return null;
+
+  const normalizedQuotes = content
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"');
+
+  const fenceMatch = normalizedQuotes.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenceMatch?.[1]) {
+    const parsed = tryParseJson(fenceMatch[1].trim());
+    if (parsed) return parsed;
+  }
+
+  const firstBrace = normalizedQuotes.indexOf('{');
+  const lastBrace = normalizedQuotes.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    const snippet = normalizedQuotes.slice(firstBrace, lastBrace + 1).trim();
+    const parsed = tryParseJson(snippet);
+    if (parsed) return parsed;
+  }
+
+  return null;
+}
+
+function parseDraftFromText(content: string): ContentDraftSuggestion {
+  if (!content) {
+    return { title: '', description: '', angle: undefined };
+  }
+
+  const lines = content
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('```'))
+    .map((line) => line.replace(/^[{\[]/, '').replace(/[}\]],?$/, '').trim())
+    .filter(Boolean);
+
+  let title = '';
+  let description = '';
+  let angle: string | undefined;
+  const remainder: string[] = [];
+
+  for (const rawLine of lines) {
+    const line = rawLine.replace(/^[-•\d)]+\s*/, '').trim();
+    const lower = line.toLowerCase();
+    const colonIndex = line.indexOf(':');
+
+    if (colonIndex !== -1) {
+      const key = lower.slice(0, colonIndex).trim();
+      const value = cleanCandidateString(line.slice(colonIndex + 1));
+
+      if (!title && /(judul|title)/.test(key) && value) {
+        title = value;
+        continue;
+      }
+
+      if (!description && /(deskripsi|description|konten|isi)/.test(key) && value) {
+        description = value;
+        continue;
+      }
+
+      if (!angle && /(angle|pendekatan|hook)/.test(key) && value) {
+        angle = value;
+        continue;
+      }
+    }
+
+    remainder.push(cleanCandidateString(line));
+  }
+
+  if (!title && remainder.length > 0) {
+    title = remainder[0];
+  }
+
+  if (!description) {
+    const descLines = remainder.slice(title ? 1 : 0).filter(Boolean);
+    if (descLines.length > 0) {
+      description = descLines.join(' ');
+    }
+  }
+
+  if (!description && content) {
+    description = cleanCandidateString(content);
+  }
+
+  return {
+    title: title.trim(),
+    description: description.trim(),
+    angle: angle?.trim() || undefined,
+  };
+}
+
+function coerceDraftSuggestion(candidate: unknown): ContentDraftSuggestion {
+  if (!candidate || typeof candidate !== 'object') {
+    return { title: '', description: '', angle: undefined };
+  }
+
+  const record = candidate as Record<string, unknown>;
+  const title = cleanCandidateString(record.title);
+  const description = cleanCandidateString(record.description);
+  const angle = cleanCandidateString(record.angle);
+
+  return {
+    title,
+    description,
+    angle: angle || undefined,
+  };
+}
+
 class ThemeManager {
   currentTheme: ThemeMode;
 
@@ -349,23 +475,67 @@ Informasi referensi:
   }
 
   const raw = await response.json();
-  const content = raw?.choices?.[0]?.message?.content;
+  const content = typeof raw?.choices?.[0]?.message?.content === 'string' ? raw.choices[0].message.content : '';
 
-  let parsed: any = raw;
-  if (typeof content === 'string') {
-    try {
-      parsed = JSON.parse(content);
-    } catch (error) {
-      console.warn('Gagal mengurai respons saran konten, menggunakan payload mentah', error);
-      parsed = raw;
+  const candidates: unknown[] = [];
+  const jsonCandidate = content ? parseJsonLike(content) : null;
+  if (jsonCandidate) {
+    candidates.push(jsonCandidate);
+  }
+
+  if (raw && typeof raw === 'object') {
+    candidates.push(raw);
+    if (Array.isArray(raw.choices)) {
+      for (const choice of raw.choices) {
+        candidates.push(choice);
+        if (choice?.message) {
+          candidates.push(choice.message);
+        }
+      }
+    }
+    if (raw?.data) {
+      candidates.push(raw.data);
+    }
+    if (raw?.result) {
+      candidates.push(raw.result);
     }
   }
 
-  return {
-    title: typeof parsed?.title === 'string' ? parsed.title : '',
-    description: typeof parsed?.description === 'string' ? parsed.description : '',
-    angle: typeof parsed?.angle === 'string' ? parsed.angle : undefined,
-  };
+  let suggestion: ContentDraftSuggestion = { title: '', description: '', angle: undefined };
+  for (const candidate of candidates) {
+    const coerced = coerceDraftSuggestion(candidate);
+    suggestion = {
+      title: suggestion.title || coerced.title,
+      description: suggestion.description || coerced.description,
+      angle: suggestion.angle || coerced.angle,
+    };
+    if (suggestion.title && suggestion.description && suggestion.angle) {
+      break;
+    }
+  }
+
+  if ((!suggestion.title || !suggestion.description) && content) {
+    const fromText = parseDraftFromText(content);
+    suggestion = {
+      title: suggestion.title || fromText.title,
+      description: suggestion.description || fromText.description,
+      angle: suggestion.angle || fromText.angle,
+    };
+  }
+
+  if (!suggestion.title && !suggestion.description) {
+    suggestion = {
+      title:
+        payload.existingTitle?.trim() ||
+        `Strategi ${payload.contentType || 'Konten Facebook'} untuk ${payload.audience || 'Audiens Indonesia'}`,
+      description:
+        payload.existingDescription?.trim() ||
+        'Soroti manfaat utama, ajak interaksi audiens Indonesia, dan gunakan CTA yang jelas untuk memperkuat performa konten.',
+      angle: undefined,
+    };
+  }
+
+  return suggestion;
 }
 
 function normalizeAnalysisResponse(input: any, toggles: AnalysisToggleState): StructuredAnalysis {
