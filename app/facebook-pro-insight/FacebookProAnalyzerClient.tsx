@@ -210,13 +210,46 @@ const qualityFromScore = (score: number): AnalysisResult['qualityLevel'] => {
 
 const clampScore = (score: number) => Math.min(100, Math.max(0, Math.round(score)));
 
-const parseAnalysisResponse = (rawText: string): AnalysisResult => {
-  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error('Respons AI tidak mengandung JSON yang bisa dibaca.');
+const extractJsonObject = (rawText: string): Record<string, any> => {
+  const cleaned = rawText.trim().replace(/^[^\{\[]*/, '');
+
+  try {
+    const parsed = JSON.parse(cleaned);
+
+    if (parsed && typeof parsed === 'object') {
+      if (typeof parsed.text === 'string') {
+        return extractJsonObject(parsed.text);
+      }
+
+      if (
+        parsed.choices &&
+        Array.isArray(parsed.choices) &&
+        parsed.choices[0]?.message?.content
+      ) {
+        return extractJsonObject(parsed.choices[0].message.content);
+      }
+
+      return parsed;
+    }
+  } catch (error) {
+    // ignore parse error and try fallback strategies below
   }
 
-  const parsed = JSON.parse(jsonMatch[0]);
+  const codeFenceMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (codeFenceMatch) {
+    return extractJsonObject(codeFenceMatch[1]);
+  }
+
+  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    return JSON.parse(jsonMatch[0]);
+  }
+
+  throw new Error('Respons AI tidak mengandung JSON yang bisa dibaca.');
+};
+
+const parseAnalysisResponse = (rawText: string): AnalysisResult => {
+  const parsed = extractJsonObject(rawText);
 
   const scores: ScoreRow[] = Array.isArray(parsed.scores)
     ? parsed.scores.map((row: any) => ({
@@ -418,7 +451,7 @@ export default function FacebookProAnalyzerClient() {
             <p className="font-semibold uppercase tracking-widest text-xs text-purple-500 dark:text-purple-200">Cara cepat</p>
             <ol className="mt-2 list-decimal space-y-1 pl-4">
               <li>Tempelkan caption, deskripsi, atau ringkasan konten yang ingin diendus.</li>
-              <li>Pilih model Pollinations.ai yang paling sesuai dengan gaya bahasa Anda.</li>
+              <li>Pilih model AI Analisis yang paling sesuai dengan gaya bahasa Anda.</li>
               <li>Klik <strong>Jalankan Analisis InsightRanker</strong> dan baca insight yang muncul di panel kanan.</li>
             </ol>
             <p className="mt-3 text-xs text-purple-600 dark:text-purple-200/80">Tip: gunakan preset di bawah untuk contoh konten jika ingin mencoba cepat.</p>
@@ -470,7 +503,7 @@ export default function FacebookProAnalyzerClient() {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <label htmlFor="model" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Model Pollinations.ai
+                Model AI Analisis
               </label>
               <div className="relative">
                 <select
