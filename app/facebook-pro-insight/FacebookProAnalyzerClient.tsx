@@ -511,11 +511,22 @@ export default function FacebookProAnalyzerClient() {
 
           <div className="rounded-2xl border border-dashed border-purple-200 bg-purple-50/50 p-4 text-sm text-purple-800 dark:border-purple-500/40 dark:bg-purple-500/10 dark:text-purple-100">
             <p className="font-semibold uppercase tracking-widest text-xs text-purple-500 dark:text-purple-200">Cara cepat</p>
-            <ol className="mt-2 list-decimal space-y-1 pl-4">
-              <li>Tempelkan caption, deskripsi, atau ringkasan konten yang ingin diendus.</li>
-              <li>Pilih model AI Analisis yang paling sesuai dengan gaya bahasa Anda.</li>
-              <li>Klik <strong>Jalankan Analisis InsightRanker</strong> dan baca insight yang muncul di panel kanan.</li>
-            </ol>
+            <ul className="mt-3 space-y-2">
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
+                <span>Tempelkan caption, deskripsi, atau ringkasan konten yang ingin diendus.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
+                <span>Pilih model AI Analisis yang paling sesuai dengan gaya bahasa Anda.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
+                <span>
+                  Klik <strong>Jalankan Analisis InsightRanker</strong> dan baca insight yang muncul di panel kanan.
+                </span>
+              </li>
+            </ul>
             <p className="mt-3 text-xs text-purple-600 dark:text-purple-200/80">Tip: gunakan preset di bawah untuk contoh konten jika ingin mencoba cepat.</p>
           </div>
 
@@ -586,9 +597,6 @@ export default function FacebookProAnalyzerClient() {
                 </select>
                 <Sparkles className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-purple-500" />
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Daftar model dimuat dinamis dari <span className="font-medium">text.pollinations.ai/models</span>.
-              </p>
             </div>
 
             <div className="space-y-2">
@@ -657,21 +665,47 @@ export default function FacebookProAnalyzerClient() {
               ))}
             </ul>
           </div>
-          <div className="rounded-2xl bg-white/10 p-5 backdrop-blur">
-            <h4 className="text-lg font-semibold">Panduan Membaca Indikator</h4>
-            <p className="mt-2 text-sm text-purple-100/90">
+        </div>
+
+        <div className="space-y-4 rounded-2xl bg-light-bg p-6 text-sm text-gray-600 shadow-neumorphic-card dark:bg-dark-bg dark:text-gray-300 dark:shadow-dark-neumorphic-card lg:col-span-1">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Checklist Pembacaan Insight</h3>
+          <ul className="space-y-3">
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
+              <span>Identifikasi skor terendah terlebih dahulu untuk menentukan prioritas perbaikan konten.</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
+              <span>Cocokkan rekomendasi dengan tujuan kampanye agar insight langsung dapat dieksekusi.</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
+              <span>Catat insight heatmap sebagai bahan diskusi tim sebelum iterasi konten berikutnya.</span>
+            </li>
+          </ul>
+          <div className="rounded-xl border border-purple-100 bg-purple-50/80 p-4 text-purple-800 shadow-inner dark:border-purple-500/40 dark:bg-purple-500/10 dark:text-purple-100">
+            <h4 className="text-base font-semibold text-purple-900 dark:text-purple-100">Panduan Membaca Indikator</h4>
+            <p className="mt-2 text-sm text-purple-900/80 dark:text-purple-100/80">
               Gunakan legenda berikut untuk mempermudah memahami warna dan rekomendasi InsightRanker.
             </p>
             <div className="mt-4 space-y-3 text-sm">
               {QUALITY_GUIDE.map((guide) => (
-                <div key={guide.level} className="rounded-xl border border-white/20 bg-white/10 p-3">
-                  <p className="text-xs uppercase tracking-widest text-purple-200">{guide.level} — {QUALITY_LABELS[guide.level]}</p>
-                  <p className="mt-1 text-purple-50/90">{guide.description}</p>
-                  <p className="mt-2 text-xs text-purple-200/80">Cepat dipraktekkan: {guide.quickTip}</p>
+                <div
+                  key={guide.level}
+                  className="rounded-xl border border-purple-100 bg-white/90 p-3 text-purple-800 shadow-sm dark:border-purple-500/40 dark:bg-purple-500/20 dark:text-purple-100"
+                >
+                  <p className="text-xs uppercase tracking-widest text-purple-500 dark:text-purple-200">
+                    {guide.level} — {QUALITY_LABELS[guide.level]}
+                  </p>
+                  <p className="mt-1 text-purple-900 dark:text-purple-100">{guide.description}</p>
+                  <p className="mt-2 text-xs text-purple-600 dark:text-purple-200/80">Cepat dipraktekkan: {guide.quickTip}</p>
                 </div>
               ))}
             </div>
           </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Tata ulang ini memisahkan kartu pembacaan dari hasil utama sehingga layar mobile terasa lebih lega dan mudah dipindai.
+          </p>
         </div>
       </div>
 
