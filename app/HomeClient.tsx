@@ -260,16 +260,6 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
                         </li>
                         <li>
                             <Link
-                                href="/facebook-pro-insight"
-                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
-                                onClick={() => setIsToolsMenuOpen(false)}
-                            >
-                                <Megaphone size={18} />
-                                <span>Facebook Pro Insight Hub</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
                                 href="/storyteller"
                                 className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
                                 onClick={() => setIsToolsMenuOpen(false)}
