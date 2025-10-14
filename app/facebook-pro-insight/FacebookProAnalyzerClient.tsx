@@ -251,8 +251,10 @@ class ThemeManager {
 
   private applyTheme() {
     if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', this.currentTheme);
-      document.documentElement.setAttribute('data-fb-theme', this.currentTheme);
+      const root = document.documentElement;
+      root.setAttribute('data-theme', this.currentTheme);
+      root.setAttribute('data-fb-theme', this.currentTheme);
+      root.classList.toggle('dark', this.currentTheme === 'dark');
     }
 
     if (typeof window !== 'undefined') {
@@ -538,6 +540,36 @@ Informasi referensi:
   return suggestion;
 }
 
+function buildFallbackDraftSuggestion(payload: {
+  contentType: string;
+  audience: string;
+  suggestions: string;
+  existingTitle: string;
+  existingDescription: string;
+}): ContentDraftSuggestion {
+  const trimmedType = payload.contentType?.trim() || 'Konten Facebook';
+  const trimmedAudience = payload.audience?.trim() || 'komunitas Anda';
+  const sanitizedNotes = payload.suggestions?.replace(/\s+/g, ' ').trim();
+  const baseTitle =
+    payload.existingTitle?.trim() || `${trimmedType} untuk ${trimmedAudience}`;
+
+  const highlight = sanitizedNotes
+    ? sanitizedNotes.replace(/[.]+$/, '')
+    : payload.existingDescription?.trim() || '';
+
+  const descriptionSegments = [
+    `Soroti nilai utama ${trimmedType.toLowerCase()} bagi ${trimmedAudience}.`,
+    highlight ? `Tekankan ${highlight.toLowerCase()}.` : '',
+    'Ajak audiens berinteraksi di komentar dan bagikan pengalaman mereka.',
+  ].filter(Boolean);
+
+  return {
+    title: baseTitle,
+    description: descriptionSegments.join(' '),
+    angle: `Fokus pada kebutuhan ${trimmedAudience.toLowerCase()}`,
+  };
+}
+
 function normalizeAnalysisResponse(input: any, toggles: AnalysisToggleState): StructuredAnalysis {
   const safeNumber = (value: unknown, fallback: number) => {
     const parsed = typeof value === 'string' ? Number.parseFloat(value) : value;
@@ -711,6 +743,8 @@ export default function FacebookProAnalyzerClient() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorSource, setErrorSource] = useState<'analysis' | 'content' | 'upload' | 'image' | null>(null);
+  const [notice, setNotice] = useState<{ type: 'success' | 'info'; message: string } | null>(null);
   const [autoAnalyze, setAutoAnalyze] = useState(true);
   const [language, setLanguage] = useState<'id' | 'en'>('id');
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -809,11 +843,15 @@ export default function FacebookProAnalyzerClient() {
       if (!analyzerRef.current) return;
       if (!title && !description) {
         setError('Masukkan judul atau deskripsi konten terlebih dahulu.');
+        setErrorSource('analysis');
+        setNotice(null);
         return;
       }
 
       setIsAnalyzing(true);
       setError(null);
+      setErrorSource(null);
+      setNotice(null);
       analyticsRef.current?.track('analysis_requested', { trigger, model: selectedModel });
 
       try {
@@ -842,10 +880,15 @@ export default function FacebookProAnalyzerClient() {
           localStorage.setItem('fb-analysis-last', JSON.stringify({ analysis: result, timestamp }));
         }
         analyticsRef.current?.track('analysis_success', { status: result.status, score: result.overallScore });
+        if (trigger === 'manual') {
+          setNotice({ type: 'success', message: 'Analisis berhasil diperbarui.' });
+        }
       } catch (err) {
         console.error(err);
         const message = err instanceof Error ? err.message : 'Terjadi kesalahan tak terduga.';
         setError(message);
+        setErrorSource('analysis');
+        setNotice(null);
         analyticsRef.current?.track('analysis_failed', { message });
       } finally {
         setIsAnalyzing(false);
@@ -864,6 +907,8 @@ export default function FacebookProAnalyzerClient() {
   const handleAutoFillContent = useCallback(async () => {
     setIsGeneratingContent(true);
     setError(null);
+    setErrorSource(null);
+    setNotice(null);
     analyticsRef.current?.track('content_autofill_requested', {
       model: selectedModel,
       contentType,
@@ -881,24 +926,57 @@ export default function FacebookProAnalyzerClient() {
         selectedModel
       );
 
-      if (!suggestion.title && !suggestion.description) {
-        throw new Error('AI tidak mengembalikan saran judul atau deskripsi.');
-      }
+      const fallback = buildFallbackDraftSuggestion({
+        contentType,
+        audience: targetAudience,
+        suggestions,
+        existingTitle: title,
+        existingDescription: description,
+      });
 
-      if (suggestion.title) {
-        setTitle(suggestion.title.trim());
-      }
-      if (suggestion.description) {
-        setDescription(suggestion.description.trim());
-      }
+      const finalSuggestion: ContentDraftSuggestion = {
+        title: suggestion.title?.trim() || fallback.title,
+        description: suggestion.description?.trim() || fallback.description,
+        angle: suggestion.angle || fallback.angle,
+      };
+
+      const usedFallback =
+        !suggestion.title?.trim() || !suggestion.description?.trim();
+
+      setTitle(finalSuggestion.title);
+      setDescription(finalSuggestion.description);
+      setNotice({
+        type: usedFallback ? 'info' : 'success',
+        message: usedFallback
+          ? 'Template otomatis melengkapi judul dan deskripsi yang belum tersedia.'
+          : 'Judul dan deskripsi diperbarui oleh AI.',
+      });
       analyticsRef.current?.track('content_autofill_success', {
         hasTitle: Boolean(suggestion.title),
         hasDescription: Boolean(suggestion.description),
+        usedFallback,
       });
     } catch (err) {
+      const fallback = buildFallbackDraftSuggestion({
+        contentType,
+        audience: targetAudience,
+        suggestions,
+        existingTitle: title,
+        existingDescription: description,
+      });
       const message = err instanceof Error ? err.message : 'Gagal mendapatkan saran AI.';
-      setError(message);
+      setTitle(fallback.title);
+      setDescription(fallback.description);
+      setError('AI belum merespons. Template otomatis siap diedit.');
+      setErrorSource('content');
+      setNotice({
+        type: 'info',
+        message: 'Template otomatis digunakan untuk menjaga alur kerja Anda.',
+      });
       analyticsRef.current?.track('content_autofill_failed', { message });
+      analyticsRef.current?.track('content_autofill_fallback', {
+        strategy: 'local-template',
+      });
     } finally {
       setIsGeneratingContent(false);
     }
@@ -910,16 +988,23 @@ export default function FacebookProAnalyzerClient() {
 
     if (!file.type.startsWith('image/')) {
       setError('Format file harus berupa gambar.');
+      setErrorSource('upload');
+      setNotice(null);
       return;
     }
 
     const reader = new FileReader();
     reader.onload = () => {
       setUploadedImage(reader.result as string);
+      setError(null);
+      setErrorSource(null);
+      setNotice({ type: 'info', message: 'Gambar berhasil ditambahkan ke pratinjau.' });
       analyticsRef.current?.track('image_uploaded', { size: file.size });
     };
     reader.onerror = () => {
       setError('Gagal membaca file gambar.');
+      setErrorSource('upload');
+      setNotice(null);
     };
     reader.readAsDataURL(file);
   };
@@ -927,6 +1012,8 @@ export default function FacebookProAnalyzerClient() {
   const handleGenerateImageSuggestion = async () => {
     setIsGeneratingImage(true);
     setError(null);
+    setErrorSource(null);
+    setNotice(null);
     analyticsRef.current?.track('image_generation_requested');
 
     try {
@@ -944,10 +1031,13 @@ export default function FacebookProAnalyzerClient() {
       }
       const imageUrl = `${POLLINATIONS_IMAGE_BASE}${encodeURIComponent(prompt)}?${params.toString()}&seed=${Date.now()}`;
       setAiImageSuggestion(imageUrl);
+      setNotice({ type: 'info', message: 'Saran visual berhasil dihasilkan.' });
       analyticsRef.current?.track('image_generation_success');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Gagal menghasilkan saran gambar.';
       setError(message);
+      setErrorSource('image');
+      setNotice(null);
       analyticsRef.current?.track('image_generation_failed', { message });
     } finally {
       setIsGeneratingImage(false);
@@ -1155,9 +1245,9 @@ export default function FacebookProAnalyzerClient() {
                 <ArrowLeft className="h-4 w-4" />
                 Kembali ke Beranda
               </Link>
-              <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 px-4 py-2 text-sm font-semibold text-indigo-700 dark:text-indigo-300">
+              <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300">
                 <Sparkles className="h-4 w-4" />
-                Facebook Pro Insight Hub
+                Insight AI
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -1178,12 +1268,9 @@ export default function FacebookProAnalyzerClient() {
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-[1.2fr_0.8fr] md:items-center">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white md:text-4xl">
-                Analisis Konten Facebook Profesional Berbasis AI
-              </h1>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white md:text-4xl">Facebook Pro Insight</h1>
               <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 md:text-base">
-                Integrasikan Pollinations.AI untuk mengevaluasi potensi monetisasi, kesesuaian audiens Indonesia, kualitas konten,
-                dan kesiapan teknis secara real-time dengan desain futuristik bergaya neumorphism.
+                Analisis cepat untuk judul, konten, dan potensi performa Facebook Anda.
               </p>
               {lastUpdatedLabel ? (
                 <p className="mt-2 text-xs font-medium text-indigo-600 dark:text-indigo-300">
@@ -1244,9 +1331,9 @@ export default function FacebookProAnalyzerClient() {
             className="flex flex-col gap-6 rounded-3xl border border-white/30 bg-white/70 p-6 shadow-neumorphic-card backdrop-blur dark:border-slate-800/60 dark:bg-slate-900/70 dark:shadow-dark-neumorphic-card"
           >
             <div>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Input & Konfigurasi</h2>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Panel Konten</h2>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Susun konten, pilih model AI Pollinations, dan atur opsi analisis sesuai kebutuhan profesional Anda.
+                Sesuaikan teks dan analisis sebelum dibagikan.
               </p>
             </div>
 
@@ -1261,10 +1348,33 @@ export default function FacebookProAnalyzerClient() {
                   {isGeneratingContent ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   Gunakan AI
                 </button>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Otomatis isi judul & konten berdasarkan catatan dan target audiens.
-                </span>
               </div>
+
+              {error ? (
+                <div className="rounded-2xl border border-rose-200 bg-rose-50/90 p-3 text-xs text-rose-700 shadow-sm dark:border-rose-500/40 dark:bg-rose-500/10 dark:text-rose-200">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div className="space-y-2">
+                      <p>{error}</p>
+                      {errorSource === 'analysis' ? (
+                        <button
+                          type="button"
+                          onClick={() => runAnalysis('manual')}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600 underline decoration-rose-300 underline-offset-2 transition hover:text-rose-700 dark:text-rose-200"
+                        >
+                          <Activity className="h-3 w-3" /> Coba lagi
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {notice ? (
+                <div className="rounded-2xl border border-indigo-200 bg-indigo-50/90 p-3 text-xs text-indigo-700 shadow-sm dark:border-indigo-500/40 dark:bg-indigo-500/10 dark:text-indigo-200">
+                  {notice.message}
+                </div>
+              ) : null}
 
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
@@ -1423,22 +1533,6 @@ export default function FacebookProAnalyzerClient() {
           </aside>
 
           <section className="flex flex-col gap-6" ref={dashboardRef}>
-            {error ? (
-              <div className="rounded-3xl border border-rose-200 bg-rose-50/90 p-5 text-sm text-rose-700 shadow-neumorphic-card dark:border-rose-500/40 dark:bg-rose-500/10 dark:text-rose-200">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4" />
-                  <span>{error}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => runAnalysis('manual')}
-                  className="mt-3 inline-flex items-center gap-2 rounded-2xl bg-rose-500 px-3 py-2 text-xs font-semibold text-white shadow-lg transition hover:bg-rose-600"
-                >
-                  <Activity className="h-3 w-3" /> Coba Lagi
-                </button>
-              </div>
-            ) : null}
-
             <div className="rounded-3xl border border-white/20 bg-white/80 p-6 shadow-neumorphic-card backdrop-blur dark:border-slate-800/60 dark:bg-slate-900/70 dark:shadow-dark-neumorphic-card">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
