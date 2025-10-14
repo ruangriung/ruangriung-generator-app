@@ -17,11 +17,11 @@ const FacebookProAnalyzerClient = dynamic(() => import('./FacebookProAnalyzerCli
 export const metadata: Metadata = {
   title: 'InsightRanker untuk Facebook Pro - Analitik Kualitas Konten',
   description:
-    'Gunakan InsightRanker untuk menilai kreativitas, relevansi, dan daya tarik emosional konten profesional Facebook Anda dengan API Pollinations.ai.',
+    'Gunakan InsightRanker untuk menilai kreativitas, relevansi, dan daya tarik emosional konten profesional Facebook Anda dengan analitik AI multimodal.',
   keywords: [
     'InsightRanker',
     'analisis konten Facebook',
-    'Pollinations AI',
+    'analisis AI multimodal',
     'evaluasi konten profesional',
     'engagement predictor',
   ],
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'InsightRanker — Mesin Pengendus Kualitas Konten',
     description:
-      'Analisis mendalam konten Facebook profesional dengan dukungan model Pollinations.ai yang dinamis.',
+      'Analisis mendalam konten Facebook profesional dengan dukungan model AI multimodal yang dinamis.',
     images: ['https://www.ruangriung.my.id/assets/ruangriung.png'],
   },
 };
@@ -75,8 +75,8 @@ export default function FacebookProInsightPage() {
         </h1>
         <p className="mx-auto max-w-3xl text-base text-gray-600 dark:text-gray-300 md:text-lg">
           Analisis menyeluruh terhadap kreativitas, relevansi, daya tarik emosional, dan keaslian konten profesional Facebook.
-          InsightRanker memanfaatkan API <span className="font-semibold text-purple-600 dark:text-purple-400">text.pollinations.ai</span>
-          untuk mengaktifkan analitik heuristik visual, pemahaman semantik, dan prediksi engagement secara real-time.
+          InsightRanker memanfaatkan mesin analitik AI multimodal untuk mengaktifkan heuristik visual, pemahaman semantik, dan
+          prediksi engagement secara real-time.
         </p>
       </header>
 
