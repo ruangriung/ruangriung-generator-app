@@ -1,1049 +1,1459 @@
 'use client';
+/* eslint-disable @next/next/no-img-element */
 
-import { type ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type ChangeEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   Activity,
   AlertCircle,
+  ArrowLeft,
   BarChart3,
-  Brain,
   CheckCircle2,
+  Download,
+  FileImage,
+  Gauge,
   Image as ImageIcon,
-  Flame,
+  Info,
   Loader2,
-  Network,
-  Radar,
-  RefreshCw,
+  LucideIcon,
+  Moon,
+  Share2,
   Sparkles,
+  Sun,
+  Target,
   TrendingUp,
-  Upload,
-  XCircle,
+  Users,
 } from 'lucide-react';
+import Link from 'next/link';
 
-interface ScoreRow {
-  parameter: string;
-  score: number;
-  insight: string;
-  recommendation: string;
-}
-
-interface MediaAlignment {
-  relevanceScore: number;
-  verdict: string;
-  notes: string[];
-}
-
-interface AnalysisResult {
-  aiScore: number;
-  qualityLevel: 'Kreatif' | 'Menarik' | 'Standar' | 'Buruk';
-  summary: string;
-  narrative: string;
-  trendNarrative: string;
-  opportunities: string[];
-  scores: ScoreRow[];
-  heatmapFocus: string[];
-  mediaAlignment: MediaAlignment;
-}
-
-const DEFAULT_PROMPT_CONTENT = `⚙️ Nama Tools: InsightRanker — Mesin Pengendus Kualitas Konten
-Tujuan: Menilai kualitas konten (gambar, video, teks, audio) berdasarkan kreativitas, relevansi, dan daya tarik emosional.
-Struktur Penilaian:
-1. Kreatif (Level Dewa) — skor 85-100, indikator emas.
-2. Menarik (Level Menengah Atas) — skor 70-84, indikator biru cerah.
-3. Standar (Level Aman) — skor 50-69, indikator abu-abu.
-4. Buruk (Level Ampas) — skor 0-49, indikator merah kusam.
-
-Fitur Analitik Utama:
-- AI Visual Heuristic
-- Semantic Insight Engine
-- Engagement Predictor
-- Trend Alignment Scanner
-- Originality Detector
-
-Output contoh:
-Kreativitas 82 (Ide segar tapi bisa lebih personal, rekomendasi: tambah konteks)
-Visualitas 90 (Warna kuat, rekomendasi: pertahankan tone)
-Orisinalitas 76 (Mirip 15% tren global, rekomendasi: ubah framing)
-Relevansi 68 (Kurang koneksi audiens, rekomendasi: gunakan tema lokal)
-Narratif: "Konten ini punya potensi viral karena kesederhanaannya."`;
-
-const DEFAULT_MEDIA_ALIGNMENT: MediaAlignment = {
-  relevanceScore: 76,
-  verdict: 'Gambar dan teks saling mendukung, meskipun masih ada ruang untuk memperkuat pesan utama.',
-  notes: [
-    'Visual menegaskan tema inti konten, tetapi dapat diperjelas dengan elemen penunjang seperti ikon atau headline.',
-    'Pertimbangkan menambahkan teks pendukung atau highlight warna agar pesan mudah dipindai audiens mobile.',
-  ],
-};
-
-const FALLBACK_ANALYSIS: AnalysisResult = {
-  aiScore: 82,
-  qualityLevel: 'Menarik',
-  summary:
-    'Konten menghadirkan ide segar dengan struktur rapi, namun masih memiliki ruang untuk personalisasi agar resonansinya lebih tinggi.',
-  narrative:
-    'Konten ini punya potensi viral karena kesederhanaannya membiarkan audiens fokus pada pesan utama tanpa gangguan visual.',
-  trendNarrative:
-    'Grafik tren satu minggu terakhir menunjukkan engagement meningkat stabil, tetapi originalitas sedikit menurun karena kedekatan dengan tren global.',
-  opportunities: [
-    'Selipkan humor atau konteks personal agar storytelling makin lekat secara emosional.',
-    'Eksperimen dengan angle visual baru untuk menurunkan kemiripan dengan tren global.',
-    'Perkuat koneksi audiens target dengan memasukkan referensi lokal atau isu komunitas.',
-  ],
-  scores: [
-    {
-      parameter: 'Kreativitas',
-      score: 82,
-      insight: 'Ide segar, storytelling tajam namun masih bisa dihangatkan secara personal.',
-      recommendation: 'Tambahkan konteks personal atau humor singkat untuk memperkuat impresi.',
-    },
-    {
-      parameter: 'Visualitas',
-      score: 90,
-      insight: 'Penggunaan warna kontras dan komposisi simetris memperkuat estetika profesional.',
-      recommendation: 'Pertahankan tone visual, coba variasikan lighting untuk menjaga kejutan visual.',
-    },
-    {
-      parameter: 'Orisinalitas',
-      score: 76,
-      insight: 'Konsep masih beririsan 15% dengan tren global yang sedang populer.',
-      recommendation: 'Ubah framing atau twist narasi agar lebih terasa sebagai signature brand.',
-    },
-    {
-      parameter: 'Relevansi',
-      score: 68,
-      insight: 'Pesan jelas namun belum menyentuh bahasa atau referensi khas audiens target.',
-      recommendation: 'Gunakan tema lokal, data audiens, atau insight komunitas untuk mendekatkan emosi.',
-    },
-  ],
-  heatmapFocus: [
-    'Kreativitas dan Visualitas berada di zona panas (tinggi).',
-    'Relevansi menunjukkan zona hangat yang butuh dorongan.',
-    'Originalitas stabil namun perlu perhatian agar tidak jatuh ke zona dingin.',
-  ],
-  mediaAlignment: DEFAULT_MEDIA_ALIGNMENT,
-};
-
-const QUALITY_COLORS: Record<AnalysisResult['qualityLevel'], string> = {
-  Kreatif: 'from-yellow-400 via-amber-500 to-orange-500 text-yellow-900',
-  Menarik: 'from-sky-400 via-blue-500 to-indigo-500 text-blue-900',
-  Standar: 'from-slate-300 via-gray-400 to-zinc-500 text-gray-800',
-  Buruk: 'from-rose-500 via-red-500 to-orange-600 text-red-50',
-};
-
-const QUALITY_LABELS: Record<AnalysisResult['qualityLevel'], string> = {
-  Kreatif: 'Level Dewa',
-  Menarik: 'Level Menengah Atas',
-  Standar: 'Level Aman Tapi Nggak Wow',
-  Buruk: 'Level Ampas',
-};
-
-const ANALYTICS_FEATURES = [
-  {
-    title: 'AI Visual Heuristic',
-    description:
-      'Menganalisis komposisi, warna, simetri, dan tekstur untuk memetakan estetika konten secara objektif.',
-    icon: Radar,
-  },
-  {
-    title: 'Semantic Insight Engine',
-    description:
-      'Menggali makna tersembunyi dalam caption, deskripsi, maupun tone percakapan untuk membaca resonansi emosional.',
-    icon: Brain,
-  },
-  {
-    title: 'Engagement Predictor',
-    description:
-      'Memodelkan kemungkinan reaksi audiens menggunakan pola emosi, gaya bahasa, dan data historis platform.',
-    icon: TrendingUp,
-  },
-  {
-    title: 'Trend Alignment Scanner',
-    description:
-      'Membandingkan konten terhadap tren terkini untuk menilai apakah Anda selaras atau justru terlihat basi.',
-    icon: Activity,
-  },
-  {
-    title: 'Originality Detector',
-    description:
-      'Mendeteksi kemiripan konseptual dengan dataset global guna menghindari kesan copy-paste.',
-    icon: Flame,
-  },
-];
-
-const QUALITY_GUIDE: Array<{
-  level: AnalysisResult['qualityLevel'];
-  description: string;
-  quickTip: string;
-}> = [
-  {
-    level: 'Kreatif',
-    description: 'Eksekusi istimewa dengan kejutan konseptual yang kuat.',
-    quickTip: 'Pertahankan storytelling dan dokumentasikan resep suksesnya.',
-  },
-  {
-    level: 'Menarik',
-    description: 'Fondasi kokoh dan mudah dipahami, tinggal diberi sentuhan personal.',
-    quickTip: 'Sisipi pengalaman nyata atau twist visual untuk naik kelas.',
-  },
-  {
-    level: 'Standar',
-    description: 'Aman untuk tayang tetapi belum meninggalkan kesan mendalam.',
-    quickTip: 'Tata ulang sudut pandang atau format supaya lebih segar.',
-  },
-  {
-    level: 'Buruk',
-    description: 'Pesan kabur atau tidak relevan dengan audiens target.',
-    quickTip: 'Perjelas tujuan konten dan gunakan bahasa yang lebih akrab.',
-  },
-];
-
-const SAMPLE_PRESETS: Array<{ id: string; name: string; description: string; content: string }> = [
-  {
-    id: 'product-launch',
-    name: 'Peluncuran Produk Lifestyle',
-    description: 'Caption promosi produk wearable dengan sentuhan storytelling.',
-    content:
-      'Hey #RuangCreators! Minggu ini kami rilis smartwatch Aurora Vibe. Fokus kami simpel: bantu kamu fokus tanpa kecanduan layar. Bayangkan jam tangan yang auto-switch ke mode sunyi saat kamu mulai olahraga, tapi kembali aktif saat kamu selesai. Video teaser-nya nunjukin bagaimana warna layar mengikuti mood. Kami pengin tahu, menurut kalian fitur mana yang paling bikin penasaran? Drop di komentar ya!',
-  },
-  {
-    id: 'event-recap',
-    name: 'Rekap Event Komunitas',
-    description: 'Ringkasan kegiatan komunitas lokal beserta ajakan bergabung.',
-    content:
-      'Terima kasih untuk 250+ kreator yang hadir di #RuangRiung Meetup Bandung! Dari sesi micro-storytelling, workshop AI copywriting, sampai open mic, semua bikin vibes kreatifnya terasa banget. Minggu depan kami coba format co-creation clinic. Mau ikutan jadi mentor atau peserta? Tulis “AYO” di kolom komentar, kami bakal DM detail lengkapnya.',
-  },
-  {
-    id: 'public-service',
-    name: 'Pesan Layanan Publik',
-    description: 'Informasi singkat untuk edukasi audiens luas.',
-    content:
-      'Buat teman-teman di kota pesisir, BMKG baru saja merilis peringatan dini gelombang tinggi untuk 48 jam ke depan. Tolong batasi aktivitas pelayaran kecil, pastikan anak-anak nggak bermain terlalu dekat bibir pantai, dan simpan nomor darurat setempat. Kami juga menyiapkan infografik singkat untuk dibagikan ulang di story kalian. Stay safe dan saling kabari ya!',
-  },
-];
-
-const qualityFromScore = (score: number): AnalysisResult['qualityLevel'] => {
-  if (score >= 85) return 'Kreatif';
-  if (score >= 70) return 'Menarik';
-  if (score >= 50) return 'Standar';
-  return 'Buruk';
-};
-
-const clampScore = (score: number) => {
-  if (!Number.isFinite(score)) {
-    return 0;
-  }
-  return Math.min(100, Math.max(0, Math.round(score)));
-};
-
-const POLLINATIONS_TEXT_API_BASE_URL = 'https://text.pollinations.ai';
-const POLLINATIONS_MODELS_ENDPOINT = `${POLLINATIONS_TEXT_API_BASE_URL}/models`;
-const POLLINATIONS_OPENAI_ENDPOINT = `${POLLINATIONS_TEXT_API_BASE_URL}/openai`;
+const POLLINATIONS_TEXT_ENDPOINT = 'https://text.pollinations.ai/openai';
+const POLLINATIONS_MODELS_ENDPOINT = 'https://text.pollinations.ai/models';
+const POLLINATIONS_IMAGE_BASE = 'https://image.pollinations.ai/prompt/';
 const POLLINATIONS_TOKEN = process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN?.trim();
-const POLLINATIONS_REFERRER = 'ruangriung.my.id';
 
-const getPollinationsQueryParam = () => {
-  if (POLLINATIONS_TOKEN) {
-    return { name: 'token', value: POLLINATIONS_TOKEN } as const;
-  }
+const ID_CURRENCY = new Intl.NumberFormat('id-ID', {
+  style: 'currency',
+  currency: 'IDR',
+  maximumFractionDigits: 0,
+});
 
-  return { name: 'referrer', value: POLLINATIONS_REFERRER } as const;
+type ThemeMode = 'light' | 'dark';
+
+type PollinationsModel = string | { id: string; label?: string; name?: string };
+
+type StructuredAnalysis = {
+  overallScore: number;
+  status: 'Excellent' | 'Good' | 'Fair' | 'Poor';
+  summary: string;
+  recommendations: string[];
+  algorithmHighlights: string[];
+  monetization: {
+    predictedCpm: number;
+    predictedRpm: number;
+    predictedCtr: number;
+    revenueEstimate: string;
+    monetizationPotential: 'Low' | 'Medium' | 'High';
+    industryComparison: string;
+    trendNarrative: string;
+  };
+  audience: {
+    culturalRelevanceScore: number;
+    languageAnalysis: string;
+    localTrendAlignment: string;
+    recommendations: string[];
+    heatmap: string[];
+  };
+  contentQuality: {
+    originalityScore: number;
+    relevanceScore: number;
+    visualQualityScore: number;
+    insights: string;
+    nicheAnalysis: string;
+  };
+  technical: {
+    optimalPostingTimes: string[];
+    hashtagRecommendations: string[];
+    reachEstimates: {
+      organic: string;
+      paid: string;
+    };
+    frequency: string;
+  };
+  improvementSuggestions: string[];
+  comparativeInsights: string[];
 };
 
-const buildPollinationsUrl = (baseUrl: string) => {
-  try {
-    const url = new URL(baseUrl);
-    const { name, value } = getPollinationsQueryParam();
-    url.searchParams.set(name, value);
-    return url.toString();
-  } catch (error) {
-    console.warn('Gagal membangun URL Pollinations:', error);
-    const { name, value } = getPollinationsQueryParam();
-    const separator = baseUrl.includes('?') ? '&' : '?';
-    return `${baseUrl}${separator}${name}=${encodeURIComponent(value)}`;
-  }
+type AnalysisPayload = {
+  title: string;
+  description: string;
+  type: string;
+  audience: string;
+  suggestions: string;
+  toggles: AnalysisToggleState;
 };
 
-const getPollinationsAuthHeaders = (hasJsonBody: boolean) => {
-  const headers: Record<string, string> = {};
+type AnalysisToggleKey = 'monetization' | 'audience' | 'quality' | 'technical';
 
-  if (hasJsonBody) {
-    headers['Content-Type'] = 'application/json';
+type AnalysisToggleState = Record<AnalysisToggleKey, boolean>;
+
+class ThemeManager {
+  currentTheme: ThemeMode;
+
+  constructor(private readonly onThemeChange: (mode: ThemeMode) => void) {
+    const stored = typeof window !== 'undefined' ? (localStorage.getItem('fb-insight-theme') as ThemeMode | null) : null;
+    this.currentTheme = stored ?? 'light';
+    this.applyTheme();
   }
+
+  toggleTheme() {
+    this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+    this.applyTheme();
+  }
+
+  private applyTheme() {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', this.currentTheme);
+      document.documentElement.setAttribute('data-fb-theme', this.currentTheme);
+    }
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fb-insight-theme', this.currentTheme);
+    }
+
+    this.onThemeChange(this.currentTheme);
+  }
+}
+
+class ModelManager {
+  availableModels: PollinationsModel[] = [];
+  currentModel = 'openai';
+
+  constructor(private readonly onUpdate: (models: PollinationsModel[]) => void) {}
+
+  async loadModels() {
+    try {
+      const response = await fetch(POLLINATIONS_MODELS_ENDPOINT, {
+        headers: this.buildHeaders(),
+      });
+      const payload = await response.json();
+      const models = Array.isArray(payload) ? payload : payload?.models ?? [];
+      this.availableModels = models;
+      this.updateUI();
+    } catch (error) {
+      console.error('Failed to load models:', error);
+      this.availableModels = ['openai'];
+      this.updateUI();
+    }
+  }
+
+  private buildHeaders(): HeadersInit {
+    const headers: Record<string, string> = {
+      Referrer: 'ruangriung.my.id',
+    };
+    if (POLLINATIONS_TOKEN) {
+      headers.Authorization = `Bearer ${POLLINATIONS_TOKEN}`;
+    }
+    return headers;
+  }
+
+  updateUI() {
+    this.onUpdate(this.availableModels);
+  }
+}
+
+class AnalyticsTracker {
+  private readonly namespace = 'fb-pro-insight-analytics';
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      const existing = localStorage.getItem(this.namespace);
+      if (!existing) {
+        localStorage.setItem(this.namespace, JSON.stringify([]));
+      }
+    }
+  }
+
+  track(event: string, data?: Record<string, unknown>) {
+    if (typeof window === 'undefined') return;
+
+    const entry = {
+      event,
+      data,
+      timestamp: new Date().toISOString(),
+    };
+
+    try {
+      const existing = localStorage.getItem(this.namespace);
+      const parsed: unknown[] = existing ? JSON.parse(existing) : [];
+      parsed.push(entry);
+      localStorage.setItem(this.namespace, JSON.stringify(parsed));
+    } catch (error) {
+      console.warn('Failed to persist analytics data', error);
+    }
+
+    if (navigator.sendBeacon) {
+      try {
+        navigator.sendBeacon(
+          '/api/analytics',
+          JSON.stringify({ source: 'facebook-pro-insight', ...entry })
+        );
+      } catch (error) {
+        console.debug('Beacon not sent', error);
+      }
+    }
+  }
+}
+
+class FacebookAnalyzer {
+  private cache = new Map<string, StructuredAnalysis>();
+
+  constructor(private readonly getModel: () => string) {}
+
+  async analyze(payload: AnalysisPayload) {
+    const cacheKey = JSON.stringify({ ...payload, model: this.getModel() });
+    if (this.cache.has(cacheKey)) {
+      return this.cache.get(cacheKey)!;
+    }
+
+    const aiAnalysis = await analyzeContent(payload, this.getModel());
+    const structured = normalizeAnalysisResponse(aiAnalysis, payload.toggles);
+    this.cache.set(cacheKey, structured);
+    return structured;
+  }
+}
+
+async function analyzeContent(payload: AnalysisPayload, selectedModel: string) {
+  const analysisPrompt = `Analisis konten Facebook berikut untuk audiens Indonesia dengan fokus pada monetisasi, relevansi audiens, kualitas konten, dan optimasi teknis. Gunakan bahasa Indonesia dan berikan hasil dalam format JSON sesuai struktur yang diminta.\n\nJudul: ${payload.title || '-'}\nDeskripsi: ${payload.description || '-'}\nJenis Konten: ${payload.type || 'Status'}\nTarget Audiens: ${payload.audience || 'Indonesia'}\nCatatan Tambahan: ${payload.suggestions || '-'}\n\nAktifkan bagian analisis hanya jika pengguna mengizinkan:\n- Monetisasi: ${payload.toggles.monetization}\n- Audiens: ${payload.toggles.audience}\n- Kualitas: ${payload.toggles.quality}\n- Teknis: ${payload.toggles.technical}\n\nBerikan analisis dalam format JSON dengan struktur:\n{\n  "overall_score": number,\n  "overall_status": "Excellent" | "Good" | "Fair" | "Poor",\n  "summary": string,\n  "monetization_analysis": {\n    "predicted_cpm": number,\n    "predicted_rpm": number,\n    "predicted_ctr": number,\n    "revenue_estimate": string,\n    "monetization_potential": "Low" | "Medium" | "High",\n    "industry_comparison": string,\n    "trend_narrative": string\n  },\n  "audience_suitability": {\n    "cultural_relevance_score": number,\n    "language_analysis": string,\n    "local_trend_alignment": string,\n    "recommendations": string[],\n    "heatmap": string[]\n  },\n  "content_quality": {\n    "originality_score": number,\n    "relevance_score": number,\n    "visual_quality_score": number,\n    "insights": string,\n    "niche_analysis": string\n  },\n  "technical_analysis": {\n    "optimal_posting_times": string[],\n    "hashtag_recommendations": string[],\n    "reach_estimates": {\n      "organic": string,\n      "paid": string\n    },\n    "frequency": string\n  },\n  "improvement_suggestions": string[],\n  "comparative_insights": string[]\n}`;
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Referrer: 'ruangriung.my.id',
+  };
 
   if (POLLINATIONS_TOKEN) {
     headers.Authorization = `Bearer ${POLLINATIONS_TOKEN}`;
   }
 
-  return headers;
-};
+  const response = await fetch(POLLINATIONS_TEXT_ENDPOINT, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      model: selectedModel,
+      messages: [
+        {
+          role: 'system',
+          content:
+            'Anda adalah ahli analisis media sosial khusus pasar Indonesia. Berikan analisis yang mendalam dan actionable dalam format JSON yang terstruktur.',
+        },
+        {
+          role: 'user',
+          content: analysisPrompt,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+      token: POLLINATIONS_TOKEN,
+    }),
+  });
 
-const extractJsonObject = (rawText: string): Record<string, any> => {
-  const cleaned = rawText.trim().replace(/^[^\{\[]*/, '');
+  if (!response.ok) {
+    throw new Error(`Analisis gagal: ${response.statusText}`);
+  }
 
-  try {
-    const parsed = JSON.parse(cleaned);
-
-    if (parsed && typeof parsed === 'object') {
-      if (typeof parsed.text === 'string') {
-        return extractJsonObject(parsed.text);
-      }
-
-      if (
-        parsed.choices &&
-        Array.isArray(parsed.choices) &&
-        parsed.choices[0]?.message?.content
-      ) {
-        return extractJsonObject(parsed.choices[0].message.content);
-      }
-
-      return parsed;
+  const raw = await response.json();
+  if (raw?.choices?.[0]?.message?.content) {
+    try {
+      return JSON.parse(raw.choices[0].message.content);
+    } catch (error) {
+      console.warn('Gagal mengurai konten AI, menggunakan payload mentah', error);
+      return raw;
     }
-  } catch (error) {
-    // ignore parse error and try fallback strategies below
   }
 
-  const codeFenceMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  if (codeFenceMatch) {
-    return extractJsonObject(codeFenceMatch[1]);
-  }
+  return raw;
+}
 
-  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-  if (jsonMatch) {
-    return JSON.parse(jsonMatch[0]);
-  }
-
-  throw new Error('Respons AI tidak mengandung JSON yang bisa dibaca.');
-};
-
-const parseAnalysisResponse = (rawText: string): AnalysisResult => {
-  const parsed = extractJsonObject(rawText);
-
-  const scores: ScoreRow[] = Array.isArray(parsed.scores)
-    ? parsed.scores.map((row: any) => ({
-        parameter: String(row.parameter ?? row.name ?? 'Parameter'),
-        score: clampScore(Number(row.score ?? 0)),
-        insight: String(row.insight ?? row.detail ?? 'Tidak ada insight'),
-        recommendation: String(row.recommendation ?? row.action ?? 'Tidak ada rekomendasi'),
-      }))
-    : FALLBACK_ANALYSIS.scores;
-
-  const averageScore =
-    scores.length > 0
-      ? scores.reduce((accumulator, current) => accumulator + current.score, 0) / scores.length
-      : 0;
-
-  const aiScore = clampScore(
-    Number(
-      (parsed.aiScore ?? parsed.summaryScore ?? averageScore) ?? 0
-    )
-  );
-
-  const qualityLevel = (parsed.qualityLevel as AnalysisResult['qualityLevel']) ?? qualityFromScore(aiScore);
-
-  const mediaAlignmentSource = parsed.mediaAlignment ?? parsed.mediaAssessment ?? parsed.media ?? {};
-  const rawRelevance = Number(
-    mediaAlignmentSource.relevanceScore ?? mediaAlignmentSource.score ?? DEFAULT_MEDIA_ALIGNMENT.relevanceScore
-  );
-  const mediaAlignment: MediaAlignment = {
-    relevanceScore: Number.isFinite(rawRelevance)
-      ? clampScore(rawRelevance)
-      : DEFAULT_MEDIA_ALIGNMENT.relevanceScore,
-    verdict:
-      typeof mediaAlignmentSource.verdict === 'string'
-        ? mediaAlignmentSource.verdict
-        : mediaAlignmentSource.summary ?? DEFAULT_MEDIA_ALIGNMENT.verdict,
-    notes: Array.isArray(mediaAlignmentSource.notes)
-      ? mediaAlignmentSource.notes.map((item: any) => String(item))
-      : Array.isArray(mediaAlignmentSource.observations)
-      ? mediaAlignmentSource.observations.map((item: any) => String(item))
-      : DEFAULT_MEDIA_ALIGNMENT.notes,
+function normalizeAnalysisResponse(input: any, toggles: AnalysisToggleState): StructuredAnalysis {
+  const safeNumber = (value: unknown, fallback: number) => {
+    const parsed = typeof value === 'string' ? Number.parseFloat(value) : value;
+    return typeof parsed === 'number' && Number.isFinite(parsed) ? parsed : fallback;
   };
 
-  return {
-    aiScore,
-    qualityLevel,
+  const overallScore = Math.min(100, Math.max(0, safeNumber(input?.overall_score, 72)));
+  const status: StructuredAnalysis['status'] = (input?.overall_status as StructuredAnalysis['status']) || (
+    overallScore >= 85 ? 'Excellent' : overallScore >= 70 ? 'Good' : overallScore >= 55 ? 'Fair' : 'Poor'
+  );
+
+  const monetizationData = toggles.monetization ? input?.monetization_analysis ?? {} : {};
+  const audienceData = toggles.audience ? input?.audience_suitability ?? {} : {};
+  const qualityData = toggles.quality ? input?.content_quality ?? {} : {};
+  const technicalData = toggles.technical ? input?.technical_analysis ?? {} : {};
+
+  const monetizationPotential =
+    (monetizationData?.monetization_potential as StructuredAnalysis['monetization']['monetizationPotential']) || 'Medium';
+
+  const structured: StructuredAnalysis = {
+    overallScore,
+    status,
     summary:
-      typeof parsed.summary === 'string'
-        ? parsed.summary
-        : parsed.overview ?? FALLBACK_ANALYSIS.summary,
-    narrative:
-      typeof parsed.narrative === 'string'
-        ? parsed.narrative
-        : parsed.panelNarrative ?? FALLBACK_ANALYSIS.narrative,
-    trendNarrative:
-      typeof parsed.trendNarrative === 'string'
-        ? parsed.trendNarrative
-        : parsed.trend ?? FALLBACK_ANALYSIS.trendNarrative,
-    opportunities: Array.isArray(parsed.opportunities)
-      ? parsed.opportunities.map((item: any) => String(item))
-      : FALLBACK_ANALYSIS.opportunities,
-    scores,
-    heatmapFocus: Array.isArray(parsed.heatmapFocus)
-      ? parsed.heatmapFocus.map((item: any) => String(item))
-      : FALLBACK_ANALYSIS.heatmapFocus,
-    mediaAlignment,
+      input?.summary || 'Analisis AI belum menyediakan ringkasan mendalam. Coba jalankan ulang analisis.',
+    recommendations: Array.isArray(input?.improvement_suggestions)
+      ? input.improvement_suggestions
+      : ['Tambahkan CTA yang relevan dengan audiens Indonesia.', 'Optimalkan penggunaan hashtag lokal yang sedang tren.'],
+    algorithmHighlights: [
+      `Model mendeteksi ${monetizationPotential.toLowerCase()} monetization potential di Indonesia.`,
+      `CTR prediksi ${safeNumber(monetizationData?.predicted_ctr, 2.8).toFixed(1)}% dengan estimasi CPM ${safeNumber(
+        monetizationData?.predicted_cpm,
+        17000
+      ).toFixed(0)} IDR.`,
+      audienceData?.local_trend_alignment ||
+        'Konten memiliki koneksi awal dengan tren lokal namun masih bisa ditingkatkan.',
+    ],
+    monetization: {
+      predictedCpm: safeNumber(monetizationData?.predicted_cpm, 17000),
+      predictedRpm: safeNumber(monetizationData?.predicted_rpm, 11000),
+      predictedCtr: safeNumber(monetizationData?.predicted_ctr, 2.8),
+      revenueEstimate: monetizationData?.revenue_estimate || 'Rp120.000 per 1000 views',
+      monetizationPotential,
+      industryComparison:
+        monetizationData?.industry_comparison || 'Performa berada sedikit di atas rata-rata page profesional di Indonesia.',
+      trendNarrative:
+        monetizationData?.trend_narrative ||
+        'Tren CPM Indonesia cenderung stabil dengan peluang peningkatan melalui konten interaktif dan live session.',
+    },
+    audience: {
+      culturalRelevanceScore: safeNumber(audienceData?.cultural_relevance_score, 82),
+      languageAnalysis:
+        audienceData?.language_analysis ||
+        'Bahasa sudah cukup natural untuk audiens Indonesia, tambahkan idiom lokal agar lebih hangat.',
+      localTrendAlignment:
+        audienceData?.local_trend_alignment ||
+        'Konten relevan dengan topik hangat nasional, optimalkan jadwal tayang di jam prime time.',
+      recommendations: Array.isArray(audienceData?.recommendations)
+        ? audienceData.recommendations
+        : ['Gunakan istilah populer di komunitas lokal.', 'Soroti manfaat langsung untuk audiens Indonesia.'],
+      heatmap: Array.isArray(audienceData?.heatmap)
+        ? audienceData.heatmap
+        : ['WIB 11:00 • Warm', 'WIB 19:00 • Hot', 'WITA 20:00 • Hot', 'WIT 21:00 • Warm'],
+    },
+    contentQuality: {
+      originalityScore: safeNumber(qualityData?.originality_score, 78),
+      relevanceScore: safeNumber(qualityData?.relevance_score, 84),
+      visualQualityScore: safeNumber(qualityData?.visual_quality_score, 80),
+      insights:
+        qualityData?.insights ||
+        'Konten memiliki struktur narasi kuat dengan potensi viralitas melalui highlight emosi dan call-to-action yang jelas.',
+      nicheAnalysis:
+        qualityData?.niche_analysis ||
+        'Posisi konten berada di segmen edukasi profesional dengan diferensiasi berupa storytelling berbasis data lokal.',
+    },
+    technical: {
+      optimalPostingTimes: Array.isArray(technicalData?.optimal_posting_times)
+        ? technicalData.optimal_posting_times
+        : ['WIB 19:00-21:00', 'WITA 20:00-22:00', 'WIT 21:00-23:00'],
+      hashtagRecommendations: Array.isArray(technicalData?.hashtag_recommendations)
+        ? technicalData.hashtag_recommendations
+        : ['#TrenIndonesia', '#BisnisLokal', '#InsightProfesional'],
+      reachEstimates: {
+        organic: technicalData?.reach_estimates?.organic || 'Potensi organik 45-55% dari total reach.',
+        paid: technicalData?.reach_estimates?.paid || 'Boost ads dapat meningkatkan reach hingga 3,2x.',
+      },
+      frequency: technicalData?.frequency || '3-4 kali per minggu dengan variasi format carousel, video pendek, dan live.',
+    },
+    improvementSuggestions: Array.isArray(input?.improvement_suggestions)
+      ? input.improvement_suggestions
+      : ['Tambah CTA ajakan diskusi di akhir konten.', 'Sisipkan insight berbasis data lokal untuk membangun kredibilitas.'],
+    comparativeInsights: Array.isArray(input?.comparative_insights)
+      ? input.comparative_insights
+      : [
+          'Performa konten ini 12% lebih tinggi dibanding rata-rata niche profesional minggu lalu.',
+          'Konten serupa dengan visual data-driven mengalami peningkatan CTR 1.4x.',
+        ],
   };
+
+  return structured;
+}
+
+function generateAnalysisChart(type: string, data: unknown) {
+  const prompt = `Create a professional ${type} chart visualization for: ${JSON.stringify(data)}`;
+  const params = new URLSearchParams({
+    width: '800',
+    height: '400',
+    model: 'flux',
+    referrer: 'ruangriung.my.id',
+  });
+  if (POLLINATIONS_TOKEN) {
+    params.append('token', POLLINATIONS_TOKEN);
+  }
+  return `${POLLINATIONS_IMAGE_BASE}${encodeURIComponent(prompt)}?${params.toString()}`;
+}
+
+function formatScoreLabel(score: number) {
+  if (score >= 85) return 'Excellent';
+  if (score >= 70) return 'Good';
+  if (score >= 55) return 'Fair';
+  return 'Poor';
+}
+
+function getScoreColor(score: number) {
+  if (score >= 85) return 'from-green-400 via-emerald-500 to-teal-500';
+  if (score >= 70) return 'from-blue-400 via-indigo-500 to-purple-500';
+  if (score >= 55) return 'from-amber-400 via-yellow-500 to-orange-500';
+  return 'from-rose-500 via-red-500 to-orange-500';
+}
+
+const translations: Record<'id' | 'en', Record<string, string>> = {
+  id: {
+    executiveSummary: 'Ringkasan Eksekutif',
+    monetization: 'Analisis Monetisasi',
+    audienceFit: 'Analisis Kesesuaian Audiens Indonesia',
+    contentQuality: 'Analisis Kualitas Konten',
+    technicalAnalysis: 'Analisis Teknis',
+    improvementSuggestions: 'Saran Perbaikan',
+    comparative: 'Analisis Komparatif',
+    livePreview: 'Pratinjau Konten Real-time',
+    history: 'Riwayat Analisis',
+  },
+  en: {
+    executiveSummary: 'Executive Summary',
+    monetization: 'Monetization Analysis',
+    audienceFit: 'Indonesian Audience Fit Analysis',
+    contentQuality: 'Content Quality Analysis',
+    technicalAnalysis: 'Technical Analysis',
+    improvementSuggestions: 'Improvement Suggestions',
+    comparative: 'Comparative Analysis',
+    livePreview: 'Real-time Content Preview',
+    history: 'Analysis History',
+  },
 };
 
 export default function FacebookProAnalyzerClient() {
-  const [content, setContent] = useState(DEFAULT_PROMPT_CONTENT);
-  const [models, setModels] = useState<{ name: string; description?: string }[]>([]);
+  const [theme, setTheme] = useState<ThemeMode>('light');
+  const [models, setModels] = useState<PollinationsModel[]>([]);
   const [selectedModel, setSelectedModel] = useState('openai');
-  const [isLoading, setIsLoading] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [contentType, setContentType] = useState('Video Pendek');
+  const [suggestions, setSuggestions] = useState('');
+  const [targetAudience, setTargetAudience] = useState('Indonesia');
+  const [toggles, setToggles] = useState<AnalysisToggleState>({
+    monetization: true,
+    audience: true,
+    quality: true,
+    technical: true,
+  });
+  const [analysis, setAnalysis] = useState<StructuredAnalysis | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [analysis, setAnalysis] = useState<AnalysisResult | null>(FALLBACK_ANALYSIS);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [activePreset, setActivePreset] = useState<string>('');
-  const mediaInputRef = useRef<HTMLInputElement | null>(null);
-  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
-  const [mediaDataUrl, setMediaDataUrl] = useState<string | null>(null);
-  const [mediaFileName, setMediaFileName] = useState<string>('');
+  const [autoAnalyze, setAutoAnalyze] = useState(true);
+  const [language, setLanguage] = useState<'id' | 'en'>('id');
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [aiImageSuggestion, setAiImageSuggestion] = useState<string | null>(null);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [analysisHistory, setAnalysisHistory] = useState<Array<{ timestamp: string; score: number; status: string }>>([]);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
 
-  const handleMediaChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const modelManagerRef = useRef<ModelManager>();
+  const themeManagerRef = useRef<ThemeManager>();
+  const analyzerRef = useRef<FacebookAnalyzer>();
+  const analyticsRef = useRef<AnalyticsTracker>();
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const dashboardRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    themeManagerRef.current = new ThemeManager(setTheme);
+    analyticsRef.current = new AnalyticsTracker();
+    analyticsRef.current.track('page_view', { page: 'facebook-pro-insight' });
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const updateStatus = () => setIsOffline(!navigator.onLine);
+    updateStatus();
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
+    return () => {
+      window.removeEventListener('online', updateStatus);
+      window.removeEventListener('offline', updateStatus);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = localStorage.getItem('fb-analysis-last');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed?.analysis) {
+          setAnalysis(parsed.analysis as StructuredAnalysis);
+          setLastUpdated(parsed.timestamp ?? parsed.updatedAt ?? null);
+        }
+      }
+      const storedHistory = localStorage.getItem('fb-analysis-history');
+      if (storedHistory) {
+        const history = JSON.parse(storedHistory);
+        if (Array.isArray(history)) {
+          setAnalysisHistory(history);
+        }
+      }
+    } catch (loadError) {
+      console.warn('Failed to load cached analysis', loadError);
+    }
+  }, []);
+
+  useEffect(() => {
+    modelManagerRef.current = new ModelManager((loadedModels) => {
+      setModels(loadedModels);
+      if (loadedModels.length > 0) {
+        const first = loadedModels[0];
+        const fallback = typeof first === 'string' ? first : first?.id || first?.name || 'openai';
+        setSelectedModel((current) => (loadedModels.includes(current) ? current : fallback));
+      }
+    });
+    modelManagerRef.current.loadModels();
+  }, []);
+
+  useEffect(() => {
+    analyzerRef.current = new FacebookAnalyzer(() => selectedModel);
+  }, [selectedModel]);
+
+  useEffect(() => {
+    if (!autoAnalyze) return;
+    if (!title && !description) return;
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      runAnalysis('auto');
+    }, 1200);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, description, contentType, suggestions, targetAudience, toggles, autoAnalyze]);
+
+  const runAnalysis = useCallback(
+    async (trigger: 'auto' | 'manual') => {
+      if (!analyzerRef.current) return;
+      if (!title && !description) {
+        setError('Masukkan judul atau deskripsi konten terlebih dahulu.');
+        return;
+      }
+
+      setIsAnalyzing(true);
+      setError(null);
+      analyticsRef.current?.track('analysis_requested', { trigger, model: selectedModel });
+
+      try {
+        const result = await analyzerRef.current.analyze({
+          title,
+          description,
+          type: contentType,
+          audience: targetAudience,
+          suggestions,
+          toggles,
+        });
+        const timestamp = new Date().toISOString();
+        setAnalysis(result);
+        setLastUpdated(timestamp);
+        setAnalysisHistory((prev) => {
+          const updated = [
+            { timestamp, score: result.overallScore, status: result.status },
+            ...prev.filter((item) => item.timestamp !== timestamp),
+          ].slice(0, 6);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('fb-analysis-history', JSON.stringify(updated));
+          }
+          return updated;
+        });
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('fb-analysis-last', JSON.stringify({ analysis: result, timestamp }));
+        }
+        analyticsRef.current?.track('analysis_success', { status: result.status, score: result.overallScore });
+      } catch (err) {
+        console.error(err);
+        const message = err instanceof Error ? err.message : 'Terjadi kesalahan tak terduga.';
+        setError(message);
+        analyticsRef.current?.track('analysis_failed', { message });
+      } finally {
+        setIsAnalyzing(false);
+      }
+    },
+    [contentType, selectedModel, suggestions, targetAudience, title, description, toggles]
+  );
+
+  const handleToggleChange = (key: AnalysisToggleKey) => {
+    setToggles((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    if (!file) return;
 
-    if (!file) {
-      setMediaPreview(null);
-      setMediaDataUrl(null);
-      setMediaFileName('');
+    if (!file.type.startsWith('image/')) {
+      setError('Format file harus berupa gambar.');
       return;
     }
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = typeof reader.result === 'string' ? reader.result : null;
-      setMediaPreview(result);
-      setMediaDataUrl(result);
-      setMediaFileName(file.name);
+    reader.onload = () => {
+      setUploadedImage(reader.result as string);
+      analyticsRef.current?.track('image_uploaded', { size: file.size });
     };
-
+    reader.onerror = () => {
+      setError('Gagal membaca file gambar.');
+    };
     reader.readAsDataURL(file);
   };
 
-  const handleClearMedia = () => {
-    setMediaPreview(null);
-    setMediaDataUrl(null);
-    setMediaFileName('');
-    if (mediaInputRef.current) {
-      mediaInputRef.current.value = '';
-    }
-  };
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const loadModels = async () => {
-      try {
-        const headers = {
-          Accept: 'application/json',
-          ...getPollinationsAuthHeaders(false),
-        };
-
-        const response = await fetch(buildPollinationsUrl(POLLINATIONS_MODELS_ENDPOINT), {
-          signal: controller.signal,
-          headers,
-        });
-
-        if (!response.ok) {
-          throw new Error(`Gagal memuat daftar model (status ${response.status}).`);
-        }
-
-        const data = await response.json();
-        const parsedModels: { name: string; description?: string }[] = [];
-
-        if (Array.isArray(data)) {
-          data.forEach((item) => {
-            if (typeof item === 'string') {
-              parsedModels.push({ name: item });
-            } else if (item && typeof item === 'object') {
-              parsedModels.push({ name: item.name ?? item.id ?? 'model', description: item.description ?? item.label });
-            }
-          });
-        } else if (data && typeof data === 'object') {
-          if (Array.isArray(data.models)) {
-            data.models.forEach((item: any) => {
-              if (typeof item === 'string') {
-                parsedModels.push({ name: item });
-              } else if (item && typeof item === 'object') {
-                parsedModels.push({ name: item.name ?? item.id ?? 'model', description: item.description ?? item.label });
-              }
-            });
-          } else {
-            Object.entries(data).forEach(([key, value]) => {
-              if (typeof value === 'string') {
-                parsedModels.push({ name: value, description: key });
-              }
-            });
-          }
-        }
-
-        const uniqueModels = parsedModels.filter(
-          (model, index, self) => index === self.findIndex((item) => item.name === model.name)
-        );
-
-        setModels(uniqueModels);
-
-        if (uniqueModels.length > 0 && !uniqueModels.some((model) => model.name === selectedModel)) {
-          setSelectedModel(uniqueModels[0].name);
-        }
-      } catch (fetchError) {
-        console.error(fetchError);
-        setError('Gagal memuat model AI, menggunakan model default.');
-      }
-    };
-
-    loadModels();
-
-    return () => {
-      controller.abort();
-    };
-  }, [selectedModel]);
-
-  const handleAnalyze = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsLoading(true);
+  const handleGenerateImageSuggestion = async () => {
+    setIsGeneratingImage(true);
     setError(null);
+    analyticsRef.current?.track('image_generation_requested');
 
     try {
-      const hasMediaAttachment = Boolean(mediaDataUrl);
-      const prompt = `Analisis konten Facebook profesional berikut secara menyeluruh. Wajib mengembalikan JSON dengan struktur: {\n  \"aiScore\": number (0-100),\n  \"qualityLevel\": \"Kreatif|Menarik|Standar|Buruk\",\n  \"summary\": string,\n  \"narrative\": string,\n  \"trendNarrative\": string,\n  \"opportunities\": string[],\n  \"scores\": [{ \"parameter\": string, \"score\": number, \"insight\": string, \"recommendation\": string }],\n  \"heatmapFocus\": string[],\n  \"mediaAlignment\": { \"relevanceScore\": number (0-100), \"verdict\": string, \"notes\": string[] }\n}. Fokus pada kreativitas, relevansi, daya tarik emosional, orisinalitas, dan visualitas. Jelaskan juga seberapa relevan ${
-        hasMediaAttachment ? 'gambar terlampir' : 'gambar (jika ada)'
-      } terhadap teks dan beri rekomendasi perbaikan lintas format. ${
-        hasMediaAttachment
-          ? 'Gambar terlampir dapat diacu langsung dari input visual.'
-          : 'Tidak ada gambar yang diunggah; analisis relevansi visual berdasarkan deskripsi teks.'
-      } Konten teks:\n\n${content}`;
-
-      const userContent: Array<
-        | { type: 'text'; text: string }
-        | { type: 'image_url'; image_url: { url: string } }
-      > = [
-        {
-          type: 'text',
-          text: prompt,
-        },
-      ];
-
-      if (hasMediaAttachment && mediaDataUrl) {
-        userContent.push({
-          type: 'image_url',
-          image_url: { url: mediaDataUrl },
-        });
-      }
-
-      const payload = {
-        model: selectedModel || 'openai',
-        messages: [
-          {
-            role: 'system',
-            content:
-              'Anda adalah InsightRanker, analis konten profesional khusus Facebook Pro. Jawaban wajib dalam JSON valid sesuai skema yang diminta.',
-          },
-          {
-            role: 'user',
-            content: userContent,
-          },
-        ],
-      };
-
-      const response = await fetch(buildPollinationsUrl(POLLINATIONS_OPENAI_ENDPOINT), {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          ...getPollinationsAuthHeaders(true),
-        },
-        body: JSON.stringify(payload),
+      const prompt = `professional facebook marketing visual, ${title || 'modern campaign'}, optimized for Indonesian audience, data-driven layout, premium colors, neumorphism UI`;
+      const params = new URLSearchParams({
+        width: '896',
+        height: '512',
+        model: 'flux',
+        referrer: 'ruangriung.my.id',
+        enhance: 'true',
+        quality: 'high',
       });
-
-      if (!response.ok) {
-        throw new Error(`Analisis gagal (status ${response.status}).`);
+      if (POLLINATIONS_TOKEN) {
+        params.append('token', POLLINATIONS_TOKEN);
       }
-
-      const rawResponse = await response.text();
-      const parsed = parseAnalysisResponse(rawResponse);
-      setAnalysis(parsed);
-      setLastUpdated(new Date());
-    } catch (fetchError: any) {
-      console.error(fetchError);
-      setError(fetchError.message ?? 'Terjadi kesalahan saat menganalisis konten.');
-      setAnalysis(FALLBACK_ANALYSIS);
+      const imageUrl = `${POLLINATIONS_IMAGE_BASE}${encodeURIComponent(prompt)}?${params.toString()}&seed=${Date.now()}`;
+      setAiImageSuggestion(imageUrl);
+      analyticsRef.current?.track('image_generation_success');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Gagal menghasilkan saran gambar.';
+      setError(message);
+      analyticsRef.current?.track('image_generation_failed', { message });
     } finally {
-      setIsLoading(false);
+      setIsGeneratingImage(false);
     }
   };
 
-  const qualityColor = useMemo(() => QUALITY_COLORS[analysis?.qualityLevel ?? 'Menarik'], [analysis?.qualityLevel]);
+  const handleExport = async (type: 'png' | 'pdf') => {
+    if (!dashboardRef.current) return;
 
-  const heatmapCells = useMemo(() => {
-    return (analysis?.scores ?? []).map((score) => {
-      let backgroundClass = 'bg-slate-200/60 dark:bg-slate-700/40';
+    analyticsRef.current?.track('export_requested', { type });
 
-      if (score.score >= 85) backgroundClass = 'bg-amber-400/80 dark:bg-amber-500/40';
-      else if (score.score >= 70) backgroundClass = 'bg-sky-400/70 dark:bg-sky-500/40';
-      else if (score.score >= 50) backgroundClass = 'bg-zinc-300/70 dark:bg-zinc-600/40';
-      else backgroundClass = 'bg-rose-500/70 dark:bg-rose-500/30';
-
-      return {
-        ...score,
-        backgroundClass,
-      };
+    const html2canvas = (await import('html2canvas')).default;
+    const canvas = await html2canvas(dashboardRef.current, {
+      backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
+      scale: 1.5,
     });
-  }, [analysis?.scores]);
 
-  const mediaAlignment = analysis?.mediaAlignment ?? DEFAULT_MEDIA_ALIGNMENT;
-  const hasMediaPreview = Boolean(mediaPreview);
+    if (type === 'png') {
+      const link = document.createElement('a');
+      link.download = `facebook-pro-insight-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      return;
+    }
 
-  return (
-    <section className="mt-10 space-y-10">
-      <div className="grid gap-8 lg:grid-cols-3">
-        <form
-          onSubmit={handleAnalyze}
-          className="lg:col-span-2 space-y-6 rounded-2xl bg-light-bg p-6 shadow-neumorphic-card dark:bg-dark-bg dark:shadow-dark-neumorphic-card"
-        >
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Panel Analisis Konten</h2>
-            <button
-              type="button"
-              onClick={() => {
-                setContent(DEFAULT_PROMPT_CONTENT);
-                setActivePreset('');
-                handleClearMedia();
-              }}
-              className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Reset ke Template
-            </button>
-          </div>
+    const dataUrl = canvas.toDataURL('image/png');
+    const printWindow = window.open('', '_blank', 'noopener,noreferrer');
+    if (!printWindow) {
+      alert('Pop-up diblokir. Izinkan pop-up untuk menyimpan PDF.');
+      return;
+    }
+    printWindow.document.write(`<!DOCTYPE html><html><head><title>Facebook Pro Insight Export</title></head><body style="margin:0;display:flex;align-items:center;justify-content:center;background:${
+      theme === 'dark' ? '#0f172a' : '#ffffff'
+    }"><img src="${dataUrl}" style="width:90vw;height:auto;"/></body></html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
 
-          <div className="rounded-2xl border border-dashed border-purple-200 bg-purple-50/50 p-4 text-sm text-purple-800 dark:border-purple-500/40 dark:bg-purple-500/10 dark:text-purple-100">
-            <p className="font-semibold uppercase tracking-widest text-xs text-purple-500 dark:text-purple-200">Cara cepat</p>
-            <ul className="mt-3 space-y-2">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
-                <span>Tempelkan caption, deskripsi, atau ringkasan konten yang ingin diendus.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
-                <span>Unggah visual pendukung (opsional) agar InsightRanker dapat menilai keselarasan teks dan gambar.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
-                <span>Pilih model AI Analisis yang paling sesuai dengan gaya bahasa Anda.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
-                <span>
-                  Klik <strong>Jalankan Analisis InsightRanker</strong> dan baca insight yang muncul di panel kanan.
-                </span>
-              </li>
-            </ul>
-            <p className="mt-3 text-xs text-purple-600 dark:text-purple-200/80">Tip: gunakan preset di bawah untuk contoh konten jika ingin mencoba cepat.</p>
-          </div>
+  const handleShare = async () => {
+    analyticsRef.current?.track('share_attempt');
 
-          <div className="space-y-2">
-            <label htmlFor="content" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Konten Facebook Pro yang Ingin Dianalisis
-            </label>
-            <div className="flex flex-col gap-3 lg:flex-row">
-              <div className="flex-1">
-                <select
-                  value={activePreset}
-                  onChange={(event) => {
-                    const presetId = event.target.value;
-                    setActivePreset(presetId);
-                    const preset = SAMPLE_PRESETS.find((item) => item.id === presetId);
-                    if (preset) {
-                      setContent(preset.content);
-                    }
-                  }}
-                  className="w-full rounded-xl border border-transparent bg-white/90 px-4 py-3 text-sm font-medium text-gray-800 shadow-inner focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/60 dark:bg-gray-800/80 dark:text-gray-100"
-                >
-                  <option value="">Pilih preset contoh konten (opsional)</option>
-                  {SAMPLE_PRESETS.map((preset) => (
-                    <option key={preset.id} value={preset.id}>
-                      {preset.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {activePreset && (
-                <div className="rounded-xl border border-purple-200 bg-purple-50/70 px-4 py-3 text-xs text-purple-700 dark:border-purple-500/40 dark:bg-purple-500/10 dark:text-purple-200">
-                  {SAMPLE_PRESETS.find((preset) => preset.id === activePreset)?.description}
-                </div>
-              )}
-            </div>
-            <textarea
-              id="content"
-              value={content}
-              onChange={(event) => setContent(event.target.value)}
-              rows={12}
-              className="w-full rounded-xl border border-transparent bg-white/90 p-4 text-sm text-gray-800 shadow-inner focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/60 dark:bg-gray-800/80 dark:text-gray-100"
-              placeholder="Tempelkan caption, deskripsi, atau ringkasan konten Anda di sini."
-              required
-            />
-          </div>
+    const shareData = {
+      title: 'Facebook Pro Insight Hub',
+      text: 'Lihat analisis komprehensif konten Facebook profesional saya.',
+      url: window.location.href,
+    };
 
-          <div className="space-y-2">
-            <label htmlFor="media-upload" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Visual Pendukung untuk Analisis (Opsional)
-            </label>
-            <input
-              id="media-upload"
-              ref={mediaInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleMediaChange}
-              className="sr-only"
-            />
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <label
-                htmlFor="media-upload"
-                className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-purple-300 bg-white/70 px-4 py-3 text-sm font-semibold text-purple-700 shadow-sm transition hover:border-purple-400 hover:bg-purple-50 dark:border-purple-500/50 dark:bg-gray-800/60 dark:text-purple-200 dark:hover:border-purple-400"
-              >
-                <Upload className="h-4 w-4" />
-                Unggah Gambar Analisis
-              </label>
-              {mediaFileName && (
-                <div className="flex w-full items-center justify-between gap-3 rounded-xl border border-purple-200 bg-purple-50/70 px-4 py-3 text-xs text-purple-700 shadow-inner dark:border-purple-500/40 dark:bg-purple-500/10 dark:text-purple-200">
-                  <span className="truncate">{mediaFileName}</span>
-                  <button
-                    type="button"
-                    onClick={handleClearMedia}
-                    className="inline-flex items-center gap-1 rounded-lg bg-purple-200/40 px-2 py-1 text-xs font-semibold text-purple-700 transition hover:bg-purple-200 dark:bg-purple-500/20 dark:text-purple-100 dark:hover:bg-purple-500/30"
-                  >
-                    <XCircle className="h-3.5 w-3.5" />
-                    Hapus
-                  </button>
-                </div>
-              )}
-            </div>
-            {mediaPreview && (
-              <div className="overflow-hidden rounded-xl border border-purple-200 bg-white/80 p-3 shadow-inner dark:border-purple-500/30 dark:bg-gray-800/60">
-                <div className="flex items-center justify-between text-xs font-semibold text-purple-700 dark:text-purple-200">
-                  <span className="inline-flex items-center gap-2">
-                    <ImageIcon className="h-4 w-4" />
-                    Pratinjau Visual
-                  </span>
-                  <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:bg-purple-500/30 dark:text-purple-100">
-                    Terlampir
-                  </span>
-                </div>
-                <img
-                  src={mediaPreview}
-                  alt="Pratinjau konten yang dianalisis"
-                  className="mt-3 max-h-60 w-full rounded-lg object-contain"
-                />
-              </div>
-            )}
-          </div>
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        analyticsRef.current?.track('share_success');
+        return;
+      } catch (shareError) {
+        console.warn('Share dibatalkan', shareError);
+      }
+    }
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <label htmlFor="model" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Model AI Analisis
-              </label>
-              <div className="relative">
-                <select
-                  id="model"
-                  value={selectedModel}
-                  onChange={(event) => setSelectedModel(event.target.value)}
-                  className="w-full appearance-none rounded-xl border border-transparent bg-white/90 px-4 py-3 text-sm font-medium text-gray-800 shadow-inner focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/60 dark:bg-gray-800/80 dark:text-gray-100"
-                >
-                  {models.length > 0 ? (
-                    models.map((model) => (
-                      <option key={model.name} value={model.name}>
-                        {model.description ? `${model.description} — ${model.name}` : model.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="openai">openai</option>
-                  )}
-                </select>
-                <Sparkles className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-purple-500" />
-              </div>
-            </div>
+    await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+    analyticsRef.current?.track('share_clipboard');
+    alert('Link analisis disalin ke clipboard!');
+  };
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Status Sistem</label>
-              <div className="flex items-center gap-3 rounded-xl border border-dashed border-purple-200 bg-purple-50/60 px-4 py-3 text-sm text-purple-700 dark:border-purple-500/40 dark:bg-purple-500/10 dark:text-purple-200">
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                {isLoading ? 'AI sedang mengendus kualitas konten...' : 'Siap mengendus kualitas konten Anda.'}
-              </div>
-            </div>
-          </div>
+  const lastUpdatedLabel = useMemo(() => {
+    if (!lastUpdated) return null;
+    try {
+      return new Intl.DateTimeFormat('id-ID', {
+        dateStyle: 'long',
+        timeStyle: 'short',
+      }).format(new Date(lastUpdated));
+    } catch (formatError) {
+      console.warn('Failed to format date', formatError);
+      return lastUpdated;
+    }
+  }, [lastUpdated]);
 
-          {error && (
-            <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/50 dark:bg-red-500/10 dark:text-red-200">
-              <AlertCircle className="h-5 w-5 flex-shrink-0" />
-              <div>
-                <p className="font-semibold">Terjadi kendala</p>
-                <p>{error}</p>
-              </div>
-            </div>
-          )}
+  const t = translations[language];
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-3 text-base font-semibold text-white shadow-lg transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-purple-400 dark:focus:ring-offset-slate-900"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Mengendus konten...
-              </>
-            ) : (
-              <>
-                <Network className="h-5 w-5" />
-                Jalankan Analisis InsightRanker
-              </>
-            )}
-          </button>
-        </form>
+  const scoreCardItems = useMemo(() => {
+    if (!analysis) return [];
+    return [
+      {
+        icon: Gauge,
+        label: 'Overall Score',
+        value: `${analysis.overallScore.toFixed(0)}/100`,
+        status: analysis.status,
+        score: analysis.overallScore,
+      },
+      {
+        icon: BarChart3,
+        label: 'Monetization',
+        value: `${ID_CURRENCY.format(analysis.monetization.predictedCpm)}/1000 CPM`,
+        status: formatScoreLabel(Math.min(100, analysis.monetization.predictedCtr * 25)),
+        score: Math.min(100, analysis.monetization.predictedCtr * 25),
+      },
+      {
+        icon: Users,
+        label: 'Audience Fit',
+        value: `${analysis.audience.culturalRelevanceScore.toFixed(0)}/100`,
+        status: formatScoreLabel(analysis.audience.culturalRelevanceScore),
+        score: analysis.audience.culturalRelevanceScore,
+      },
+    ];
+  }, [analysis]);
 
-        <div className="space-y-6 rounded-2xl bg-gradient-to-br from-purple-600/90 via-purple-700/90 to-indigo-800/90 p-6 text-purple-50 shadow-neumorphic-card dark:shadow-dark-neumorphic-card lg:col-span-1">
-          <div className="rounded-2xl bg-white/10 p-5 backdrop-blur">
-            <p className="text-xs uppercase tracking-[0.4em] text-purple-200">AI Score</p>
-            <div className="mt-3 flex items-end justify-between">
-              <h3 className="text-5xl font-black leading-none">{analysis?.aiScore ?? '—'}</h3>
-              <span className="text-sm font-medium text-purple-100">
-                {lastUpdated ? `Diperbarui ${lastUpdated.toLocaleTimeString('id-ID')}` : 'Menggunakan data baseline' }
-              </span>
-            </div>
-          </div>
+  const revenueChartUrl = useMemo(() => {
+    if (!analysis) return null;
+    return generateAnalysisChart('bar', {
+      title: 'Revenue Comparison',
+      organic: analysis.technical.reachEstimates.organic,
+      paid: analysis.technical.reachEstimates.paid,
+      cpm: analysis.monetization.predictedCpm,
+      rpm: analysis.monetization.predictedRpm,
+    });
+  }, [analysis]);
 
-          <div className={`rounded-2xl p-5 text-center font-semibold shadow-lg backdrop-blur transition-colors bg-gradient-to-br ${qualityColor}`}>
-            <p className="text-xs uppercase tracking-[0.35em]">Tingkat Kualitas</p>
-            <p className="mt-2 text-2xl font-black">{analysis ? analysis.qualityLevel : '—'}</p>
-            <p className="text-sm font-medium opacity-80">{analysis ? QUALITY_LABELS[analysis.qualityLevel] : ''}</p>
-          </div>
+  const heatmapChartUrl = useMemo(() => {
+    if (!analysis) return null;
+    return generateAnalysisChart('heatmap', {
+      title: 'Audience Heatmap',
+      heatmap: analysis.audience.heatmap,
+      optimalTimes: analysis.technical.optimalPostingTimes,
+    });
+  }, [analysis]);
 
-          <div className="rounded-2xl bg-white/5 p-5 backdrop-blur">
-            <h4 className="text-lg font-semibold">Heatmap Fokus</h4>
-            <ul className="mt-3 space-y-2 text-sm text-purple-100/90">
-              {(analysis?.heatmapFocus ?? []).map((item, index) => (
-                <li key={index} className="flex items-start gap-2">
-                  <BarChart3 className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="rounded-2xl bg-white/5 p-5 backdrop-blur">
-            <h4 className="text-lg font-semibold">Sinkronisasi Teks &amp; Visual</h4>
-            <div className="mt-3 flex items-center justify-between text-sm font-semibold text-purple-100/90">
-              <span>Skor Relevansi</span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-base font-bold">
-                {mediaAlignment.relevanceScore}
-              </span>
-            </div>
-            <p className="mt-3 text-sm text-purple-100/90">{mediaAlignment.verdict}</p>
-            <ul className="mt-3 space-y-2 text-xs text-purple-100/80">
-              {mediaAlignment.notes.map((note, index) => (
-                <li key={index} className="flex items-start gap-2">
-                  <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
-                  <span>{note}</span>
-                </li>
-              ))}
-            </ul>
-            {hasMediaPreview ? (
-              <div className="mt-4 overflow-hidden rounded-xl border border-white/20 bg-white/10 p-2">
-                <img
-                  src={mediaPreview ?? undefined}
-                  alt="Visual yang dianalisis InsightRanker"
-                  className="max-h-40 w-full rounded-lg object-contain"
-                />
-              </div>
-            ) : (
-              <p className="mt-4 text-xs text-purple-200/80">
-                Belum ada visual diunggah. InsightRanker menilai relevansi berdasarkan konteks teks.
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-4 rounded-2xl bg-light-bg p-6 text-sm text-gray-600 shadow-neumorphic-card dark:bg-dark-bg dark:text-gray-300 dark:shadow-dark-neumorphic-card lg:col-span-1">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Checklist Pembacaan Insight</h3>
-          <ul className="space-y-3">
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
-              <span>Identifikasi skor terendah terlebih dahulu untuk menentukan prioritas perbaikan konten.</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
-              <span>Cocokkan rekomendasi dengan tujuan kampanye agar insight langsung dapat dieksekusi.</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
-              <span>Catat insight heatmap sebagai bahan diskusi tim sebelum iterasi konten berikutnya.</span>
-            </li>
-          </ul>
-          <div className="rounded-xl border border-purple-100 bg-purple-50/80 p-4 text-purple-800 shadow-inner dark:border-purple-500/40 dark:bg-purple-500/10 dark:text-purple-100">
-            <h4 className="text-base font-semibold text-purple-900 dark:text-purple-100">Panduan Membaca Indikator</h4>
-            <p className="mt-2 text-sm text-purple-900/80 dark:text-purple-100/80">
-              Gunakan legenda berikut untuk mempermudah memahami warna dan rekomendasi InsightRanker.
-            </p>
-            <div className="mt-4 space-y-3 text-sm">
-              {QUALITY_GUIDE.map((guide) => (
-                <div
-                  key={guide.level}
-                  className="rounded-xl border border-purple-100 bg-white/90 p-3 text-purple-800 shadow-sm dark:border-purple-500/40 dark:bg-purple-500/20 dark:text-purple-100"
-                >
-                  <p className="text-xs uppercase tracking-widest text-purple-500 dark:text-purple-200">
-                    {guide.level} — {QUALITY_LABELS[guide.level]}
-                  </p>
-                  <p className="mt-1 text-purple-900 dark:text-purple-100">{guide.description}</p>
-                  <p className="mt-2 text-xs text-purple-600 dark:text-purple-200/80">Cepat dipraktekkan: {guide.quickTip}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Tata ulang ini memisahkan kartu pembacaan dari hasil utama sehingga layar mobile terasa lebih lega dan mudah dipindai.
-          </p>
-        </div>
+  const renderToggle = (key: AnalysisToggleKey, label: string, description: string) => (
+    <label className="flex items-start justify-between gap-3 rounded-2xl bg-white/70 p-4 shadow-neumorphic-card transition hover:-translate-y-0.5 hover:shadow-neumorphic-card-lg dark:bg-slate-900/60 dark:shadow-dark-neumorphic-card">
+      <div>
+        <p className="text-sm font-semibold text-slate-700 dark:text-slate-100">{label}</p>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{description}</p>
       </div>
+      <span
+        role="switch"
+        aria-checked={toggles[key]}
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            handleToggleChange(key);
+          }
+        }}
+        onClick={() => handleToggleChange(key)}
+        className={`relative inline-flex h-7 w-12 cursor-pointer items-center rounded-full border border-transparent transition ${
+          toggles[key]
+            ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-inner'
+            : 'bg-slate-300/70 dark:bg-slate-700/70'
+        }`}
+      >
+        <span
+          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+            toggles[key] ? 'translate-x-6' : 'translate-x-1'
+          }`}
+        />
+      </span>
+    </label>
+  );
 
-      <div className="grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6 rounded-2xl bg-light-bg p-6 shadow-neumorphic-card dark:bg-dark-bg dark:shadow-dark-neumorphic-card">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Pemetaan Skor InsightRanker</h3>
-            <TrendingUp className="h-5 w-5 text-purple-500" />
-          </div>
-          <div className="overflow-hidden rounded-xl border border-gray-200/60 dark:border-gray-700/60">
-            <div className="hidden overflow-x-auto md:block">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50/90 dark:bg-gray-800/80">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                      Parameter
-                    </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                    Skor
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                    Insight Otomatis
-                  </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
-                      Rekomendasi
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white/80 dark:divide-gray-800 dark:bg-gray-900/60">
-                  {(analysis?.scores ?? []).map((row) => (
-                    <tr key={row.parameter}>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">{row.parameter}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
-                      <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-semibold text-gray-700 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-100">
-                        {row.score}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{row.insight}</td>
-                      <td className="px-4 py-3 text-sm text-purple-700 dark:text-purple-300">{row.recommendation}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="grid gap-4 md:hidden">
-              {(analysis?.scores ?? []).map((row) => (
-                <div
-                  key={`${row.parameter}-mobile`}
-                  className="rounded-2xl border border-gray-200 bg-white/90 p-4 text-sm shadow-sm dark:border-gray-700 dark:bg-gray-900/60"
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">{row.parameter}</p>
-                    <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-700 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-100">
-                      {row.score}
-                    </span>
-                  </div>
-                  <p className="mt-3 text-gray-600 dark:text-gray-300">{row.insight}</p>
-                  <p className="mt-2 text-purple-700 dark:text-purple-300">{row.recommendation}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-6 rounded-2xl bg-light-bg p-6 shadow-neumorphic-card dark:bg-dark-bg dark:shadow-dark-neumorphic-card">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Opportunities Radar</h3>
-          <ul className="grid gap-3 text-sm text-gray-600 sm:grid-cols-2 sm:gap-4 dark:text-gray-300">
-            {(analysis?.opportunities ?? []).map((opportunity, index) => (
-              <li
-                key={index}
-                className="flex flex-col gap-2 rounded-xl border border-purple-100 bg-purple-50/70 px-4 py-3 text-purple-700 shadow-sm transition-colors hover:border-purple-200 hover:bg-purple-100/70 dark:border-purple-500/40 dark:bg-purple-500/10 dark:text-purple-200"
-              >
-                <div className="flex items-center gap-2 text-sm font-semibold">
-                  <Sparkles className="h-4 w-4" />
-                  <span>Peluang #{index + 1}</span>
-                </div>
-                <span className="text-xs leading-relaxed text-purple-800 dark:text-purple-100">{opportunity}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+  const renderScoreMeter = (score: number, label: string) => (
+    <div className="rounded-2xl bg-white/70 p-4 shadow-neumorphic-card dark:bg-slate-900/60 dark:shadow-dark-neumorphic-card">
+      <div className="flex items-center justify-between text-sm font-semibold text-slate-700 dark:text-slate-200">
+        <span>{label}</span>
+        <span>{score.toFixed(0)} / 100</span>
       </div>
-
-      <div className="grid gap-8 lg:grid-cols-3">
-        <div className="space-y-6 rounded-2xl bg-light-bg p-6 shadow-neumorphic-card dark:bg-dark-bg dark:shadow-dark-neumorphic-card">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Heatmap Kualitas</h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            {heatmapCells.map((cell) => (
-              <div key={cell.parameter} className={`rounded-xl p-4 text-sm font-medium text-gray-800 shadow-inner dark:text-gray-100 ${cell.backgroundClass}`}>
-                <p className="text-xs uppercase tracking-wide opacity-80">{cell.parameter}</p>
-                <p className="mt-2 text-3xl font-black">{cell.score}</p>
-                <p className="mt-1 text-xs font-normal opacity-90">{cell.insight}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-6 rounded-2xl bg-light-bg p-6 shadow-neumorphic-card dark:bg-dark-bg dark:shadow-dark-neumorphic-card">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Panel Insight Naratif</h3>
-          <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">{analysis?.narrative}</p>
-          <div className="rounded-xl border border-blue-100 bg-blue-50/80 px-4 py-3 text-sm text-blue-800 dark:border-blue-500/40 dark:bg-blue-500/10 dark:text-blue-200">
-            <p className="font-semibold">Catatan Strategis</p>
-            <p>{analysis?.summary}</p>
-          </div>
-        </div>
-
-        <div className="space-y-6 rounded-2xl bg-light-bg p-6 shadow-neumorphic-card dark:bg-dark-bg dark:shadow-dark-neumorphic-card">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Grafik Tren Mingguan</h3>
-          <div className="h-36 w-full rounded-xl bg-gradient-to-tr from-emerald-400/30 via-sky-400/40 to-purple-500/30 p-4">
-            <div className="flex h-full items-end gap-2">
-              {[60, 72, 68, 74, 79, 83, analysis?.aiScore ?? 80].map((value, index) => (
-                <div
-                  key={index}
-                  className="flex-1 rounded-t-lg bg-white/70 dark:bg-white/30"
-                  style={{ height: `${Math.max(20, value)}%` }}
-                />
-              ))}
-            </div>
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-300">{analysis?.trendNarrative}</p>
-        </div>
+      <div className="mt-3 h-3 rounded-full bg-slate-200/70 dark:bg-slate-800">
+        <div
+          className={`h-full rounded-full bg-gradient-to-r ${getScoreColor(score)} transition-all duration-700`}
+          style={{ width: `${Math.min(100, Math.max(0, score))}%` }}
+        />
       </div>
+    </div>
+  );
 
-      <div className="rounded-2xl bg-light-bg p-6 shadow-neumorphic-card dark:bg-dark-bg dark:shadow-dark-neumorphic-card">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Mesin Analitik InsightRanker</h3>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-          InsightRanker menggabungkan lima modul kecerdasan yang bekerja secara paralel untuk menilai konten profesional Facebook.
-        </p>
-        <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-          {ANALYTICS_FEATURES.map((feature) => (
-            <div key={feature.title} className="rounded-2xl border border-gray-200 bg-white/80 p-4 text-gray-700 shadow-sm transition hover:border-purple-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-200">
-              <feature.icon className="h-6 w-6 text-purple-500" />
-              <h4 className="mt-3 text-sm font-semibold text-gray-900 dark:text-gray-100">{feature.title}</h4>
-              <p className="mt-2 text-xs leading-relaxed text-gray-600 dark:text-gray-300">{feature.description}</p>
-            </div>
-          ))}
+  const renderCard = (title: string, IconComponent: LucideIcon, content: ReactNode, tooltip?: string) => (
+    <section className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/80 p-6 shadow-neumorphic-card backdrop-blur transition hover:-translate-y-1 hover:shadow-neumorphic-card-lg dark:border-slate-800/60 dark:bg-slate-900/70 dark:shadow-dark-neumorphic-card">
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <span className="rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 p-3 text-indigo-600 dark:text-indigo-300">
+            <IconComponent className="h-5 w-5" />
+          </span>
+          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{title}</h3>
         </div>
-        <p className="mt-6 text-xs text-gray-500 dark:text-gray-400">
-          Butuh mockup visual futuristik? Tinggal hubungi kami—kami bisa bantu bikin dashboard yang terlihat seperti alat alien yang membedakan karya hidup dan konten numpang eksis.
-        </p>
+        {tooltip ? (
+          <span className="text-slate-400" title={tooltip}>
+            <Info className="h-4 w-4" />
+          </span>
+        ) : null}
+      </div>
+      <div className="mt-4 space-y-3 text-sm text-slate-600 transition-opacity duration-300 group-hover:opacity-95 dark:text-slate-300">
+        {content}
       </div>
     </section>
   );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-100 px-4 py-10 transition-colors duration-500 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8">
+        <header className="rounded-3xl border border-white/30 bg-white/60 p-6 shadow-neumorphic-card backdrop-blur dark:border-slate-800/60 dark:bg-slate-900/70 dark:shadow-dark-neumorphic-card">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 rounded-2xl bg-white/80 px-3 py-2 text-sm font-semibold text-slate-700 shadow-neumorphic-button transition hover:-translate-y-0.5 hover:text-indigo-600 dark:bg-slate-900/60 dark:text-slate-200 dark:shadow-dark-neumorphic-button"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Kembali ke Beranda
+              </Link>
+              <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 px-4 py-2 text-sm font-semibold text-indigo-700 dark:text-indigo-300">
+                <Sparkles className="h-4 w-4" />
+                Facebook Pro Insight Hub
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <nav className="hidden text-sm font-medium text-slate-500 dark:text-slate-400 md:flex md:items-center md:gap-4">
+                <a className="transition hover:text-indigo-600 dark:hover:text-indigo-300" href="#input">Konfigurasi</a>
+                <a className="transition hover:text-indigo-600 dark:hover:text-indigo-300" href="#dashboard">Dashboard</a>
+                <a className="transition hover:text-indigo-600 dark:hover:text-indigo-300" href="#insight">Insight</a>
+              </nav>
+              <button
+                type="button"
+                onClick={() => themeManagerRef.current?.toggleTheme()}
+                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-slate-200 to-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 shadow-neumorphic-button transition hover:-translate-y-0.5 hover:from-indigo-500/20 hover:to-purple-500/20 hover:text-indigo-600 dark:from-slate-800 dark:to-slate-900 dark:text-slate-200"
+              >
+                {theme === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+              </button>
+            </div>
+          </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-[1.2fr_0.8fr] md:items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white md:text-4xl">
+                Analisis Konten Facebook Profesional Berbasis AI
+              </h1>
+              <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 md:text-base">
+                Integrasikan Pollinations.AI untuk mengevaluasi potensi monetisasi, kesesuaian audiens Indonesia, kualitas konten,
+                dan kesiapan teknis secara real-time dengan desain futuristik bergaya neumorphism.
+              </p>
+              {lastUpdatedLabel ? (
+                <p className="mt-2 text-xs font-medium text-indigo-600 dark:text-indigo-300">
+                  Terakhir diperbarui: {lastUpdatedLabel}
+                </p>
+              ) : null}
+            </div>
+            <div className="flex h-full flex-col justify-between gap-3 rounded-3xl bg-white/80 p-4 shadow-inner dark:bg-slate-900/70">
+              <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
+                <span>Mode Analisis</span>
+                <label className="inline-flex items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={autoAnalyze}
+                    onChange={(event) => setAutoAnalyze(event.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-indigo-500 focus:ring-indigo-400"
+                  />
+                  Auto Refresh
+                </label>
+              </div>
+              <button
+                type="button"
+                onClick={() => runAnalysis('manual')}
+                className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:shadow-xl hover:shadow-indigo-500/40"
+              >
+                {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Activity className="h-4 w-4" />}
+                Jalankan Analisis Sekarang
+              </button>
+              <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 dark:text-slate-400">
+                <button
+                  type="button"
+                  onClick={() => handleExport('png')}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-slate-100/80 px-3 py-2 font-semibold shadow-neumorphic-button transition hover:-translate-y-0.5 hover:text-indigo-600 dark:bg-slate-800/60 dark:text-slate-200"
+                >
+                  <Download className="h-4 w-4" /> PNG
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleExport('pdf')}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-slate-100/80 px-3 py-2 font-semibold shadow-neumorphic-button transition hover:-translate-y-0.5 hover:text-indigo-600 dark:bg-slate-800/60 dark:text-slate-200"
+                >
+                  <Download className="h-4 w-4" /> PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {isOffline ? (
+          <div className="rounded-3xl border border-amber-200 bg-amber-50/90 p-4 text-sm text-amber-700 shadow-neumorphic-card dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+            Mode offline aktif. Anda dapat melihat hasil analisis terakhir dan riwayat meskipun tanpa koneksi internet.
+          </div>
+        ) : null}
+
+        <main className="grid gap-8 lg:grid-cols-[340px_1fr]" id="dashboard">
+          <aside
+            id="input"
+            className="flex flex-col gap-6 rounded-3xl border border-white/30 bg-white/70 p-6 shadow-neumorphic-card backdrop-blur dark:border-slate-800/60 dark:bg-slate-900/70 dark:shadow-dark-neumorphic-card"
+          >
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Input & Konfigurasi</h2>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Susun konten, pilih model AI Pollinations, dan atur opsi analisis sesuai kebutuhan profesional Anda.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Judul Konten
+                </label>
+                <input
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  placeholder="Contoh: Strategi Iklan Edukasi 2024"
+                  className="mt-2 w-full rounded-2xl border border-slate-200/60 bg-white/80 px-3 py-2 text-sm font-medium text-slate-700 shadow-inner focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-slate-800/60 dark:bg-slate-900/70 dark:text-slate-200"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Deskripsi & Pesan Utama
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  placeholder="Tuliskan deskripsi konten, CTA, dan nilai utama yang ingin disampaikan."
+                  rows={4}
+                  className="mt-2 w-full rounded-2xl border border-slate-200/60 bg-white/80 px-3 py-3 text-sm font-medium text-slate-700 shadow-inner focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-slate-800/60 dark:bg-slate-900/70 dark:text-slate-200"
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    Jenis Konten
+                  </label>
+                  <select
+                    value={contentType}
+                    onChange={(event) => setContentType(event.target.value)}
+                    className="mt-2 w-full rounded-2xl border border-slate-200/60 bg-white/80 px-3 py-2 text-sm font-medium text-slate-700 shadow-inner focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-slate-800/60 dark:bg-slate-900/70 dark:text-slate-200"
+                  >
+                    <option>Video Pendek</option>
+                    <option>Live Streaming</option>
+                    <option>Carousel</option>
+                    <option>Artikel Panjang</option>
+                    <option>Gambar & Caption</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    Target Audiens
+                  </label>
+                  <input
+                    value={targetAudience}
+                    onChange={(event) => setTargetAudience(event.target.value)}
+                    placeholder="Indonesia"
+                    className="mt-2 w-full rounded-2xl border border-slate-200/60 bg-white/80 px-3 py-2 text-sm font-medium text-slate-700 shadow-inner focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-slate-800/60 dark:bg-slate-900/70 dark:text-slate-200"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Saran Konten / Catatan Tim
+                </label>
+                <textarea
+                  value={suggestions}
+                  onChange={(event) => setSuggestions(event.target.value)}
+                  placeholder="Misal: fokus pada manfaat produk bagi pekerja remote, tekankan kemudahan integrasi."
+                  rows={3}
+                  className="mt-2 w-full rounded-2xl border border-slate-200/60 bg-white/80 px-3 py-3 text-sm font-medium text-slate-700 shadow-inner focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-slate-800/60 dark:bg-slate-900/70 dark:text-slate-200"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Model Pollinations.AI
+                </label>
+                <select
+                  value={selectedModel}
+                  onChange={(event) => setSelectedModel(event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-slate-200/60 bg-white/80 px-3 py-2 text-sm font-medium text-slate-700 shadow-inner focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-slate-800/60 dark:bg-slate-900/70 dark:text-slate-200"
+                >
+                  {models.length === 0 ? <option value="openai">openai</option> : null}
+                  {models.map((model) => {
+                    if (typeof model === 'string') {
+                      return (
+                        <option key={model} value={model}>
+                          {model}
+                        </option>
+                      );
+                    }
+                    const id = model.id ?? model.name ?? 'openai';
+                    return (
+                      <option key={id} value={id}>
+                        {model.label || model.name || id}
+                      </option>
+                    );
+                  })}
+                </select>
+                <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                  Model dimuat otomatis dari Pollinations.AI. Pastikan token aktif untuk akses premium.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-100">Fitur Analisis</h3>
+              {renderToggle('monetization', 'Analisis Monetisasi', 'Prediksi CPM, RPM, CTR, dan estimasi pendapatan.')}
+              {renderToggle('audience', 'Kesesuaian Audiens', 'Bahasa, relevansi budaya, dan tren lokal.')}
+              {renderToggle('quality', 'Kualitas Konten', 'Originalitas, relevansi, visualitas, dan niche positioning.')}
+              {renderToggle('technical', 'Analisis Teknis', 'Hashtag, jam tayang, dan estimasi jangkauan.')}
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-100">Media Pendukung</h3>
+                <button
+                  type="button"
+                  onClick={handleGenerateImageSuggestion}
+                  disabled={isGeneratingImage}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500/90 to-purple-500/90 px-3 py-2 text-xs font-semibold text-white shadow-lg transition hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {isGeneratingImage ? <Loader2 className="h-3 w-3 animate-spin" /> : <ImageIcon className="h-3 w-3" />}
+                  Saran Visual AI
+                </button>
+              </div>
+              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-slate-300 bg-white/60 p-6 text-center text-sm text-slate-500 shadow-inner transition hover:border-indigo-300 hover:text-indigo-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-400">
+                <FileImage className="h-6 w-6" />
+                <span>Unggah gambar pendukung</span>
+                <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+              </label>
+              <div className="grid gap-3">
+                {uploadedImage ? (
+                  <div className="overflow-hidden rounded-2xl border border-white/10 shadow-neumorphic-card dark:border-slate-800/60 dark:shadow-dark-neumorphic-card">
+                    <img src={uploadedImage} alt="Uploaded" className="h-36 w-full object-cover" />
+                    <p className="bg-white/70 px-3 py-2 text-xs text-slate-500 dark:bg-slate-900/70 dark:text-slate-400">
+                      Pratinjau unggahan manual.
+                    </p>
+                  </div>
+                ) : null}
+                {aiImageSuggestion ? (
+                  <div className="overflow-hidden rounded-2xl border border-white/10 shadow-neumorphic-card dark:border-slate-800/60 dark:shadow-dark-neumorphic-card">
+                    <img src={aiImageSuggestion} alt="AI suggestion" className="h-36 w-full object-cover" />
+                    <p className="bg-white/70 px-3 py-2 text-xs text-slate-500 dark:bg-slate-900/70 dark:text-slate-400">
+                      Visual rekomendasi AI Flux dengan parameter otomatis.
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="rounded-3xl bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 p-4 text-xs text-slate-600 shadow-inner dark:text-slate-300">
+              <p className="font-semibold text-slate-700 dark:text-slate-100">Tips:</p>
+              <ul className="mt-2 space-y-1">
+                <li>• Gunakan bahasa spesifik dan angka untuk hasil analisis yang lebih tajam.</li>
+                <li>• Aktifkan hanya fitur analisis yang dibutuhkan agar respon lebih cepat.</li>
+                <li>• Saran visual AI mengikuti konteks deskripsi konten.</li>
+              </ul>
+            </div>
+          </aside>
+
+          <section className="flex flex-col gap-6" ref={dashboardRef}>
+            {error ? (
+              <div className="rounded-3xl border border-rose-200 bg-rose-50/90 p-5 text-sm text-rose-700 shadow-neumorphic-card dark:border-rose-500/40 dark:bg-rose-500/10 dark:text-rose-200">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>{error}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => runAnalysis('manual')}
+                  className="mt-3 inline-flex items-center gap-2 rounded-2xl bg-rose-500 px-3 py-2 text-xs font-semibold text-white shadow-lg transition hover:bg-rose-600"
+                >
+                  <Activity className="h-3 w-3" /> Coba Lagi
+                </button>
+              </div>
+            ) : null}
+
+            <div className="rounded-3xl border border-white/20 bg-white/80 p-6 shadow-neumorphic-card backdrop-blur dark:border-slate-800/60 dark:bg-slate-900/70 dark:shadow-dark-neumorphic-card">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">{t.executiveSummary}</h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    {analysis?.summary || 'Hasil analisis akan muncul di sini setelah AI menyelesaikan evaluasi konten.'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-slate-100/80 px-4 py-2 text-xs font-semibold text-slate-600 shadow-neumorphic-button transition hover:-translate-y-0.5 hover:text-indigo-600 dark:bg-slate-800/60 dark:text-slate-300"
+                  >
+                    <Share2 className="h-4 w-4" /> Bagikan Insight
+                  </button>
+                  <div className="flex overflow-hidden rounded-2xl border border-slate-200/60 dark:border-slate-800/60">
+                    <button
+                      type="button"
+                      className={`px-3 py-2 text-xs font-semibold transition ${
+                        language === 'id'
+                          ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
+                          : 'bg-transparent text-slate-500 dark:text-slate-400'
+                      }`}
+                      onClick={() => setLanguage('id')}
+                    >
+                      ID
+                    </button>
+                    <button
+                      type="button"
+                      className={`px-3 py-2 text-xs font-semibold transition ${
+                        language === 'en'
+                          ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
+                          : 'bg-transparent text-slate-500 dark:text-slate-400'
+                      }`}
+                      onClick={() => setLanguage('en')}
+                    >
+                      EN
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {isAnalyzing ? (
+                <div className="mt-6 grid gap-4 md:grid-cols-3">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="h-24 rounded-2xl bg-slate-200/60 shadow-inner animate-pulse dark:bg-slate-800/60"
+                    />
+                  ))}
+                </div>
+              ) : null}
+
+              {analysis ? (
+                <div className="mt-6 grid gap-4 md:grid-cols-3">
+                  {scoreCardItems.map((item) => (
+                    <div
+                      key={item.label}
+                      className="flex h-full flex-col justify-between rounded-2xl bg-white/80 p-4 shadow-neumorphic-card dark:bg-slate-950/60 dark:shadow-dark-neumorphic-card"
+                    >
+                      <div className="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        <span className="inline-flex items-center gap-2 text-slate-700 dark:text-slate-200">
+                          <item.icon className="h-4 w-4" /> {item.label}
+                        </span>
+                        <span>{item.status}</span>
+                      </div>
+                      <p className="mt-3 text-2xl font-bold text-slate-900 dark:text-white">{item.value}</p>
+                      <div className="mt-3 h-2 rounded-full bg-slate-200/60 dark:bg-slate-800/60">
+                        <div
+                          className={`h-full rounded-full bg-gradient-to-r ${getScoreColor(item.score)}`}
+                          style={{ width: `${Math.min(100, item.score)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              {analysis ? (
+                <div className="mt-6 grid gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl bg-white/80 p-4 shadow-inner dark:bg-slate-950/60">
+                    <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Rekomendasi Utama</h4>
+                    <ul className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                      {analysis.recommendations.map((item) => (
+                        <li key={item} className="flex items-start gap-2">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-500" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="rounded-2xl bg-white/80 p-4 shadow-inner dark:bg-slate-950/60">
+                    <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Pencapaian Algoritma</h4>
+                    <ul className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                      {analysis.algorithmHighlights.map((item) => (
+                        <li key={item} className="flex items-start gap-2">
+                          <Sparkles className="mt-0.5 h-4 w-4 text-indigo-500" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            {analysis ? (
+              <div className="grid gap-6 xl:grid-cols-2" id="insight">
+                {renderCard(
+                  t.monetization,
+                  BarChart3,
+                  <div className="space-y-3 text-sm">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {renderScoreMeter(
+                        Math.min(100, (analysis.monetization.predictedCpm / 20000) * 100),
+                        'CPM Indonesia'
+                      )}
+                      {renderScoreMeter(
+                        Math.min(100, (analysis.monetization.predictedCtr / 4) * 100),
+                        'CTR Prediksi'
+                      )}
+                    </div>
+                    <p>
+                      <strong>Estimasi Pendapatan:</strong> {analysis.monetization.revenueEstimate}
+                    </p>
+                    <p>
+                      <strong>Perbandingan Industri:</strong> {analysis.monetization.industryComparison}
+                    </p>
+                    <p>
+                      <strong>Narasi Tren:</strong> {analysis.monetization.trendNarrative}
+                    </p>
+                    {revenueChartUrl ? (
+                      <img
+                        src={revenueChartUrl}
+                        alt="Perbandingan pendapatan"
+                        className="mt-3 h-40 w-full rounded-2xl object-cover"
+                      />
+                    ) : null}
+                  </div>,
+                  'Prediksi CPM/RPM dan perbandingan dengan standar industri Indonesia.'
+                )}
+
+                {renderCard(
+                  t.audienceFit,
+                  Users,
+                  <div className="space-y-3 text-sm">
+                    {renderScoreMeter(analysis.audience.culturalRelevanceScore, 'Skor Relevansi Budaya')}
+                    <p>
+                      <strong>Analisis Bahasa:</strong> {analysis.audience.languageAnalysis}
+                    </p>
+                    <p>
+                      <strong>Tren Lokal:</strong> {analysis.audience.localTrendAlignment}
+                    </p>
+                    <ul className="space-y-2 text-sm">
+                      {analysis.audience.recommendations.map((item) => (
+                        <li key={item} className="flex items-start gap-2">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-indigo-500" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {analysis.audience.heatmap.map((slot) => (
+                        <span
+                          key={slot}
+                          className="inline-flex items-center justify-center rounded-xl bg-indigo-500/10 px-3 py-2 text-xs font-semibold text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-200"
+                        >
+                          {slot}
+                        </span>
+                      ))}
+                    </div>
+                    {heatmapChartUrl ? (
+                      <img
+                        src={heatmapChartUrl}
+                        alt="Heatmap audiens"
+                        className="mt-3 h-40 w-full rounded-2xl object-cover"
+                      />
+                    ) : null}
+                  </div>,
+                  'Relevansi budaya, bahasa, dan jadwal terbaik untuk audiens Indonesia.'
+                )}
+
+                {renderCard(
+                  t.contentQuality,
+                  Target,
+                  <div className="space-y-3 text-sm">
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      {renderScoreMeter(analysis.contentQuality.originalityScore, 'Orisinalitas')}
+                      {renderScoreMeter(analysis.contentQuality.relevanceScore, 'Relevansi')}
+                      {renderScoreMeter(analysis.contentQuality.visualQualityScore, 'Visualitas')}
+                    </div>
+                    <p>
+                      <strong>Insight:</strong> {analysis.contentQuality.insights}
+                    </p>
+                    <p>
+                      <strong>Niche Analysis:</strong> {analysis.contentQuality.nicheAnalysis}
+                    </p>
+                  </div>,
+                  'Kualitas konten mencakup orisinalitas, relevansi, dan visualitas.'
+                )}
+
+                {renderCard(
+                  t.technicalAnalysis,
+                  Activity,
+                  <div className="space-y-3 text-sm">
+                    <p>
+                      <strong>Jam Tayang Terbaik:</strong> {analysis.technical.optimalPostingTimes.join(', ')}
+                    </p>
+                    <p>
+                      <strong>Frekuensi Ideal:</strong> {analysis.technical.frequency}
+                    </p>
+                    <p>
+                      <strong>Estimasi Reach:</strong> {analysis.technical.reachEstimates.organic} · {analysis.technical.reachEstimates.paid}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {analysis.technical.hashtagRecommendations.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center rounded-full bg-slate-200/70 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800/70 dark:text-slate-300"
+                        >
+                          #{tag.replace('#', '')}
+                        </span>
+                      ))}
+                    </div>
+                  </div>,
+                  'Optimasi teknis mencakup hashtag, jam tayang, dan estimasi jangkauan.'
+                )}
+              </div>
+            ) : null}
+
+            {analysis ? (
+              <div className="grid gap-6 lg:grid-cols-2">
+                {renderCard(
+                  t.improvementSuggestions,
+                  Sparkles,
+                  <ul className="space-y-2 text-sm">
+                    {analysis.improvementSuggestions.map((item) => (
+                      <li key={item} className="flex items-start gap-2">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-500" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>,
+                  'Daftar aksi yang dapat langsung diterapkan untuk meningkatkan performa konten.'
+                )}
+
+                {renderCard(
+                  t.comparative,
+                  TrendingUp,
+                  <div className="space-y-3 text-sm">
+                    <ul className="space-y-2">
+                      {analysis.comparativeInsights.map((item) => (
+                        <li key={item} className="flex items-start gap-2">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-purple-500" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="rounded-2xl bg-white/70 p-3 text-xs text-slate-500 shadow-inner dark:bg-slate-900/60 dark:text-slate-400">
+                      Benchmark industri: {analysis.monetization.industryComparison}
+                    </div>
+                  </div>,
+                  'Bandingkan performa konten dengan standar industri dan histori Anda.'
+                )}
+              </div>
+            ) : null}
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              {renderCard(
+                t.livePreview,
+                ImageIcon,
+                <div className="space-y-3 text-sm">
+                  <p>
+                    <strong>Judul:</strong> {title || 'Belum diisi'}
+                  </p>
+                  <p>
+                    <strong>Jenis Konten:</strong> {contentType}
+                  </p>
+                  <p>
+                    <strong>Target Audiens:</strong> {targetAudience || 'Indonesia'}
+                  </p>
+                  <p>
+                    <strong>Pesan Utama:</strong> {description || 'Tambahkan deskripsi untuk analisis yang kaya.'}
+                  </p>
+                  <p>
+                    <strong>Catatan Tim:</strong> {suggestions || 'Belum ada catatan tambahan.'}
+                  </p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">
+                    Pratinjau diperbarui secara langsung saat Anda mengubah input.
+                  </p>
+                </div>,
+                'Pantau isi konten sebelum dikirim ke AI untuk menjaga kualitas input.'
+              )}
+
+              {renderCard(
+                t.history,
+                Activity,
+                <div className="space-y-3 text-sm">
+                  {analysisHistory.length === 0 ? (
+                    <p className="text-slate-500 dark:text-slate-400">Belum ada riwayat analisis tersimpan.</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {analysisHistory.map((item) => (
+                        <li
+                          key={item.timestamp}
+                          className="flex items-center justify-between rounded-2xl bg-white/70 px-3 py-2 text-xs shadow-inner dark:bg-slate-900/60"
+                        >
+                          <div>
+                            <p className="font-semibold text-slate-600 dark:text-slate-300">{item.status}</p>
+                            <p className="text-slate-400">
+                              {new Date(item.timestamp).toLocaleString('id-ID', { hour12: false })}
+                            </p>
+                          </div>
+                          <span className="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-200">
+                            {item.score.toFixed(0)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <p className="text-xs text-slate-400 dark:text-slate-500">
+                    Riwayat tersimpan secara lokal untuk memantau progres performa konten.
+                  </p>
+                </div>,
+                'Lihat perkembangan skor dan status analisis yang pernah dijalankan.'
+              )}
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+  );
 }
+
