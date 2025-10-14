@@ -172,13 +172,6 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
           <span>Artikel</span>
         </Link>
         <Link
-          href="/facebook-pro-insight"
-          className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
-        >
-          <Megaphone size={18} />
-          <span>InsightRanker FB Pro</span>
-        </Link>
-        <Link
           href="/umkm"
           className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
         >
@@ -263,6 +256,16 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
                             >
                                 <Sparkles size={18} />
                                 <span>Tema Unik</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                href="/facebook-pro-insight"
+                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
+                                onClick={() => setIsToolsMenuOpen(false)}
+                            >
+                                <Megaphone size={18} />
+                                <span>InsightRanker FB Pro</span>
                             </Link>
                         </li>
                         <li>
