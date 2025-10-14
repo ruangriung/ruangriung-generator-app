@@ -103,6 +103,12 @@ type AnalysisToggleKey = 'monetization' | 'audience' | 'quality' | 'technical';
 
 type AnalysisToggleState = Record<AnalysisToggleKey, boolean>;
 
+type ContentDraftSuggestion = {
+  title: string;
+  description: string;
+  angle?: string;
+};
+
 class ThemeManager {
   currentTheme: ThemeMode;
 
@@ -280,6 +286,88 @@ async function analyzeContent(payload: AnalysisPayload, selectedModel: string) {
   return raw;
 }
 
+async function generateContentDraft(
+  payload: {
+    contentType: string;
+    audience: string;
+    suggestions: string;
+    existingTitle: string;
+    existingDescription: string;
+  },
+  selectedModel: string
+): Promise<ContentDraftSuggestion> {
+  const prompt = `Anda adalah copywriter Facebook profesional untuk pasar Indonesia. Buat satu usulan judul dan deskripsi konten yang menarik berdasarkan informasi berikut.
+
+Format output dalam JSON:
+{
+  "title": string,
+  "description": string,
+  "angle": string
+}
+
+Gunakan bahasa Indonesia natural, sertakan CTA singkat, dan fokus pada audiens ${payload.audience || 'Indonesia'}.
+
+Informasi referensi:
+- Jenis konten: ${payload.contentType || 'Video Pendek'}
+- Catatan tim: ${payload.suggestions || '-'}
+- Judul saat ini: ${payload.existingTitle || '-'}
+- Deskripsi saat ini: ${payload.existingDescription || '-'}`;
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Referrer: 'ruangriung.my.id',
+  };
+
+  if (POLLINATIONS_TOKEN) {
+    headers.Authorization = `Bearer ${POLLINATIONS_TOKEN}`;
+  }
+
+  const response = await fetch(POLLINATIONS_TEXT_ENDPOINT, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      model: selectedModel,
+      messages: [
+        {
+          role: 'system',
+          content:
+            'Anda adalah asisten kreatif ahli konten Facebook profesional Indonesia. Tulis dengan nada strategis dan actionable.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.8,
+      max_tokens: 800,
+      token: POLLINATIONS_TOKEN,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Gagal memperoleh saran konten: ${response.statusText}`);
+  }
+
+  const raw = await response.json();
+  const content = raw?.choices?.[0]?.message?.content;
+
+  let parsed: any = raw;
+  if (typeof content === 'string') {
+    try {
+      parsed = JSON.parse(content);
+    } catch (error) {
+      console.warn('Gagal mengurai respons saran konten, menggunakan payload mentah', error);
+      parsed = raw;
+    }
+  }
+
+  return {
+    title: typeof parsed?.title === 'string' ? parsed.title : '',
+    description: typeof parsed?.description === 'string' ? parsed.description : '',
+    angle: typeof parsed?.angle === 'string' ? parsed.angle : undefined,
+  };
+}
+
 function normalizeAnalysisResponse(input: any, toggles: AnalysisToggleState): StructuredAnalysis {
   const safeNumber = (value: unknown, fallback: number) => {
     const parsed = typeof value === 'string' ? Number.parseFloat(value) : value;
@@ -451,6 +539,7 @@ export default function FacebookProAnalyzerClient() {
   });
   const [analysis, setAnalysis] = useState<StructuredAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [autoAnalyze, setAutoAnalyze] = useState(true);
   const [language, setLanguage] = useState<'id' | 'en'>('id');
@@ -601,6 +690,49 @@ export default function FacebookProAnalyzerClient() {
       [key]: !prev[key],
     }));
   };
+
+  const handleAutoFillContent = useCallback(async () => {
+    setIsGeneratingContent(true);
+    setError(null);
+    analyticsRef.current?.track('content_autofill_requested', {
+      model: selectedModel,
+      contentType,
+    });
+
+    try {
+      const suggestion = await generateContentDraft(
+        {
+          contentType,
+          audience: targetAudience,
+          suggestions,
+          existingTitle: title,
+          existingDescription: description,
+        },
+        selectedModel
+      );
+
+      if (!suggestion.title && !suggestion.description) {
+        throw new Error('AI tidak mengembalikan saran judul atau deskripsi.');
+      }
+
+      if (suggestion.title) {
+        setTitle(suggestion.title.trim());
+      }
+      if (suggestion.description) {
+        setDescription(suggestion.description.trim());
+      }
+      analyticsRef.current?.track('content_autofill_success', {
+        hasTitle: Boolean(suggestion.title),
+        hasDescription: Boolean(suggestion.description),
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Gagal mendapatkan saran AI.';
+      setError(message);
+      analyticsRef.current?.track('content_autofill_failed', { message });
+    } finally {
+      setIsGeneratingContent(false);
+    }
+  }, [contentType, description, selectedModel, suggestions, targetAudience, title]);
 
   const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -949,6 +1081,21 @@ export default function FacebookProAnalyzerClient() {
             </div>
 
             <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleAutoFillContent}
+                  disabled={isGeneratingContent}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-3 py-2 text-xs font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:shadow-xl hover:shadow-indigo-500/40 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isGeneratingContent ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  Gunakan AI
+                </button>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Otomatis isi judul & konten berdasarkan catatan dan target audiens.
+                </span>
+              </div>
+
               <div>
                 <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                   Judul Konten
