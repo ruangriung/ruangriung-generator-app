@@ -35,7 +35,6 @@ import Link from 'next/link';
 
 const POLLINATIONS_TEXT_ENDPOINT = 'https://text.pollinations.ai/openai';
 const POLLINATIONS_MODELS_ENDPOINT = 'https://text.pollinations.ai/models';
-const POLLINATIONS_IMAGE_BASE = 'https://image.pollinations.ai/prompt/';
 const POLLINATIONS_TOKEN = process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN?.trim();
 
 const ID_CURRENCY = new Intl.NumberFormat('id-ID', {
@@ -102,6 +101,18 @@ type AnalysisPayload = {
 type AnalysisToggleKey = 'monetization' | 'audience' | 'quality' | 'technical';
 
 type AnalysisToggleState = Record<AnalysisToggleKey, boolean>;
+
+type VisualPlan = {
+  presetId: string;
+  mood: string;
+  heroFocus: string;
+  supportingVisuals: string[];
+  colorPalette: string[];
+  typography: string;
+  ctaTone: string;
+  captionIdeas: string[];
+  highlight: string;
+};
 
 type ContentDraftSuggestion = {
   title: string;
@@ -233,6 +244,320 @@ function coerceDraftSuggestion(candidate: unknown): ContentDraftSuggestion {
     description,
     angle: angle || undefined,
   };
+}
+
+function extractNumericValue(input: string | undefined | null): number | null {
+  if (!input) return null;
+  const match = input.match(/[\d.,]+/);
+  if (!match) return null;
+  const normalized = match[0].replace(/\./g, '').replace(',', '.');
+  const value = Number(normalized);
+  return Number.isFinite(value) ? value : null;
+}
+
+type VisualPreset = {
+  id: string;
+  keywords: string[];
+  mood: string;
+  heroFocus: string;
+  supportingVisuals: string[];
+  palette: string[];
+  typography: string;
+  ctaTone: string;
+  captionIdeas: string[];
+  highlightTemplate: string;
+};
+
+const VISUAL_PRESETS: VisualPreset[] = [
+  {
+    id: 'finance',
+    keywords: ['finans', 'invest', 'bank', 'roi', 'keuangan', 'bisnis', 'modal'],
+    mood: 'Profesional premium & terpercaya',
+    heroFocus: 'Ilustrasi grafik pertumbuhan dan tim analis finansial dengan nuansa kantor modern.',
+    supportingVisuals: [
+      'Sorot angka utama atau KPI dalam kartu highlight.',
+      'Gunakan ikonografi finansial (grafik batang, mata uang Rupiah).',
+      'Tambahkan foto profesional dengan latar ruang rapat modern.',
+    ],
+    palette: ['#0f172a', '#22c55e', '#f59e0b', '#f1f5f9'],
+    typography: 'Sans-serif modern dengan huruf tegas (contoh: Plus Jakarta Sans).',
+    ctaTone: 'Tawarkan solusi investasi atau konsultasi dengan nada yakin dan data-driven.',
+    captionIdeas: [
+      'Tunjukkan ROI atau efisiensi biaya dalam angka yang mudah dipahami.',
+      'Ajak audiens mengambil keputusan melalui sesi konsultasi singkat.',
+      'Gunakan testimoni klien atau studi kasus singkat untuk memperkuat kepercayaan.',
+    ],
+    highlightTemplate: 'Tekankan {focus} dengan menampilkan metrik keuangan yang paling kuat.',
+  },
+  {
+    id: 'education',
+    keywords: ['edukasi', 'belajar', 'kelas', 'kursus', 'pelatihan', 'academy'],
+    mood: 'Inspiratif & bersahabat',
+    heroFocus: 'Visual mentor dan peserta workshop dengan elemen papan tulis atau layar interaktif.',
+    supportingVisuals: [
+      'Sisipkan ilustrasi langkah-langkah pembelajaran yang runtut.',
+      'Gunakan foto aktivitas belajar dengan ekspresi antusias.',
+      'Tambahkan ikon sertifikat atau badge pencapaian.',
+    ],
+    palette: ['#1d4ed8', '#f97316', '#facc15', '#e2e8f0'],
+    typography: 'Font humanis dengan ketebalan medium (contoh: Inter, Poppins).',
+    ctaTone: 'Ajak audiens mendaftar atau mencoba sesi demo dengan bahasa persuasif.',
+    captionIdeas: [
+      'Soroti manfaat langsung yang didapat peserta setelah mengikuti program.',
+      'Gunakan testimoni singkat untuk menunjukkan hasil nyata.',
+      'Tawarkan bonus materi atau workbook eksklusif.',
+    ],
+    highlightTemplate: 'Tonjolkan {focus} sebagai alasan utama mengikuti sesi belajar.',
+  },
+  {
+    id: 'technology',
+    keywords: ['teknologi', 'startup', 'digital', 'saas', 'platform', 'aplikasi', 'ai', 'otomasi'],
+    mood: 'Futuristik & inovatif',
+    heroFocus: 'Tampilan dashboard produk atau ilustrasi AI dengan cahaya neon lembut.',
+    supportingVisuals: [
+      'Gunakan mockup perangkat (mobile/desktop) untuk menunjukkan fitur utama.',
+      'Tambahkan elemen garis grid atau partikel untuk nuansa teknologi.',
+      'Sorot angka performa atau keamanan data.',
+    ],
+    palette: ['#312e81', '#6366f1', '#22d3ee', '#0f172a'],
+    typography: 'Sans-serif geometris dengan aksen semi-bold (contoh: Rubik, Space Grotesk).',
+    ctaTone: 'Dorong audiens mencoba demo atau fitur gratis dengan nada visioner.',
+    captionIdeas: [
+      'Tampilkan keunggulan teknologi dan dampaknya bagi bisnis.',
+      'Jelaskan integrasi atau kompatibilitas dengan tools populer.',
+      'Highlight keamanan dan kecepatan layanan.',
+    ],
+    highlightTemplate: 'Fokuskan {focus} sebagai bukti inovasi yang memudahkan audiens.',
+  },
+  {
+    id: 'health',
+    keywords: ['kesehatan', 'wellness', 'nutrisi', 'mental', 'hidup sehat', 'kebugaran'],
+    mood: 'Segar & menenangkan',
+    heroFocus: 'Visual close-up gaya hidup sehat dengan pencahayaan natural.',
+    supportingVisuals: [
+      'Gunakan elemen daun, air, atau gradient pastel untuk rasa sejuk.',
+      'Tambahkan ikon ceklis untuk langkah praktis menjaga kesehatan.',
+      'Sisipkan testimoni atau kutipan motivasi singkat.',
+    ],
+    palette: ['#15803d', '#34d399', '#fde68a', '#ecfdf5'],
+    typography: 'Font rounded atau humanis (contoh: Nunito, Quicksand).',
+    ctaTone: 'Ajak audiens memulai kebiasaan sehat dengan dukungan program Anda.',
+    captionIdeas: [
+      'Bagikan tips sederhana yang dapat dilakukan hari ini.',
+      'Highlight sebelum-sesudah atau progress nyata pengguna.',
+      'Tekankan komunitas pendukung atau akses konsultasi ahli.',
+    ],
+    highlightTemplate: 'Jelaskan {focus} untuk menunjukkan manfaat kesehatan yang mudah diterapkan.',
+  },
+  {
+    id: 'lifestyle',
+    keywords: ['gaya hidup', 'komunitas', 'event', 'travel', 'kuliner', 'retail', 'produk'],
+    mood: 'Hangat & energik',
+    heroFocus: 'Momen komunitas atau produk hero dengan ekspresi antusias.',
+    supportingVisuals: [
+      'Gunakan foto aktivitas nyata yang dekat dengan keseharian target audiens.',
+      'Tambahkan pattern dinamis atau bentuk organik.',
+      'Sorot benefit emosional seperti kebersamaan atau keseruan.',
+    ],
+    palette: ['#be123c', '#fb7185', '#f97316', '#fef2f2'],
+    typography: 'Font sans-serif tegas dengan aksen display untuk judul.',
+    ctaTone: 'Ajak audiens bergabung atau mencoba pengalaman langsung.',
+    captionIdeas: [
+      'Cerita singkat tentang pengalaman pelanggan terbaik.',
+      'Soroti keunikan produk atau acara yang tidak boleh dilewatkan.',
+      'Gunakan pertanyaan retoris untuk mendorong interaksi.',
+    ],
+    highlightTemplate: 'Angkat {focus} untuk menunjukkan nilai emosional yang kuat.',
+  },
+];
+
+function selectVisualPreset(text: string): VisualPreset {
+  const lowered = text.toLowerCase();
+  for (const preset of VISUAL_PRESETS) {
+    if (preset.keywords.some((keyword) => lowered.includes(keyword))) {
+      return preset;
+    }
+  }
+  return {
+    id: 'default',
+    keywords: [],
+    mood: 'Modern & terarah',
+    heroFocus: 'Visual hero menampilkan inti pesan dengan komposisi simetris dan tipografi kuat.',
+    supportingVisuals: [
+      'Gunakan kombinasi ikon dan angka kunci yang paling meyakinkan.',
+      'Tambahkan foto manusia atau aktivitas yang mewakili audiens.',
+      'Gunakan blok warna solid untuk memisahkan informasi utama.',
+    ],
+    palette: ['#0ea5e9', '#6366f1', '#facc15', '#f8fafc'],
+    typography: 'Sans-serif modern dengan variasi ketebalan (contoh: Inter, Manrope).',
+    ctaTone: 'Sampaikan ajakan yang jelas dan singkat sesuai tujuan konten.',
+    captionIdeas: [
+      'Perjelas manfaat utama dan tambahkan CTA langsung.',
+      'Gunakan data atau fakta singkat untuk memperkuat klaim.',
+      'Ajak audiens berinteraksi melalui pertanyaan pemicu.',
+    ],
+    highlightTemplate: 'Sorot {focus} sebagai pesan utama yang perlu diingat.',
+  };
+}
+
+function extractKeywords(text: string, limit = 4): string[] {
+  if (!text) return [];
+  const tokens = text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/gi, ' ')
+    .split(/\s+/)
+    .filter((token) => token.length > 3 && !['dalam', 'dengan', 'untuk', 'pada', 'yang', 'anda', 'kita'].includes(token));
+  const counts = new Map<string, number>();
+  for (const token of tokens) {
+    counts.set(token, (counts.get(token) ?? 0) + 1);
+  }
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([token]) => token);
+}
+
+function buildVisualPlan(
+  input: {
+    title: string;
+    description: string;
+    suggestions: string;
+    contentType: string;
+    targetAudience: string;
+    analysis: StructuredAnalysis | null;
+  }
+): VisualPlan {
+  const combined = [input.title, input.description, input.suggestions].filter(Boolean).join(' ');
+  const preset = selectVisualPreset(combined);
+  const keywords = extractKeywords(combined);
+  const focus = keywords.slice(0, 2).join(' & ') || input.contentType || 'kampanye utama';
+  const audienceNote = input.analysis?.audience.localTrendAlignment || input.analysis?.summary || input.description;
+
+  return {
+    presetId: preset.id,
+    mood: preset.mood,
+    heroFocus: `${preset.heroFocus} Fokuskan pada ${focus.toLowerCase()} yang relevan untuk audiens ${
+      input.targetAudience || 'Indonesia'
+    }.`,
+    supportingVisuals: preset.supportingVisuals,
+    colorPalette: preset.palette,
+    typography: preset.typography,
+    ctaTone: preset.ctaTone,
+    captionIdeas: preset.captionIdeas.map((idea) =>
+      idea.replace('{audience}', input.targetAudience || 'audiens utama').replace('{focus}', focus)
+    ),
+    highlight: preset.highlightTemplate.replace('{focus}', focus).concat(
+      audienceNote ? ` Pastikan narasi menyentuh konteks: ${audienceNote}` : ''
+    ),
+  };
+}
+
+type RevenueChartItem = {
+  label: string;
+  value: number;
+  description?: string;
+};
+
+function RevenueBarChart({ data }: { data: RevenueChartItem[] }) {
+  if (!data.length) {
+    return null;
+  }
+
+  const maxValue = Math.max(...data.map((item) => item.value));
+  if (maxValue <= 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-4 grid grid-cols-3 gap-3 sm:gap-4">
+      {data.map((item) => {
+        const percentage = Math.round((item.value / maxValue) * 100);
+        return (
+          <div key={item.label} className="flex flex-col items-center gap-2 text-center">
+            <div className="flex h-32 w-full items-end justify-center rounded-2xl bg-slate-100/70 p-2 shadow-inner dark:bg-slate-900/60">
+              <div
+                className="w-3/4 rounded-xl bg-gradient-to-b from-indigo-400 via-purple-500 to-pink-500"
+                style={{ height: `${Math.max(8, percentage)}%` }}
+                aria-hidden="true"
+              />
+            </div>
+            <div className="space-y-1 text-xs">
+              <p className="font-semibold text-slate-600 dark:text-slate-300">{item.label}</p>
+              <p className="text-slate-500 dark:text-slate-400">{ID_CURRENCY.format(item.value)}</p>
+              {item.description ? (
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">{item.description}</p>
+              ) : null}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+type HeatmapEntry = {
+  slot: string;
+  descriptor: string;
+  intensity: 0 | 1 | 2 | 3;
+  highlighted: boolean;
+};
+
+function parseHeatmapSlot(slot: string, highlights: Set<string>): HeatmapEntry {
+  const [timePartRaw, descriptorRaw] = slot.split('•').map((part) => part.trim());
+  const timePart = timePartRaw || slot;
+  const descriptor = descriptorRaw || 'Aktif';
+  const normalized = descriptor.toLowerCase();
+  let intensity: HeatmapEntry['intensity'] = 1;
+  if (normalized.includes('hot') || normalized.includes('prime')) {
+    intensity = 3;
+  } else if (normalized.includes('warm')) {
+    intensity = 2;
+  } else if (normalized.includes('cool') || normalized.includes('low')) {
+    intensity = 0;
+  }
+
+  return {
+    slot: timePart,
+    descriptor,
+    intensity,
+    highlighted: highlights.has(timePart)
+      || highlights.has(timePart.replace(/WIB|WITA|WIT/gi, '').trim())
+      || highlights.has(timePart.toLowerCase()),
+  };
+}
+
+function AudienceHeatmap({ entries }: { entries: HeatmapEntry[] }) {
+  if (!entries.length) {
+    return null;
+  }
+
+  const intensityClassMap: Record<HeatmapEntry['intensity'], string> = {
+    0: 'bg-slate-200/70 text-slate-600 dark:bg-slate-800/70 dark:text-slate-300',
+    1: 'bg-emerald-100/70 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200',
+    2: 'bg-amber-100/80 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200',
+    3: 'bg-rose-100/80 text-rose-700 dark:bg-rose-500/20 dark:text-rose-200',
+  };
+
+  return (
+    <div className="mt-4">
+      <div className="grid gap-2 sm:grid-cols-3">
+        {entries.map((entry) => (
+          <div
+            key={`${entry.slot}-${entry.descriptor}`}
+            className={`rounded-xl p-3 text-xs font-semibold transition ${intensityClassMap[entry.intensity]} ${
+              entry.highlighted ? 'ring-2 ring-indigo-500/60 dark:ring-indigo-400/60' : ''
+            }`}
+          >
+            <p>{entry.slot}</p>
+            <p className="text-[11px] font-normal opacity-80">{entry.descriptor}</p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-2 text-[11px] text-slate-400 dark:text-slate-500">
+        Slot dengan garis tebal merupakan rekomendasi jam tayang dari analisis teknis.
+      </p>
+    </div>
+  );
 }
 
 class ThemeManager {
@@ -671,20 +996,6 @@ function normalizeAnalysisResponse(input: any, toggles: AnalysisToggleState): St
   return structured;
 }
 
-function generateAnalysisChart(type: string, data: unknown) {
-  const prompt = `Create a professional ${type} chart visualization for: ${JSON.stringify(data)}`;
-  const params = new URLSearchParams({
-    width: '800',
-    height: '400',
-    model: 'flux',
-    referrer: 'ruangriung.my.id',
-  });
-  if (POLLINATIONS_TOKEN) {
-    params.append('token', POLLINATIONS_TOKEN);
-  }
-  return `${POLLINATIONS_IMAGE_BASE}${encodeURIComponent(prompt)}?${params.toString()}`;
-}
-
 function formatScoreLabel(score: number) {
   if (score >= 85) return 'Excellent';
   if (score >= 70) return 'Good';
@@ -743,13 +1054,13 @@ export default function FacebookProAnalyzerClient() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [errorSource, setErrorSource] = useState<'analysis' | 'content' | 'upload' | 'image' | null>(null);
+  const [errorSource, setErrorSource] = useState<'analysis' | 'content' | 'upload' | 'visual' | null>(null);
   const [notice, setNotice] = useState<{ type: 'success' | 'info'; message: string } | null>(null);
   const [autoAnalyze, setAutoAnalyze] = useState(true);
   const [language, setLanguage] = useState<'id' | 'en'>('id');
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [aiImageSuggestion, setAiImageSuggestion] = useState<string | null>(null);
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [visualPlan, setVisualPlan] = useState<VisualPlan | null>(null);
+  const [isGeneratingVisualPlan, setIsGeneratingVisualPlan] = useState(false);
   const [analysisHistory, setAnalysisHistory] = useState<Array<{ timestamp: string; score: number; status: string }>>([]);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
@@ -801,6 +1112,12 @@ export default function FacebookProAnalyzerClient() {
       console.warn('Failed to load cached analysis', loadError);
     }
   }, []);
+
+  useEffect(() => {
+    if (!title.trim() && !description.trim()) {
+      setVisualPlan(null);
+    }
+  }, [title, description]);
 
   useEffect(() => {
     modelManagerRef.current = new ModelManager((loadedModels) => {
@@ -1009,38 +1326,39 @@ export default function FacebookProAnalyzerClient() {
     reader.readAsDataURL(file);
   };
 
-  const handleGenerateImageSuggestion = async () => {
-    setIsGeneratingImage(true);
+  const handleGenerateVisualPlan = async () => {
+    setIsGeneratingVisualPlan(true);
     setError(null);
     setErrorSource(null);
     setNotice(null);
-    analyticsRef.current?.track('image_generation_requested');
+    analyticsRef.current?.track('visual_plan_requested');
 
     try {
-      const prompt = `professional facebook marketing visual, ${title || 'modern campaign'}, optimized for Indonesian audience, data-driven layout, premium colors, neumorphism UI`;
-      const params = new URLSearchParams({
-        width: '896',
-        height: '512',
-        model: 'flux',
-        referrer: 'ruangriung.my.id',
-        enhance: 'true',
-        quality: 'high',
-      });
-      if (POLLINATIONS_TOKEN) {
-        params.append('token', POLLINATIONS_TOKEN);
+      if (!title.trim() && !description.trim()) {
+        throw new Error('Isi judul atau deskripsi untuk membuat rencana visual yang relevan.');
       }
-      const imageUrl = `${POLLINATIONS_IMAGE_BASE}${encodeURIComponent(prompt)}?${params.toString()}&seed=${Date.now()}`;
-      setAiImageSuggestion(imageUrl);
-      setNotice({ type: 'info', message: 'Saran visual berhasil dihasilkan.' });
-      analyticsRef.current?.track('image_generation_success');
+
+      const plan = buildVisualPlan({
+        title,
+        description,
+        suggestions,
+        contentType,
+        targetAudience,
+        analysis,
+      });
+      setVisualPlan(plan);
+      setNotice({ type: 'info', message: 'Rencana visual disesuaikan dengan konten dan audiens Anda.' });
+      analyticsRef.current?.track('visual_plan_success', {
+        preset: plan.presetId,
+      });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal menghasilkan saran gambar.';
+      const message = err instanceof Error ? err.message : 'Gagal menyiapkan rencana visual.';
       setError(message);
-      setErrorSource('image');
+      setErrorSource('visual');
       setNotice(null);
-      analyticsRef.current?.track('image_generation_failed', { message });
+      analyticsRef.current?.track('visual_plan_failed', { message });
     } finally {
-      setIsGeneratingImage(false);
+      setIsGeneratingVisualPlan(false);
     }
   };
 
@@ -1144,24 +1462,35 @@ export default function FacebookProAnalyzerClient() {
     ];
   }, [analysis]);
 
-  const revenueChartUrl = useMemo(() => {
-    if (!analysis) return null;
-    return generateAnalysisChart('bar', {
-      title: 'Revenue Comparison',
-      organic: analysis.technical.reachEstimates.organic,
-      paid: analysis.technical.reachEstimates.paid,
-      cpm: analysis.monetization.predictedCpm,
-      rpm: analysis.monetization.predictedRpm,
-    });
+  const revenueChartData = useMemo(() => {
+    if (!analysis) return [];
+    const items: RevenueChartItem[] = [
+      {
+        label: 'CPM',
+        value: Math.max(0, analysis.monetization.predictedCpm),
+        description: 'Biaya per 1000 tayangan.',
+      },
+      {
+        label: 'RPM',
+        value: Math.max(0, analysis.monetization.predictedRpm),
+        description: 'Pendapatan per 1000 tayangan.',
+      },
+    ];
+    const estimatedRevenue = extractNumericValue(analysis.monetization.revenueEstimate);
+    if (estimatedRevenue) {
+      items.push({
+        label: 'Estimasi',
+        value: estimatedRevenue,
+        description: analysis.monetization.revenueEstimate,
+      });
+    }
+    return items;
   }, [analysis]);
 
-  const heatmapChartUrl = useMemo(() => {
-    if (!analysis) return null;
-    return generateAnalysisChart('heatmap', {
-      title: 'Audience Heatmap',
-      heatmap: analysis.audience.heatmap,
-      optimalTimes: analysis.technical.optimalPostingTimes,
-    });
+  const heatmapEntries = useMemo(() => {
+    if (!analysis) return [];
+    const highlightSet = new Set<string>(analysis.technical.optimalPostingTimes.map((time) => time.trim()));
+    return analysis.audience.heatmap.map((slot) => parseHeatmapSlot(slot, highlightSet));
   }, [analysis]);
 
   const renderToggle = (key: AnalysisToggleKey, label: string, description: string) => (
@@ -1364,6 +1693,14 @@ export default function FacebookProAnalyzerClient() {
                         >
                           <Activity className="h-3 w-3" /> Coba lagi
                         </button>
+                      ) : errorSource === 'visual' ? (
+                        <button
+                          type="button"
+                          onClick={handleGenerateVisualPlan}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600 underline decoration-rose-300 underline-offset-2 transition hover:text-rose-700 dark:text-rose-200"
+                        >
+                          <ImageIcon className="h-3 w-3" /> Susun ulang blueprint
+                        </button>
                       ) : null}
                     </div>
                   </div>
@@ -1489,12 +1826,12 @@ export default function FacebookProAnalyzerClient() {
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-100">Media Pendukung</h3>
                 <button
                   type="button"
-                  onClick={handleGenerateImageSuggestion}
-                  disabled={isGeneratingImage}
+                  onClick={handleGenerateVisualPlan}
+                  disabled={isGeneratingVisualPlan}
                   className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500/90 to-purple-500/90 px-3 py-2 text-xs font-semibold text-white shadow-lg transition hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {isGeneratingImage ? <Loader2 className="h-3 w-3 animate-spin" /> : <ImageIcon className="h-3 w-3" />}
-                  Saran Visual AI
+                  {isGeneratingVisualPlan ? <Loader2 className="h-3 w-3 animate-spin" /> : <ImageIcon className="h-3 w-3" />}
+                  Blueprint Visual
                 </button>
               </div>
               <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-slate-300 bg-white/60 p-6 text-center text-sm text-slate-500 shadow-inner transition hover:border-indigo-300 hover:text-indigo-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-400">
@@ -1511,12 +1848,51 @@ export default function FacebookProAnalyzerClient() {
                     </p>
                   </div>
                 ) : null}
-                {aiImageSuggestion ? (
-                  <div className="overflow-hidden rounded-2xl border border-white/10 shadow-neumorphic-card dark:border-slate-800/60 dark:shadow-dark-neumorphic-card">
-                    <img src={aiImageSuggestion} alt="AI suggestion" className="h-36 w-full object-cover" />
-                    <p className="bg-white/70 px-3 py-2 text-xs text-slate-500 dark:bg-slate-900/70 dark:text-slate-400">
-                      Visual rekomendasi AI Flux dengan parameter otomatis.
-                    </p>
+                {visualPlan ? (
+                  <div className="rounded-2xl border border-white/10 bg-white/85 p-4 text-xs text-slate-600 shadow-neumorphic-card dark:border-slate-800/60 dark:bg-slate-950/70 dark:text-slate-300 dark:shadow-dark-neumorphic-card">
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-100">Blueprint Visual</p>
+                    <p className="mt-2 text-slate-500 dark:text-slate-400">{visualPlan.mood}</p>
+                    <div className="mt-3 space-y-2">
+                      <div>
+                        <p className="font-semibold text-slate-600 dark:text-slate-200">Fokus Hero</p>
+                        <p className="mt-1 text-slate-500 dark:text-slate-400">{visualPlan.heroFocus}</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-600 dark:text-slate-200">Palet Warna</p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {visualPlan.colorPalette.map((color) => (
+                            <span
+                              key={color}
+                              className="flex h-8 w-8 items-center justify-center rounded-xl text-[10px] font-semibold text-white shadow-inner"
+                              style={{ backgroundColor: color }}
+                            >
+                              {color.replace('#', '').slice(0, 3).toUpperCase()}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-600 dark:text-slate-200">Elemen Pendukung</p>
+                        <ul className="mt-1 space-y-1">
+                          {visualPlan.supportingVisuals.map((item) => (
+                            <li key={item}>• {item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-600 dark:text-slate-200">CTA & Caption</p>
+                        <p className="mt-1 text-slate-500 dark:text-slate-400">{visualPlan.ctaTone}</p>
+                        <ul className="mt-1 space-y-1">
+                          {visualPlan.captionIdeas.map((idea) => (
+                            <li key={idea}>– {idea}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-600 dark:text-slate-200">Highlight Pesan</p>
+                        <p className="mt-1 text-slate-500 dark:text-slate-400">{visualPlan.highlight}</p>
+                      </div>
+                    </div>
                   </div>
                 ) : null}
               </div>
@@ -1527,7 +1903,7 @@ export default function FacebookProAnalyzerClient() {
               <ul className="mt-2 space-y-1">
                 <li>• Gunakan bahasa spesifik dan angka untuk hasil analisis yang lebih tajam.</li>
                 <li>• Aktifkan hanya fitur analisis yang dibutuhkan agar respon lebih cepat.</li>
-                <li>• Saran visual AI mengikuti konteks deskripsi konten.</li>
+                <li>• Blueprint visual akan mengikuti judul, deskripsi, dan insight analisis.</li>
               </ul>
             </div>
           </aside>
@@ -1665,13 +2041,7 @@ export default function FacebookProAnalyzerClient() {
                     <p>
                       <strong>Narasi Tren:</strong> {analysis.monetization.trendNarrative}
                     </p>
-                    {revenueChartUrl ? (
-                      <img
-                        src={revenueChartUrl}
-                        alt="Perbandingan pendapatan"
-                        className="mt-3 h-40 w-full rounded-2xl object-cover"
-                      />
-                    ) : null}
+                    {analysis && revenueChartData.length > 0 ? <RevenueBarChart data={revenueChartData} /> : null}
                   </div>,
                   'Prediksi CPM/RPM dan perbandingan dengan standar industri Indonesia.'
                 )}
@@ -1705,13 +2075,7 @@ export default function FacebookProAnalyzerClient() {
                         </span>
                       ))}
                     </div>
-                    {heatmapChartUrl ? (
-                      <img
-                        src={heatmapChartUrl}
-                        alt="Heatmap audiens"
-                        className="mt-3 h-40 w-full rounded-2xl object-cover"
-                      />
-                    ) : null}
+                    {analysis && heatmapEntries.length > 0 ? <AudienceHeatmap entries={heatmapEntries} /> : null}
                   </div>,
                   'Relevansi budaya, bahasa, dan jadwal terbaik untuk audiens Indonesia.'
                 )}
