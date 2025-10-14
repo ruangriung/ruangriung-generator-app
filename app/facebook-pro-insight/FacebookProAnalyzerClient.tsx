@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { type ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Activity,
   AlertCircle,
   BarChart3,
   Brain,
   CheckCircle2,
+  Image as ImageIcon,
   Flame,
   Loader2,
   Network,
@@ -14,6 +15,8 @@ import {
   RefreshCw,
   Sparkles,
   TrendingUp,
+  Upload,
+  XCircle,
 } from 'lucide-react';
 
 interface ScoreRow {
@@ -21,6 +24,12 @@ interface ScoreRow {
   score: number;
   insight: string;
   recommendation: string;
+}
+
+interface MediaAlignment {
+  relevanceScore: number;
+  verdict: string;
+  notes: string[];
 }
 
 interface AnalysisResult {
@@ -32,6 +41,7 @@ interface AnalysisResult {
   opportunities: string[];
   scores: ScoreRow[];
   heatmapFocus: string[];
+  mediaAlignment: MediaAlignment;
 }
 
 const DEFAULT_PROMPT_CONTENT = `⚙️ Nama Tools: InsightRanker — Mesin Pengendus Kualitas Konten
@@ -55,6 +65,15 @@ Visualitas 90 (Warna kuat, rekomendasi: pertahankan tone)
 Orisinalitas 76 (Mirip 15% tren global, rekomendasi: ubah framing)
 Relevansi 68 (Kurang koneksi audiens, rekomendasi: gunakan tema lokal)
 Narratif: "Konten ini punya potensi viral karena kesederhanaannya."`;
+
+const DEFAULT_MEDIA_ALIGNMENT: MediaAlignment = {
+  relevanceScore: 76,
+  verdict: 'Gambar dan teks saling mendukung, meskipun masih ada ruang untuk memperkuat pesan utama.',
+  notes: [
+    'Visual menegaskan tema inti konten, tetapi dapat diperjelas dengan elemen penunjang seperti ikon atau headline.',
+    'Pertimbangkan menambahkan teks pendukung atau highlight warna agar pesan mudah dipindai audiens mobile.',
+  ],
+};
 
 const FALLBACK_ANALYSIS: AnalysisResult = {
   aiScore: 82,
@@ -101,6 +120,7 @@ const FALLBACK_ANALYSIS: AnalysisResult = {
     'Relevansi menunjukkan zona hangat yang butuh dorongan.',
     'Originalitas stabil namun perlu perhatian agar tidak jatuh ke zona dingin.',
   ],
+  mediaAlignment: DEFAULT_MEDIA_ALIGNMENT,
 };
 
 const QUALITY_COLORS: Record<AnalysisResult['qualityLevel'], string> = {
@@ -208,7 +228,12 @@ const qualityFromScore = (score: number): AnalysisResult['qualityLevel'] => {
   return 'Buruk';
 };
 
-const clampScore = (score: number) => Math.min(100, Math.max(0, Math.round(score)));
+const clampScore = (score: number) => {
+  if (!Number.isFinite(score)) {
+    return 0;
+  }
+  return Math.min(100, Math.max(0, Math.round(score)));
+};
 
 const POLLINATIONS_TEXT_API_BASE_URL = 'https://text.pollinations.ai';
 const POLLINATIONS_MODELS_ENDPOINT = `${POLLINATIONS_TEXT_API_BASE_URL}/models`;
@@ -315,6 +340,25 @@ const parseAnalysisResponse = (rawText: string): AnalysisResult => {
 
   const qualityLevel = (parsed.qualityLevel as AnalysisResult['qualityLevel']) ?? qualityFromScore(aiScore);
 
+  const mediaAlignmentSource = parsed.mediaAlignment ?? parsed.mediaAssessment ?? parsed.media ?? {};
+  const rawRelevance = Number(
+    mediaAlignmentSource.relevanceScore ?? mediaAlignmentSource.score ?? DEFAULT_MEDIA_ALIGNMENT.relevanceScore
+  );
+  const mediaAlignment: MediaAlignment = {
+    relevanceScore: Number.isFinite(rawRelevance)
+      ? clampScore(rawRelevance)
+      : DEFAULT_MEDIA_ALIGNMENT.relevanceScore,
+    verdict:
+      typeof mediaAlignmentSource.verdict === 'string'
+        ? mediaAlignmentSource.verdict
+        : mediaAlignmentSource.summary ?? DEFAULT_MEDIA_ALIGNMENT.verdict,
+    notes: Array.isArray(mediaAlignmentSource.notes)
+      ? mediaAlignmentSource.notes.map((item: any) => String(item))
+      : Array.isArray(mediaAlignmentSource.observations)
+      ? mediaAlignmentSource.observations.map((item: any) => String(item))
+      : DEFAULT_MEDIA_ALIGNMENT.notes,
+  };
+
   return {
     aiScore,
     qualityLevel,
@@ -337,6 +381,7 @@ const parseAnalysisResponse = (rawText: string): AnalysisResult => {
     heatmapFocus: Array.isArray(parsed.heatmapFocus)
       ? parsed.heatmapFocus.map((item: any) => String(item))
       : FALLBACK_ANALYSIS.heatmapFocus,
+    mediaAlignment,
   };
 };
 
@@ -349,6 +394,40 @@ export default function FacebookProAnalyzerClient() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(FALLBACK_ANALYSIS);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [activePreset, setActivePreset] = useState<string>('');
+  const mediaInputRef = useRef<HTMLInputElement | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [mediaDataUrl, setMediaDataUrl] = useState<string | null>(null);
+  const [mediaFileName, setMediaFileName] = useState<string>('');
+
+  const handleMediaChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      setMediaPreview(null);
+      setMediaDataUrl(null);
+      setMediaFileName('');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = typeof reader.result === 'string' ? reader.result : null;
+      setMediaPreview(result);
+      setMediaDataUrl(result);
+      setMediaFileName(file.name);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const handleClearMedia = () => {
+    setMediaPreview(null);
+    setMediaDataUrl(null);
+    setMediaFileName('');
+    if (mediaInputRef.current) {
+      mediaInputRef.current.value = '';
+    }
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -409,7 +488,7 @@ export default function FacebookProAnalyzerClient() {
         }
       } catch (fetchError) {
         console.error(fetchError);
-        setError('Gagal memuat model dari Pollinations.ai, menggunakan model default.');
+        setError('Gagal memuat model AI, menggunakan model default.');
       }
     };
 
@@ -426,7 +505,31 @@ export default function FacebookProAnalyzerClient() {
     setError(null);
 
     try {
-      const prompt = `Analisis konten Facebook profesional berikut secara menyeluruh. Kembalikan JSON dengan struktur: {\n  \"aiScore\": number (0-100),\n  \"qualityLevel\": \"Kreatif|Menarik|Standar|Buruk\",\n  \"summary\": string,\n  \"narrative\": string,\n  \"trendNarrative\": string,\n  \"opportunities\": string[],\n  \"scores\": [{ \"parameter\": string, \"score\": number, \"insight\": string, \"recommendation\": string }],\n  \"heatmapFocus\": string[]\n}. Fokus pada kreativitas, relevansi, daya tarik emosional, orisinalitas, dan visualitas. Konten:\n\n${content}`;
+      const hasMediaAttachment = Boolean(mediaDataUrl);
+      const prompt = `Analisis konten Facebook profesional berikut secara menyeluruh. Wajib mengembalikan JSON dengan struktur: {\n  \"aiScore\": number (0-100),\n  \"qualityLevel\": \"Kreatif|Menarik|Standar|Buruk\",\n  \"summary\": string,\n  \"narrative\": string,\n  \"trendNarrative\": string,\n  \"opportunities\": string[],\n  \"scores\": [{ \"parameter\": string, \"score\": number, \"insight\": string, \"recommendation\": string }],\n  \"heatmapFocus\": string[],\n  \"mediaAlignment\": { \"relevanceScore\": number (0-100), \"verdict\": string, \"notes\": string[] }\n}. Fokus pada kreativitas, relevansi, daya tarik emosional, orisinalitas, dan visualitas. Jelaskan juga seberapa relevan ${
+        hasMediaAttachment ? 'gambar terlampir' : 'gambar (jika ada)'
+      } terhadap teks dan beri rekomendasi perbaikan lintas format. ${
+        hasMediaAttachment
+          ? 'Gambar terlampir dapat diacu langsung dari input visual.'
+          : 'Tidak ada gambar yang diunggah; analisis relevansi visual berdasarkan deskripsi teks.'
+      } Konten teks:\n\n${content}`;
+
+      const userContent: Array<
+        | { type: 'text'; text: string }
+        | { type: 'image_url'; image_url: { url: string } }
+      > = [
+        {
+          type: 'text',
+          text: prompt,
+        },
+      ];
+
+      if (hasMediaAttachment && mediaDataUrl) {
+        userContent.push({
+          type: 'image_url',
+          image_url: { url: mediaDataUrl },
+        });
+      }
 
       const payload = {
         model: selectedModel || 'openai',
@@ -438,7 +541,7 @@ export default function FacebookProAnalyzerClient() {
           },
           {
             role: 'user',
-            content: prompt,
+            content: userContent,
           },
         ],
       };
@@ -487,6 +590,9 @@ export default function FacebookProAnalyzerClient() {
     });
   }, [analysis?.scores]);
 
+  const mediaAlignment = analysis?.mediaAlignment ?? DEFAULT_MEDIA_ALIGNMENT;
+  const hasMediaPreview = Boolean(mediaPreview);
+
   return (
     <section className="mt-10 space-y-10">
       <div className="grid gap-8 lg:grid-cols-3">
@@ -501,6 +607,7 @@ export default function FacebookProAnalyzerClient() {
               onClick={() => {
                 setContent(DEFAULT_PROMPT_CONTENT);
                 setActivePreset('');
+                handleClearMedia();
               }}
               className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
             >
@@ -515,6 +622,10 @@ export default function FacebookProAnalyzerClient() {
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
                 <span>Tempelkan caption, deskripsi, atau ringkasan konten yang ingin diendus.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
+                <span>Unggah visual pendukung (opsional) agar InsightRanker dapat menilai keselarasan teks dan gambar.</span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" />
@@ -571,6 +682,60 @@ export default function FacebookProAnalyzerClient() {
               placeholder="Tempelkan caption, deskripsi, atau ringkasan konten Anda di sini."
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="media-upload" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Visual Pendukung untuk Analisis (Opsional)
+            </label>
+            <input
+              id="media-upload"
+              ref={mediaInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleMediaChange}
+              className="sr-only"
+            />
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <label
+                htmlFor="media-upload"
+                className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-purple-300 bg-white/70 px-4 py-3 text-sm font-semibold text-purple-700 shadow-sm transition hover:border-purple-400 hover:bg-purple-50 dark:border-purple-500/50 dark:bg-gray-800/60 dark:text-purple-200 dark:hover:border-purple-400"
+              >
+                <Upload className="h-4 w-4" />
+                Unggah Gambar Analisis
+              </label>
+              {mediaFileName && (
+                <div className="flex w-full items-center justify-between gap-3 rounded-xl border border-purple-200 bg-purple-50/70 px-4 py-3 text-xs text-purple-700 shadow-inner dark:border-purple-500/40 dark:bg-purple-500/10 dark:text-purple-200">
+                  <span className="truncate">{mediaFileName}</span>
+                  <button
+                    type="button"
+                    onClick={handleClearMedia}
+                    className="inline-flex items-center gap-1 rounded-lg bg-purple-200/40 px-2 py-1 text-xs font-semibold text-purple-700 transition hover:bg-purple-200 dark:bg-purple-500/20 dark:text-purple-100 dark:hover:bg-purple-500/30"
+                  >
+                    <XCircle className="h-3.5 w-3.5" />
+                    Hapus
+                  </button>
+                </div>
+              )}
+            </div>
+            {mediaPreview && (
+              <div className="overflow-hidden rounded-xl border border-purple-200 bg-white/80 p-3 shadow-inner dark:border-purple-500/30 dark:bg-gray-800/60">
+                <div className="flex items-center justify-between text-xs font-semibold text-purple-700 dark:text-purple-200">
+                  <span className="inline-flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4" />
+                    Pratinjau Visual
+                  </span>
+                  <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:bg-purple-500/30 dark:text-purple-100">
+                    Terlampir
+                  </span>
+                </div>
+                <img
+                  src={mediaPreview}
+                  alt="Pratinjau konten yang dianalisis"
+                  className="mt-3 max-h-60 w-full rounded-lg object-contain"
+                />
+              </div>
+            )}
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -664,6 +829,38 @@ export default function FacebookProAnalyzerClient() {
                 </li>
               ))}
             </ul>
+          </div>
+
+          <div className="rounded-2xl bg-white/5 p-5 backdrop-blur">
+            <h4 className="text-lg font-semibold">Sinkronisasi Teks &amp; Visual</h4>
+            <div className="mt-3 flex items-center justify-between text-sm font-semibold text-purple-100/90">
+              <span>Skor Relevansi</span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-base font-bold">
+                {mediaAlignment.relevanceScore}
+              </span>
+            </div>
+            <p className="mt-3 text-sm text-purple-100/90">{mediaAlignment.verdict}</p>
+            <ul className="mt-3 space-y-2 text-xs text-purple-100/80">
+              {mediaAlignment.notes.map((note, index) => (
+                <li key={index} className="flex items-start gap-2">
+                  <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+                  <span>{note}</span>
+                </li>
+              ))}
+            </ul>
+            {hasMediaPreview ? (
+              <div className="mt-4 overflow-hidden rounded-xl border border-white/20 bg-white/10 p-2">
+                <img
+                  src={mediaPreview ?? undefined}
+                  alt="Visual yang dianalisis InsightRanker"
+                  className="max-h-40 w-full rounded-lg object-contain"
+                />
+              </div>
+            ) : (
+              <p className="mt-4 text-xs text-purple-200/80">
+                Belum ada visual diunggah. InsightRanker menilai relevansi berdasarkan konteks teks.
+              </p>
+            )}
           </div>
         </div>
 
