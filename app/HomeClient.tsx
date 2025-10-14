@@ -265,7 +265,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
                                 onClick={() => setIsToolsMenuOpen(false)}
                             >
                                 <Megaphone size={18} />
-                                <span>InsightRanker FB Pro</span>
+                                <span>Facebook Pro Insight Hub</span>
                             </Link>
                         </li>
                         <li>
