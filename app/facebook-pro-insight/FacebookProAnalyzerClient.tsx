@@ -210,6 +210,48 @@ const qualityFromScore = (score: number): AnalysisResult['qualityLevel'] => {
 
 const clampScore = (score: number) => Math.min(100, Math.max(0, Math.round(score)));
 
+const POLLINATIONS_TEXT_API_BASE_URL = 'https://text.pollinations.ai';
+const POLLINATIONS_MODELS_ENDPOINT = `${POLLINATIONS_TEXT_API_BASE_URL}/models`;
+const POLLINATIONS_OPENAI_ENDPOINT = `${POLLINATIONS_TEXT_API_BASE_URL}/openai`;
+const POLLINATIONS_TOKEN = process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN?.trim();
+const POLLINATIONS_REFERRER = 'ruangriung.my.id';
+
+const getPollinationsQueryParam = () => {
+  if (POLLINATIONS_TOKEN) {
+    return { name: 'token', value: POLLINATIONS_TOKEN } as const;
+  }
+
+  return { name: 'referrer', value: POLLINATIONS_REFERRER } as const;
+};
+
+const buildPollinationsUrl = (baseUrl: string) => {
+  try {
+    const url = new URL(baseUrl);
+    const { name, value } = getPollinationsQueryParam();
+    url.searchParams.set(name, value);
+    return url.toString();
+  } catch (error) {
+    console.warn('Gagal membangun URL Pollinations:', error);
+    const { name, value } = getPollinationsQueryParam();
+    const separator = baseUrl.includes('?') ? '&' : '?';
+    return `${baseUrl}${separator}${name}=${encodeURIComponent(value)}`;
+  }
+};
+
+const getPollinationsAuthHeaders = (hasJsonBody: boolean) => {
+  const headers: Record<string, string> = {};
+
+  if (hasJsonBody) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  if (POLLINATIONS_TOKEN) {
+    headers.Authorization = `Bearer ${POLLINATIONS_TOKEN}`;
+  }
+
+  return headers;
+};
+
 const extractJsonObject = (rawText: string): Record<string, any> => {
   const cleaned = rawText.trim().replace(/^[^\{\[]*/, '');
 
@@ -313,8 +355,14 @@ export default function FacebookProAnalyzerClient() {
 
     const loadModels = async () => {
       try {
-        const response = await fetch('https://text.pollinations.ai/models', {
+        const headers = {
+          Accept: 'application/json',
+          ...getPollinationsAuthHeaders(false),
+        };
+
+        const response = await fetch(buildPollinationsUrl(POLLINATIONS_MODELS_ENDPOINT), {
           signal: controller.signal,
+          headers,
         });
 
         if (!response.ok) {
@@ -378,24 +426,38 @@ export default function FacebookProAnalyzerClient() {
     setError(null);
 
     try {
-      const prompt = `Anda adalah InsightRanker, analis konten profesional. Analisis konten berikut untuk Facebook Pro. Kembalikan JSON dengan schema: {\n  \"aiScore\": number 0-100,\n  \"qualityLevel\": \"Kreatif|Menarik|Standar|Buruk\",\n  \"summary\": string,\n  \"narrative\": string,\n  \"trendNarrative\": string,\n  \"opportunities\": string[],\n  \"scores\": [{ \"parameter\": string, \"score\": number, \"insight\": string, \"recommendation\": string }],\n  \"heatmapFocus\": string[]\n}.\nFokus pada kreativitas, relevansi, daya tarik emosional, orisinalitas, dan visualitas. Konten:\n\n${content}`;
+      const prompt = `Analisis konten Facebook profesional berikut secara menyeluruh. Kembalikan JSON dengan struktur: {\n  \"aiScore\": number (0-100),\n  \"qualityLevel\": \"Kreatif|Menarik|Standar|Buruk\",\n  \"summary\": string,\n  \"narrative\": string,\n  \"trendNarrative\": string,\n  \"opportunities\": string[],\n  \"scores\": [{ \"parameter\": string, \"score\": number, \"insight\": string, \"recommendation\": string }],\n  \"heatmapFocus\": string[]\n}. Fokus pada kreativitas, relevansi, daya tarik emosional, orisinalitas, dan visualitas. Konten:\n\n${content}`;
 
-      const endpoint = `https://text.pollinations.ai/${encodeURIComponent(selectedModel || 'openai')}?text=${encodeURIComponent(
-        prompt
-      )}`;
+      const payload = {
+        model: selectedModel || 'openai',
+        messages: [
+          {
+            role: 'system',
+            content:
+              'Anda adalah InsightRanker, analis konten profesional khusus Facebook Pro. Jawaban wajib dalam JSON valid sesuai skema yang diminta.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+      };
 
-      const response = await fetch(endpoint, {
+      const response = await fetch(buildPollinationsUrl(POLLINATIONS_OPENAI_ENDPOINT), {
+        method: 'POST',
         headers: {
-          Accept: 'text/plain',
+          Accept: 'application/json',
+          ...getPollinationsAuthHeaders(true),
         },
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         throw new Error(`Analisis gagal (status ${response.status}).`);
       }
 
-      const text = await response.text();
-      const parsed = parseAnalysisResponse(text);
+      const rawResponse = await response.text();
+      const parsed = parseAnalysisResponse(rawResponse);
       setAnalysis(parsed);
       setLastUpdated(new Date());
     } catch (fetchError: any) {
