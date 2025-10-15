@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   BarChart3,
   Brain,
@@ -62,26 +62,208 @@ const platformBenchmarks = [
   },
 ];
 
-const aiContentSuggestions = [
-  {
-    title: 'Storytelling Komunitas',
-    description:
-      'Bagikan kisah nyata pelanggan yang berhasil setelah bergabung dengan komunitas Anda, sertakan kutipan dan CTA untuk diskusi.',
-    tone: 'Hangat & Menginspirasi',
+type ContentInsights = {
+  wordCount: number;
+  charCount: number;
+  hasQuestion: boolean;
+  hasCTA: boolean;
+  positivity: number;
+  readinessScore: number;
+};
+
+type RevenueSnapshot = {
+  views: number;
+  cpmRevenue: number;
+  rpmRevenue: number;
+  ctrLeads: number;
+};
+
+type AiSuggestion = {
+  title: string;
+  description: string;
+  tone: string;
+};
+
+const stopwords = new Set([
+  'yang',
+  'dan',
+  'untuk',
+  'dengan',
+  'agar',
+  'atau',
+  'pada',
+  'dari',
+  'akan',
+  'kami',
+  'anda',
+  'para',
+  'dalam',
+  'ketika',
+  'bagi',
+  'sebagai',
+  'karena',
+  'saat',
+  'itu',
+  'ini',
+  'jadi',
+  'tidak',
+  'apa',
+  'maka',
+  'lebih',
+  'sudah',
+  'bisa',
+  'harus',
+]);
+
+const extractKeywords = (text: string) => {
+  const tokens = text
+    .toLowerCase()
+    .match(/[a-zà-ÿ0-9]+/gi)
+    ?.filter((token) => token.length > 3 && !stopwords.has(token)) ?? [];
+
+  const frequency = tokens.reduce<Record<string, number>>((acc, word) => {
+    acc[word] = (acc[word] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  return Object.entries(frequency)
+    .sort(([, a], [, b]) => b - a)
+    .map(([word]) => word)
+    .slice(0, 5);
+};
+
+const platformVoices: Record<string, {
+  tone: string;
+  defaultTopic: string;
+  hookTemplate: string;
+  ctaTemplate: string;
+  ctaHint: string;
+  proofPoint: string;
+  formatTip: string;
+}> = {
+  Facebook: {
+    tone: 'Hangat & Komunitas',
+    defaultTopic: 'komunitas digital',
+    hookTemplate: 'Mulai dengan pertanyaan yang mengajak audiens berbagi tentang {keyword}.',
+    ctaTemplate: 'Ajak audiens menuliskan pengalaman mereka di kolom komentar.',
+    ctaHint: 'ajak audiens menuliskan pengalaman mereka di kolom komentar',
+    proofPoint: 'Sisipi kutipan singkat atau fakta komunitas untuk menjaga kepercayaan.',
+    formatTip: 'Pisahkan paragraf agar mudah dibaca pada feed dan grup.',
   },
-  {
-    title: 'Tips Actionable 3 Langkah',
-    description:
-      'Gunakan format carousel dengan tiga langkah praktis untuk mencapai hasil spesifik, tutup dengan pertanyaan pemicu komentar.',
-    tone: 'Informasional & Energik',
+  YouTube: {
+    tone: 'Strategis & Edukatif',
+    defaultTopic: 'perjalanan kreator',
+    hookTemplate: 'Buka dengan fakta atau statistik mengejutkan soal {keyword} di awal video.',
+    ctaTemplate: 'Dorong penonton untuk subscribe dan cek link deskripsi.',
+    ctaHint: 'dorong penonton untuk subscribe dan cek link deskripsi',
+    proofPoint: 'Tunjukkan preview visual atau data grafis agar hook semakin kuat.',
+    formatTip: 'Gunakan struktur hook, nilai utama, dan closing dengan CTA jelas.',
   },
-  {
-    title: 'Debunking Miskonsepsi',
-    description:
-      'Sorot 3 miskonsepsi populer di industri Anda dan jelaskan fakta sebenarnya dengan data pendukung yang mudah dipahami.',
-    tone: 'Edukatif & Persuasif',
+  TikTok: {
+    tone: 'Enerjik & Eksperimental',
+    defaultTopic: 'tren singkat',
+    hookTemplate: 'Mulai dengan pernyataan berani tentang {keyword} dalam 3 detik pertama.',
+    ctaTemplate: 'Ajak penonton mencoba langkahnya dan tag akun Anda.',
+    ctaHint: 'ajak penonton mencoba langkahnya dan tag akun Anda',
+    proofPoint: 'Gunakan teks overlay singkat untuk menonjolkan fakta utama.',
+    formatTip: 'Pecah cerita dalam 3 scene cepat agar ritmenya terjaga.',
   },
-];
+  Instagram: {
+    tone: 'Estetis & Aspiratif',
+    defaultTopic: 'gaya hidup kreator',
+    hookTemplate: 'Tulis caption pembuka yang relatable tentang {keyword} untuk slide pertama.',
+    ctaTemplate: 'Ajak audiens menyimpan carousel dan bagikan ke teman dekat.',
+    ctaHint: 'ajak audiens menyimpan carousel dan bagikan ke teman dekat',
+    proofPoint: 'Tampilkan before-after visual atau testimoni singkat.',
+    formatTip: 'Rancang 4-5 slide dengan headline tajam dan highlight emoji.',
+  },
+  Threads: {
+    tone: 'Percakapan & Spontan',
+    defaultTopic: 'obrolan komunitas',
+    hookTemplate: 'Mulai thread dengan kalimat pendek yang memancing diskusi seputar {keyword}.',
+    ctaTemplate: 'Arahkan audiens untuk merespons thread lanjutan atau kirim DM.',
+    ctaHint: 'ajak audiens merespons thread lanjutan atau mengirim DM lanjutan',
+    proofPoint: 'Sisipkan opini personal atau humor ringan untuk memanaskan percakapan.',
+    formatTip: 'Buat 3-4 thread berseri dengan callout yang mudah di-skim.',
+  },
+};
+
+const pickRandom = <T,>(items: T[], random: () => number) =>
+  items[Math.floor(random() * items.length)] ?? items[0];
+
+const createSeededRandom = (seed: number) => {
+  let currentSeed = Math.floor(Math.abs(seed) * 1000) || 1;
+  return () => {
+    currentSeed += 1;
+    const value = Math.sin(currentSeed) * 10000;
+    return value - Math.floor(value);
+  };
+};
+
+const generateAiContentSuggestions = (
+  platform: string,
+  text: string,
+  insights: ContentInsights,
+  benchmark: (typeof platformBenchmarks)[number],
+  revenue: RevenueSnapshot,
+  seed: number,
+): AiSuggestion[] => {
+  const voice = platformVoices[platform] ?? platformVoices.Facebook;
+  const keywords = extractKeywords(text);
+  const [primaryKeyword, secondaryKeyword, tertiaryKeyword] = [
+    keywords[0] ?? voice.defaultTopic,
+    keywords[1] ?? 'pertumbuhan komunitas',
+    keywords[2] ?? 'engagement audiens',
+  ];
+
+  const random = createSeededRandom(seed);
+
+  const readinessFeedback =
+    insights.readinessScore > 85
+      ? 'Pertahankan alur narasi yang sudah kuat, tinggal poles visual pendukung.'
+      : 'Perjelas fokus manfaat utama dan sisipkan CTA eksplisit agar pesan lebih tajam.';
+
+  const ctaCue = insights.hasCTA
+    ? 'CTA existing bisa disingkat agar tidak memecah fokus pembaca.'
+    : `Tambahkan CTA seperti "${voice.ctaHint}".`;
+
+  const questionCue = insights.hasQuestion
+    ? 'Pertanyaan pemicu sudah ada, tinggal tambahkan opsi jawaban untuk memudahkan respon.'
+    : 'Tambahkan pertanyaan reflektif di akhir untuk memancing komentar lanjutan.';
+
+  const toneVariants = [voice.tone, `${voice.tone} · ${pickRandom(['Optimistis', 'Visioner', 'Data-driven', 'Empatik'], random)}`];
+
+  return [
+    {
+      title: `Narasi Cerita ${platform}`,
+      tone: toneVariants[0],
+      description: [
+        voice.hookTemplate.replace('{keyword}', primaryKeyword),
+        `Ceritakan momen ketika ${primaryKeyword} menjadi titik balik dan hubungkan dengan ${secondaryKeyword}. ${voice.proofPoint}`,
+        `${readinessFeedback} ${questionCue}`,
+        voice.ctaTemplate,
+      ].join('\n\n'),
+    },
+    {
+      title: `Formula 3 Langkah ${pickRandom(['Actionable', 'Eksperimen', 'Pro Growth'], random)}`,
+      tone: toneVariants[1],
+      description: [
+        `Ramu 3 langkah praktis: (1) ${primaryKeyword.toUpperCase()} insight, (2) ${secondaryKeyword} sebagai studi kasus, (3) ajak audiens mencoba dalam 24 jam.`,
+        `${voice.formatTip} Gunakan emoji atau penomoran agar mudah dipindai.`,
+        `${ctaCue} Sorot bahwa potensi CPM mencapai ${formatCurrency(revenue.cpmRevenue)} dan RPM ${formatCurrency(revenue.rpmRevenue)} untuk memancing rasa penasaran monetisasi.`,
+      ].join('\n\n'),
+    },
+    {
+      title: `Analisa Data & Rekomendasi ${platform}`,
+      tone: pickRandom(toneVariants, random),
+      description: [
+        `Buka dengan insight data: CTR platform ${platform} berada di ${formatPercent(benchmark.ctr)} dengan engagement ${benchmark.engagement}%. Kaitkan dengan ${tertiaryKeyword}.`,
+        `Susun perbandingan singkat antara performa sekarang dan target berikutnya. ${voice.proofPoint}`,
+        `${questionCue} Tutup dengan highlight ${revenue.ctrLeads.toLocaleString()} potensi klik menuju funnel.`,
+      ].join('\n\n'),
+    },
+  ];
+};
 
 const aiImagePrompts = [
   'Ilustrasi gaya flat design tentang komunitas yang saling membantu, warna biru dan jingga.',
@@ -202,6 +384,68 @@ export default function AnalisaKontenPage() {
       readinessScore,
     };
   }, [contentInput]);
+
+  const [aiSuggestions, setAiSuggestions] = useState<AiSuggestion[]>(() =>
+    generateAiContentSuggestions(
+      selectedPlatform,
+      contentInput,
+      analysisInsights,
+      selectedBenchmark,
+      estimatedRevenue,
+      Math.random(),
+    ),
+  );
+  const [isGenerating, setIsGenerating] = useState(false);
+  const aiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previousPlatformRef = useRef(selectedPlatform);
+
+  const regenerateAiSuggestions = useCallback(
+    (seed?: number) =>
+      generateAiContentSuggestions(
+        selectedPlatform,
+        contentInput,
+        analysisInsights,
+        selectedBenchmark,
+        estimatedRevenue,
+        seed ?? Math.random(),
+      ),
+    [analysisInsights, contentInput, estimatedRevenue, selectedBenchmark, selectedPlatform],
+  );
+
+  useEffect(() => {
+    if (previousPlatformRef.current !== selectedPlatform) {
+      setAiSuggestions(
+        generateAiContentSuggestions(
+          selectedPlatform,
+          contentInput,
+          analysisInsights,
+          selectedBenchmark,
+          estimatedRevenue,
+          Math.random(),
+        ),
+      );
+      previousPlatformRef.current = selectedPlatform;
+    }
+  }, [analysisInsights, contentInput, estimatedRevenue, selectedBenchmark, selectedPlatform]);
+
+  const handleGenerateAiContent = useCallback(() => {
+    if (aiTimeoutRef.current) {
+      clearTimeout(aiTimeoutRef.current);
+    }
+    setIsGenerating(true);
+    const suggestions = regenerateAiSuggestions(Math.random());
+    aiTimeoutRef.current = setTimeout(() => {
+      setAiSuggestions(suggestions);
+      setIsGenerating(false);
+      aiTimeoutRef.current = null;
+    }, 320);
+  }, [regenerateAiSuggestions]);
+
+  useEffect(() => () => {
+    if (aiTimeoutRef.current) {
+      clearTimeout(aiTimeoutRef.current);
+    }
+  }, []);
 
   const handleUseSuggestion = (text: string) => {
     setContentInput(text);
@@ -502,15 +746,35 @@ export default function AnalisaKontenPage() {
                     Saran narasi AI
                   </h2>
                   <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                    Pilih ide konten untuk langsung digunakan atau modifikasi sesuai konteks platform pilihan.
+                    Pilih ide konten yang diproses secara dinamis oleh AI berdasarkan analisa teks dan platform pilihan.
                   </p>
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Saran memperhitungkan kata kunci dominan, kekuatan CTA, dan peluang monetisasi.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleGenerateAiContent}
+                      disabled={isGenerating}
+                      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold shadow transition ${
+                        isGenerating
+                          ? 'cursor-wait border border-indigo-300 bg-indigo-200 text-indigo-600 dark:border-indigo-500 dark:bg-indigo-500/30 dark:text-indigo-200'
+                          : 'border border-indigo-500 bg-indigo-500 text-white hover:bg-indigo-600'
+                      }`}
+                    >
+                      <Sparkles className="h-3.5 w-3.5" />
+                      {isGenerating ? 'Memproses ide...' : 'Hasilkan ulang konten'}
+                    </button>
+                  </div>
                   <div className="mt-4 space-y-3">
-                    {aiContentSuggestions.map((suggestion) => (
+                    {aiSuggestions.map((suggestion) => (
                       <div key={suggestion.title} className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
                         <div className="flex items-start justify-between gap-4">
                           <div>
                             <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">{suggestion.title}</h3>
-                            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{suggestion.description}</p>
+                            <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">
+                              {suggestion.description}
+                            </p>
                             <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-200">
                               <Sparkles className="h-3.5 w-3.5" />
                               {suggestion.tone}
