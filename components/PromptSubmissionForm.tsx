@@ -123,6 +123,8 @@ export default function PromptSubmissionForm({
     setFeedbackMessage('');
 
     const normalizedDate = date.trim();
+    const todayDate = new Date().toISOString().split('T')[0];
+    const resolvedDate = normalizedDate || todayDate;
     const payload = {
       author: author.trim(),
       email: email.trim(),
@@ -133,7 +135,7 @@ export default function PromptSubmissionForm({
       promptContent: promptContent.trim(),
       tool: tool.trim(),
       tags: parseTags(tags),
-      date: normalizedDate || undefined,
+      date: resolvedDate,
     };
 
     try {
