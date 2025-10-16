@@ -2,9 +2,9 @@
 id: "10"
 slug: "alur-prototipe-chatbot"
 title: "Alur Prototipe Chatbot Layanan Pelanggan"
-author: "Raka Suryana"
-date: "2024-05-12"
-tool: "ChatGPT"
+author: "ruangriung team"
+date: "2025-10-17"
+tool: "Google AI Studio"
 tags:
   - chatbot
   - customer service

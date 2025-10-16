@@ -2,9 +2,9 @@
 id: "1"
 slug: "landing-page-saas-ai"
 title: "Landing Page SaaS AI yang Memukau"
-author: "RuangRiung Studio"
-date: "2024-02-15"
-tool: "ChatGPT"
+author: "ruangriung team"
+date: "2025-10-17"
+tool: "Google Gemini"
 tags:
   - website
   - landing page

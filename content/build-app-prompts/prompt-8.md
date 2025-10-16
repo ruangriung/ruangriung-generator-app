@@ -2,9 +2,9 @@
 id: "8"
 slug: "alur-ci-cd-monorepo"
 title: "Alur CI/CD untuk Monorepo"
-author: "Yanuar Mahesa"
-date: "2024-04-27"
-tool: "ChatGPT"
+author: "ruangriung team"
+date: "2025-10-17"
+tool: "Emergent.sh"
 tags:
   - devops
   - ci/cd

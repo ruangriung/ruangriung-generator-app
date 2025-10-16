@@ -2,9 +2,9 @@
 id: "2"
 slug: "dashboard-analytics-tailwind"
 title: "Template Dashboard Analytics dengan Tailwind"
-author: "Nala Pradipta"
-date: "2024-03-02"
-tool: "ChatGPT"
+author: "ruangriung team"
+date: "2025-10-17"
+tool: "chatgpt"
 tags:
   - dashboard
   - tailwindcss

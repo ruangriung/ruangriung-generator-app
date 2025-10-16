@@ -2,9 +2,9 @@
 id: "6"
 slug: "copywriting-aplikasi-keuangan"
 title: "Copywriting Aplikasi Keuangan Pribadi"
-author: "Diva Hartanto"
-date: "2024-05-05"
-tool: "ChatGPT"
+author: "ruangriung team"
+date: "2025-10-17"
+tool: "Codex by ChatGPT"
 tags:
   - copywriting
   - finance app

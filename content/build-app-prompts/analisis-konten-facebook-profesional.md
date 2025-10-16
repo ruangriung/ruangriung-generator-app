@@ -2,9 +2,9 @@
 id: "11"
 slug: "analisis-konten-facebook-profesional"
 title: "Blueprint Analisis Konten Facebook Profesional"
-author: "RuangRiung Studio"
-date: "2024-03-12"
-tool: "ChatGPT"
+author: "ruangriung team"
+date: "2025-10-17"
+tool: "deepseek"
 tags:
   - analitik konten
   - facebook

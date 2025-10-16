@@ -2,9 +2,9 @@
 id: "3"
 slug: "aplikasi-mobile-belanja-ux"
 title: "Flow UX Aplikasi Belanja Mobile"
-author: "Sinta Hapsari"
-date: "2024-01-28"
-tool: "ChatGPT"
+author: "ruangriung team"
+date: "2025-10-17"
+tool: "github copilot"
 tags:
   - mobile
   - ux

@@ -2,9 +2,9 @@
 id: "5"
 slug: "design-system-komponen"
 title: "Checklist Design System Komponen UI"
-author: "Anya Wirawan"
-date: "2024-02-01"
-tool: "ChatGPT"
+author: "ruangriung team"
+date: "2025-10-17"
+tool: "Manus AI"
 tags:
   - design system
   - components

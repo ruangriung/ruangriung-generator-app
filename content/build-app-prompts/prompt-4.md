@@ -2,9 +2,9 @@
 id: "4"
 slug: "api-spec-event-booking"
 title: "Spesifikasi API Platform Booking Event"
-author: "RuangRiung Lab"
-date: "2024-04-10"
-tool: "ChatGPT"
+author: "ruangriung team"
+date: "2025-10-17"
+tool: "Google AI Studio"
 tags:
   - api
   - backend

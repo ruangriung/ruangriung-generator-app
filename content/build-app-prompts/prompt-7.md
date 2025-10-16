@@ -2,9 +2,9 @@
 id: "7"
 slug: "arsitektur-microservice-marketplace"
 title: "Arsitektur Microservice Marketplace"
-author: "Bagus Prakoso"
-date: "2024-03-18"
-tool: "ChatGPT"
+author: "ruangriung team"
+date: "2025-10-17"
+tool: "BlackBox AI"
 tags:
   - architecture
   - microservice

@@ -2,9 +2,9 @@
 id: "9"
 slug: "pwa-event-community"
 title: "Blueprint PWA Komunitas Event"
-author: "Galang Novera"
-date: "2024-01-12"
-tool: "ChatGPT"
+author: "ruangriung team"
+date: "2025-10-17"
+tool: "deepseek"
 tags:
   - pwa
   - offline-first
