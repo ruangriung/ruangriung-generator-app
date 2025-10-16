@@ -19,6 +19,8 @@ import {
   ArrowRight,
   HelpCircle,
   RefreshCw,
+  Image as ImageIcon,
+  AppWindow,
 } from 'lucide-react';
 import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
@@ -44,7 +46,9 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
   const [showInstallButton, setShowInstallButton] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
   const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
+  const [isPromptMenuOpen, setIsPromptMenuOpen] = useState(false);
   const toolsMenuRef = useRef<HTMLDivElement>(null);
+  const promptMenuRef = useRef<HTMLDivElement>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   // Efek untuk PWA Install Prompt
@@ -73,6 +77,8 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsHelpOpen(false);
+        setIsToolsMenuOpen(false);
+        setIsPromptMenuOpen(false);
       }
     };
 
@@ -85,9 +91,15 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
   // Efek untuk menutup dropdown menu saat klik di luar area
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-        if (toolsMenuRef.current && !toolsMenuRef.current.contains(event.target as Node)) {
-            setIsToolsMenuOpen(false);
-        }
+      const targetNode = event.target as Node;
+
+      if (toolsMenuRef.current && !toolsMenuRef.current.contains(targetNode)) {
+        setIsToolsMenuOpen(false);
+      }
+
+      if (promptMenuRef.current && !promptMenuRef.current.contains(targetNode)) {
+        setIsPromptMenuOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -160,13 +172,52 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
       </header>
 
       <div className="w-full max-w-4xl mb-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        <Link
-          href="/kumpulan-prompt"
-          className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
-        >
-          <LayoutGrid size={18} />
-          <span>Prompt AI</span>
-        </Link>
+        <div className="relative" ref={promptMenuRef}>
+          <button
+            type="button"
+            onClick={() => setIsPromptMenuOpen(current => !current)}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-light-bg px-4 py-3 text-center text-sm font-semibold text-gray-700 shadow-neumorphic-button transition-all hover:text-purple-600 active:shadow-neumorphic-inset dark:bg-dark-bg dark:text-gray-300 dark:shadow-dark-neumorphic-button dark:hover:text-purple-300 dark:active:shadow-dark-neumorphic-inset"
+          >
+            <LayoutGrid size={18} />
+            <span>Prompt AI</span>
+            <ChevronDown
+              size={16}
+              className={`transition-transform duration-200 ${isPromptMenuOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+          {isPromptMenuOpen && (
+            <div className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
+              <ul className="divide-y divide-gray-100 dark:divide-gray-700">
+                <li>
+                  <Link
+                    href="/kumpulan-prompt"
+                    onClick={() => setIsPromptMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-purple-50 hover:text-purple-700 focus:bg-purple-50 focus:text-purple-700 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-purple-200"
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                    <div className="flex flex-col text-left">
+                      <span className="font-semibold">Prompt Gambar</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Koleksi prompt visual dan kreatif siap pakai.</span>
+                    </div>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/kumpulan-prompt/build-app"
+                    onClick={() => setIsPromptMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-purple-50 hover:text-purple-700 focus:bg-purple-50 focus:text-purple-700 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-purple-200"
+                  >
+                    <AppWindow className="h-4 w-4" />
+                    <div className="flex flex-col text-left">
+                      <span className="font-semibold">Prompt App &amp; Website</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Blueprint untuk membangun aplikasi, dashboard, dan produk digital.</span>
+                    </div>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          )}
+        </div>
         <Link href="/artikel" className="flex items-center justify-center text-center gap-2 px-4 py-3 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-semibold text-sm rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all">
           <Rss size={18} />
           <span>Artikel</span>

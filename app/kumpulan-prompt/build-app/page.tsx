@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
-import PromptClient from '../PromptClient';
 import { getBuildAppPrompts } from '@/lib/buildAppPrompts';
+import BuildAppPageClient from './BuildAppPageClient';
+
+const BUILD_APP_ARTICLE_SLUG = 'analisis-konten-facebook-profesional';
 
 const PAGE_URL = 'https://ruangriung.my.id/kumpulan-prompt/build-app';
 const SOCIAL_IMAGE_URL = 'https://ruangriung.my.id/og-image/og-image-rr.png';
@@ -51,14 +53,6 @@ export default async function BuildAppPromptPage() {
   const prompts = await getBuildAppPrompts();
 
   return (
-    <PromptClient
-      prompts={prompts}
-      title="Kumpulan Prompt Build App"
-      description="Kumpulan prompt terkurasi untuk membantu kamu merancang website, aplikasi, serta arsitektur produk digital dengan cepat."
-      backHref="/kumpulan-prompt"
-      backLabel="Kembali ke Kumpulan Prompt"
-      basePath="/kumpulan-prompt/build-app"
-      showSubmissionTrigger={false}
-    />
+    <BuildAppPageClient prompts={prompts} articleSlug={BUILD_APP_ARTICLE_SLUG} />
   );
 }
