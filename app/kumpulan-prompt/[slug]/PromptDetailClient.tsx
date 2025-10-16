@@ -16,9 +16,22 @@ const sortPrompts = (items: Prompt[]) =>
 interface PromptDetailClientProps {
   prompt: Prompt;
   prompts: Prompt[];
+  collectionHref?: string;
+  collectionLabel?: string;
+  detailBasePath?: string;
+  homeHref?: string;
+  homeLabel?: string;
 }
 
-export default function PromptDetailClient({ prompt, prompts }: PromptDetailClientProps) {
+export default function PromptDetailClient({
+  prompt,
+  prompts,
+  collectionHref = '/kumpulan-prompt',
+  collectionLabel = 'Kembali ke Kumpulan Prompt',
+  detailBasePath = '/kumpulan-prompt',
+  homeHref = '/',
+  homeLabel = 'Kembali ke Beranda',
+}: PromptDetailClientProps) {
   const currentPrompt = prompt;
   const [promptCollection, setPromptCollection] = useState(() => sortPrompts(prompts));
   const [shareFeedback, setShareFeedback] = useState<'idle' | 'success' | 'error'>('idle');
@@ -101,8 +114,8 @@ export default function PromptDetailClient({ prompt, prompts }: PromptDetailClie
   const buildCollectionLink = useCallback((type: 'tag' | 'tool', value: string) => {
     const params = new URLSearchParams();
     params.set(type, value);
-    return `/kumpulan-prompt?${params.toString()}`;
-  }, []);
+    return `${collectionHref}?${params.toString()}`;
+  }, [collectionHref]);
 
   const hasRecommendations =
     featuredPrompts.length > 0 || recommendedTags.length > 0 || recommendedTools.length > 0;
@@ -164,18 +177,18 @@ export default function PromptDetailClient({ prompt, prompts }: PromptDetailClie
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 flex justify-center">
         <Link
-          href="/kumpulan-prompt"
+          href={collectionHref}
           className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
         >
           <ArrowLeft size={18} />
-          <span>Kembali ke Kumpulan Prompt</span>
+          <span>{collectionLabel}</span>
         </Link>
         <Link
-          href="/"
+          href={homeHref}
           className="ml-4 inline-flex items-center justify-center gap-2 px-4 py-2 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
         >
           <ArrowLeft size={18} />
-          <span>Kembali ke Beranda</span>
+          <span>{homeLabel}</span>
         </Link>
       </div>
       <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
@@ -291,7 +304,7 @@ export default function PromptDetailClient({ prompt, prompts }: PromptDetailClie
               {relatedPrompts.map(relatedPrompt => (
                 <Link
                   key={relatedPrompt.slug}
-                  href={`/kumpulan-prompt/${relatedPrompt.slug}`}
+                  href={`${detailBasePath}/${relatedPrompt.slug}`}
                   className="block h-full"
                 >
                   <div className="h-full p-5 bg-gray-50 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 dark:bg-gray-900 dark:border-gray-700">
@@ -403,7 +416,7 @@ export default function PromptDetailClient({ prompt, prompts }: PromptDetailClie
                     </p>
                   </div>
                   <Link
-                    href="/kumpulan-prompt"
+                    href={collectionHref}
                     className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500/60 dark:text-blue-400"
                   >
                     Lihat semua prompt
@@ -413,7 +426,7 @@ export default function PromptDetailClient({ prompt, prompts }: PromptDetailClie
                   {featuredPrompts.map(featured => (
                     <Link
                       key={featured.slug}
-                      href={`/kumpulan-prompt/${featured.slug}`}
+                      href={`${detailBasePath}/${featured.slug}`}
                       className="group flex h-full flex-col justify-between rounded-xl border border-gray-100 bg-gray-50 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-md dark:border-gray-800 dark:bg-gray-800/60 dark:hover:border-blue-700 dark:hover:bg-gray-800"
                     >
                       <div>
