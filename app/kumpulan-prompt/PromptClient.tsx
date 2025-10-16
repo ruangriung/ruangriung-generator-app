@@ -41,9 +41,23 @@ const highlightMatches = (text: string, term: string) => {
 
 interface PromptClientProps {
   prompts: Prompt[];
+  title?: string;
+  description?: string;
+  backHref?: string;
+  backLabel?: string;
+  basePath?: string;
+  showSubmissionTrigger?: boolean;
 }
 
-export default function PromptClient({ prompts }: PromptClientProps) {
+export default function PromptClient({
+  prompts,
+  title,
+  description,
+  backHref,
+  backLabel,
+  basePath,
+  showSubmissionTrigger = true,
+}: PromptClientProps) {
   const [promptList, setPromptList] = useState(() => sortPrompts(prompts));
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
@@ -53,6 +67,12 @@ export default function PromptClient({ prompts }: PromptClientProps) {
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const promptListRef = useRef<HTMLDivElement | null>(null);
   const hasInteractedWithPaginationRef = useRef(false);
+  const effectiveTitle = title ?? 'Kumpulan Prompt';
+  const effectiveDescription = description ??
+    'Jelajahi, gunakan, dan bagikan prompt kreatif untuk berbagai model AI.';
+  const effectiveBackHref = backHref ?? '/';
+  const effectiveBackLabel = backLabel ?? 'Kembali ke Beranda';
+  const effectiveBasePath = basePath ?? '/kumpulan-prompt';
   const topAdSlot = PROMPT_TOP_AD_SLOT;
   const bottomAdSlot = PROMPT_BOTTOM_AD_SLOT;
 
@@ -290,20 +310,22 @@ export default function PromptClient({ prompts }: PromptClientProps) {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 flex justify-center">
         <Link
-          href="/"
+          href={effectiveBackHref}
           className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
         >
           <ArrowLeft size={18} />
-          <span>Kembali ke Beranda</span>
+          <span>{effectiveBackLabel}</span>
         </Link>
       </div>
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900 dark:text-white">Kumpulan Prompt</h1>
-        <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">Jelajahi, gunakan, dan bagikan prompt kreatif untuk berbagai model AI.</p>
-        <PromptSubmissionTrigger
-          className="mt-6 px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition duration-300 shadow-lg"
-          onSuccess={handlePromptCreated}
-        />
+        <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900 dark:text-white">{effectiveTitle}</h1>
+        <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">{effectiveDescription}</p>
+        {showSubmissionTrigger && (
+          <PromptSubmissionTrigger
+            className="mt-6 px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition duration-300 shadow-lg"
+            onSuccess={handlePromptCreated}
+          />
+        )}
       </div>
 
       <div className="mb-10 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
@@ -425,7 +447,7 @@ export default function PromptClient({ prompts }: PromptClientProps) {
             key={prompt.id}
             className="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-6 shadow-md transition-shadow duration-300 hover:shadow-xl dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700"
           >
-            <Link href={`/kumpulan-prompt/${prompt.slug}`} className="flex-1">
+            <Link href={`${effectiveBasePath}/${prompt.slug}`} className="flex-1">
               <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 {highlightMatches(prompt.title, searchTerm)}
               </h5>
@@ -543,7 +565,7 @@ export default function PromptClient({ prompts }: PromptClientProps) {
                 {featuredPrompts.map(prompt => (
                   <Link
                     key={prompt.id}
-                    href={`/kumpulan-prompt/${prompt.slug}`}
+                    href={`${effectiveBasePath}/${prompt.slug}`}
                     className="group flex h-full flex-col justify-between rounded-xl border border-gray-100 bg-gray-50 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-md dark:border-gray-800 dark:bg-gray-800/60 dark:hover:border-blue-700 dark:hover:bg-gray-800"
                   >
                     <div>

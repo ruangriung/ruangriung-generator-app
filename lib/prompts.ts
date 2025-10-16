@@ -195,16 +195,14 @@ export interface Prompt {
   promptContent: string;
 }
 
-export async function getAllPrompts(): Promise<Prompt[]> {
-  let persistedPrompts: Prompt[] = [];
-
+const readPromptsFromDirectory = async (directory: string): Promise<Prompt[]> => {
   try {
-    const fileNames = await fs.readdir(promptsDirectory);
-    persistedPrompts = await Promise.all(
+    const fileNames = await fs.readdir(directory);
+    const prompts = await Promise.all(
       fileNames
         .filter(fileName => fileName.endsWith('.md'))
         .map(async fileName => {
-          const fullPath = path.join(promptsDirectory, fileName);
+          const fullPath = path.join(directory, fileName);
           const fileContents = await fs.readFile(fullPath, 'utf8');
           const { data, content } = matter(fileContents);
           const prompt: Prompt = {
@@ -224,11 +222,21 @@ export async function getAllPrompts(): Promise<Prompt[]> {
           return prompt;
         }),
     );
-  } catch (error) {
-    // If the directory doesn't exist or cannot be read, continue with transient prompts only
-    console.log('Could not read prompts directory, returning transient prompts only.');
-  }
 
+    return prompts;
+  } catch (error) {
+    console.log(`Could not read prompts directory at ${directory}, returning empty array.`);
+    return [];
+  }
+};
+
+export const getPromptsFromDirectory = async (directory: string): Promise<Prompt[]> => {
+  const prompts = await readPromptsFromDirectory(directory);
+  return prompts.sort((a, b) => getPromptSortValue(b) - getPromptSortValue(a));
+};
+
+export async function getAllPrompts(): Promise<Prompt[]> {
+  const persistedPrompts = await readPromptsFromDirectory(promptsDirectory);
   const transientPrompts = listTransientPrompts();
   const promptMap = new Map<string, Prompt>();
 
