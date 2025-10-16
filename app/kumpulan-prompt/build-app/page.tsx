@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getBuildAppPrompts } from '@/lib/buildAppPrompts';
 import BuildAppPageClient from './BuildAppPageClient';
 
-const BUILD_APP_ARTICLE_SLUG = 'analisis-konten-facebook-profesional';
+const FEATURED_PROMPT_SLUG = 'analisis-konten-facebook-profesional';
 
 const PAGE_URL = 'https://ruangriung.my.id/kumpulan-prompt/build-app';
 const SOCIAL_IMAGE_URL = 'https://ruangriung.my.id/og-image/og-image-rr.png';
@@ -53,6 +53,9 @@ export default async function BuildAppPromptPage() {
   const prompts = await getBuildAppPrompts();
 
   return (
-    <BuildAppPageClient prompts={prompts} articleSlug={BUILD_APP_ARTICLE_SLUG} />
+    <BuildAppPageClient
+      prompts={prompts}
+      featuredPromptSlug={FEATURED_PROMPT_SLUG}
+    />
   );
 }

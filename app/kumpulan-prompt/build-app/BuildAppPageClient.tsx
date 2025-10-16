@@ -16,7 +16,7 @@ import { BUILD_APP_EVENT_CATEGORY, trackAnalyticsEvent } from '@/lib/analytics';
 
 interface BuildAppPageClientProps {
   prompts: Prompt[];
-  articleSlug: string;
+  featuredPromptSlug: string;
 }
 
 const sortByRecency = (items: Prompt[]) =>
@@ -26,7 +26,7 @@ const sortByRecency = (items: Prompt[]) =>
 
 export default function BuildAppPageClient({
   prompts: initialPrompts,
-  articleSlug,
+  featuredPromptSlug,
 }: BuildAppPageClientProps) {
   const [prompts, setPrompts] = useState(() => sortByRecency(initialPrompts));
   const [hasTrackedFormFocus, setHasTrackedFormFocus] = useState(false);
@@ -42,12 +42,12 @@ export default function BuildAppPageClient({
     });
   }, []);
 
-  const handleArticleClick = useCallback(() => {
-    trackAnalyticsEvent('click_build_app_article', {
+  const handleFeaturedPromptClick = useCallback(() => {
+    trackAnalyticsEvent('click_build_app_featured_prompt', {
       event_category: BUILD_APP_EVENT_CATEGORY,
-      article_slug: articleSlug,
+      prompt_slug: featuredPromptSlug,
     });
-  }, [articleSlug]);
+  }, [featuredPromptSlug]);
 
   const handlePromptCreated = useCallback(
     (prompt: Prompt) => {
@@ -145,11 +145,11 @@ export default function BuildAppPageClient({
               </ul>
               <div className="flex flex-wrap gap-3">
                 <Link
-                  href={`/artikel/${articleSlug}`}
-                  onClick={handleArticleClick}
+                  href={`/kumpulan-prompt/build-app/${featuredPromptSlug}`}
+                  onClick={handleFeaturedPromptClick}
                   className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:hover:bg-indigo-400"
                 >
-                  Baca panduan lengkap
+                  Baca prompt unggulan
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <a
