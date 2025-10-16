@@ -4,7 +4,7 @@ slug: "analisis-konten-facebook-profesional"
 title: "Blueprint Analisis Konten Facebook Profesional"
 author: "ruangriung team"
 date: "2025-10-17"
-tool: "deepseek"
+tool: "Google AI Studio, Vercel Bot"
 tags:
   - analitik konten
   - facebook
