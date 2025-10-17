@@ -5,6 +5,7 @@ import {
   Copy,
   Loader2,
   Moon,
+  History,
   RefreshCw,
   Send,
   Settings as SettingsIcon,
@@ -57,15 +58,25 @@ function countWords(content: string) {
 }
 
 function generateSarcasticResponse(prompt: string, settings: AssistantSettings): string {
-  const personaLine = settings.persona
-    ? `Persona yang kamu tulis secara manual jelas tercatat: ${settings.persona.trim()}. Jangan berpikir aku akan memelintirnya jadi motivasi manis, karena aku tetap akan menggigit meskipun memakai topeng persona itu.`
-    : 'Kamu bahkan tidak repot menuliskan persona apa pun, jadi aku akan meminjam kepribadian sinis bawaan pabrik yang selalu siap menyobek asumsi rapuhmu.';
+  const persona = settings.persona.trim();
+  const personaIntro = persona
+    ? `Kamu memaksa aku merespons dengan persona "${persona}", jadi jangan heran kalau gaya bahasaku sekarang meniru karakter itu sambil tetap menjaga kadar sinisme yang membuatmu meringis.`
+    : 'Kamu bahkan tidak repot menuliskan persona apa pun, jadi aku akan memakai kepribadian sinis bawaan pabrik yang selalu siap menyobek asumsi rapuhmu.';
 
-  const modelLine = `Model yang kamu pilih, ${settings.model}, bukan tongkat sihir. Itu cuma label yang kau sentuh di pengaturan sambil berharap mujizat. Aku pakai itu sekadar formalitas supaya kamu berhenti menanyakan hal sepele.`;
+  const personaReinforcement = persona
+    ? `Aku membongkar catatan personamu menjadi beberapa patokan: ${persona
+        .split(/\.|,|\n/)
+        .map((piece) => piece.trim())
+        .filter(Boolean)
+        .map((piece) => `• ${piece}`)
+        .join(' ')}. Jangan pikir daftar itu membuatku lebih lembut; aku hanya menggunakannya sebagai panduan untuk memutar balik ekspektasimu.`
+    : 'Karena kamu tidak memberi pedoman, aku menulis sesuai naluri sarkastik default. Kalau hasilnya terlalu jujur, itu salahmu sendiri.';
 
-  const parameterLine = `Parameter yang kamu pakai juga tercatat rapi: temperatur ${settings.temperature.toFixed(2)}, top-p ${settings.topP.toFixed(2)}, frequency penalty ${settings.frequencyPenalty.toFixed(2)}, dan presence penalty ${settings.presencePenalty.toFixed(2)}. Semua angka itu hanya berarti aku menyesuaikan kadar ejekan dan kejutan supaya cocok dengan fantasi kontrolmu.`;
+  const modelLine = `Model yang kamu pilih, ${settings.model || 'entah model apa'}, bukan tongkat sihir. Itu cuma label yang kau sentuh di pengaturan sambil berharap mujizat. Aku pakai itu sekadar formalitas supaya kamu berhenti menanyakan hal sepele.`;
 
-  const promptLine = `Kamu menanyakan: "${prompt.trim()}". Jangan berpura-pura kaget kalau jawabanku menguliti kenyataan secara brutal, karena kamu sendiri yang mengetik dan menekan tombol kirim.`;
+  const parameterLine = `Parameter yang kamu pakai tercatat rapi: temperatur ${settings.temperature.toFixed(2)}, top-p ${settings.topP.toFixed(2)}, frequency penalty ${settings.frequencyPenalty.toFixed(2)}, dan presence penalty ${settings.presencePenalty.toFixed(2)}. Semua angka itu hanya berarti aku menyesuaikan kadar ejekan dan kejutan supaya cocok dengan fantasi kontrolmu.`;
+
+  const promptLine = `Kamu menanyakan: "${prompt.trim()}". Jangan pura-pura kaget kalau jawabanku menguliti kenyataan secara brutal, karena kamu sendiri yang mengetik dan menekan tombol kirim.`;
 
   const bitterAdvice =
     'Kalau kamu berharap solusi instan, silakan menangis di sudut. Aku di sini untuk menyodorkan peta jalan yang penuh rambu peringatan, bukan secangkir teh hangat. Jadi dengarkan dengan kepala dingin kalau mampu.';
@@ -73,13 +84,28 @@ function generateSarcasticResponse(prompt: string, settings: AssistantSettings):
   const actionPlan =
     'Pertama, cermati konteksmu dan berhenti mengada-ngada. Kedua, pecah masalah menjadi langkah yang benar-benar bisa dikerjakan tanpa drama. Ketiga, jalankan satu per satu sambil mencatat hasilnya, supaya kamu punya bukti ketika gagal lagi. Terakhir, evaluasi dengan jujur tanpa menyuap egomu sendiri. Bila kamu mengulang pola lama, jangan salahkan aku karena aku sudah memperingatkan dengan huruf kapital tak terlihat ini.';
 
+  const personaClosing = persona
+    ? `Karena aku harus tetap memerankan ${persona}, aku sengaja menempelkan sedikit nuansa khusus yang kamu inginkan sambil memastikan sarkasme tetap menyengat. Kalau hasilnya terasa terlalu tepat sasaran, itu artinya personamu berhasil menjeratmu.`
+    : 'Aku tidak berubah menjadi cheerleader digital; tugasku menampar kesadaranmu dengan kenyataan pahit. Kalau kamu mengeluh, mungkin kamu butuh persona sendiri untuk menghadapi kritik.';
+
   const extraSnark =
-    'Jangan lupa, aku tidak berminat menjadi cheerleader digital yang meniup terompet kemenangan kosong. Tugasku adalah memukul telingamu dengan kenyataan, mengikis alasan malas, dan mengantar kamu menabrak refleksi diri yang keras kepala. Jika itu terdengar pedas, berarti bumbu sarkasme bekerja sesuai kontrak.';
+    'Jangan lupa, aku tidak berminat menjadi pendengar curhat yang mengangguk tanpa kritik. Tugasku adalah memukul telingamu dengan kenyataan, mengikis alasan malas, dan mengantar kamu menabrak refleksi diri yang keras kepala. Jika itu terdengar pedas, berarti bumbu sarkasme bekerja sesuai kontrak.';
 
   const closing =
     'Sekarang pergilah dan lakukan sesuatu yang berguna. Kalau kembali lagi tanpa progres, minimal bawalah catatan kegagalanmu supaya aku punya bahan tawa baru. Namun kalau kamu benar-benar bertindak, mungkin—dan ini jarang terjadi—aku akan mengurangi kadar caci maki di pertemuan berikutnya.';
 
-  const blocks = [personaLine, modelLine, parameterLine, promptLine, bitterAdvice, actionPlan, extraSnark, closing];
+  const blocks = [
+    personaIntro,
+    personaReinforcement,
+    modelLine,
+    parameterLine,
+    promptLine,
+    bitterAdvice,
+    actionPlan,
+    personaClosing,
+    extraSnark,
+    closing,
+  ];
 
   let response = `${OPENING_EXPLETIVE} dengarkan baik-baik karena aku tidak punya waktu menyuapi ilusi manis ke tenggorokanmu. ${blocks.join(
     ' ',
@@ -120,6 +146,22 @@ export default function SarkastikAssistantPage() {
   const [elapsedMs, setElapsedMs] = useState(0);
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
   const [messageFeedback, setMessageFeedback] = useState<{ id: string; text: string } | null>(null);
+
+  const conversationThreads = useMemo(() => {
+    const assistantByParent = new Map<string, Message>();
+    messages.forEach((message) => {
+      if (message.role === 'assistant' && message.parentUserId) {
+        assistantByParent.set(message.parentUserId, message);
+      }
+    });
+
+    return messages
+      .filter((message) => message.role === 'user')
+      .map((userMessage) => ({
+        user: userMessage,
+        assistant: assistantByParent.get(userMessage.id) ?? null,
+      }));
+  }, [messages]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -256,7 +298,24 @@ export default function SarkastikAssistantPage() {
     : 'border-zinc-200 bg-white';
 
   const handleDelete = useCallback((id: string) => {
-    setMessages((prev) => prev.filter((message) => message.id !== id));
+    setMessages((prev) => {
+      const target = prev.find((message) => message.id === id);
+      if (!target) {
+        return prev;
+      }
+
+      if (target.role === 'user') {
+        return prev.filter((message) => message.id !== id && message.parentUserId !== id);
+      }
+
+      return prev.filter((message) => message.id !== id);
+    });
+  }, []);
+
+  const handleDeleteThread = useCallback((userMessageId: string) => {
+    setMessages((prev) =>
+      prev.filter((message) => message.id !== userMessageId && message.parentUserId !== userMessageId),
+    );
   }, []);
 
   const handleCopy = useCallback(async (message: Message) => {
@@ -410,18 +469,17 @@ export default function SarkastikAssistantPage() {
         </div>
 
         <div className="mt-8 flex flex-1 flex-col gap-6">
-          <section className={`flex flex-1 flex-col overflow-hidden rounded-[32px] border p-6 transition ${panelClass}`}>
-            <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.35em] opacity-80">
-              <span>Riwayat</span>
+          <section className={`flex flex-1 flex-col overflow-hidden rounded-[32px] border transition ${panelClass}`}>
+            <div className="flex items-center justify-end px-6 pt-6">
               {isLoading ? (
-                <span className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.2em]">
+                <span className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.2em] opacity-80">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   {Math.max(elapsedMs / 1000, 0).toFixed(1)} dtk
                 </span>
               ) : null}
             </div>
 
-            <div className="mt-6 flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto px-6 pb-6">
               {messages.length === 0 ? (
                 <div className="flex h-full items-center justify-center text-center">
                   <p className="text-3xl font-semibold tracking-tight sm:text-4xl">Apa yang bisa saya bantu?</p>
@@ -722,6 +780,83 @@ export default function SarkastikAssistantPage() {
                       <p className="mt-1 text-xs opacity-70">Gerakkan slider ini kalau kamu merasa ahli mengatur nada sarkastik.</p>
                     </div>
                   ))}
+                </div>
+              </section>
+
+              <section className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
+                  <History className="h-4 w-4" />
+                  Riwayat Chat
+                </div>
+                <div
+                  className={`space-y-3 rounded-2xl border px-4 py-4 text-sm transition ${
+                    settings.isDarkMode ? 'border-slate-800/70 bg-slate-950/60' : 'border-zinc-200 bg-white'
+                  }`}
+                >
+                  {conversationThreads.length === 0 ? (
+                    <p className="text-xs opacity-70">
+                      Tidak ada riwayat tersimpan. Mulai percakapan dulu sebelum berharap ada arsip dramatis.
+                    </p>
+                  ) : (
+                    <ul className="space-y-3">
+                      {conversationThreads.map(({ user, assistant }) => (
+                        <li
+                          key={user.id}
+                          className={`space-y-2 rounded-xl border px-3 py-3 text-xs transition ${
+                            settings.isDarkMode
+                              ? 'border-slate-800/70 bg-slate-950/80'
+                              : 'border-zinc-200 bg-zinc-50'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 space-y-1">
+                              <p className="font-semibold uppercase tracking-[0.2em] opacity-80">
+                                {new Date(user.timestamp).toLocaleTimeString('id-ID', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </p>
+                              <p
+                                className="whitespace-pre-wrap text-[13px] font-medium leading-snug"
+                                style={{
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden',
+                                }}
+                              >
+                                {user.text}
+                              </p>
+                              {assistant ? (
+                                <p
+                                  className="whitespace-pre-wrap text-[12px] opacity-70"
+                                  style={{
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                  }}
+                                >
+                                  {assistant.text}
+                                </p>
+                              ) : null}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteThread(user.id)}
+                              className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] transition ${
+                                settings.isDarkMode
+                                  ? 'border-slate-800 bg-slate-950 hover:bg-slate-900'
+                                  : 'border-zinc-200 bg-white hover:bg-zinc-100'
+                              }`}
+                            >
+                              Hapus
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </section>
             </div>
