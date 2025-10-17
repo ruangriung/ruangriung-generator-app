@@ -2,10 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Copy,
   Loader2,
   Moon,
+  RefreshCw,
   Send,
   Settings as SettingsIcon,
+  Share2,
   SlidersHorizontal,
   Sun,
   Trash2,
@@ -18,6 +21,7 @@ interface Message {
   text: string;
   timestamp: number;
   durationMs?: number;
+  parentUserId?: string;
 }
 
 interface AssistantSettings {
@@ -52,23 +56,14 @@ function countWords(content: string) {
     .filter(Boolean).length;
 }
 
-function generateSarcasticResponse(
-  prompt: string,
-  settings: AssistantSettings,
-): string {
+function generateSarcasticResponse(prompt: string, settings: AssistantSettings): string {
   const personaLine = settings.persona
     ? `Persona yang kamu tulis secara manual jelas tercatat: ${settings.persona.trim()}. Jangan berpikir aku akan memelintirnya jadi motivasi manis, karena aku tetap akan menggigit meskipun memakai topeng persona itu.`
     : 'Kamu bahkan tidak repot menuliskan persona apa pun, jadi aku akan meminjam kepribadian sinis bawaan pabrik yang selalu siap menyobek asumsi rapuhmu.';
 
   const modelLine = `Model yang kamu pilih, ${settings.model}, bukan tongkat sihir. Itu cuma label yang kau sentuh di pengaturan sambil berharap mujizat. Aku pakai itu sekadar formalitas supaya kamu berhenti menanyakan hal sepele.`;
 
-  const parameterLine = `Parameter yang kamu pakai juga tercatat rapi: temperatur ${settings.temperature.toFixed(
-    2,
-  )}, top-p ${settings.topP.toFixed(2)}, frequency penalty ${settings.frequencyPenalty.toFixed(
-    2,
-  )}, dan presence penalty ${settings.presencePenalty.toFixed(
-    2,
-  )}. Semua angka itu hanya berarti aku menyesuaikan kadar ejekan dan kejutan supaya cocok dengan fantasi kontrolmu.`;
+  const parameterLine = `Parameter yang kamu pakai juga tercatat rapi: temperatur ${settings.temperature.toFixed(2)}, top-p ${settings.topP.toFixed(2)}, frequency penalty ${settings.frequencyPenalty.toFixed(2)}, dan presence penalty ${settings.presencePenalty.toFixed(2)}. Semua angka itu hanya berarti aku menyesuaikan kadar ejekan dan kejutan supaya cocok dengan fantasi kontrolmu.`;
 
   const promptLine = `Kamu menanyakan: "${prompt.trim()}". Jangan berpura-pura kaget kalau jawabanku menguliti kenyataan secara brutal, karena kamu sendiri yang mengetik dan menekan tombol kirim.`;
 
@@ -84,16 +79,7 @@ function generateSarcasticResponse(
   const closing =
     'Sekarang pergilah dan lakukan sesuatu yang berguna. Kalau kembali lagi tanpa progres, minimal bawalah catatan kegagalanmu supaya aku punya bahan tawa baru. Namun kalau kamu benar-benar bertindak, mungkin—dan ini jarang terjadi—aku akan mengurangi kadar caci maki di pertemuan berikutnya.';
 
-  const blocks = [
-    personaLine,
-    modelLine,
-    parameterLine,
-    promptLine,
-    bitterAdvice,
-    actionPlan,
-    extraSnark,
-    closing,
-  ];
+  const blocks = [personaLine, modelLine, parameterLine, promptLine, bitterAdvice, actionPlan, extraSnark, closing];
 
   let response = `${OPENING_EXPLETIVE} dengarkan baik-baik karena aku tidak punya waktu menyuapi ilusi manis ke tenggorokanmu. ${blocks.join(
     ' ',
@@ -128,9 +114,11 @@ export default function SarkastikAssistantPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [settings, setSettings] = useState<AssistantSettings>(defaultSettings);
-  const [showSettings, setShowSettings] = useState(true);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
+  const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
+  const [messageFeedback, setMessageFeedback] = useState<{ id: string; text: string } | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -182,6 +170,17 @@ export default function SarkastikAssistantPage() {
     };
   }, [isLoading]);
 
+  useEffect(() => {
+    if (!messageFeedback) return;
+    if (typeof window === 'undefined') return;
+
+    const timeout = window.setTimeout(() => {
+      setMessageFeedback(null);
+    }, 2200);
+
+    return () => window.clearTimeout(timeout);
+  }, [messageFeedback]);
+
   const themeClass = useMemo(
     () =>
       settings.isDarkMode
@@ -194,14 +193,73 @@ export default function SarkastikAssistantPage() {
     ? 'bg-slate-900/60 border-slate-700 text-slate-100'
     : 'bg-white/70 border-zinc-200 text-zinc-900';
 
+  const drawerClass = settings.isDarkMode
+    ? 'bg-slate-950 text-slate-100 border-slate-800'
+    : 'bg-white text-zinc-900 border-zinc-200';
+
   const handleDelete = useCallback((id: string) => {
     setMessages((prev) => prev.filter((message) => message.id !== id));
   }, []);
+
+  const handleCopy = useCallback(async (message: Message) => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      if (navigator?.clipboard) {
+        await navigator.clipboard.writeText(message.text);
+        setMessageFeedback({ id: message.id, text: 'Tersalin ke clipboard' });
+        return;
+      }
+    } catch (error) {
+      console.warn('Clipboard write failed, falling back to manual method.', error);
+    }
+
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = message.text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setMessageFeedback({ id: message.id, text: 'Tersalin ke clipboard' });
+    } catch (error) {
+      console.error('Fallback copy failed', error);
+    }
+  }, []);
+
+  const handleShare = useCallback(
+    async (message: Message) => {
+      if (typeof window === 'undefined') return;
+
+      if (navigator?.share) {
+        try {
+          await navigator.share({
+            title: 'Asisten AI Sarkastik',
+            text: message.text,
+          });
+          setMessageFeedback({ id: message.id, text: 'Dibagikan melalui share sheet' });
+          return;
+        } catch (error) {
+          if ((error as { name?: string }).name === 'AbortError') {
+            return;
+          }
+          console.warn('Share failed, fallback to copy', error);
+        }
+      }
+
+      await handleCopy(message);
+    },
+    [handleCopy],
+  );
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (!input.trim() || isLoading) return;
+
+      setRegeneratingId(null);
 
       const userMessage: Message = {
         id: crypto.randomUUID(),
@@ -215,9 +273,7 @@ export default function SarkastikAssistantPage() {
       setIsLoading(true);
 
       const start = performance.now();
-
       const responseText = generateSarcasticResponse(input, settings);
-
       await new Promise((resolve) => setTimeout(resolve, 900));
 
       const assistantMessage: Message = {
@@ -226,6 +282,7 @@ export default function SarkastikAssistantPage() {
         text: responseText,
         timestamp: Date.now(),
         durationMs: performance.now() - start,
+        parentUserId: userMessage.id,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -234,26 +291,61 @@ export default function SarkastikAssistantPage() {
     [input, isLoading, settings],
   );
 
+  const handleRegenerate = useCallback(
+    async (messageId: string) => {
+      if (isLoading) return;
+
+      const targetMessage = messages.find((message) => message.id === messageId);
+      if (!targetMessage || targetMessage.role !== 'assistant' || !targetMessage.parentUserId) {
+        return;
+      }
+
+      const userMessage = messages.find((message) => message.id === targetMessage.parentUserId);
+      if (!userMessage) {
+        return;
+      }
+
+      setRegeneratingId(messageId);
+      setIsLoading(true);
+
+      const start = performance.now();
+      const responseText = generateSarcasticResponse(userMessage.text, settings);
+      await new Promise((resolve) => setTimeout(resolve, 900));
+      const duration = performance.now() - start;
+
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === messageId
+            ? {
+                ...message,
+                text: responseText,
+                timestamp: Date.now(),
+                durationMs: duration,
+              }
+            : message,
+        ),
+      );
+
+      setIsLoading(false);
+      setRegeneratingId(null);
+    },
+    [isLoading, messages, settings],
+  );
+
   return (
     <div className={`min-h-screen px-4 py-10 transition-colors duration-300 ${themeClass}`}>
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
         <header className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Asisten AI Sarkastik
-              </h1>
-              <p className="text-sm sm:text-base">
-                Tidak ada salam manis. Langsung ketik kalau berani.
-              </p>
+              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Asisten AI Sarkastik</h1>
+              <p className="text-sm sm:text-base">Tidak ada salam manis. Langsung ketik kalau berani.</p>
             </div>
             <button
               type="button"
-              onClick={() => setShowSettings((prev) => !prev)}
+              onClick={() => setIsDrawerOpen(true)}
               className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
-                settings.isDarkMode
-                  ? 'border-slate-700 bg-slate-900/70 hover:bg-slate-900'
-                  : 'border-zinc-200 bg-white hover:bg-zinc-50'
+                settings.isDarkMode ? 'border-slate-700 bg-slate-900/70 hover:bg-slate-900' : 'border-zinc-200 bg-white hover:bg-zinc-50'
               }`}
             >
               <SettingsIcon className="h-4 w-4" />
@@ -262,168 +354,7 @@ export default function SarkastikAssistantPage() {
           </div>
         </header>
 
-        {showSettings ? (
-          <section
-            className={`grid gap-4 rounded-3xl border p-6 transition-all md:grid-cols-2 ${cardClass}`}
-          >
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
-                <SettingsIcon className="h-4 w-4" />
-                Preferensi Utama
-              </div>
-              <div className="flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition">
-                <div className="flex items-center gap-3">
-                  {settings.isDarkMode ? (
-                    <Moon className="h-5 w-5" />
-                  ) : (
-                    <Sun className="h-5 w-5" />
-                  )}
-                  <div>
-                    <p className="font-medium">Mode Gelap</p>
-                    <p className="text-xs opacity-70">
-                      Aktifkan tema gelap kalau kamu muak melihat layar silau.
-                    </p>
-                  </div>
-                </div>
-                <label className="relative inline-flex cursor-pointer items-center">
-                  <input
-                    type="checkbox"
-                    className="peer sr-only"
-                    checked={settings.isDarkMode}
-                    onChange={(event) =>
-                      setSettings((prev) => ({
-                        ...prev,
-                        isDarkMode: event.target.checked,
-                      }))
-                    }
-                  />
-                  <div className="h-6 w-11 rounded-full bg-zinc-300 transition peer-checked:bg-slate-600">
-                    <div className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5 peer-checked:bg-zinc-100" />
-                  </div>
-                </label>
-              </div>
-
-              <div className="flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition">
-                <div className="flex items-center gap-3">
-                  <SlidersHorizontal className="h-5 w-5" />
-                  <div>
-                    <p className="font-medium">Pilih Model</p>
-                    <p className="text-xs opacity-70">
-                      Hanya label, bukan kontrak keajaiban.
-                    </p>
-                  </div>
-                </div>
-                <select
-                  value={settings.model}
-                  onChange={(event) =>
-                    setSettings((prev) => ({ ...prev, model: event.target.value }))
-                  }
-                  className={`rounded-xl border px-3 py-2 text-sm font-medium outline-none transition ${
-                    settings.isDarkMode
-                      ? 'border-slate-700 bg-slate-900'
-                      : 'border-zinc-200 bg-white'
-                  }`}
-                >
-                  <option value="gpt-sarkas-13b">gpt-sarkas-13b</option>
-                  <option value="gpt-sarkas-7b">gpt-sarkas-7b</option>
-                  <option value="gpt-sarkas-lite">gpt-sarkas-lite</option>
-                  <option value="gpt-sarkas-ultra">gpt-sarkas-ultra</option>
-                </select>
-              </div>
-
-              <div className="rounded-2xl border p-4 text-sm transition">
-                <div className="mb-3 flex items-center gap-2">
-                  <UserPen className="h-5 w-5" />
-                  <p className="font-semibold">Persona AI</p>
-                </div>
-                <textarea
-                  value={settings.persona}
-                  onChange={(event) =>
-                    setSettings((prev) => ({ ...prev, persona: event.target.value }))
-                  }
-                  placeholder="Tulis manual persona sinismu di sini."
-                  className={`w-full min-h-[120px] resize-none rounded-xl border px-3 py-2 text-sm outline-none transition ${
-                    settings.isDarkMode
-                      ? 'border-slate-700 bg-slate-900 placeholder:text-slate-500'
-                      : 'border-zinc-200 bg-white placeholder:text-zinc-400'
-                  }`}
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
-                <SlidersHorizontal className="h-4 w-4" />
-                Parameter Respons
-              </div>
-              <div className="grid gap-4">
-                {[
-                  {
-                    label: 'Temperatur',
-                    key: 'temperature' as const,
-                    min: 0,
-                    max: 1,
-                    step: 0.05,
-                  },
-                  {
-                    label: 'Top-p',
-                    key: 'topP' as const,
-                    min: 0,
-                    max: 1,
-                    step: 0.05,
-                  },
-                  {
-                    label: 'Frequency Penalty',
-                    key: 'frequencyPenalty' as const,
-                    min: 0,
-                    max: 2,
-                    step: 0.05,
-                  },
-                  {
-                    label: 'Presence Penalty',
-                    key: 'presencePenalty' as const,
-                    min: 0,
-                    max: 2,
-                    step: 0.05,
-                  },
-                ].map((slider) => (
-                  <div
-                    key={slider.key}
-                    className="rounded-2xl border px-4 py-3 text-sm transition"
-                  >
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium">{slider.label}</p>
-                      <span className="text-xs font-semibold">
-                        {settings[slider.key].toFixed(2)}
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min={slider.min}
-                      max={slider.max}
-                      step={slider.step}
-                      value={settings[slider.key]}
-                      onChange={(event) =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          [slider.key]: Number.parseFloat(event.target.value),
-                        }))
-                      }
-                      className="mt-2 w-full accent-fuchsia-500"
-                    />
-                    <p className="mt-1 text-xs opacity-70">
-                      Gerakkan slider ini kalau kamu merasa ahli mengatur nada sarkastik.
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        ) : null}
-
-        <section
-          className={`flex flex-col gap-4 rounded-3xl border p-6 transition ${cardClass}`}
-        >
+        <section className={`flex flex-1 flex-col gap-4 rounded-3xl border p-6 transition ${cardClass}`}>
           <div className="flex items-center justify-between text-sm font-semibold uppercase tracking-wide">
             <span>Riwayat Percakapan</span>
             {isLoading ? (
@@ -435,72 +366,113 @@ export default function SarkastikAssistantPage() {
           </div>
 
           <div
-            className={`flex h-[420px] flex-col gap-3 overflow-y-auto rounded-2xl border p-4 ${
-              settings.isDarkMode
-                ? 'border-slate-800 bg-slate-950/40'
-                : 'border-zinc-200 bg-white/60'
+            className={`flex h-[460px] flex-col gap-3 overflow-y-auto rounded-2xl border p-4 ${
+              settings.isDarkMode ? 'border-slate-800 bg-slate-950/40' : 'border-zinc-200 bg-white/60'
             }`}
           >
             {messages.length === 0 ? (
-              <p className="text-center text-sm opacity-70">
-                Belum ada percakapan. Tidak ada sapaan pembuka di sini.
-              </p>
+              <p className="text-center text-sm opacity-70">Belum ada percakapan. Tidak ada sapaan pembuka di sini.</p>
             ) : (
-              messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`group flex flex-col gap-2 rounded-2xl border p-4 text-sm transition ${
-                    message.role === 'user'
-                      ? settings.isDarkMode
-                        ? 'border-fuchsia-700/40 bg-fuchsia-900/20'
-                        : 'border-fuchsia-200 bg-fuchsia-50'
-                      : settings.isDarkMode
-                      ? 'border-slate-700/70 bg-slate-900/80'
-                      : 'border-zinc-200 bg-zinc-50'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
-                      <span>{message.role === 'user' ? 'Pengguna' : 'Asisten'}</span>
-                      <span className="opacity-60">
-                        {new Date(message.timestamp).toLocaleTimeString('id-ID', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </span>
-                      {message.role === 'assistant' && message.durationMs ? (
-                        <span className="rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wider opacity-80">
-                          {formatDuration(message.durationMs)}
+              messages.map((message) => {
+                const isAssistant = message.role === 'assistant';
+                const isRegenerating = regeneratingId === message.id && isLoading;
+
+                return (
+                  <div
+                    key={message.id}
+                    className={`group flex flex-col gap-3 rounded-2xl border p-4 text-sm transition ${
+                      message.role === 'user'
+                        ? settings.isDarkMode
+                          ? 'border-fuchsia-700/40 bg-fuchsia-900/20'
+                          : 'border-fuchsia-200 bg-fuchsia-50'
+                        : settings.isDarkMode
+                        ? 'border-slate-700/70 bg-slate-900/80'
+                        : 'border-zinc-200 bg-zinc-50'
+                    }`}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide">
+                        <span>{isAssistant ? 'Asisten' : 'Pengguna'}</span>
+                        <span className="opacity-60">
+                          {new Date(message.timestamp).toLocaleTimeString('id-ID', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
                         </span>
-                      ) : null}
+                        {isAssistant && message.durationMs ? (
+                          <span className="rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-wider opacity-80">
+                            {isRegenerating ? 'Mengocok ulang…' : formatDuration(message.durationMs)}
+                          </span>
+                        ) : null}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(message.id)}
+                        className="rounded-full border px-2 py-1 text-xs font-medium opacity-60 transition hover:opacity-100"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(message.id)}
-                      className="invisible rounded-full border px-2 py-1 text-xs font-medium opacity-0 transition group-hover:visible group-hover:opacity-100"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+
+                    <p className="whitespace-pre-wrap text-sm leading-relaxed">{message.text}</p>
+
+                    {isAssistant ? (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(message)}
+                          className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                            settings.isDarkMode
+                              ? 'border-slate-700 bg-slate-900 hover:bg-slate-800'
+                              : 'border-zinc-200 bg-white hover:bg-zinc-100'
+                          }`}
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                          Salin
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRegenerate(message.id)}
+                          disabled={isLoading}
+                          className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                            settings.isDarkMode
+                              ? 'border-slate-700 bg-slate-900 hover:bg-slate-800'
+                              : 'border-zinc-200 bg-white hover:bg-zinc-100'
+                          } ${isLoading ? 'cursor-not-allowed opacity-60' : ''}`}
+                        >
+                          <RefreshCw className={`h-3.5 w-3.5 ${isRegenerating ? 'animate-spin' : ''}`} />
+                          Hasilkan ulang
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleShare(message)}
+                          className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                            settings.isDarkMode
+                              ? 'border-slate-700 bg-slate-900 hover:bg-slate-800'
+                              : 'border-zinc-200 bg-white hover:bg-zinc-100'
+                          }`}
+                        >
+                          <Share2 className="h-3.5 w-3.5" />
+                          Bagikan
+                        </button>
+                        {messageFeedback?.id === message.id ? (
+                          <span className="text-[11px] font-medium opacity-80">{messageFeedback.text}</span>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {message.text}
-                  </p>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 
           <form
             onSubmit={handleSubmit}
             className={`flex flex-col gap-3 rounded-2xl border p-4 shadow-sm transition ${
-              settings.isDarkMode
-                ? 'border-slate-800 bg-slate-950/60'
-                : 'border-zinc-200 bg-white'
+              settings.isDarkMode ? 'border-slate-800 bg-slate-950/60' : 'border-zinc-200 bg-white'
             }`}
           >
-            <label className="text-xs font-semibold uppercase tracking-wide">
-              Ketik Perintahmu
-            </label>
+            <label className="text-xs font-semibold uppercase tracking-wide">Ketik Perintahmu</label>
             <textarea
               value={input}
               onChange={(event) => setInput(event.target.value)}
@@ -518,9 +490,7 @@ export default function SarkastikAssistantPage() {
                   <span>Menunggu respon ... {Math.max(elapsedMs / 1000, 0).toFixed(1)} dtk</span>
                 </div>
               ) : (
-                <p className="text-xs opacity-70">
-                  Pastikan perintahmu jelas. Aku tidak menerjemahkan gumaman.
-                </p>
+                <p className="text-xs opacity-70">Pastikan perintahmu jelas. Aku tidak menerjemahkan gumaman.</p>
               )}
               <button
                 type="submit"
@@ -534,6 +504,176 @@ export default function SarkastikAssistantPage() {
           </form>
         </section>
       </div>
+
+      {isDrawerOpen ? (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            aria-hidden="true"
+            onClick={() => setIsDrawerOpen(false)}
+          />
+          <aside
+            className={`fixed inset-y-0 right-0 z-50 w-full max-w-md border-l px-6 py-8 shadow-2xl transition-transform duration-300 ${
+              drawerClass
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
+                <SettingsIcon className="h-4 w-4" />
+                Panel Pengaturan
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsDrawerOpen(false)}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                  settings.isDarkMode
+                    ? 'border-slate-700 bg-slate-900 hover:bg-slate-800'
+                    : 'border-zinc-200 bg-white hover:bg-zinc-100'
+                }`}
+              >
+                Tutup
+              </button>
+            </div>
+
+            <div className="mt-6 flex h-full flex-col gap-6 overflow-y-auto pb-10">
+              <section className="space-y-4">
+                <div className="flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition">
+                  <div className="flex items-center gap-3">
+                    {settings.isDarkMode ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                    <div>
+                      <p className="font-medium">Mode Gelap</p>
+                      <p className="text-xs opacity-70">Aktifkan tema gelap kalau kamu muak melihat layar silau.</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex cursor-pointer items-center">
+                    <input
+                      type="checkbox"
+                      className="peer sr-only"
+                      checked={settings.isDarkMode}
+                      onChange={(event) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          isDarkMode: event.target.checked,
+                        }))
+                      }
+                    />
+                    <div className="h-6 w-11 rounded-full bg-zinc-300 transition peer-checked:bg-slate-600">
+                      <div className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5 peer-checked:bg-zinc-100" />
+                    </div>
+                  </label>
+                </div>
+
+                <div className="rounded-2xl border px-4 py-3 text-sm transition">
+                  <div className="mb-3 flex items-center gap-2">
+                    <SlidersHorizontal className="h-5 w-5" />
+                    <p className="font-semibold">Pilih Model</p>
+                  </div>
+                  <select
+                    value={settings.model}
+                    onChange={(event) =>
+                      setSettings((prev) => ({
+                        ...prev,
+                        model: event.target.value,
+                      }))
+                    }
+                    className={`w-full rounded-xl border px-3 py-2 text-sm font-medium outline-none transition ${
+                      settings.isDarkMode ? 'border-slate-700 bg-slate-900' : 'border-zinc-200 bg-white'
+                    }`}
+                  >
+                    <option value="gpt-sarkas-13b">gpt-sarkas-13b</option>
+                    <option value="gpt-sarkas-7b">gpt-sarkas-7b</option>
+                    <option value="gpt-sarkas-lite">gpt-sarkas-lite</option>
+                    <option value="gpt-sarkas-ultra">gpt-sarkas-ultra</option>
+                  </select>
+                </div>
+
+                <div className="rounded-2xl border p-4 text-sm transition">
+                  <div className="mb-3 flex items-center gap-2">
+                    <UserPen className="h-5 w-5" />
+                    <p className="font-semibold">Persona AI</p>
+                  </div>
+                  <textarea
+                    value={settings.persona}
+                    onChange={(event) =>
+                      setSettings((prev) => ({
+                        ...prev,
+                        persona: event.target.value,
+                      }))
+                    }
+                    placeholder="Tulis manual persona sinismu di sini."
+                    className={`w-full min-h-[120px] resize-none rounded-xl border px-3 py-2 text-sm outline-none transition ${
+                      settings.isDarkMode
+                        ? 'border-slate-700 bg-slate-900 placeholder:text-slate-500'
+                        : 'border-zinc-200 bg-white placeholder:text-zinc-400'
+                    }`}
+                  />
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
+                  <SlidersHorizontal className="h-4 w-4" />
+                  Parameter Respons
+                </div>
+                <div className="grid gap-4">
+                  {[
+                    {
+                      label: 'Temperatur',
+                      key: 'temperature' as const,
+                      min: 0,
+                      max: 1,
+                      step: 0.05,
+                    },
+                    {
+                      label: 'Top-p',
+                      key: 'topP' as const,
+                      min: 0,
+                      max: 1,
+                      step: 0.05,
+                    },
+                    {
+                      label: 'Frequency Penalty',
+                      key: 'frequencyPenalty' as const,
+                      min: 0,
+                      max: 2,
+                      step: 0.05,
+                    },
+                    {
+                      label: 'Presence Penalty',
+                      key: 'presencePenalty' as const,
+                      min: 0,
+                      max: 2,
+                      step: 0.05,
+                    },
+                  ].map((slider) => (
+                    <div key={slider.key} className="rounded-2xl border px-4 py-3 text-sm transition">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium">{slider.label}</p>
+                        <span className="text-xs font-semibold">{settings[slider.key].toFixed(2)}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={slider.min}
+                        max={slider.max}
+                        step={slider.step}
+                        value={settings[slider.key]}
+                        onChange={(event) =>
+                          setSettings((prev) => ({
+                            ...prev,
+                            [slider.key]: Number.parseFloat(event.target.value),
+                          }))
+                        }
+                        className="mt-2 w-full accent-fuchsia-500"
+                      />
+                      <p className="mt-1 text-xs opacity-70">Gerakkan slider ini kalau kamu merasa ahli mengatur nada sarkastik.</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+          </aside>
+        </>
+      ) : null}
     </div>
   );
 }
