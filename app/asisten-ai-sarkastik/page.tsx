@@ -163,6 +163,31 @@ export default function SarkastikAssistantPage() {
       }));
   }, [messages]);
 
+  const orderedMessages = useMemo(
+    () => [...messages].sort((a, b) => a.timestamp - b.timestamp),
+    [messages],
+  );
+
+  const pendingUserId = useMemo(() => {
+    if (!isLoading || regeneratingId) {
+      return null;
+    }
+
+    const lastUser = [...orderedMessages]
+      .reverse()
+      .find((message) => message.role === 'user');
+
+    if (!lastUser) {
+      return null;
+    }
+
+    const hasAssistant = orderedMessages.some(
+      (message) => message.role === 'assistant' && message.parentUserId === lastUser.id,
+    );
+
+    return hasAssistant ? null : lastUser.id;
+  }, [isLoading, orderedMessages, regeneratingId]);
+
   useEffect(() => {
     if (typeof document === 'undefined') return;
 
@@ -477,100 +502,107 @@ export default function SarkastikAssistantPage() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 pb-6">
-              {conversationThreads.length === 0 ? (
+              {orderedMessages.length === 0 ? (
                 <div className="flex h-full items-center justify-center text-center">
                   <p className="text-3xl font-semibold tracking-tight sm:text-4xl">Apa yang bisa saya bantu?</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-5 pb-6">
-                  {conversationThreads.map(({ user, assistant }) => {
-                    const awaitingAssistant =
-                      !assistant && user.id === messages[messages.length - 1]?.id && isLoading;
-                    const isRegenerating = Boolean(assistant && regeneratingId === assistant.id && isLoading);
+                  {orderedMessages.map((message) => {
+                    const isUser = message.role === 'user';
+                    const isAssistant = message.role === 'assistant';
+                    const isRegenerating =
+                      isAssistant && regeneratingId === message.id && isLoading;
 
                     return (
-                      <article
-                        key={user.id}
-                        className={`flex flex-col gap-4 rounded-3xl border p-5 text-sm transition ${panelClass}`}
-                      >
-                        <header className="flex items-start justify-between gap-3">
-                          <div className="flex flex-col">
-                            <span className="text-[11px] font-semibold uppercase tracking-[0.35em] opacity-60">
-                              Percakapan
-                            </span>
-                            <span className="text-xs font-semibold opacity-70">
-                              {new Date(user.timestamp).toLocaleTimeString('id-ID', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteThread(user.id)}
-                            className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] opacity-70 transition hover:opacity-100"
+                      <div key={message.id} className="space-y-3">
+                        <div
+                          className={`flex ${isUser ? 'justify-end' : 'justify-start'} text-sm`}
+                        >
+                          <div
+                            className={`max-w-full rounded-3xl border px-5 py-4 shadow-sm transition sm:max-w-[82%] ${
+                              isUser ? userBubbleClass : assistantBubbleClass
+                            }`}
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
-                            Hapus
-                          </button>
-                        </header>
+                            <div className="mb-3 flex items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-[0.3em] opacity-70">
+                              <span>{isUser ? 'Pengguna' : 'Asisten'}</span>
+                              <div className="flex items-center gap-2">
+                                <span>
+                                  {new Date(message.timestamp).toLocaleTimeString('id-ID', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </span>
+                                {isUser ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteThread(message.id)}
+                                    className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.3em] transition hover:opacity-100"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                    Hapus
+                                  </button>
+                                ) : null}
+                                {isAssistant && message.durationMs ? (
+                                  <span className="rounded-full border px-3 py-0.5 text-[10px]">
+                                    {isRegenerating ? 'Mengocok ulang…' : formatDuration(message.durationMs)}
+                                  </span>
+                                ) : null}
+                              </div>
+                            </div>
 
-                        <div className={`rounded-2xl border p-4 leading-relaxed transition ${userBubbleClass}`}>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] opacity-70">Pengguna</p>
-                          <p className="mt-2 whitespace-pre-wrap text-sm font-medium">{user.text}</p>
-                        </div>
+                            <p
+                              className={`whitespace-pre-wrap text-sm ${
+                                isUser ? 'font-medium' : ''
+                              }`}
+                            >
+                              {message.text}
+                            </p>
 
-                        <div className={`rounded-2xl border p-4 leading-relaxed transition ${assistantBubbleClass}`}>
-                          <div className="flex items-center justify-between">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] opacity-70">Asisten</p>
-                            {assistant?.durationMs ? (
-                              <span className="rounded-full border px-3 py-0.5 text-[10px] font-semibold uppercase tracking-[0.3em]">
-                                {isRegenerating ? 'Mengocok ulang…' : formatDuration(assistant.durationMs)}
-                              </span>
-                            ) : null}
-                          </div>
-
-                          {assistant ? (
-                            <>
-                              <p className="mt-2 whitespace-pre-wrap text-sm">{assistant.text}</p>
+                            {isAssistant ? (
                               <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] opacity-80">
                                 <button
                                   type="button"
-                                  onClick={() => handleCopy(assistant)}
-                                  className="inline-flex items-center gap-1 rounded-full border px-3 py-1 transition hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-950"
+                                  onClick={() => handleCopy(message)}
+                                  className="inline-flex items-center gap-1 rounded-full border px-3 py-1 transition hover:bg-slate-900 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-white dark:hover:text-slate-950"
                                 >
                                   <Copy className="h-3.5 w-3.5" />
                                   Salin
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => handleRegenerate(assistant.id)}
-                                  className="inline-flex items-center gap-1 rounded-full border px-3 py-1 transition hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-950"
+                                  onClick={() => handleRegenerate(message.id)}
+                                  className="inline-flex items-center gap-1 rounded-full border px-3 py-1 transition hover:bg-slate-900 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-white dark:hover:text-slate-950"
+                                  disabled={isLoading && regeneratingId !== message.id}
                                 >
                                   <RefreshCw className={`h-3.5 w-3.5 ${isRegenerating ? 'animate-spin' : ''}`} />
                                   Ulangi
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => handleShare(assistant)}
-                                  className="inline-flex items-center gap-1 rounded-full border px-3 py-1 transition hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-950"
+                                  onClick={() => handleShare(message)}
+                                  className="inline-flex items-center gap-1 rounded-full border px-3 py-1 transition hover:bg-slate-900 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-white dark:hover:text-slate-950"
                                 >
                                   <Share2 className="h-3.5 w-3.5" />
                                   Bagikan
                                 </button>
-                                {messageFeedback?.id === assistant.id ? (
+                                {messageFeedback?.id === message.id ? (
                                   <span className="text-[11px] font-medium opacity-80">{messageFeedback.text}</span>
                                 ) : null}
                               </div>
-                            </>
-                          ) : (
-                            <div className="mt-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] opacity-70">
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              {awaitingAssistant ? 'Menyiapkan jawaban…' : 'Menunggu respon…'}
-                            </div>
-                          )}
+                            ) : null}
+                          </div>
                         </div>
-                      </article>
+
+                        {isUser && pendingUserId === message.id ? (
+                          <div className="flex justify-start text-xs font-semibold uppercase tracking-[0.3em] opacity-70">
+                            <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Menyiapkan jawaban…
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
                     );
                   })}
                 </div>
