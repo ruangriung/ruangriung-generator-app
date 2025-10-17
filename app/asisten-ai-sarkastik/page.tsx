@@ -164,6 +164,18 @@ export default function SarkastikAssistantPage() {
   }, [messages]);
 
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const className = 'hide-global-footer';
+    const { body } = document;
+    body.classList.add(className);
+
+    return () => {
+      body.classList.remove(className);
+    };
+  }, []);
+
+  useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const stored = window.localStorage.getItem(HISTORY_KEY);
@@ -296,21 +308,6 @@ export default function SarkastikAssistantPage() {
   const assistantBubbleClass = settings.isDarkMode
     ? 'border-slate-800 bg-slate-950/80'
     : 'border-zinc-200 bg-white';
-
-  const handleDelete = useCallback((id: string) => {
-    setMessages((prev) => {
-      const target = prev.find((message) => message.id === id);
-      if (!target) {
-        return prev;
-      }
-
-      if (target.role === 'user') {
-        return prev.filter((message) => message.id !== id && message.parentUserId !== id);
-      }
-
-      return prev.filter((message) => message.id !== id);
-    });
-  }, []);
 
   const handleDeleteThread = useCallback((userMessageId: string) => {
     setMessages((prev) =>
@@ -480,94 +477,99 @@ export default function SarkastikAssistantPage() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 pb-6">
-              {messages.length === 0 ? (
+              {conversationThreads.length === 0 ? (
                 <div className="flex h-full items-center justify-center text-center">
                   <p className="text-3xl font-semibold tracking-tight sm:text-4xl">Apa yang bisa saya bantu?</p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-4 pb-6">
-                  {messages.map((message) => {
-                    const isAssistant = message.role === 'assistant';
-                    const isRegenerating = regeneratingId === message.id && isLoading;
+                <div className="flex flex-col gap-5 pb-6">
+                  {conversationThreads.map(({ user, assistant }) => {
+                    const awaitingAssistant =
+                      !assistant && user.id === messages[messages.length - 1]?.id && isLoading;
+                    const isRegenerating = Boolean(assistant && regeneratingId === assistant.id && isLoading);
 
                     return (
                       <article
-                        key={message.id}
-                        className={`flex flex-col gap-3 rounded-3xl border p-4 text-sm leading-relaxed transition ${
-                          isAssistant ? assistantBubbleClass : userBubbleClass
-                        }`}
+                        key={user.id}
+                        className={`flex flex-col gap-4 rounded-3xl border p-5 text-sm transition ${panelClass}`}
                       >
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.35em] opacity-70">
-                            <span>{isAssistant ? 'Asisten' : 'Pengguna'}</span>
-                            <span>
-                              {new Date(message.timestamp).toLocaleTimeString('id-ID', {
+                        <header className="flex items-start justify-between gap-3">
+                          <div className="flex flex-col">
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.35em] opacity-60">
+                              Percakapan
+                            </span>
+                            <span className="text-xs font-semibold opacity-70">
+                              {new Date(user.timestamp).toLocaleTimeString('id-ID', {
                                 hour: '2-digit',
                                 minute: '2-digit',
                               })}
                             </span>
-                            {isAssistant && message.durationMs ? (
-                              <span className="rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.3em]">
-                                {isRegenerating ? 'Mengocok ulang…' : formatDuration(message.durationMs)}
-                              </span>
-                            ) : null}
                           </div>
                           <button
                             type="button"
-                            onClick={() => handleDelete(message.id)}
-                            className="inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] opacity-60 transition hover:opacity-100"
+                            onClick={() => handleDeleteThread(user.id)}
+                            className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] opacity-70 transition hover:opacity-100"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                             Hapus
                           </button>
+                        </header>
+
+                        <div className={`rounded-2xl border p-4 leading-relaxed transition ${userBubbleClass}`}>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] opacity-70">Pengguna</p>
+                          <p className="mt-2 whitespace-pre-wrap text-sm font-medium">{user.text}</p>
                         </div>
 
-                        <p className="whitespace-pre-wrap text-sm leading-relaxed">{message.text}</p>
-
-                        {isAssistant ? (
-                          <div className="flex flex-wrap items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleCopy(message)}
-                              className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] transition ${
-                                settings.isDarkMode
-                                  ? 'border-slate-800 bg-slate-950 hover:bg-slate-900'
-                                  : 'border-zinc-200 bg-white hover:bg-zinc-100'
-                              }`}
-                            >
-                              <Copy className="h-3.5 w-3.5" />
-                              Salin
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleRegenerate(message.id)}
-                              disabled={isLoading}
-                              className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] transition ${
-                                settings.isDarkMode
-                                  ? 'border-slate-800 bg-slate-950 hover:bg-slate-900'
-                                  : 'border-zinc-200 bg-white hover:bg-zinc-100'
-                              } ${isLoading ? 'cursor-not-allowed opacity-60' : ''}`}
-                            >
-                              <RefreshCw className={`h-3.5 w-3.5 ${isRegenerating ? 'animate-spin' : ''}`} />
-                              Hasilkan ulang
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleShare(message)}
-                              className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] transition ${
-                                settings.isDarkMode
-                                  ? 'border-slate-800 bg-slate-950 hover:bg-slate-900'
-                                  : 'border-zinc-200 bg-white hover:bg-zinc-100'
-                              }`}
-                            >
-                              <Share2 className="h-3.5 w-3.5" />
-                              Bagikan
-                            </button>
-                            {messageFeedback?.id === message.id ? (
-                              <span className="text-[11px] font-medium opacity-80">{messageFeedback.text}</span>
+                        <div className={`rounded-2xl border p-4 leading-relaxed transition ${assistantBubbleClass}`}>
+                          <div className="flex items-center justify-between">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] opacity-70">Asisten</p>
+                            {assistant?.durationMs ? (
+                              <span className="rounded-full border px-3 py-0.5 text-[10px] font-semibold uppercase tracking-[0.3em]">
+                                {isRegenerating ? 'Mengocok ulang…' : formatDuration(assistant.durationMs)}
+                              </span>
                             ) : null}
                           </div>
-                        ) : null}
+
+                          {assistant ? (
+                            <>
+                              <p className="mt-2 whitespace-pre-wrap text-sm">{assistant.text}</p>
+                              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] opacity-80">
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopy(assistant)}
+                                  className="inline-flex items-center gap-1 rounded-full border px-3 py-1 transition hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-950"
+                                >
+                                  <Copy className="h-3.5 w-3.5" />
+                                  Salin
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRegenerate(assistant.id)}
+                                  className="inline-flex items-center gap-1 rounded-full border px-3 py-1 transition hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-950"
+                                >
+                                  <RefreshCw className={`h-3.5 w-3.5 ${isRegenerating ? 'animate-spin' : ''}`} />
+                                  Ulangi
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleShare(assistant)}
+                                  className="inline-flex items-center gap-1 rounded-full border px-3 py-1 transition hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-950"
+                                >
+                                  <Share2 className="h-3.5 w-3.5" />
+                                  Bagikan
+                                </button>
+                                {messageFeedback?.id === assistant.id ? (
+                                  <span className="text-[11px] font-medium opacity-80">{messageFeedback.text}</span>
+                                ) : null}
+                              </div>
+                            </>
+                          ) : (
+                            <div className="mt-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] opacity-70">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              {awaitingAssistant ? 'Menyiapkan jawaban…' : 'Menunggu respon…'}
+                            </div>
+                          )}
+                        </div>
                       </article>
                     );
                   })}
