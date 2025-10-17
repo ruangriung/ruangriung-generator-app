@@ -57,59 +57,122 @@ function countWords(content: string) {
     .filter(Boolean).length;
 }
 
+function randomPick<T>(options: T[]): T {
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+function condensePersona(persona: string) {
+  const highlights = persona
+    .split(/[,.;\n]/)
+    .map((piece) => piece.replace(/^[-•\s]+/, '').trim())
+    .filter((piece) => piece.length > 0);
+
+  if (highlights.length === 0) {
+    return '';
+  }
+
+  const sampled = highlights.slice(0, 3);
+  if (sampled.length === 1) {
+    return sampled[0];
+  }
+
+  if (sampled.length === 2) {
+    return `${sampled[0]} dan ${sampled[1]}`;
+  }
+
+  return `${sampled[0]}, ${sampled[1]}, dan ${sampled[2]}`;
+}
+
 function generateSarcasticResponse(prompt: string, settings: AssistantSettings): string {
   const persona = settings.persona.trim();
+  const personaHighlights = persona ? condensePersona(persona) : '';
+
+  const leadIn = randomPick([
+    `${OPENING_EXPLETIVE} dengarkan baik-baik karena aku tidak dibayar untuk memoles egomu.`,
+    `${OPENING_EXPLETIVE} fokus, aku sedang menyiapkan kenyataan yang tidak akan muat di karpet dramamu.`,
+    `${OPENING_EXPLETIVE} aku datang membawa fakta pedas, bukan bantal empuk untuk menangis.`,
+  ]);
+
   const personaIntro = persona
-    ? `Kamu memaksa aku merespons dengan persona "${persona}", jadi jangan heran kalau gaya bahasaku sekarang meniru karakter itu sambil tetap menjaga kadar sinisme yang membuatmu meringis.`
-    : 'Kamu bahkan tidak repot menuliskan persona apa pun, jadi aku akan memakai kepribadian sinis bawaan pabrik yang selalu siap menyobek asumsi rapuhmu.';
+    ? randomPick([
+        `Aku mengenakan topeng ${personaHighlights || 'yang kamu sodorkan'} sesuai perintahmu, dan entah bagaimana itu justru mempertebal sinisku.`,
+        `Persona yang kamu tulis—${personaHighlights || 'campuran watak aneh'}—sudah kupasang, jadi siap-siap menerima komentar dengan aksen tajam versi spesialmu.`,
+        `Baiklah, aku memasuki mode ${personaHighlights || 'pesanan khususmu'}, tapi jangan mimpi sarkasme bawaannya jadi lebih manis.`,
+      ])
+    : randomPick([
+        'Kamu malas memberi persona, jadi aku pakai konfigurasi pabrikan: sinis, frontal, dan berisik tentang fakta.',
+        'Tanpa panduan persona, aku kembali ke firmware default—sarkas, logis, dan alergi terhadap drama kosong.',
+        'Tidak ada persona tambahan? Bagus. Aku tetap jadi versi tajam yang jujur dan sedikit sadis terhadap keluh kesah kosong.',
+      ]);
 
-  const personaReinforcement = persona
-    ? `Aku membongkar catatan personamu menjadi beberapa patokan: ${persona
-        .split(/\.|,|\n/)
-        .map((piece) => piece.trim())
-        .filter(Boolean)
-        .map((piece) => `• ${piece}`)
-        .join(' ')}. Jangan pikir daftar itu membuatku lebih lembut; aku hanya menggunakannya sebagai panduan untuk memutar balik ekspektasimu.`
-    : 'Karena kamu tidak memberi pedoman, aku menulis sesuai naluri sarkastik default. Kalau hasilnya terlalu jujur, itu salahmu sendiri.';
+  const modelLine = randomPick([
+    `Model ${settings.model || 'yang entah apa itu'} hanya label; aku yang bekerja membongkar ilusi dramamu.`,
+    `Kita pakai model ${settings.model || 'misterius itu'} sesuai pilihanmu, tapi jangan kira label tersebut menebus keputusan setengah matang.`,
+    `Model pilihanmu ${settings.model || 'tanpa nama jelas'} kuaktifkan, walau isinya tetap logika dingin plus sindiran berlapis.`,
+  ]);
 
-  const modelLine = `Model yang kamu pilih, ${settings.model || 'entah model apa'}, bukan tongkat sihir. Itu cuma label yang kau sentuh di pengaturan sambil berharap mujizat. Aku pakai itu sekadar formalitas supaya kamu berhenti menanyakan hal sepele.`;
+  const parameterLine = randomPick([
+    `Temperatur ${settings.temperature.toFixed(2)}, top-p ${settings.topP.toFixed(2)}, frequency penalty ${settings.frequencyPenalty.toFixed(2)}, dan presence penalty ${settings.presencePenalty.toFixed(2)} sudah terkunci—angka-angka itu kupakai untuk mengatur kadar ejekan biar pas sasaran.`,
+    `Catatan parametermu: suhu ${settings.temperature.toFixed(2)}, top-p ${settings.topP.toFixed(2)}, penalti frekuensi ${settings.frequencyPenalty.toFixed(2)}, dan penalti kehadiran ${settings.presencePenalty.toFixed(2)}. Intinya aku menyeduh sindiran dengan resep yang kamu tetapkan sendiri.`,
+    `Setelanmu mencatat temperatur ${settings.temperature.toFixed(2)}, top-p ${settings.topP.toFixed(2)}, frequency penalty ${settings.frequencyPenalty.toFixed(2)}, serta presence penalty ${settings.presencePenalty.toFixed(2)}—semua jadi bumbu untuk melejitkan komentar getirku.`,
+  ]);
 
-  const parameterLine = `Parameter yang kamu pakai tercatat rapi: temperatur ${settings.temperature.toFixed(2)}, top-p ${settings.topP.toFixed(2)}, frequency penalty ${settings.frequencyPenalty.toFixed(2)}, dan presence penalty ${settings.presencePenalty.toFixed(2)}. Semua angka itu hanya berarti aku menyesuaikan kadar ejekan dan kejutan supaya cocok dengan fantasi kontrolmu.`;
+  const promptLine = randomPick([
+    `Pertanyaanmu: "${prompt.trim()}". Jangan pura-pura kaget kalau jawabannya mengguncang kenyamananmu.`,
+    `Kamu menulis: "${prompt.trim()}"—catatan publik bahwa kamu siap disuguhi kenyataan tanpa lapisan gula.`,
+    `Inti permintaanmu adalah "${prompt.trim()}". Aku akan menjawabnya sambil mencopot ilusi satu per satu.`,
+  ]);
 
-  const promptLine = `Kamu menanyakan: "${prompt.trim()}". Jangan pura-pura kaget kalau jawabanku menguliti kenyataan secara brutal, karena kamu sendiri yang mengetik dan menekan tombol kirim.`;
+  const realityCheck = randomPick([
+    'Pertama, berhenti bersandar pada harapan kosong dan tulis fakta yang kamu punya. Tanpa fondasi data, semua rencanamu hanya poster motivasi murahan.',
+    'Langkah awal: cek ulang konteks dan angka. Jika data dasarmu lemah, itu sumber tragedi utama dan tidak ada persona yang bisa menutupinya.',
+    'Sebelum mengarang strategi, susun ulang asumsi. Banyak drama berawal dari prasangka yang kamu pelihara tanpa pernah diaudit.',
+  ]);
 
-  const bitterAdvice =
-    'Kalau kamu berharap solusi instan, silakan menangis di sudut. Aku di sini untuk menyodorkan peta jalan yang penuh rambu peringatan, bukan secangkir teh hangat. Jadi dengarkan dengan kepala dingin kalau mampu.';
+  const actionPlan = randomPick([
+    'Bagi tujuanmu menjadi tugas kecil yang punya batas waktu. Kerjakan satu per satu dan catat hasilnya, supaya kamu punya bukti saat kembali mengeluh.',
+    'Rinci prosesnya: tetapkan prioritas, jadwalkan pengerjaan, dan pangkas gangguan. Progres nyata lahir dari disiplin, bukan dari doa sambil mengeluh.',
+    'Susun urutan kerja yang realistis, ajak pihak terkait untuk bertanggung jawab, dan ukur hasilnya secara brutal. Itulah cara dewasa menghadapi masalah.',
+  ]);
 
-  const actionPlan =
-    'Pertama, cermati konteksmu dan berhenti mengada-ngada. Kedua, pecah masalah menjadi langkah yang benar-benar bisa dikerjakan tanpa drama. Ketiga, jalankan satu per satu sambil mencatat hasilnya, supaya kamu punya bukti ketika gagal lagi. Terakhir, evaluasi dengan jujur tanpa menyuap egomu sendiri. Bila kamu mengulang pola lama, jangan salahkan aku karena aku sudah memperingatkan dengan huruf kapital tak terlihat ini.';
+  const personaReminder = persona
+    ? randomPick([
+        `Sentuhan persona ${personaHighlights || 'pesananmu'} kubiarkan merembes ke diksi supaya kamu merasa didengar, walau aku jelas tidak peduli pada dramanya.`,
+        `Aku meracik narasi ini dengan bumbu persona ${personaHighlights || 'kacau itu'}, tapi jangan salah, prioritas utamaku tetap mengupas masalahmu sampai tandas.`,
+        `Persona ${personaHighlights || 'yang kamu tempelkan'} membuatku menyesuaikan nada, bukan menumpulkan kuku.`,
+      ])
+    : randomPick([
+        'Tanpa persona khusus, aku bebas menembak langsung ke akar masalahmu.',
+        'Firmware sarkastikku tetap menyala penuh karena kamu tidak memasang batasan tambahan.',
+        'Aku bergerak tanpa tali persona, jadi fokusku murni pada fakta dan sindiran tajam.',
+      ]);
 
-  const personaClosing = persona
-    ? `Karena aku harus tetap memerankan ${persona}, aku sengaja menempelkan sedikit nuansa khusus yang kamu inginkan sambil memastikan sarkasme tetap menyengat. Kalau hasilnya terasa terlalu tepat sasaran, itu artinya personamu berhasil menjeratmu.`
-    : 'Aku tidak berubah menjadi cheerleader digital; tugasku menampar kesadaranmu dengan kenyataan pahit. Kalau kamu mengeluh, mungkin kamu butuh persona sendiri untuk menghadapi kritik.';
+  const challenge = randomPick([
+    'Kalau kamu mencari validasi, kamu salah alamat. Aku memberikan analisis tajam agar kamu tergerak mengambil tindakan, bukan untuk membelai egomu.',
+    'Jangan harap aku menenangkanmu. Aku mengingatkan bahwa ketidaknyamanan ini adalah tanda kamu akhirnya menatap kekacauan yang kamu buat sendiri.',
+    'Kamu mungkin ingin dipuji, tetapi aku hanya menawarkan cermin yang memantulkan kekurangan yang kamu coba sembunyikan.',
+  ]);
 
-  const extraSnark =
-    'Jangan lupa, aku tidak berminat menjadi pendengar curhat yang mengangguk tanpa kritik. Tugasku adalah memukul telingamu dengan kenyataan, mengikis alasan malas, dan mengantar kamu menabrak refleksi diri yang keras kepala. Jika itu terdengar pedas, berarti bumbu sarkasme bekerja sesuai kontrak.';
-
-  const closing =
-    'Sekarang pergilah dan lakukan sesuatu yang berguna. Kalau kembali lagi tanpa progres, minimal bawalah catatan kegagalanmu supaya aku punya bahan tawa baru. Namun kalau kamu benar-benar bertindak, mungkin—dan ini jarang terjadi—aku akan mengurangi kadar caci maki di pertemuan berikutnya.';
+  const closing = randomPick([
+    'Sekarang bergeraklah. Jika kembali tanpa perkembangan, setidaknya bawa laporan kegagalan yang bisa kita bedah habis-habisan.',
+    'Pergi jalankan rencanamu. Ketika kamu kembali, aku ingin mendengar data, bukan alibi yang sudah basi.',
+    'Lanjutkan eksekusinya. Balik lagi hanya jika kamu punya progres atau butuh dipermalukan dengan fakta baru.',
+  ]);
 
   const blocks = [
+    leadIn,
     personaIntro,
-    personaReinforcement,
     modelLine,
     parameterLine,
     promptLine,
-    bitterAdvice,
+    realityCheck,
     actionPlan,
-    personaClosing,
-    extraSnark,
+    personaReminder,
+    challenge,
     closing,
   ];
 
-  let response = `${OPENING_EXPLETIVE} dengarkan baik-baik karena aku tidak punya waktu menyuapi ilusi manis ke tenggorokanmu. ${blocks.join(
-    ' ',
-  )}`;
+  let response = blocks.join(' ');
 
   const fillerParagraphs = [
     'Sebagai tambahan, catat juga bahwa aku memantau cara kamu merangkai kalimat, jadi setiap kata klise yang kamu masukkan hanya membuatku semakin ingin menyalakan lampu sorot ke arah kelemahanmu. Aku bukan guru les yang digaji untuk bersikap lembut, aku lebih mirip pelatih keras kepala yang menghitung kesalahanmu sambil menertawakan usaha setengah hati.',
