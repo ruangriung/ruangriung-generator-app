@@ -49,13 +49,17 @@ export async function POST(request: Request) {
 
     // Jika verifikasi Turnstile berhasil, lanjutkan mengirim email
     // Konfigurasi Gmail (gunakan app password, bukan password biasa)
-    let transporter;
-    let nodemailerUser;
+    let transporter: Awaited<ReturnType<typeof createEmailTransporter>>['transporter'];
+    let nodemailerUser: string;
+    let previewResolver:
+      | Awaited<ReturnType<typeof createEmailTransporter>>['getTestMessageUrl']
+      | undefined;
 
     try {
-      const emailTransport = createEmailTransporter();
+      const emailTransport = await createEmailTransporter();
       transporter = emailTransport.transporter;
       nodemailerUser = emailTransport.nodemailerUser;
+      previewResolver = emailTransport.getTestMessageUrl;
     } catch (error) {
       console.error('Konfigurasi Nodemailer belum lengkap:', error);
       return NextResponse.json(
@@ -78,7 +82,7 @@ export async function POST(request: Request) {
       );
     }
 
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: senderAddress,
       to: recipients.join(', '),
       replyTo: email,
@@ -92,6 +96,11 @@ export async function POST(request: Request) {
         <p>${message.replace(/\n/g, '<br>')}</p>
       `,
     });
+
+    const previewUrl = previewResolver?.(info);
+    if (typeof previewUrl === 'string' && previewUrl.length > 0) {
+      console.info('Preview email formulir kontak tersedia di:', previewUrl);
+    }
 
     return NextResponse.json({ message: 'Pesan Anda telah berhasil dikirim!' }, { status: 200 });
 

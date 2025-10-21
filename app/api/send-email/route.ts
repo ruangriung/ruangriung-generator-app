@@ -19,13 +19,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Semua kolom wajib diisi.' }, { status: 400 });
     }
 
-    let transporter;
-    let nodemailerUser;
+    let transporter: Awaited<ReturnType<typeof createEmailTransporter>>['transporter'];
+    let nodemailerUser: string;
+    let previewResolver:
+      | Awaited<ReturnType<typeof createEmailTransporter>>['getTestMessageUrl']
+      | undefined;
 
     try {
-      const emailTransport = createEmailTransporter();
+      const emailTransport = await createEmailTransporter();
       transporter = emailTransport.transporter;
       nodemailerUser = emailTransport.nodemailerUser;
+      previewResolver = emailTransport.getTestMessageUrl;
     } catch (error) {
       console.error('Konfigurasi Nodemailer belum lengkap:', error);
       return NextResponse.json(
@@ -66,7 +70,12 @@ export async function POST(request: Request) {
     };
 
     // Kirim email
-    await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
+
+    const previewUrl = previewResolver?.(info);
+    if (typeof previewUrl === 'string' && previewUrl.length > 0) {
+      console.info('Preview email API send-email tersedia di:', previewUrl);
+    }
 
     return NextResponse.json({ message: 'Email berhasil dikirim!' }, { status: 200 });
 

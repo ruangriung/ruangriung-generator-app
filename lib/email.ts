@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import type { TestAccount, Transporter } from 'nodemailer';
 import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 type NormalizedEmail = {
@@ -198,17 +199,91 @@ export const createTransportOptions = (user: string, pass: string): SMTPTranspor
   } satisfies SMTPTransport.Options;
 };
 
-export const createEmailTransporter = () => {
+type EmailTransporterResult = {
+  transporter: Transporter<SMTPTransport.SentMessageInfo, SMTPTransport.Options>;
+  nodemailerUser: string;
+  getTestMessageUrl?: typeof nodemailer.getTestMessageUrl;
+  testAccount?: TestAccount;
+};
+
+const resolveBooleanEnv = (value: string) => ['true', '1', 'yes', 'on'].includes(value.toLowerCase());
+
+const shouldUseEthereal = () => {
+  const override = sanitizeString(resolveMailEnvValue('NODEMAILER_USE_ETHEREAL'));
+
+  if (override) {
+    return resolveBooleanEnv(override);
+  }
+
+  const nodeEnv = sanitizeString(process.env.NODE_ENV).toLowerCase();
+  return nodeEnv === 'test';
+};
+
+const createStreamPreviewTransporter = (reason: unknown): EmailTransporterResult => {
+  console.warn(
+    'Gagal membuat akun Ethereal untuk pengujian email. Menggunakan transporter buffer lokal.',
+    reason,
+  );
+
+  const transporter = nodemailer.createTransport({
+    streamTransport: true,
+    buffer: true,
+  });
+
+  return {
+    transporter,
+    nodemailerUser: 'dev-inbox@localhost',
+    getTestMessageUrl: info => {
+      const message = (info as { message?: Buffer }).message;
+      if (message instanceof Buffer) {
+        return `data:message/rfc822;base64,${message.toString('base64')}`;
+      }
+      return `stream:${info.messageId}`;
+    },
+  } satisfies EmailTransporterResult;
+};
+
+const createEtherealTransporter = async (): Promise<EmailTransporterResult> => {
+  try {
+    const testAccount = await nodemailer.createTestAccount();
+    const transporter = nodemailer.createTransport({
+      host: testAccount.smtp.host,
+      port: testAccount.smtp.port,
+      secure: testAccount.smtp.secure,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass,
+      },
+    });
+
+    return {
+      transporter,
+      nodemailerUser: testAccount.user,
+      getTestMessageUrl: nodemailer.getTestMessageUrl,
+      testAccount,
+    } satisfies EmailTransporterResult;
+  } catch (error) {
+    return createStreamPreviewTransporter(error);
+  }
+};
+
+export const createEmailTransporter = async (): Promise<EmailTransporterResult> => {
   const nodemailerUser = sanitizeEmail(resolveMailEnvValue('NODEMAILER_EMAIL'));
   const nodemailerPass = sanitizeAppPassword(resolveMailEnvValue('NODEMAILER_APP_PASSWORD'));
 
-  if (!nodemailerUser || !nodemailerPass) {
-    throw new Error('NODEMAILER_EMAIL atau NODEMAILER_APP_PASSWORD belum dikonfigurasi dengan benar.');
+  if (nodemailerUser && nodemailerPass) {
+    const transportOptions = createTransportOptions(nodemailerUser, nodemailerPass);
+    const transporter = nodemailer.createTransport(transportOptions);
+
+    return { transporter, nodemailerUser } satisfies EmailTransporterResult;
   }
 
-  const transportOptions = createTransportOptions(nodemailerUser, nodemailerPass);
-  const transporter = nodemailer.createTransport(transportOptions);
+  if (shouldUseEthereal()) {
+    return createEtherealTransporter();
+  }
 
-  return { transporter, nodemailerUser };
+  throw new Error('NODEMAILER_EMAIL atau NODEMAILER_APP_PASSWORD belum dikonfigurasi dengan benar.');
 };
+
+export type { EmailTransporterResult };
 
