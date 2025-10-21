@@ -11,6 +11,13 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const sanitizeString = (value: unknown): string =>
   typeof value === 'string' ? value.trim() : '';
 
+const collapseWhitespace = (value: string) => value.replace(/\s+/g, '');
+
+export const sanitizeAppPassword = (value: unknown): string => {
+  const sanitized = sanitizeString(value);
+  return collapseWhitespace(sanitized);
+};
+
 export const normalizeEmailAddress = (value: unknown): NormalizedEmail | null => {
   if (typeof value !== 'string') {
     return null;
@@ -145,7 +152,7 @@ export const createTransportOptions = (user: string, pass: string): SMTPTranspor
 
 export const createEmailTransporter = () => {
   const nodemailerUser = sanitizeEmail(process.env.NODEMAILER_EMAIL);
-  const nodemailerPass = sanitizeString(process.env.NODEMAILER_APP_PASSWORD);
+  const nodemailerPass = sanitizeAppPassword(process.env.NODEMAILER_APP_PASSWORD);
 
   if (!nodemailerUser || !nodemailerPass) {
     throw new Error('NODEMAILER_EMAIL atau NODEMAILER_APP_PASSWORD belum dikonfigurasi dengan benar.');
