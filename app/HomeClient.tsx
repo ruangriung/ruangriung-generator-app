@@ -27,7 +27,6 @@ import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useState, useEffect, useRef } from 'react';
 import FAQ from '@/components/FAQ';
-import { AdBanner } from '@/components/AdBanner';
 import Link from 'next/link';
 import PromptSubmissionTrigger from '@/components/PromptSubmissionTrigger';
 
@@ -355,10 +354,6 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         </div>
       </div>
       
-      <div className="w-full max-w-4xl mb-4">
-        <AdBanner dataAdSlot="6897039624" />
-      </div>
-
       <div className="w-full max-w-4xl flex flex-col gap-4 mb-4 md:flex-row md:items-stretch md:gap-6">
         <AuthButton />
         <div className="w-full md:w-auto md:self-stretch">
@@ -369,10 +364,6 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
       <main className="w-full flex flex-col items-center">
         <Tabs />
       </main>
-
-      <div className="w-full max-w-4xl mt-16">
-        <AdBanner dataAdSlot="5961316189" />
-      </div>
 
       <div className="w-full max-w-4xl mt-10 mb-6">
         <Link

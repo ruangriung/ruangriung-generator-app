@@ -3,7 +3,6 @@
 
 import { ArrowLeft, Users, Heart, FacebookIcon, ContactRound } from 'lucide-react';
 import Link from 'next/link';
-import { AdBanner } from '@/components/AdBanner';
 import Image from 'next/image';
 
 const teamMembers = [
@@ -106,11 +105,6 @@ export default function TentangKamiPage() {
           </div>
 
           <hr className="my-8 border-gray-300 dark:border-gray-600" />
-
-          <div className="w-full flex justify-center">
-            {/* Anda bisa menggunakan slot iklan yang sama dengan halaman kontak atau yang baru */}
-            <AdBanner dataAdSlot="6897039624" />
-          </div>
 
         </div>
       </div>

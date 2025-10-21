@@ -23,8 +23,6 @@ import {
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { AdBanner } from '@/components/AdBanner';
-import { PROMPT_TOP_AD_SLOT } from '@/lib/adsense';
 
 interface PollinationsModel {
   id?: string;
@@ -1445,20 +1443,6 @@ const KeywordGeneratorClient = () => {
                 </p>
               </div>
             </div>
-          </div>
-        </section>
-
-        <section className="rounded-3xl bg-light-bg p-6 shadow-neumorphic dark:bg-dark-bg dark:shadow-dark-neumorphic">
-          <div className="rounded-2xl bg-white/75 p-4 shadow-inner dark:bg-dark-neumorphic-light/70">
-            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">Dukungan Kreativitas</p>
-            <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
-              Iklan berikut membantu menjaga pengembangan fitur eksperimen prompt tetap berjalan.
-            </p>
-            <AdBanner
-              className="mt-4 w-full overflow-hidden rounded-xl"
-              dataAdSlot={PROMPT_TOP_AD_SLOT}
-              dataFullWidthResponsive="true"
-            />
           </div>
         </section>
 

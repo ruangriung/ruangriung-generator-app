@@ -7,8 +7,6 @@ import Script from 'next/script';
 import { Toaster } from 'react-hot-toast';
 import CookieConsent from '@/components/CookieConsent';
 import ThemeScript from '@/components/ThemeScript';
-import AdSenseLoader from '@/components/AdSenseLoader';
-import { ADSENSE_PUBLISHER_ID } from '@/lib/adsense';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ruangriung.my.id'),
@@ -63,14 +61,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <ThemeScript />
-        {/* Tag verifikasi AdSense */}
-        {ADSENSE_PUBLISHER_ID ? (
-          <meta
-            name="google-adsense-account"
-            content={ADSENSE_PUBLISHER_ID}
-          ></meta>
-        ) : null}
-
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
@@ -83,7 +73,6 @@ export default function RootLayout({
         </AuthProvider>
         <Toaster />
         <CookieConsent />
-        <AdSenseLoader />
 
         {/* Google Analytics Script */}
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-PWFT2SQWNZ" />

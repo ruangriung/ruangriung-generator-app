@@ -9,7 +9,6 @@ import Spinner from './Spinner';
 import ImageModal from './ImageModal';
 import Accordion from './Accordion';
 import ApiKeyModal from './ApiKeyModal';
-import { AdBanner } from '@/components/AdBanner'; 
 
 // --- Konstanta API ---
 const POLLINATIONS_TEXT_API_BASE_URL = 'https://text.pollinations.ai/openai';
