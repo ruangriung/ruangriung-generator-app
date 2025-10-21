@@ -40,7 +40,9 @@ NEXT_PUBLIC_POLLINATIONS_TOKEN=
 PROMPT_EDIT_TOKEN=
 ```
 
-Variabel tambahan mungkin diperlukan untuk fitur tertentu seperti formulir kontak atau iklan.
+Variabel tambahan mungkin diperlukan untuk fitur tertentu seperti formulir kontak atau iklan. Anda juga dapat menambahkan
+akhiran khusus (misalnya `NODEMAILER_EMAIL_AYICKTIGABELAS` dan `NODEMAILER_APP_PASSWORD_AYICKTIGABELAS`) bila perlu
+menyimpan beberapa kredensial; aplikasi akan otomatis menggunakan nilai pertama yang tersedia dengan awalan tersebut.
 
 ## Konten
 Artikel dan contoh prompt berada pada direktori `content` dan dimuat dari berkas Markdown.
