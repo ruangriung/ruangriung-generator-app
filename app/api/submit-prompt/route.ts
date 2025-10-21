@@ -62,9 +62,9 @@ export async function POST(request: Request) {
     const token = sanitizeString(body.token);
     const date = sanitizeOptionalString(body.date);
 
-    if (!author || !email || !title || !promptContent || !tool || !token) {
+    if (!author || !email || !title || !promptContent || !tool) {
       return NextResponse.json(
-        { message: 'Semua kolom wajib diisi dengan benar, termasuk email dan verifikasi keamanan.' },
+        { message: 'Semua kolom wajib diisi dengan benar, termasuk email.' },
         { status: 400 }
       );
     }
@@ -75,27 +75,53 @@ export async function POST(request: Request) {
         : Boolean(body.skipEmail);
 
     const turnstileSecretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
-    if (!turnstileSecretKey) {
-      console.error('CLOUDFLARE_TURNSTILE_SECRET_KEY tidak diatur.');
-      return NextResponse.json({ message: 'Kesalahan konfigurasi server.' }, { status: 500 });
-    }
+    const isTurnstileEnabled = Boolean(turnstileSecretKey);
 
-    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        secret: turnstileSecretKey,
-        response: token,
-        remoteip: request.headers.get('x-forwarded-for'),
-      }),
-    });
+    if (isTurnstileEnabled) {
+      if (!token) {
+        return NextResponse.json(
+          { message: 'Silakan selesaikan verifikasi keamanan.' },
+          { status: 400 },
+        );
+      }
 
-    const turnstileData = await response.json();
-    if (!turnstileData.success) {
-      console.error('Verifikasi Turnstile Gagal:', turnstileData['error-codes']);
-      return NextResponse.json(
-        { message: 'Verifikasi keamanan gagal. Silakan coba lagi.' },
-        { status: 401 }
+      try {
+        const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            secret: turnstileSecretKey,
+            response: token,
+            remoteip: request.headers.get('x-forwarded-for'),
+          }),
+        });
+
+        if (!response.ok) {
+          console.error('Verifikasi Turnstile tidak dapat diproses:', response.statusText);
+          return NextResponse.json(
+            { message: 'Verifikasi keamanan gagal diproses. Silakan coba lagi.' },
+            { status: 502 },
+          );
+        }
+
+        const turnstileData = await response.json();
+        if (!turnstileData.success) {
+          console.error('Verifikasi Turnstile Gagal:', turnstileData['error-codes']);
+          return NextResponse.json(
+            { message: 'Verifikasi keamanan gagal. Silakan coba lagi.' },
+            { status: 401 },
+          );
+        }
+      } catch (verificationError) {
+        console.error('Kesalahan saat memverifikasi Turnstile:', verificationError);
+        return NextResponse.json(
+          { message: 'Verifikasi keamanan tidak tersedia saat ini. Silakan coba lagi nanti.' },
+          { status: 503 },
+        );
+      }
+    } else {
+      console.warn(
+        'CLOUDFLARE_TURNSTILE_SECRET_KEY tidak diatur. Melewati verifikasi Turnstile untuk permintaan ini.',
       );
     }
 
