@@ -138,6 +138,9 @@ export async function POST(request: Request) {
       date,
     });
 
+    let emailStatus: 'skipped' | 'sent' | 'failed' = skipEmail ? 'skipped' : 'sent';
+    let emailError: string | undefined;
+
     if (!skipEmail) {
       let transporter;
       let nodemailerUser;
@@ -212,7 +215,27 @@ export async function POST(request: Request) {
         `,
       };
 
-      await transporter.sendMail(mailOptions);
+      try {
+        await transporter.sendMail(mailOptions);
+        emailStatus = 'sent';
+      } catch (error: unknown) {
+        emailStatus = 'failed';
+
+        const errorMessage = (() => {
+          if (error && typeof error === 'object' && 'code' in error) {
+            const code = (error as { code?: unknown }).code;
+
+            if (code === 'EAUTH') {
+              return 'Konfigurasi kredensial email tidak valid.';
+            }
+          }
+
+          return 'Gagal mengirim email notifikasi prompt.';
+        })();
+
+        emailError = errorMessage;
+        console.error('Gagal mengirim email notifikasi prompt:', error);
+      }
     }
 
     if (persisted) {
@@ -221,13 +244,17 @@ export async function POST(request: Request) {
     }
 
     const successMessage = persisted
-      ? skipEmail
+      ? emailStatus === 'failed'
+        ? 'Prompt berhasil dikirim, namun notifikasi email gagal dikirim.'
+        : skipEmail
         ? 'Prompt berhasil dikirim dan langsung ditayangkan di katalog.'
         : 'Prompt berhasil dikirim!'
-      : 'Prompt berhasil dikirim, namun diperlukan peninjauan manual sebelum dipublikasikan.';
+      : emailStatus === 'failed'
+        ? 'Prompt berhasil dikirim, namun notifikasi email gagal dikirim. Prompt memerlukan peninjauan manual sebelum dipublikasikan.'
+        : 'Prompt berhasil dikirim, namun diperlukan peninjauan manual sebelum dipublikasikan.';
 
     return NextResponse.json(
-      { message: successMessage, prompt, persisted },
+      { message: successMessage, prompt, persisted, emailStatus, emailError },
       { status: 200 },
     );
 
