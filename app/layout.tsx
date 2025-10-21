@@ -75,7 +75,7 @@ export default function RootLayout({
         <CookieConsent />
 
         {/* Google Analytics Script */}
-        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-PWFT2SQWNZ" />
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-7T365LMTJ7" />
         <Script
           id="google-analytics-script"
           strategy="afterInteractive"
@@ -84,7 +84,7 @@ export default function RootLayout({
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-PWFT2SQWNZ');
+              gtag('config', 'G-7T365LMTJ7');
             `,
           }}
         />
