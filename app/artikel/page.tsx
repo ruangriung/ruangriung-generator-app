@@ -1,7 +1,6 @@
 
 import { Suspense } from 'react';
 import { getAllArticles } from '@/lib/articles';
-import { ARTICLE_BOTTOM_AD_SLOT, ARTICLE_LIST_AD_SLOT } from '@/lib/adsense';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import ArticlePaginationClient from './ArticlePaginationClient';
@@ -9,9 +8,6 @@ import ArticleSubmissionTrigger from '@/components/ArticleSubmissionTrigger';
 
 export default function ArticleListPage() {
   const articles = getAllArticles();
-  const adSlotIds = [ARTICLE_LIST_AD_SLOT, ARTICLE_BOTTOM_AD_SLOT].filter(
-    (slot): slot is string => Boolean(slot),
-  );
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -43,7 +39,7 @@ export default function ArticleListPage() {
           </div>
         }
       >
-        <ArticlePaginationClient initialArticles={articles} adSlotIds={adSlotIds} />
+        <ArticlePaginationClient initialArticles={articles} />
       </Suspense>
     </div>
   );

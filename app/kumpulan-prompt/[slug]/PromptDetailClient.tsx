@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { ArrowLeft, Share2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
-import AdBanner from '@/components/AdBanner';
 import CopyButton from '@/components/CopyButton';
 import PromptSubmissionTrigger from '@/components/PromptSubmissionTrigger';
 import { Prompt } from '@/lib/prompts';
@@ -391,10 +390,6 @@ export default function PromptDetailClient({
             </div>
           </div>
         )}
-
-        <div className="my-8">
-          <AdBanner dataAdSlot="5961316189" />
-        </div>
 
         <div className="mt-8">
           {currentPrompt.tags.map(tag => (

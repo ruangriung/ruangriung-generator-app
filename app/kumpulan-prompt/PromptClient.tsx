@@ -6,8 +6,6 @@ import { Prompt } from '../../lib/prompts';
 import Link from 'next/link';
 import PromptSubmissionTrigger from '../../components/PromptSubmissionTrigger';
 import Pagination from '../../components/Pagination';
-import AdBanner from '../../components/AdBanner';
-import { PROMPT_BOTTOM_AD_SLOT, PROMPT_TOP_AD_SLOT } from '../../lib/adsense';
 import { ArrowLeft, Filter, Search, XCircle } from 'lucide-react';
 import { usePromptSuggestions } from './usePromptSuggestions';
 
@@ -73,8 +71,6 @@ export default function PromptClient({
   const effectiveBackHref = backHref ?? '/';
   const effectiveBackLabel = backLabel ?? 'Kembali ke Beranda';
   const effectiveBasePath = basePath ?? '/kumpulan-prompt';
-  const topAdSlot = PROMPT_TOP_AD_SLOT;
-  const bottomAdSlot = PROMPT_BOTTOM_AD_SLOT;
 
   useEffect(() => {
     setPromptList(sortPrompts(prompts));
@@ -435,12 +431,6 @@ export default function PromptClient({
         </div>
       </div>
 
-      {topAdSlot && (
-        <div className="my-8">
-          <AdBanner key="prompt-top-ad" dataAdSlot={topAdSlot} />
-        </div>
-      )}
-
       <div ref={promptListRef} className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {paginatedPrompts.map((prompt: Prompt) => (
           <div
@@ -519,15 +509,6 @@ export default function PromptClient({
           </div>
         ))}
       </div>
-
-      {bottomAdSlot && (
-        <div className="my-8">
-          <AdBanner
-            key={`prompt-bottom-ad-${currentPage}`}
-            dataAdSlot={bottomAdSlot}
-          />
-        </div>
-      )}
 
       {totalPages > 1 && (
         <Pagination

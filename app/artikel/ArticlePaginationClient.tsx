@@ -4,7 +4,6 @@ import { useState, Fragment, useMemo, useEffect, useRef, useCallback } from 'rea
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import AdBanner from '@/components/AdBanner';
 import ArticleSearchForm from '@/components/ArticleSearchForm';
 
 const escapeRegExp = (value: string) => value.replace(/[-/\\^$*+?.()|[\]{}]/g, '\$&');
@@ -48,10 +47,9 @@ interface Article {
 
 interface ArticlePaginationClientProps {
     initialArticles: Article[];
-    adSlotIds: string[];
 }
 
-export default function ArticlePaginationClient({ initialArticles, adSlotIds }: ArticlePaginationClientProps) {
+export default function ArticlePaginationClient({ initialArticles }: ArticlePaginationClientProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const postsPerPage = 6;
     const searchParams = useSearchParams();
@@ -131,11 +129,6 @@ export default function ArticlePaginationClient({ initialArticles, adSlotIds }: 
         }
     }, [currentPage, totalPages, scrollToArticleListTop]);
 
-    const sanitizedAdSlots = useMemo(
-        () => adSlotIds.map(slot => slot.trim()).filter(Boolean),
-        [adSlotIds],
-    );
-    
     const handleNextPage = () => {
         if (currentPage < totalPages) {
             hasInteractedWithPaginationRef.current = true;
@@ -150,8 +143,6 @@ export default function ArticlePaginationClient({ initialArticles, adSlotIds }: 
             scrollToArticleListTop();
         }
     };
-
-    const AD_INTERVAL = 3; // Tampilkan iklan setelah setiap 3 artikel
 
     return (
         <>
@@ -182,7 +173,7 @@ export default function ArticlePaginationClient({ initialArticles, adSlotIds }: 
             ) : (
                 <>
                     <div ref={listContainerRef} className="space-y-8">
-                        {currentPosts.map((article, index) => (
+                        {currentPosts.map((article) => (
                             <Fragment key={article.slug}>
                                 <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow">
                                     <div className="flex items-start justify-between mb-2">
@@ -224,32 +215,7 @@ export default function ArticlePaginationClient({ initialArticles, adSlotIds }: 
                                         ))}
                                     </div>
                                 </div>
-
-                        {(() => {
-                            const shouldShowAd =
-                                (index + 1) % AD_INTERVAL === 0 && sanitizedAdSlots.length > 0;
-
-                            if (!shouldShowAd) {
-                                return null;
-                            }
-
-                            const adIndex = Math.floor((index + 1) / AD_INTERVAL) - 1;
-                            const slotId = sanitizedAdSlots[adIndex % sanitizedAdSlots.length];
-
-                            if (!slotId) {
-                                return null;
-                            }
-
-                            return (
-                                <div className="my-6">
-                                    <AdBanner
-                                        key={`article-list-ad-${currentPage}-${index}-${slotId}`}
-                                        dataAdSlot={slotId}
-                                    />
-                                </div>
-                            );
-                        })()}
-                    </Fragment>
+                            </Fragment>
                         ))}
                     </div>
 
