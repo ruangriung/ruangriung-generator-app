@@ -14,8 +14,32 @@ export const sanitizeString = (value: unknown): string =>
 const collapseWhitespace = (value: string) => value.replace(/\s+/g, '');
 
 export const sanitizeAppPassword = (value: unknown): string => {
-  const sanitized = sanitizeString(value);
-  return collapseWhitespace(sanitized);
+  const trimmed = sanitizeString(value);
+
+  if (!trimmed) {
+    return '';
+  }
+
+  const collapsed = collapseWhitespace(trimmed);
+
+  if (collapsed === trimmed) {
+    return trimmed;
+  }
+
+  const looksLikeGmailAppPassword =
+    /^[a-zA-Z0-9\s]+$/.test(trimmed) && collapsed.length === 16 && trimmed.length > collapsed.length;
+
+  if (looksLikeGmailAppPassword) {
+    return collapsed;
+  }
+
+  const shouldStripWhitespace = sanitizeString(process.env.NODEMAILER_STRIP_PASSWORD_WHITESPACE);
+
+  if (shouldStripWhitespace && ['true', '1', 'yes', 'on'].includes(shouldStripWhitespace.toLowerCase())) {
+    return collapsed;
+  }
+
+  return trimmed;
 };
 
 export const normalizeEmailAddress = (value: unknown): NormalizedEmail | null => {
