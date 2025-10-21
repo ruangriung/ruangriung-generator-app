@@ -48,7 +48,9 @@ export default function PromptSubmissionForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState('');
-  const [token, setToken] = useState('');
+  const [token, setToken] = useState(() =>
+    process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY ? '' : 'captcha-skipped',
+  );
   const [adminToken, setAdminToken] = useState('');
   const [captchaError, setCaptchaError] = useState(false);
   const [createdPrompt, setCreatedPrompt] = useState<Prompt | null>(null);
@@ -56,6 +58,9 @@ export default function PromptSubmissionForm({
   const isEditMode = mode === 'edit';
   const isStandalone = variant === 'page';
   const isFormVisible = isStandalone || isOpen;
+  const isCaptchaConfigured = Boolean(
+    process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY,
+  );
 
   const containerClasses = useMemo(
     () =>
@@ -67,7 +72,7 @@ export default function PromptSubmissionForm({
 
   useEffect(() => {
     if (!isFormVisible) {
-      setToken('');
+      setToken(isCaptchaConfigured ? '' : 'captcha-skipped');
       return;
     }
 
@@ -87,7 +92,13 @@ export default function PromptSubmissionForm({
     setCaptchaError(false);
     setAdminToken('');
     setCreatedPrompt(isEditMode ? prompt ?? null : null);
-  }, [isFormVisible, initialPrompt, isEditMode]);
+    setToken(isCaptchaConfigured ? '' : 'captcha-skipped');
+  }, [
+    isFormVisible,
+    initialPrompt,
+    isEditMode,
+    isCaptchaConfigured,
+  ]);
 
   const handleClose = () => {
     onClose?.();
@@ -95,12 +106,13 @@ export default function PromptSubmissionForm({
     setFeedbackMessage('');
     setCaptchaError(false);
     setCreatedPrompt(isEditMode ? initialPrompt ?? null : null);
+    setToken(isCaptchaConfigured ? '' : 'captcha-skipped');
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!isEditMode && !token) {
+    if (!isEditMode && isCaptchaConfigured && !token) {
       setCaptchaError(true);
       return;
     }
@@ -143,7 +155,11 @@ export default function PromptSubmissionForm({
       const method = isEditMode ? 'PATCH' : 'POST';
       const body = {
         ...payload,
-        ...(isEditMode ? {} : { token }),
+        ...(isEditMode
+          ? {}
+          : isCaptchaConfigured
+            ? { token }
+            : {}),
       };
 
       const headers: HeadersInit = {
@@ -196,7 +212,7 @@ export default function PromptSubmissionForm({
         setLink('');
         setImage('');
         setDate('');
-        setToken('');
+        setToken(isCaptchaConfigured ? '' : 'captcha-skipped');
       }
 
       setSubmitStatus('success');
@@ -360,10 +376,17 @@ export default function PromptSubmissionForm({
             </div>
           )}
 
-          {!isEditMode && (
+          {!isEditMode && isCaptchaConfigured && (
             <div className="flex justify-center mb-6">
               <DynamicTurnstile onSuccess={setToken} />
             </div>
+          )}
+
+          {!isEditMode && !isCaptchaConfigured && (
+            <p className="mb-6 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-500 dark:bg-amber-500/10 dark:text-amber-200">
+              Verifikasi captcha sedang dinonaktifkan karena konfigurasi lingkungan
+              belum lengkap. Kirimkan formulir seperti biasa.
+            </p>
           )}
 
           <div className="flex justify-end gap-4">
@@ -378,14 +401,16 @@ export default function PromptSubmissionForm({
             )}
             <button
               type="submit"
-              disabled={isSubmitting || (!isEditMode && !token)}
+              disabled={
+                isSubmitting || (!isEditMode && isCaptchaConfigured && !token)
+              }
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-500"
             >
               {isSubmitting ? 'Mengirim...' : isEditMode ? 'Simpan Perubahan' : 'Kirim'}
             </button>
           </div>
 
-          {captchaError && !isEditMode && (
+          {captchaError && !isEditMode && isCaptchaConfigured && (
             <p className="text-red-500 mt-4">Silakan selesaikan verifikasi keamanan.</p>
           )}
           {submitStatus === 'error' && (
