@@ -11,6 +11,30 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const sanitizeString = (value: unknown): string =>
   typeof value === 'string' ? value.trim() : '';
 
+export const resolveMailEnvValue = (baseName: string): string | undefined => {
+  const direct = process.env[baseName];
+
+  if (typeof direct === 'string' && direct.length > 0) {
+    return direct;
+  }
+
+  const prefix = `${baseName}_`;
+  const fallbackKey = Object.keys(process.env)
+    .filter(key => key.startsWith(prefix))
+    .sort((a, b) => a.length - b.length || a.localeCompare(b))
+    .find(key => {
+      const value = process.env[key];
+      return typeof value === 'string' && value.length > 0;
+    });
+
+  if (!fallbackKey) {
+    return undefined;
+  }
+
+  const fallback = process.env[fallbackKey];
+  return typeof fallback === 'string' && fallback.length > 0 ? fallback : undefined;
+};
+
 const collapseWhitespace = (value: string) => value.replace(/\s+/g, '');
 
 export const sanitizeAppPassword = (value: unknown): string => {
@@ -175,8 +199,8 @@ export const createTransportOptions = (user: string, pass: string): SMTPTranspor
 };
 
 export const createEmailTransporter = () => {
-  const nodemailerUser = sanitizeEmail(process.env.NODEMAILER_EMAIL);
-  const nodemailerPass = sanitizeAppPassword(process.env.NODEMAILER_APP_PASSWORD);
+  const nodemailerUser = sanitizeEmail(resolveMailEnvValue('NODEMAILER_EMAIL'));
+  const nodemailerPass = sanitizeAppPassword(resolveMailEnvValue('NODEMAILER_APP_PASSWORD'));
 
   if (!nodemailerUser || !nodemailerPass) {
     throw new Error('NODEMAILER_EMAIL atau NODEMAILER_APP_PASSWORD belum dikonfigurasi dengan benar.');
@@ -187,3 +211,4 @@ export const createEmailTransporter = () => {
 
   return { transporter, nodemailerUser };
 };
+

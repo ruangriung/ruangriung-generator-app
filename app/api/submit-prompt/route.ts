@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createPrompt } from '@/lib/prompts';
 import {
   createEmailTransporter,
+  resolveMailEnvValue,
   sanitizeEmail,
   sanitizeEmailAddresses,
   sanitizeSenderAddress,
@@ -127,10 +128,13 @@ export async function POST(request: Request) {
         );
       }
 
-      const senderAddress = sanitizeSenderAddress(process.env.NODEMAILER_FROM, nodemailerUser);
+      const senderAddress = sanitizeSenderAddress(
+        resolveMailEnvValue('NODEMAILER_FROM'),
+        nodemailerUser,
+      );
       const recipientAddresses = sanitizeEmailAddresses([
-        process.env.PROMPT_SUBMISSION_RECIPIENT,
-        process.env.CONTACT_EMAIL_RECIPIENT,
+        resolveMailEnvValue('PROMPT_SUBMISSION_RECIPIENT'),
+        resolveMailEnvValue('CONTACT_EMAIL_RECIPIENT'),
         nodemailerUser,
         DEFAULT_PROMPT_NOTIFICATION_EMAIL,
       ]);
