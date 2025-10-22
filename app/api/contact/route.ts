@@ -3,6 +3,7 @@
 import { NextResponse } from 'next/server';
 import {
   createEmailTransporter,
+  getDefaultNotificationEmail,
   sanitizeEmail,
   sanitizeEmailAddresses,
   sanitizeSenderAddress,
@@ -49,11 +50,11 @@ export async function POST(request: Request) {
 
     // Jika verifikasi Turnstile berhasil, lanjutkan mengirim email
     // Konfigurasi Gmail (gunakan app password, bukan password biasa)
-    let transporter: Awaited<ReturnType<typeof createEmailTransporter>>['transporter'];
-    let nodemailerUser: Awaited<ReturnType<typeof createEmailTransporter>>['nodemailerUser'];
+    let transporter;
+    let nodemailerUser;
 
     try {
-      const emailTransport = await createEmailTransporter();
+      const emailTransport = createEmailTransporter();
       transporter = emailTransport.transporter;
       nodemailerUser = emailTransport.nodemailerUser;
     } catch (error) {
@@ -67,6 +68,7 @@ export async function POST(request: Request) {
     const senderAddress = sanitizeSenderAddress(`"${name}" <${nodemailerUser}>`, nodemailerUser);
     const recipients = sanitizeEmailAddresses([
       process.env.CONTACT_EMAIL_RECIPIENT,
+      getDefaultNotificationEmail(),
       nodemailerUser,
     ]);
 

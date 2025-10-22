@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import {
   createEmailTransporter,
+  getDefaultNotificationEmail,
   sanitizeEmailAddresses,
   sanitizeSenderAddress,
   sanitizeString,
@@ -19,17 +20,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Semua kolom wajib diisi.' }, { status: 400 });
     }
 
-    let transporter: Awaited<ReturnType<typeof createEmailTransporter>>['transporter'];
-    let nodemailerUser: string;
-    let previewResolver:
-      | Awaited<ReturnType<typeof createEmailTransporter>>['getTestMessageUrl']
-      | undefined;
+    let transporter;
+    let nodemailerUser;
 
     try {
-      const emailTransport = await createEmailTransporter();
+      const emailTransport = createEmailTransporter();
       transporter = emailTransport.transporter;
       nodemailerUser = emailTransport.nodemailerUser;
-      previewResolver = emailTransport.getTestMessageUrl;
     } catch (error) {
       console.error('Konfigurasi Nodemailer belum lengkap:', error);
       return NextResponse.json(
@@ -41,8 +38,8 @@ export async function POST(request: Request) {
     const senderAddress = sanitizeSenderAddress(`"${name}" <${nodemailerUser}>`, nodemailerUser);
     const recipients = sanitizeEmailAddresses([
       process.env.CONTACT_EMAIL_RECIPIENT,
+      getDefaultNotificationEmail(),
       nodemailerUser,
-      'ayicktigabelas@gmail.com',
     ]);
 
     if (recipients.length === 0) {
@@ -70,12 +67,7 @@ export async function POST(request: Request) {
     };
 
     // Kirim email
-    const info = await transporter.sendMail(mailOptions);
-
-    const previewUrl = previewResolver?.(info);
-    if (typeof previewUrl === 'string' && previewUrl.length > 0) {
-      console.info('Preview email API send-email tersedia di:', previewUrl);
-    }
+    await transporter.sendMail(mailOptions);
 
     return NextResponse.json({ message: 'Email berhasil dikirim!' }, { status: 200 });
 

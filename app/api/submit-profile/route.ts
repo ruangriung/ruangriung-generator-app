@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import {
   createEmailTransporter,
+  getDefaultNotificationEmail,
   sanitizeEmailAddresses,
   sanitizeSenderAddress,
   sanitizeString,
@@ -164,17 +165,13 @@ export async function POST(request: Request) {
       );
     }
 
-    let transporter: Awaited<ReturnType<typeof createEmailTransporter>>['transporter'];
-    let nodemailerUser: string;
-    let previewResolver:
-      | Awaited<ReturnType<typeof createEmailTransporter>>['getTestMessageUrl']
-      | undefined;
+    let transporter;
+    let nodemailerUser;
 
     try {
-      const emailTransport = await createEmailTransporter();
+      const emailTransport = createEmailTransporter();
       transporter = emailTransport.transporter;
       nodemailerUser = emailTransport.nodemailerUser;
-      previewResolver = emailTransport.getTestMessageUrl;
     } catch (error) {
       console.error('Konfigurasi email belum lengkap untuk submission profil.', error);
       return NextResponse.json(
@@ -187,8 +184,8 @@ export async function POST(request: Request) {
     const recipients = sanitizeEmailAddresses([
       process.env.CREATOR_PROFILE_RECIPIENT,
       process.env.CONTACT_EMAIL_RECIPIENT,
+      getDefaultNotificationEmail(),
       nodemailerUser,
-      'ayicktigabelas@gmail.com',
     ]);
 
     if (recipients.length === 0) {
@@ -237,18 +234,13 @@ export async function POST(request: Request) {
 
     const replyToAddress = sanitizeSenderAddress(submission.contactEmail, submission.contactEmail);
 
-    const info = await transporter.sendMail({
+    await transporter.sendMail({
       from: senderAddress,
       to: recipients.join(', '),
       replyTo: replyToAddress,
       subject: `Pengajuan Profil Konten Kreator - ${submission.name}`,
       html,
     });
-
-    const previewUrl = previewResolver?.(info);
-    if (typeof previewUrl === 'string' && previewUrl.length > 0) {
-      console.info('Preview email submission profil kreator tersedia di:', previewUrl);
-    }
 
     return NextResponse.json(
       { message: 'Profil Anda berhasil dikirim! Tim RuangRiung akan meninjaunya.' },

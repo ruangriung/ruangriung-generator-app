@@ -4,14 +4,12 @@ import { revalidatePath } from 'next/cache';
 import { createPrompt } from '@/lib/prompts';
 import {
   createEmailTransporter,
-  resolveMailEnvValue,
+  getDefaultNotificationEmail,
   sanitizeEmail,
   sanitizeEmailAddresses,
   sanitizeSenderAddress,
   sanitizeString,
 } from '@/lib/email';
-
-const DEFAULT_PROMPT_NOTIFICATION_EMAIL = 'ayicktigabelas@gmail.com';
 
 const sanitizeOptionalString = (value: unknown): string | undefined => {
   const sanitized = sanitizeString(value);
@@ -62,9 +60,9 @@ export async function POST(request: Request) {
     const token = sanitizeString(body.token);
     const date = sanitizeOptionalString(body.date);
 
-    if (!author || !email || !title || !promptContent || !tool) {
+    if (!author || !email || !title || !promptContent || !tool || !token) {
       return NextResponse.json(
-        { message: 'Semua kolom wajib diisi dengan benar, termasuk email.' },
+        { message: 'Semua kolom wajib diisi dengan benar, termasuk email dan verifikasi keamanan.' },
         { status: 400 }
       );
     }
@@ -75,53 +73,27 @@ export async function POST(request: Request) {
         : Boolean(body.skipEmail);
 
     const turnstileSecretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
-    const isTurnstileEnabled = Boolean(turnstileSecretKey);
+    if (!turnstileSecretKey) {
+      console.error('CLOUDFLARE_TURNSTILE_SECRET_KEY tidak diatur.');
+      return NextResponse.json({ message: 'Kesalahan konfigurasi server.' }, { status: 500 });
+    }
 
-    if (isTurnstileEnabled) {
-      if (!token) {
-        return NextResponse.json(
-          { message: 'Silakan selesaikan verifikasi keamanan.' },
-          { status: 400 },
-        );
-      }
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret: turnstileSecretKey,
+        response: token,
+        remoteip: request.headers.get('x-forwarded-for'),
+      }),
+    });
 
-      try {
-        const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            secret: turnstileSecretKey,
-            response: token,
-            remoteip: request.headers.get('x-forwarded-for'),
-          }),
-        });
-
-        if (!response.ok) {
-          console.error('Verifikasi Turnstile tidak dapat diproses:', response.statusText);
-          return NextResponse.json(
-            { message: 'Verifikasi keamanan gagal diproses. Silakan coba lagi.' },
-            { status: 502 },
-          );
-        }
-
-        const turnstileData = await response.json();
-        if (!turnstileData.success) {
-          console.error('Verifikasi Turnstile Gagal:', turnstileData['error-codes']);
-          return NextResponse.json(
-            { message: 'Verifikasi keamanan gagal. Silakan coba lagi.' },
-            { status: 401 },
-          );
-        }
-      } catch (verificationError) {
-        console.error('Kesalahan saat memverifikasi Turnstile:', verificationError);
-        return NextResponse.json(
-          { message: 'Verifikasi keamanan tidak tersedia saat ini. Silakan coba lagi nanti.' },
-          { status: 503 },
-        );
-      }
-    } else {
-      console.warn(
-        'CLOUDFLARE_TURNSTILE_SECRET_KEY tidak diatur. Melewati verifikasi Turnstile untuk permintaan ini.',
+    const turnstileData = await response.json();
+    if (!turnstileData.success) {
+      console.error('Verifikasi Turnstile Gagal:', turnstileData['error-codes']);
+      return NextResponse.json(
+        { message: 'Verifikasi keamanan gagal. Silakan coba lagi.' },
+        { status: 401 }
       );
     }
 
@@ -138,22 +110,14 @@ export async function POST(request: Request) {
       date,
     });
 
-    let emailStatus: 'skipped' | 'sent' | 'failed' = skipEmail ? 'skipped' : 'sent';
-    let emailError: string | undefined;
-    let emailPreviewUrl: string | undefined;
-
     if (!skipEmail) {
-      let transporter: Awaited<ReturnType<typeof createEmailTransporter>>['transporter'];
-      let nodemailerUser: string;
-      let previewResolver:
-        | Awaited<ReturnType<typeof createEmailTransporter>>['getTestMessageUrl']
-        | undefined;
+      let transporter;
+      let nodemailerUser;
 
       try {
-        const emailTransport = await createEmailTransporter();
+        const emailTransport = createEmailTransporter();
         transporter = emailTransport.transporter;
         nodemailerUser = emailTransport.nodemailerUser;
-        previewResolver = emailTransport.getTestMessageUrl;
       } catch (error) {
         console.error('NODEMAILER_EMAIL atau NODEMAILER_APP_PASSWORD belum diatur.');
         return NextResponse.json(
@@ -162,15 +126,12 @@ export async function POST(request: Request) {
         );
       }
 
-      const senderAddress = sanitizeSenderAddress(
-        resolveMailEnvValue('NODEMAILER_FROM'),
-        nodemailerUser,
-      );
+      const senderAddress = sanitizeSenderAddress(process.env.NODEMAILER_FROM, nodemailerUser);
       const recipientAddresses = sanitizeEmailAddresses([
-        resolveMailEnvValue('PROMPT_SUBMISSION_RECIPIENT'),
-        resolveMailEnvValue('CONTACT_EMAIL_RECIPIENT'),
+        process.env.PROMPT_SUBMISSION_RECIPIENT,
+        process.env.CONTACT_EMAIL_RECIPIENT,
+        getDefaultNotificationEmail(),
         nodemailerUser,
-        DEFAULT_PROMPT_NOTIFICATION_EMAIL,
       ]);
 
       if (recipientAddresses.length === 0) {
@@ -220,33 +181,7 @@ export async function POST(request: Request) {
         `,
       };
 
-      try {
-        const info = await transporter.sendMail(mailOptions);
-        emailStatus = 'sent';
-
-        const previewUrl = previewResolver?.(info);
-        if (typeof previewUrl === 'string' && previewUrl.length > 0) {
-          emailPreviewUrl = previewUrl;
-          console.info('Preview email submission prompt tersedia di:', previewUrl);
-        }
-      } catch (error: unknown) {
-        emailStatus = 'failed';
-
-        const errorMessage = (() => {
-          if (error && typeof error === 'object' && 'code' in error) {
-            const code = (error as { code?: unknown }).code;
-
-            if (code === 'EAUTH') {
-              return 'Konfigurasi kredensial email tidak valid.';
-            }
-          }
-
-          return 'Gagal mengirim email notifikasi prompt.';
-        })();
-
-        emailError = errorMessage;
-        console.error('Gagal mengirim email notifikasi prompt:', error);
-      }
+      await transporter.sendMail(mailOptions);
     }
 
     if (persisted) {
@@ -255,17 +190,13 @@ export async function POST(request: Request) {
     }
 
     const successMessage = persisted
-      ? emailStatus === 'failed'
-        ? 'Prompt berhasil dikirim, namun notifikasi email gagal dikirim.'
-        : skipEmail
+      ? skipEmail
         ? 'Prompt berhasil dikirim dan langsung ditayangkan di katalog.'
         : 'Prompt berhasil dikirim!'
-      : emailStatus === 'failed'
-        ? 'Prompt berhasil dikirim, namun notifikasi email gagal dikirim. Prompt memerlukan peninjauan manual sebelum dipublikasikan.'
-        : 'Prompt berhasil dikirim, namun diperlukan peninjauan manual sebelum dipublikasikan.';
+      : 'Prompt berhasil dikirim, namun diperlukan peninjauan manual sebelum dipublikasikan.';
 
     return NextResponse.json(
-      { message: successMessage, prompt, persisted, emailStatus, emailError, emailPreviewUrl },
+      { message: successMessage, prompt, persisted },
       { status: 200 },
     );
 

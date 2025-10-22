@@ -173,7 +173,7 @@ export default function ArticlePaginationClient({ initialArticles }: ArticlePagi
             ) : (
                 <>
                     <div ref={listContainerRef} className="space-y-8">
-                        {currentPosts.map((article) => (
+                        {currentPosts.map(article => (
                             <Fragment key={article.slug}>
                                 <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow">
                                     <div className="flex items-start justify-between mb-2">
@@ -215,7 +215,7 @@ export default function ArticlePaginationClient({ initialArticles }: ArticlePagi
                                         ))}
                                     </div>
                                 </div>
-                            </Fragment>
+                    </Fragment>
                         ))}
                     </div>
 
