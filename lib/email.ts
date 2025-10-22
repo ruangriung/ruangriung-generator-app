@@ -269,7 +269,7 @@ const createEtherealTransporter = async (): Promise<EmailTransporterResult> => {
 
 export const createEmailTransporter = async (): Promise<EmailTransporterResult> => {
   const nodemailerUser = sanitizeEmail(resolveMailEnvValue('NODEMAILER_EMAIL'));
-  const nodemailerPass = sanitizeAppPassword(resolveMailEnvValue('NODEMAILER_APP_PASSWORD'));
+  const nodemailerPass = sanitizeString(resolveMailEnvValue('NODEMAILER_APP_PASSWORD'));
 
   if (nodemailerUser && nodemailerPass) {
     const transportOptions = createTransportOptions(nodemailerUser, nodemailerPass);
