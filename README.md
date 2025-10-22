@@ -34,15 +34,30 @@ FACEBOOK_CLIENT_ID=
 FACEBOOK_CLIENT_SECRET=
 NODEMAILER_EMAIL=
 NODEMAILER_APP_PASSWORD=
+DEFAULT_NOTIFICATION_EMAIL=
+CONTACT_EMAIL_RECIPIENT=
+ARTICLE_SUBMISSION_RECIPIENT=
+CREATOR_PROFILE_RECIPIENT=
+PROMPT_SUBMISSION_RECIPIENT=
+UMKM_SUBMISSION_RECIPIENT=
 CLOUDFLARE_TURNSTILE_SECRET_KEY=
 NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY=
 NEXT_PUBLIC_POLLINATIONS_TOKEN=
 PROMPT_EDIT_TOKEN=
 ```
 
-Variabel tambahan mungkin diperlukan untuk fitur tertentu seperti formulir kontak atau iklan. Anda juga dapat menambahkan
-akhiran khusus (misalnya `NODEMAILER_EMAIL_AYICKTIGABELAS` dan `NODEMAILER_APP_PASSWORD_AYICKTIGABELAS`) bila perlu
-menyimpan beberapa kredensial; aplikasi akan otomatis menggunakan nilai pertama yang tersedia dengan awalan tersebut.
+> `DEFAULT_NOTIFICATION_EMAIL` menentukan inbox utama yang menerima seluruh notifikasi formulir. Bila tidak diisi, aplikasi akan otomatis menggunakan nilai `NODEMAILER_EMAIL`. Anda dapat menambahkan beberapa alamat penerima tambahan untuk tiap formulir melalui variabel `*_RECIPIENT` yang relevan.
+
+### Pengaturan Email Formulir
+
+Semua formulir (kontak, kirim artikel, profil kreator, kirim prompt, UMKM, dan pesan umum) memanfaatkan Nodemailer untuk meneruskan data ke inbox Anda. Pastikan langkah berikut sudah dilakukan sebelum produksi atau deploy:
+
+1. Aktifkan `NODEMAILER_EMAIL` dan `NODEMAILER_APP_PASSWORD` dengan alamat Gmail serta *App Password* yang Anda buat melalui Google Account.
+2. Isi `DEFAULT_NOTIFICATION_EMAIL` dengan alamat inbox utama yang ingin menerima semua notifikasi formulir (misalnya `ayicktigabelas@gmail.com`). Jika dikosongkan, aplikasi memakai nilai `NODEMAILER_EMAIL` sebagai fallback.
+3. (Opsional) Isi masing-masing `*_RECIPIENT` untuk menambahkan distribusi khusus selain email utama.
+4. Atur `CONTACT_EMAIL_RECIPIENT` agar formulir kontak juga mengirim ke alamat tambahan jika diperlukan.
+5. Simpan nilai-nilai ini pada **Project Settings → Environment Variables** di Vercel untuk setiap lingkungan (`Production`, `Preview`, dan/atau `Development`).
+6. Setelah menyimpan variabel di Vercel, lakukan redeploy agar Next.js memuat ulang konfigurasi lingkungan.
 
 ## Konten
 Artikel dan contoh prompt berada pada direktori `content` dan dimuat dari berkas Markdown.

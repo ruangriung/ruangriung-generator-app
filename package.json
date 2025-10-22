@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "dotenv -e .env.local -- next build",
     "start": "next start",
-    "lint": "next lint",
-    "test:email": "rm -rf .tests-tmp && pnpm exec tsc --module commonjs --target ES2020 --moduleResolution node --esModuleInterop --skipLibCheck --outDir .tests-tmp tests/email-smoke.ts lib/email.ts && NODEMAILER_USE_ETHEREAL=true node .tests-tmp/tests/email-smoke.js && rm -rf .tests-tmp"
+    "lint": "next lint"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",

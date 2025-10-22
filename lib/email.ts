@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-import type { TestAccount, Transporter } from 'nodemailer';
 import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 type NormalizedEmail = {
@@ -11,61 +10,6 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const sanitizeString = (value: unknown): string =>
   typeof value === 'string' ? value.trim() : '';
-
-export const resolveMailEnvValue = (baseName: string): string | undefined => {
-  const direct = process.env[baseName];
-
-  if (typeof direct === 'string' && direct.length > 0) {
-    return direct;
-  }
-
-  const prefix = `${baseName}_`;
-  const fallbackKey = Object.keys(process.env)
-    .filter(key => key.startsWith(prefix))
-    .sort((a, b) => a.length - b.length || a.localeCompare(b))
-    .find(key => {
-      const value = process.env[key];
-      return typeof value === 'string' && value.length > 0;
-    });
-
-  if (!fallbackKey) {
-    return undefined;
-  }
-
-  const fallback = process.env[fallbackKey];
-  return typeof fallback === 'string' && fallback.length > 0 ? fallback : undefined;
-};
-
-const collapseWhitespace = (value: string) => value.replace(/\s+/g, '');
-
-export const sanitizeAppPassword = (value: unknown): string => {
-  const trimmed = sanitizeString(value);
-
-  if (!trimmed) {
-    return '';
-  }
-
-  const collapsed = collapseWhitespace(trimmed);
-
-  if (collapsed === trimmed) {
-    return trimmed;
-  }
-
-  const looksLikeGmailAppPassword =
-    /^[a-zA-Z0-9\s]+$/.test(trimmed) && collapsed.length === 16 && trimmed.length > collapsed.length;
-
-  if (looksLikeGmailAppPassword) {
-    return collapsed;
-  }
-
-  const shouldStripWhitespace = sanitizeString(process.env.NODEMAILER_STRIP_PASSWORD_WHITESPACE);
-
-  if (shouldStripWhitespace && ['true', '1', 'yes', 'on'].includes(shouldStripWhitespace.toLowerCase())) {
-    return collapsed;
-  }
-
-  return trimmed;
-};
 
 export const normalizeEmailAddress = (value: unknown): NormalizedEmail | null => {
   if (typeof value !== 'string') {
@@ -103,6 +47,24 @@ export const normalizeEmailAddress = (value: unknown): NormalizedEmail | null =>
 export const sanitizeEmail = (value: unknown): string => {
   const normalized = normalizeEmailAddress(value);
   return normalized?.address ?? '';
+};
+
+export const getDefaultNotificationEmail = (): string => {
+  const configured = sanitizeEmail(process.env.DEFAULT_NOTIFICATION_EMAIL);
+
+  if (configured) {
+    return configured;
+  }
+
+  const nodemailerUser = sanitizeEmail(process.env.NODEMAILER_EMAIL);
+
+  if (nodemailerUser) {
+    return nodemailerUser;
+  }
+
+  throw new Error(
+    'DEFAULT_NOTIFICATION_EMAIL atau NODEMAILER_EMAIL belum dikonfigurasi. Setel salah satunya agar formulir dapat mengirim notifikasi.',
+  );
 };
 
 export const sanitizeSenderAddress = (value: unknown, fallback: string): string => {
@@ -199,91 +161,16 @@ export const createTransportOptions = (user: string, pass: string): SMTPTranspor
   } satisfies SMTPTransport.Options;
 };
 
-type EmailTransporterResult = {
-  transporter: Transporter<SMTPTransport.SentMessageInfo, SMTPTransport.Options>;
-  nodemailerUser: string;
-  getTestMessageUrl?: typeof nodemailer.getTestMessageUrl;
-  testAccount?: TestAccount;
-};
+export const createEmailTransporter = () => {
+  const nodemailerUser = sanitizeEmail(process.env.NODEMAILER_EMAIL);
+  const nodemailerPass = sanitizeString(process.env.NODEMAILER_APP_PASSWORD);
 
-const resolveBooleanEnv = (value: string) => ['true', '1', 'yes', 'on'].includes(value.toLowerCase());
-
-const shouldUseEthereal = () => {
-  const override = sanitizeString(resolveMailEnvValue('NODEMAILER_USE_ETHEREAL'));
-
-  if (override) {
-    return resolveBooleanEnv(override);
+  if (!nodemailerUser || !nodemailerPass) {
+    throw new Error('NODEMAILER_EMAIL atau NODEMAILER_APP_PASSWORD belum dikonfigurasi dengan benar.');
   }
 
-  const nodeEnv = sanitizeString(process.env.NODE_ENV).toLowerCase();
-  return nodeEnv === 'test';
+  const transportOptions = createTransportOptions(nodemailerUser, nodemailerPass);
+  const transporter = nodemailer.createTransport(transportOptions);
+
+  return { transporter, nodemailerUser };
 };
-
-const createStreamPreviewTransporter = (reason: unknown): EmailTransporterResult => {
-  console.warn(
-    'Gagal membuat akun Ethereal untuk pengujian email. Menggunakan transporter buffer lokal.',
-    reason,
-  );
-
-  const transporter = nodemailer.createTransport({
-    streamTransport: true,
-    buffer: true,
-  });
-
-  return {
-    transporter,
-    nodemailerUser: 'dev-inbox@localhost',
-    getTestMessageUrl: info => {
-      const message = (info as { message?: Buffer }).message;
-      if (message instanceof Buffer) {
-        return `data:message/rfc822;base64,${message.toString('base64')}`;
-      }
-      return `stream:${info.messageId}`;
-    },
-  } satisfies EmailTransporterResult;
-};
-
-const createEtherealTransporter = async (): Promise<EmailTransporterResult> => {
-  try {
-    const testAccount = await nodemailer.createTestAccount();
-    const transporter = nodemailer.createTransport({
-      host: testAccount.smtp.host,
-      port: testAccount.smtp.port,
-      secure: testAccount.smtp.secure,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
-      },
-    });
-
-    return {
-      transporter,
-      nodemailerUser: testAccount.user,
-      getTestMessageUrl: nodemailer.getTestMessageUrl,
-      testAccount,
-    } satisfies EmailTransporterResult;
-  } catch (error) {
-    return createStreamPreviewTransporter(error);
-  }
-};
-
-export const createEmailTransporter = async (): Promise<EmailTransporterResult> => {
-  const nodemailerUser = sanitizeEmail(resolveMailEnvValue('NODEMAILER_EMAIL'));
-  const nodemailerPass = sanitizeAppPassword(resolveMailEnvValue('NODEMAILER_APP_PASSWORD'));
-
-  if (nodemailerUser && nodemailerPass) {
-    const transportOptions = createTransportOptions(nodemailerUser, nodemailerPass);
-    const transporter = nodemailer.createTransport(transportOptions);
-
-    return { transporter, nodemailerUser } satisfies EmailTransporterResult;
-  }
-
-  if (shouldUseEthereal()) {
-    return createEtherealTransporter();
-  }
-
-  throw new Error('NODEMAILER_EMAIL atau NODEMAILER_APP_PASSWORD belum dikonfigurasi dengan benar.');
-};
-
-export type { EmailTransporterResult };
-

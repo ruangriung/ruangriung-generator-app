@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import {
   createEmailTransporter,
+  getDefaultNotificationEmail,
   sanitizeEmailAddresses,
   sanitizeSenderAddress,
   sanitizeString,
@@ -134,17 +135,13 @@ export async function POST(request: Request) {
       );
     }
 
-    let transporter: Awaited<ReturnType<typeof createEmailTransporter>>['transporter'];
-    let nodemailerUser: string;
-    let previewResolver:
-      | Awaited<ReturnType<typeof createEmailTransporter>>['getTestMessageUrl']
-      | undefined;
+    let transporter;
+    let nodemailerUser;
 
     try {
-      const emailTransport = await createEmailTransporter();
+      const emailTransport = createEmailTransporter();
       transporter = emailTransport.transporter;
       nodemailerUser = emailTransport.nodemailerUser;
-      previewResolver = emailTransport.getTestMessageUrl;
     } catch (error) {
       console.error('Konfigurasi email belum lengkap.', error);
       return NextResponse.json(
@@ -157,6 +154,7 @@ export async function POST(request: Request) {
     const recipients = sanitizeEmailAddresses([
       process.env.UMKM_SUBMISSION_RECIPIENT,
       process.env.CONTACT_EMAIL_RECIPIENT,
+      getDefaultNotificationEmail(),
       nodemailerUser,
     ]);
 
@@ -228,7 +226,7 @@ export async function POST(request: Request) {
     ]);
     const replyToAddress = replyToCandidates[0];
 
-    const info = await transporter.sendMail({
+    await transporter.sendMail({
       from: senderAddress,
       to: recipients.join(', '),
       ...(replyToAddress ? { replyTo: replyToAddress } : {}),
@@ -238,11 +236,6 @@ export async function POST(request: Request) {
         ${messageLines.join('\n')}
       `,
     });
-
-    const previewUrl = previewResolver?.(info);
-    if (typeof previewUrl === 'string' && previewUrl.length > 0) {
-      console.info('Preview email pengajuan UMKM tersedia di:', previewUrl);
-    }
 
     return NextResponse.json({
       message: 'Terima kasih! Data UMKM Anda sudah kami terima. Tim kami akan segera menindaklanjuti.',
