@@ -3,18 +3,18 @@ import FontGeneratorClient from './FontGeneratorClient';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ruangriung.my.id'),
-  title: 'Font Generator AI untuk Branding & Konten | RuangRiung',
+  title: 'Font Generator .TTF Kustom | RuangRiung',
   description:
-    'Buat paket tipografi siap pakai untuk brand, konten sosial, dan proyek kreatif Anda. Pilih model dari katalog AI internal, jelaskan karakter brand, dan dapatkan rekomendasi font lengkap dengan pairing dan CSS.',
+    'Rancang font kustom dan unduh file .ttf langsung dari browser Anda. Atur ketebalan, lebar, serif, hingga x-height untuk menghasilkan typeface unik yang siap dipakai di brand dan produk digital.',
   keywords:
-    'font generator AI, rekomendasi font, tipografi brand, katalog model AI, generator font Indonesia, ruangriung font generator',
+    'font generator ttf, pembuat font online, desain tipografi, ruangriung font generator, buat font sendiri, font editor indonesia',
   alternates: {
     canonical: '/font-generator',
   },
   openGraph: {
-    title: 'Font Generator AI untuk Branding & Konten | RuangRiung',
+    title: 'Font Generator .TTF Kustom | RuangRiung',
     description:
-      'Susun kombinasi tipografi profesional dengan bantuan AI. Dapatkan rekomendasi font, pasangan, dan snippet CSS dalam hitungan detik.',
+      'Bangun font .ttf Anda sendiri dengan kontrol penuh atas bentuk, kemiringan, serif, dan karakter yang tersedia.',
     url: 'https://ruangriung.my.id/font-generator',
     siteName: 'RuangRiung AI Generator',
     images: [
@@ -30,9 +30,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Font Generator AI untuk Branding & Konten | RuangRiung',
+    title: 'Font Generator .TTF Kustom | RuangRiung',
     description:
-      'Jelaskan brand Anda, pilih model dari katalog AI internal, dan AI kami akan menyiapkan rekomendasi font lengkap dengan pairing serta tips penggunaan.',
+      'Atur parameter tipografi dan hasilkan file font .ttf siap pakai untuk identitas visual, UI, dan materi komunikasi.',
     images: ['/og-image/og-image-font-generator.png'],
   },
   robots: {
