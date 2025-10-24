@@ -93,7 +93,7 @@ const buildPollinationsUrl = (baseUrl: string) => {
     url.searchParams.set(paramName, paramValue);
     return url.toString();
   } catch (error) {
-    console.warn('Gagal membangun URL text.pollinations.ai:', error);
+    console.warn('Gagal membangun URL layanan teks internal:', error);
     const separator = baseUrl.includes('?') ? '&' : '?';
     return `${baseUrl}${separator}${paramName}=${encodeURIComponent(paramValue)}`;
   }
@@ -274,7 +274,7 @@ const parseFontResponse = (content: string): FontPlan => {
       rawText: content,
     };
   } catch (error) {
-    console.warn('Gagal mengurai respons font dari text.pollinations.ai:', error);
+    console.warn('Gagal mengurai respons font dari layanan teks internal:', error);
     return fallback;
   }
 };
@@ -337,11 +337,11 @@ export default function FontGeneratorClient() {
           setSelectedModel(parsed[0]?.id ?? 'openai');
         }
       } catch (error) {
-        console.error('Kesalahan memuat model text.pollinations.ai:', error);
+        console.error('Kesalahan memuat model dari layanan teks internal:', error);
         if (!isMounted) {
           return;
         }
-        setModelError('Tidak dapat memuat model terbaru dari text.pollinations.ai. Menggunakan opsi cadangan.');
+        setModelError('Tidak dapat memuat katalog model utama. Menggunakan opsi cadangan.');
         setModels(FALLBACK_MODELS);
         if (!FALLBACK_MODELS.some((item) => item.id === selectedModel)) {
           setSelectedModel('openai');
@@ -567,7 +567,7 @@ Jika font berbayar, jelaskan pada "description". Gunakan bahasa Indonesia.`;
             </div>
             <h1 className="mt-2 text-3xl font-bold sm:text-4xl">Susun Paket Font Profesional Dalam Hitungan Detik</h1>
             <p className="mt-3 max-w-3xl text-sm sm:text-base text-white/85">
-              Hubungkan karakter brand Anda dengan model dari text.pollinations.ai. Masukkan konteks penggunaan, pilih model,
+              Hubungkan karakter brand Anda dengan model dari katalog AI internal. Masukkan konteks penggunaan, pilih model,
               dan dapatkan rekomendasi font lengkap dengan pairing, snippet CSS, serta tips implementasi.
             </p>
           </div>
@@ -575,7 +575,7 @@ Jika font berbayar, jelaskan pada "description". Gunakan bahasa Indonesia.`;
             <div className="rounded-2xl bg-white/15 px-4 py-3 text-sm font-medium text-white/90 shadow-lg backdrop-blur">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5" />
-                <span>Terintegrasi text.pollinations.ai</span>
+                <span>Terintegrasi layanan teks internal</span>
               </div>
               <p className="mt-1 text-xs text-white/70">
                 Token otomatis digunakan dari konfigurasi Vercel.
@@ -739,7 +739,7 @@ Jika font berbayar, jelaskan pada "description". Gunakan bahasa Indonesia.`;
             <div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Pengaturan Lanjutan</h2>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                Atur jumlah rekomendasi, karakter tone, serta pilihan model text.pollinations.ai yang akan digunakan.
+                Atur jumlah rekomendasi, karakter tone, serta pilihan model teks yang akan digunakan.
               </p>
             </div>
             <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
@@ -850,7 +850,7 @@ Jika font berbayar, jelaskan pada "description". Gunakan bahasa Indonesia.`;
             <div className="space-y-5">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-200" htmlFor="model">
-                  Pilih model text.pollinations.ai
+                  Pilih model teks AI
                 </label>
                 <div className="relative">
                   <select
@@ -874,7 +874,7 @@ Jika font berbayar, jelaskan pada "description". Gunakan bahasa Indonesia.`;
                   <p className="text-xs text-red-500 dark:text-red-400">{modelError}</p>
                 ) : (
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Model dipanggil langsung dari text.pollinations.ai/models menggunakan token yang sama dengan konfigurasi aplikasi.
+                    Model dipanggil langsung dari katalog penyedia teks menggunakan token yang sama dengan konfigurasi aplikasi.
                   </p>
                 )}
               </div>
@@ -907,8 +907,7 @@ Jika font berbayar, jelaskan pada "description". Gunakan bahasa Indonesia.`;
                 <div className="flex items-start gap-3">
                   <Info className="mt-0.5 h-5 w-5 shrink-0" />
                   <p>
-                    Endpoint <code className="rounded bg-purple-200/50 px-1 py-0.5 text-xs dark:bg-purple-800/60">https://text.pollinations.ai/openai</code>
-                    {' '}dipanggil langsung dengan Authorization token (jika tersedia) dan fallback referrer RuangRiung.
+                    Permintaan dikirim ke endpoint teks bawaan dengan Authorization token (jika tersedia) dan fallback referrer RuangRiung.
                   </p>
                 </div>
               </div>
