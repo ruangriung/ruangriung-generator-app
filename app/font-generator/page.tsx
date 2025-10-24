@@ -5,9 +5,9 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://ruangriung.my.id'),
   title: 'Font Generator AI untuk Branding & Konten | RuangRiung',
   description:
-    'Buat paket tipografi siap pakai untuk brand, konten sosial, dan proyek kreatif Anda. Pilih model AI Pollinations, jelaskan karakter brand, dan dapatkan rekomendasi font lengkap dengan pairing dan CSS.',
+    'Buat paket tipografi siap pakai untuk brand, konten sosial, dan proyek kreatif Anda. Pilih model dari text.pollinations.ai, jelaskan karakter brand, dan dapatkan rekomendasi font lengkap dengan pairing dan CSS.',
   keywords:
-    'font generator AI, rekomendasi font, tipografi brand, Pollinations AI font, generator font Indonesia, ruangriung font generator',
+    'font generator AI, rekomendasi font, tipografi brand, text.pollinations.ai font, generator font Indonesia, ruangriung font generator',
   alternates: {
     canonical: '/font-generator',
   },
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Font Generator AI untuk Branding & Konten | RuangRiung',
     description:
-      'Jelaskan brand Anda, pilih model Pollinations, dan AI kami akan menyiapkan rekomendasi font lengkap dengan pairing serta tips penggunaan.',
+      'Jelaskan brand Anda, pilih model dari text.pollinations.ai, dan AI kami akan menyiapkan rekomendasi font lengkap dengan pairing serta tips penggunaan.',
     images: ['/og-image/og-image-font-generator.png'],
   },
   robots: {
