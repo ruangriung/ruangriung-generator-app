@@ -29,6 +29,7 @@ import { useState, useEffect, useRef } from 'react';
 import FAQ from '@/components/FAQ';
 import Link from 'next/link';
 import PromptSubmissionTrigger from '@/components/PromptSubmissionTrigger';
+import GoogleAd from '@/components/GoogleAd';
 
 interface HomeClientProps {
   latestArticle: {
@@ -364,6 +365,8 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
       <main className="w-full flex flex-col items-center">
         <Tabs />
       </main>
+
+      <GoogleAd className="w-full max-w-4xl my-8" />
 
       <div className="w-full max-w-4xl mt-10 mb-6">
         <Link
