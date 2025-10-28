@@ -171,6 +171,8 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         </p>
       </header>
 
+      <GoogleAd className="w-full max-w-4xl mb-8" />
+
       <div className="w-full max-w-4xl mb-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         <div className="relative" ref={promptMenuRef}>
           <button
