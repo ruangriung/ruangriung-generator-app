@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import ArticlePaginationClient from './ArticlePaginationClient';
 import ArticleSubmissionTrigger from '@/components/ArticleSubmissionTrigger';
+import GoogleAd from '@/components/GoogleAd';
 
 export default function ArticleListPage() {
   const articles = getAllArticles();
@@ -22,6 +23,9 @@ export default function ArticleListPage() {
         <ArticleSubmissionTrigger className="w-full sm:w-auto" />
       </div>
       <h1 className="text-4xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">Artikel</h1>
+      <div className="mb-10 flex justify-center">
+        <GoogleAd className="w-full max-w-3xl" />
+      </div>
       <Suspense
         fallback={
           <div className="space-y-6">

@@ -6,6 +6,7 @@ import { Prompt } from '../../lib/prompts';
 import Link from 'next/link';
 import PromptSubmissionTrigger from '../../components/PromptSubmissionTrigger';
 import Pagination from '../../components/Pagination';
+import GoogleAd from '@/components/GoogleAd';
 import { ArrowLeft, Filter, Search, XCircle } from 'lucide-react';
 import { usePromptSuggestions } from './usePromptSuggestions';
 
@@ -315,6 +316,9 @@ export default function PromptClient({
       </div>
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900 dark:text-white">{effectiveTitle}</h1>
+        <div className="my-6 flex w-full justify-center">
+          <GoogleAd className="w-full max-w-4xl" />
+        </div>
         <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">{effectiveDescription}</p>
         {showSubmissionTrigger && (
           <PromptSubmissionTrigger

@@ -8,6 +8,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ArticleSubmissionTrigger from '@/components/ArticleSubmissionTrigger';
 import ArticleSearchForm from '@/components/ArticleSearchForm';
+import GoogleAd from '@/components/GoogleAd';
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const article: Article | undefined = getArticleBySlug(params.slug);
@@ -114,6 +115,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       <h1 className="text-4xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">
         {article.title}
       </h1>
+      <div className="my-6 flex justify-center">
+        <GoogleAd className="w-full max-w-3xl" />
+      </div>
       <p className="text-gray-600 dark:text-gray-400 text-center mb-2">
         Oleh {article.author} pada {new Date(article.date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}
       </p>

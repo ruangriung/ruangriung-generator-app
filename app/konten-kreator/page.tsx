@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { creators, type Creator } from './creators';
 import { socialPlatforms } from './social-platforms';
+import GoogleAd from '@/components/GoogleAd';
 
 type SubmissionBenefit = {
   title: string;
@@ -226,6 +227,9 @@ export default function KontenKreatorPage() {
           <h1 className="mt-6 text-4xl font-bold text-gray-900 dark:text-gray-100">
             Bersama Kreator, Untuk Kreator, Oleh Kreator.
           </h1>
+          <div className="my-6 flex justify-center">
+            <GoogleAd className="w-full max-w-4xl" />
+          </div>
           <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
             Halaman ini dirancang untuk memperkenalkan dan memperkuat personal branding para Konten kreator di seluruh dunia sekaligus menonjolkan konten Facebook pro Anda semakin dikenal dunia. Jelajahi direktori ini untuk bertemu rekan seperjalanan yang siap berkolaborasi, membuka peluang baru, dan saling mengangkat karya terbaik.
           </p>
