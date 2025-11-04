@@ -3,7 +3,7 @@ id: "210"
 slug: "double-exposure-2"
 title: "Double Exposure"
 author: "Hamba Allah"
-date: "2025-11-03"
+date: "2025-11-04"
 tool: "RuangRiung my id, gemini, google ai studio"
 tags:
   - double-exposure
