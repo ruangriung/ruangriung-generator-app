@@ -128,13 +128,14 @@ export default function PlaybookStrategiBerkelanjutan() {
               dipercaya.
             </h2>
             <p className="mt-4 text-slate-600">
-              Halaman ini melanjutkan strategi dasar dengan contoh superpraktis. Cocok untuk kreator pemula, pelajar, bisnis rumahan,
-              sampai tim konten profesional yang ingin membangun hubungan jangka panjang.
+              Fokus utama playbook ini adalah <span className="font-semibold">kreator Mode Profesional Facebook</span> yang ingin
+              menumbuhkan profil atau halaman secara organik lalu memperluas ke kanal lain. Semua contoh dijelaskan dengan bahasa
+              sehari-hari agar bisa langsung diterapkan oleh kreator pemula, pelajar, bisnis rumahan, sampai tim konten profesional.
             </p>
             <ul className="mt-5 text-slate-700 list-disc pl-5 space-y-2">
               <li>
                 Mulai dari dasar (tujuan, audiens, identitas) — misalnya, pilih satu tujuan 90 hari dan gambarkan sosok penonton
-                ideal seperti “Rina, mahasiswa tingkat akhir yang cari tips edit murah”.
+                ideal seperti “Rina, admin komunitas Facebook UMKM yang cari tips live shopping”.
               </li>
               <li>
                 Bangun mesin cerita, kolaborasi, dan etika — contoh: buat seri cerita 4 episode, ajak teman UKM lokal kolaborasi,
@@ -145,6 +146,14 @@ export default function PlaybookStrategiBerkelanjutan() {
                 bisa langsung mempraktikkan.
               </li>
             </ul>
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
+              <p className="font-semibold text-slate-800">Sorotan fitur Facebook Profesional:</p>
+              <ul className="mt-2 list-disc pl-5 space-y-1">
+                <li>Aktifkan Mode Profesional di profil untuk membuka dashboard insight, monetisasi Stars, dan kotak pesan kolaborasi.</li>
+                <li>Gunakan Content Inspiration di Professional Dashboard untuk menemukan topik hangat lokal sebelum membuat skrip.</li>
+                <li>Jadwalkan Reels dan posting halaman lewat Meta Business Suite agar upload tetap rapi walau tim kecil.</li>
+              </ul>
+            </div>
           </div>
           <div className="rounded-3xl bg-white p-5 border border-slate-200 shadow-sm">
             <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-2 md:grid-cols-3">
@@ -286,25 +295,25 @@ function SectionTujuan() {
           {
             title: 'Personal Branding',
             items: [
-              'Dokumentasikan proses belajar mingguan — contohnya, ceritakan apa yang kamu kuasai setelah mencoba efek baru di CapCut.',
-              'Cerita gagal dan pelajaran jujur — misal, jelaskan kenapa video kemarin sepi dan apa perbaikanmu minggu ini.',
-              'Highlight karya terbaik tiap bulan — tunjukkan sebelum vs sesudah desain/foto untuk membuktikan progresmu.',
+              'Dokumentasikan proses belajar mingguan — contohnya, ceritakan apa yang kamu kuasai setelah mencoba efek baru di CapCut dan unggah ke Reels + Stories Facebook.',
+              'Cerita gagal dan pelajaran jujur — misal, jelaskan kenapa video kemarin sepi dan apa perbaikanmu minggu ini di postingan teks panjang dengan foto pendukung.',
+              'Highlight karya terbaik tiap bulan — pin postingan carousel foto di profil/halaman agar pengunjung baru langsung melihat progresmu.',
             ],
           },
           {
             title: 'Penjualan Produk/Jasa',
             items: [
-              'Demo sederhana (sebelum vs sesudah) — rekam produk dipakai orang biasa agar penonton mudah membayangkan hasilnya.',
-              'Testimoni pelanggan awam — rekam suara atau kutip pesan WhatsApp dari pelanggan pertama sebagai bukti sosial.',
-              'Promo terbatas dengan CTA jelas — contohnya, “Diskon 20% sampai Jumat, klik link bio untuk pesan”.',
+              'Demo sederhana (sebelum vs sesudah) — rekam produk dipakai orang biasa agar penonton mudah membayangkan hasilnya, lalu tambahkan tombol “Pesan sekarang” lewat link bio atau WhatsApp.',
+              'Testimoni pelanggan awam — rekam suara atau kutip pesan WhatsApp dari pelanggan pertama sebagai bukti sosial dan unggah ke Facebook Stories dengan stiker pertanyaan.',
+              'Promo terbatas dengan CTA jelas — contohnya, “Diskon 20% sampai Jumat, klik link bio untuk pesan”, lalu aktifkan fitur pengingat event di postingan.',
             ],
           },
           {
             title: 'Hiburan & Edukasi Ringan',
             items: [
-              'Sketsa lucu dari masalah harian — contoh: adegan orang tua nanya pekerjaan kreator lengkap dengan punchline sederhana.',
-              'Fun fact 30–60 detik — bacakan fakta ringan lalu beri contoh penerapan sehari-hari supaya cepat dipahami.',
-              'Meme yang bantu orang paham konsep sulit — gunakan perbandingan gambar/teks populer untuk menjelaskan istilah teknis.',
+              'Sketsa lucu dari masalah harian — contoh: adegan orang tua nanya pekerjaan kreator lengkap dengan punchline sederhana dan tag teman pakai fitur mention.',
+              'Fun fact 30–60 detik — bacakan fakta ringan lalu beri contoh penerapan sehari-hari supaya cepat dipahami; akhiri dengan tombol “Add Yours” di Reels.',
+              'Meme yang bantu orang paham konsep sulit — gunakan perbandingan gambar/teks populer untuk menjelaskan istilah teknis dan bagikan ulang ke grup komunitas.',
             ],
           },
         ].map((card) => (
@@ -340,6 +349,14 @@ function SectionAudiens() {
             'Akhiri dengan CTA ke newsletter atau lead magnet — contoh: “Unduh template pitch deck gratis di link komentar”.',
           ]}
         />
+        <PersonaCard
+          title="Pelaku UMKM 25–40 (Facebook Profesional)"
+          bullets={[
+            'Aktif di grup jual beli dan komunitas lokal — gunakan bahasa sehari-hari plus emotikon agar terasa akrab.',
+            'Suka konten kombinasi teks + video pendek — bagikan Reels demo produk lalu tulis ringkasan harga di caption panjang.',
+            'Responsif lewat Messenger/WhatsApp — sertakan tombol kontak dan balas pesan dalam 1×24 jam untuk menjaga algoritma pesan.',
+          ]}
+        />
       </div>
       <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-100/60 p-4 text-sm text-slate-600">
         <p className="font-semibold text-slate-700">Tip cepat untuk pemula:</p>
@@ -347,6 +364,7 @@ function SectionAudiens() {
           <li>Tulis 3 kalimat tentang apa yang bikin audiens Anda stres — contoh: “Susah cari ide konten karena alat minim”.</li>
           <li>Sebutkan 3 hal yang bikin mereka senyum lalu jadikan sumber ide — misal, “Senang lihat before-after desain murid”.</li>
           <li>Uji lewat IG story poll atau Google Form singkat — tanyakan pilihan sederhana seperti “Lebih butuh tips edit atau naskah?”.</li>
+          <li>Cek tab Insight di Professional Dashboard Facebook — lihat jam aktif utama lalu cocokkan dengan jadwal upload.</li>
         </ul>
       </div>
     </section>
@@ -368,6 +386,7 @@ function SectionIdentitas() {
             'Edukasi ramah, langsung ke intinya — jelaskan langkah satu per satu tanpa istilah rumit.',
             'Gunakan analogi sederhana — misal, bandingkan algoritma dengan “satpam komplek” yang pilih konten rapi.',
             'Hindari jargon kecuali dijelaskan — kalau sebut “retensi”, langsung tambah kalimat “artinya berapa lama orang nonton”.',
+            'Gunakan sapaan hangat khas Facebook — seperti “Hai teman-teman komunitas...” agar cocok untuk komentar keluarga & pelanggan.',
           ]}
         />
         <Spec
@@ -376,6 +395,7 @@ function SectionIdentitas() {
             'Palet biru/putih/abu atau sesuaikan brand — tulis kode warna sederhana agar desain konsisten.',
             'Tipografi tegas untuk headline — contohnya, pakai font Montserrat untuk judul dan font ringan untuk isi.',
             'Gunakan pola pembuka yang sama (misal, “Hai, saya...”) — latih audiens mengenali videomu dari 2 detik pertama.',
+            'Siapkan cover dan avatar berkualitas untuk profil Mode Profesional — ukuran 1:1 (profil) dan 1200×628 px (cover) agar tidak terpotong.',
           ]}
         />
         <Spec
@@ -384,6 +404,7 @@ function SectionIdentitas() {
             'Keaslian lebih penting daripada sensasi — lebih baik cerita apa adanya meski views kecil.',
             'Transparansi proses produksi — tunjukkan behind the scenes agar penonton paham kerja kerasmu.',
             'Anti-plagiarisme & kredit jelas — cantumkan nama sumber foto, musik, atau ide inspirasi.',
+            'Utamakan interaksi sehat — moderasi komentar dengan fitur “Moderation Assist” agar komunitas nyaman.',
           ]}
         />
       </div>
@@ -400,10 +421,10 @@ function SectionProduksi() {
       </p>
       <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
         <div className="grid sm:grid-cols-4 gap-3 text-sm">
-          <Stage k="M1" v="Riset tren, kumpulkan 20 ide, pilih 5 terbaik — cek topik populer di TikTok dan catat yang cocok." />
+          <Stage k="M1" v="Riset tren, kumpulkan 20 ide, pilih 5 terbaik — cek Content Inspiration & grup Facebook lokal." />
           <Stage k="M2" v="Tulis naskah dan shot list 8–12 konten — buat skrip singkat + daftar adegan agar syuting hemat waktu." />
           <Stage k="M3" v="Batch shooting 1–2 hari, rekam VO — atur outfit seragam dan rekam suara terpisah supaya rapi." />
-          <Stage k="M4" v="Editing, jadwalkan unggahan, siapkan thumbnail/caption — pakai fitur schedule YouTube/IG biar konsisten." />
+          <Stage k="M4" v="Editing, jadwalkan unggahan, siapkan thumbnail/caption — pakai Meta Business Suite untuk schedule Reels & posting." />
         </div>
         <p className="mt-3 text-xs text-slate-500">Gunakan Notion, Trello, atau Google Calendar untuk ceklis status tiap konten.</p>
       </div>
@@ -436,7 +457,7 @@ function SectionDistribusi() {
       <p className="mt-2 text-slate-700">
         Satu konten bisa hadir di banyak format. Utamakan platform utama Anda, lalu ubah versi ringkasnya untuk kanal lain.
       </p>
-      <div className="mt-4 grid md:grid-cols-3 gap-4">
+      <div className="mt-4 grid md:grid-cols-2 xl:grid-cols-4 gap-4">
         <Card
           title="Multi-Platform"
           items={[
@@ -461,12 +482,20 @@ function SectionDistribusi() {
             'Remarketing ringan untuk konten edukasi — arahkan ulang orang yang pernah nonton 50% videomu.',
           ]}
         />
+        <Card
+          title="Mode Profesional Facebook"
+          items={[
+            'Aktifkan crossposting otomatis Reels ke halaman agar view dari follower lama ikut naik.',
+            'Gunakan fitur “Kolaborasi” saat upload Reels supaya muncul di profil partner sekaligus.',
+            'Manfaatkan tab Grup & Event untuk ajak audiens daftar live shopping atau kelas Zoom.',
+          ]}
+        />
       </div>
       <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
         <p className="font-semibold">Contoh nyata:</p>
         <ul className="mt-2 list-disc pl-5 space-y-1">
-          <li>Video YouTube 6 menit → 3 potongan TikTok → carousel LinkedIn berisi poin penting → email newsletter berisi cerita pribadi.</li>
-          <li>Podcast audio → highlight quote untuk Twitter → poster tips A4 untuk komunitas sekolah.</li>
+          <li>Video YouTube 6 menit → 3 potongan Reels Facebook + Instagram → carousel LinkedIn berisi poin penting → email newsletter berisi cerita pribadi.</li>
+          <li>Podcast audio → highlight quote untuk Twitter → poster tips A4 untuk komunitas sekolah → postingan grup Facebook untuk diskusi lanjutan.</li>
         </ul>
       </div>
     </section>
@@ -516,6 +545,14 @@ function SectionAnalitik() {
           <li>Rencanakan eksperimen untuk minggu depan — coba ubah opening atau thumbnail sesuai catatan.</li>
         </ol>
       </div>
+      <div className="mt-4 rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
+        <p className="font-semibold">Pakailah data dari Facebook Professional Dashboard:</p>
+        <ul className="mt-2 list-disc pl-5 space-y-1">
+          <li>Lihat tab Insight & Audience untuk mengecek usia, lokasi, dan jam aktif — cocokkan dengan persona yang sudah Anda buat.</li>
+          <li>Gunakan laporan “Konten yang disarankan” untuk menilai topik apa yang layak diremake minggu depan.</li>
+          <li>Cek fitur Monetisasi untuk memantau kelayakan Stars, Bonus Reels, atau Iklan In-Stream dan catat syarat yang belum terpenuhi.</li>
+        </ul>
+      </div>
     </section>
   );
 }
@@ -529,25 +566,25 @@ function SectionAdaptasi() {
         <Card
           title="Variabel Uji"
           items={[
-            'Hook 3 variasi (pertanyaan, fakta, cerita) — lihat mana yang bikin penonton bertahan 10 detik.',
-            'Durasi 20/40/60 detik — cocok untuk tahu panjang video favorit audiensmu.',
-            'Kecepatan cut 1.0x vs 1.25x — bandingkan hasil edit biasa dengan versi lebih cepat.',
+            'Hook 3 variasi (pertanyaan, fakta, cerita) — lihat mana yang bikin penonton bertahan 10 detik di Reels Facebook.',
+            'Durasi 20/40/60 detik — cocok untuk tahu panjang video favorit audiensmu dan apakah layak dipanjangkan ke Live.',
+            'Caption pendek vs panjang + hashtag lokal — cek mana yang bantu reach organik lewat fitur pencarian Facebook.',
           ]}
         />
         <Card
           title="Dokumentasi"
           items={[
-            'Log eksperimen mingguan — tulis hasil di spreadsheet sederhana setiap Jumat.',
-            'Template A/B judul — simpan dua versi judul dan catat mana yang CTR-nya tinggi.',
-            'Daftar kemenangan kecil tiap bulan — misalnya, “Live perdana ditonton 30 orang”.',
+            'Log eksperimen mingguan — tulis hasil di spreadsheet sederhana setiap Jumat, lampirkan screenshot insight.',
+            'Template A/B judul — simpan dua versi judul dan catat mana yang CTR-nya tinggi dari Professional Dashboard.',
+            'Daftar kemenangan kecil tiap bulan — misalnya, “Live perdana ditonton 30 orang”, “Stars perdana diterima”.',
           ]}
         />
         <Card
           title="Pembelajaran"
           items={[
-            'Ikut workshop/webinar — pilih acara gratis YouTube atau komunitas lokal.',
+            'Ikut workshop/webinar — pilih acara gratis YouTube, Meta Boost, atau komunitas lokal.',
             'Bedah kanal mentor — tonton ulang video kreator favorit sambil catat pola bagusnya.',
-            'Bikin rangkuman buku/artikel bulanan — tulis 5 poin penting supaya mudah diingat.',
+            'Bikin rangkuman buku/artikel bulanan — tulis 5 poin penting supaya mudah diingat, unggah ke Notes Facebook.',
           ]}
         />
       </div>
@@ -556,7 +593,15 @@ function SectionAdaptasi() {
         <ul className="mt-2 list-disc pl-5 space-y-1">
           <li>Rekam dua versi pembuka, minta teman pilih yang paling bikin penasaran — kirim lewat chat dan lihat respon spontan.</li>
           <li>Post di jam berbeda (pagi vs malam) selama seminggu, catat perbedaannya — cukup tulis di catatan HP.</li>
-          <li>Ubah call-to-action dari “Like dong” menjadi ajakan spesifik seperti “Simpan untuk praktek weekend” — lihat apakah simpanan meningkat.</li>
+          <li>Ubah call-to-action dari “Like dong” menjadi ajakan spesifik seperti “Simpan untuk praktek weekend” — lihat apakah simpanan meningkat di insight Simpanan Facebook.</li>
+        </ul>
+      </div>
+      <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
+        <p className="font-semibold">Fitur Facebook yang mendukung eksperimen:</p>
+        <ul className="mt-2 list-disc pl-5 space-y-1">
+          <li>Gunakan “Rekomendasi untuk Anda” untuk melihat konten terkait yang sedang naik, lalu adaptasi gaya judulnya.</li>
+          <li>Aktifkan uji A/B thumbnail di Meta Business Suite (jika tersedia) agar bisa bandingkan visual secara otomatis.</li>
+          <li>Catat performa Live di tab Insight Live — perhatikan titik drop-off untuk mengatur ulang rundown sesi berikutnya.</li>
         </ul>
       </div>
     </section>
@@ -585,7 +630,7 @@ function SectionStory() {
           items={[
             'Diary harian (30 detik cerita “hari ini saya coba...”) — update singkat layaknya voice note ke teman.',
             'Serial mingguan (Episode 1–4) — tiap pekan fokus ke langkah berbeda agar penonton menanti kelanjutannya.',
-            'Cerita pelanggan: tanya jawab singkat + foto/video sebelum sesudah — tunjukkan dampak nyata di kehidupan mereka.',
+            'Cerita pelanggan: tanya jawab singkat + foto/video sebelum sesudah — tunjukkan dampak nyata di kehidupan mereka dan tag akun mereka (dengan izin).',
           ]}
         />
         <Card
@@ -593,7 +638,7 @@ function SectionStory() {
           items={[
             'Catat momen kecil di notes HP — tulis kejadian unik begitu selesai terjadi.',
             'Ambil foto/video BTS meski seadanya — misalnya, kamera disangga tumpukan buku.',
-            'Simpan tangkapan layar komentar bagus (minta izin kalau pribadi) — gunakan untuk bukti sosial di konten berikutnya.',
+            'Simpan tangkapan layar komentar bagus (minta izin kalau pribadi) — gunakan untuk bukti sosial di konten berikutnya atau Album Highlights Facebook.',
           ]}
         />
       </div>
@@ -602,7 +647,7 @@ function SectionStory() {
         <ul className="mt-2 list-disc pl-5 space-y-1">
           <li>“Tiga bulan lalu, saya cuma punya modal 300 ribu. Ini cara saya balik modal lewat jasa desain.”</li>
           <li>“Kalau kamu sering ditanya ‘kapan lulus?’, pakai jawaban ini biar obrolan tetap sopan tapi lucu.”</li>
-          <li>“Ibu saya baru paham kenapa saya jadi kreator setelah lihat angka ini.”</li>
+          <li>“Ibu saya baru paham kenapa saya jadi kreator setelah lihat angka insight ini di Facebook.”</li>
         </ul>
       </div>
     </section>
@@ -622,16 +667,16 @@ function SectionKolaborasi() {
           title="Cara Kolab"
           items={[
             'Tukar konten (saya edit video kamu, kamu bantu script) — jelas peran agar waktu tidak saling tabrakan.',
-            'Live bareng bahas topik hangat — contoh: ngobrol santai soal harga jasa kreator.',
-            'Buat challenge mingguan dengan hashtag khusus — misal, #30HariCeritaBisnis.',
+            'Live bareng bahas topik hangat — contoh: ngobrol santai soal harga jasa kreator dan ajak audiens kirim pertanyaan lewat komentar.',
+            'Buat challenge mingguan dengan hashtag khusus — misal, #30HariCeritaBisnis dan ajak posting di grup Facebook.',
           ]}
         />
         <Card
           title="Bangun Komunitas"
           items={[
-            'Buka grup WA/Discord kecil berisi 20 orang pertama — jaga agar diskusi tetap akrab.',
+            'Buka grup Facebook atau WA/Discord kecil berisi 20 orang pertama — jaga agar diskusi tetap akrab.',
             'Adakan sesi review karya tiap Jumat — gantian memberi masukan sopan dan jelas.',
-            'Sediakan folder resource bersama (template, referensi) — pakai Google Drive agar mudah diakses.',
+            'Sediakan folder resource bersama (template, referensi) — pakai Google Drive agar mudah diakses dan sematkan di fitur “Panduan” grup.',
           ]}
         />
         <Card
@@ -639,7 +684,7 @@ function SectionKolaborasi() {
           items={[
             'Rutin tanya kabar rekan kreator — kirim pesan “Ada yang bisa dibantu?” seminggu sekali.',
             'Rayakan pencapaian kecil bersama — contoh, buat ucapan selamat ketika follower teman naik 1000.',
-            'Buat jadwal coworking online (Zoom 60 menit) — nyalakan kamera sambil kerja agar merasa ditemani.',
+            'Buat jadwal coworking online (Zoom 60 menit) — nyalakan kamera sambil kerja agar merasa ditemani, lalu bagikan link rekaman di grup.',
           ]}
         />
       </div>
@@ -670,7 +715,7 @@ function SectionEtika() {
           items={[
             'Sebutkan sponsor atau penggunaan AI — cukup tambahkan teks “Video ini disponsori oleh...”',
             'Cantumkan sumber data & kredit karya — tulis nama pemilik foto/musik di deskripsi.',
-            'Respons keluhan dengan sopan dan terbuka — balas komentar negatif dengan solusi, bukan debat.',
+            'Respons keluhan dengan sopan dan terbuka — balas komentar negatif dengan solusi, bukan debat, gunakan fitur Moderation Assist bila perlu.',
           ]}
         />
         <Card
@@ -678,7 +723,7 @@ function SectionEtika() {
           items={[
             'Hindari menampilkan data pribadi tanpa izin — sensor nomor telepon/alamat dengan stiker.',
             'Blur wajah anak-anak jika belum ada persetujuan — pakai fitur blur di aplikasi edit.',
-            'Gunakan musik bebas lisensi atau berbayar resmi — cek perpustakaan audio YouTube atau Artlist.',
+            'Gunakan musik bebas lisensi atau berbayar resmi — cek perpustakaan audio YouTube atau Artlist, atau audio bebas lisensi Reels.',
           ]}
         />
         <Card
@@ -686,7 +731,7 @@ function SectionEtika() {
           items={[
             'Tidak menyebar hoaks atau clickbait menyesatkan — pastikan judul sesuai isi.',
             'Jujur soal hasil: tampilkan proses, bukan cuma sukses — ceritakan juga tantangan dan kegagalan.',
-            'Siapkan SOP menghadapi hate speech (moderasi komentar) — tulis aturan di deskripsi/live chat.',
+            'Siapkan SOP menghadapi hate speech (moderasi komentar) — tulis aturan di deskripsi/live chat dan pin di bagian “Peraturan Grup”.',
           ]}
         />
       </div>
@@ -695,7 +740,15 @@ function SectionEtika() {
         <ul className="mt-2 list-disc pl-5 space-y-1">
           <li>Buat halaman “Disclaimer” atau “Tentang” singkat yang menjelaskan nilai Anda — bisa ditaruh di link bio.</li>
           <li>Jawab minimal 5 komentar setiap posting dalam 1 jam pertama — gunakan jawaban hangat seperti ngobrol langsung.</li>
-          <li>Kalau salah, revisi konten dan jelaskan pembaruan secara terbuka — tulis “Update: angka yang benar adalah...” di caption.</li>
+          <li>Kalau salah, revisi konten dan jelaskan pembaruan secara terbuka — tulis “Update: angka yang benar adalah...” di caption dan gunakan fitur edit posting Facebook.</li>
+        </ul>
+      </div>
+      <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
+        <p className="font-semibold">Checklist etika khusus Facebook Profesional:</p>
+        <ul className="mt-2 list-disc pl-5 space-y-1">
+          <li>Aktifkan label “Konten Bermerek” ketika bekerja sama dengan brand agar mematuhi kebijakan Facebook.</li>
+          <li>Atur preferensi moderasi kata kunci di Professional Dashboard untuk menyaring komentar spam.</li>
+          <li>Simpan arsip live penting dan berikan akses ulang hanya untuk anggota komunitas yang sudah mendaftar.</li>
         </ul>
       </div>
     </section>
@@ -709,7 +762,7 @@ function SectionTemplate() {
       <div className="mt-4 grid gap-6">
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <h4 className="font-semibold">Template Pilar Konten (isi cepat)</h4>
-          <div className="mt-3 grid md:grid-cols-3 gap-3 text-sm">
+          <div className="mt-3 grid md:grid-cols-2 xl:grid-cols-4 gap-3 text-sm">
             <Template
               t="Edukasi"
               ex={[
@@ -734,6 +787,14 @@ function SectionTemplate() {
                 'Tanya pendapat dengan opsi sederhana — misal, “Tim video horizontal atau vertikal?”.',
               ]}
             />
+            <Template
+              t="Facebook Profesional"
+              ex={[
+                'Reels demo produk + tombol Add Yours — ajak audiens ikut upload versi mereka.',
+                'Status panjang dengan cerita pelanggan + link katalog WhatsApp Business.',
+                'Postingan grup: tanya kabar komunitas dan selipkan survei ringan via fitur Polling.',
+              ]}
+            />
           </div>
         </div>
 
@@ -745,19 +806,19 @@ function SectionTemplate() {
               items={[
                 'Senin: Edukasi (tutorial 60 detik) — ajari cara setting tripod murah.',
                 'Rabu: Inspirasi (cerita proses) — kisahkan perjalanan edit video pertama.',
-                'Jumat: Diskusi (polling topik) — tanya audiens mau belajar apa minggu depan.',
+                'Jumat: Diskusi (polling topik) — tanya audiens mau belajar apa minggu depan via Polling Facebook.',
               ]}
             />
             <Cal
               title="Minggu B"
               items={[
                 'Selasa: Edukasi (case study) — bagikan hasil konten klien UKM setelah 2 minggu.',
-                'Kamis: Humor (meme relate) — unggah meme kehidupan kreator saat deadline.',
-                'Sabtu: Live Q&A 30 menit — jawab pertanyaan basic sambil tunjukkan layar.',
+                'Kamis: Humor (meme relate) — unggah meme kehidupan kreator saat deadline, mention anggota grup aktif.',
+                'Sabtu: Live Q&A 30 menit — jawab pertanyaan basic sambil tunjukkan layar, jadwalkan dan promokan lewat Event Facebook.',
               ]}
             />
           </div>
-          <p className="mt-2 text-xs text-slate-500">Sesuaikan slot dengan jam aktif audiens berdasarkan insight platform.</p>
+          <p className="mt-2 text-xs text-slate-500">Sesuaikan slot dengan jam aktif audiens berdasarkan insight platform dan jadwalkan di Meta Business Suite agar upload tetap konsisten.</p>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -766,8 +827,9 @@ function SectionTemplate() {
             <li>3 konten performa terbaik dan alasannya — catat apa yang bikin penonton betah.</li>
             <li>3 hipotesis eksperimen berikutnya — tulis ide seperti “coba judul pakai angka”.</li>
             <li>Perbandingan angka retensi/CTR/ER vs bulan lalu — gunakan tabel sederhana di spreadsheet.</li>
-            <li>Kolaborasi yang terjadi & tindak lanjut — misal, “Live bareng Dina, lanjut bikin e-book bersama”.</li>
-            <li>Perkembangan aset: email list, komunitas, library konten — cek apakah ada penambahan anggota.</li>
+            <li>Kolaborasi yang terjadi & tindak lanjut — misal, “Live bareng Dina, lanjut bikin e-book bersama”, “Reels kolab berhasil tembus grup X”.</li>
+            <li>Perkembangan aset: email list, komunitas, library konten — cek apakah ada penambahan anggota grup Facebook.</li>
+            <li>Status monetisasi: cek kelayakan Stars, Iklan In-Stream, atau Bonus Reels di Professional Dashboard.</li>
           </ul>
         </div>
 
@@ -792,6 +854,7 @@ function SectionTemplate() {
               title="Monetisasi"
               lines={[
                 'Butuh bimbingan? DM “COACH” untuk detail — jelas siapa yang harus menghubungi dan bagaimana.',
+                'Nyalakan notifikasi live + kirim Stars kalau merasa terbantu — jelaskan cara memberi dukungan.',
                 'Template lengkap ada di tautan bio — arahkan ke produk digital tanpa memaksa.',
               ]}
             />
@@ -816,6 +879,9 @@ function SectionGlosarium() {
         <Glossary term="ER (Engagement Rate)" meaning="Perbandingan interaksi (like, komentar, share) dengan jumlah orang yang melihat. Jika 200 orang lihat dan 20 orang berinteraksi, ER-nya 10%." />
         <Glossary term="CTA" meaning="Ajakan yang Anda ucapkan atau tulis supaya penonton melakukan tindakan tertentu, misalnya “Klik link daftar kelas gratis”." />
         <Glossary term="Funnel" meaning="Tahapan sederhana dari kenal → suka → percaya → membeli/bergabung. Contoh: lihat Reels → follow → daftar newsletter → beli template." />
+        <Glossary term="Mode Profesional Facebook" meaning="Fitur yang mengubah profil pribadi jadi profil kreator lengkap dengan insight, monetisasi Stars, dan kotak pesan kolaborasi." />
+        <Glossary term="Stars" meaning="Mata uang virtual di Facebook. Penonton bisa membeli dan mengirim Stars saat live atau video on-demand sebagai bentuk dukungan." />
+        <Glossary term="Meta Business Suite" meaning="Dashboard gratis untuk mengatur jadwal posting, menjawab pesan, dan membaca insight Facebook + Instagram di satu tempat." />
       </div>
     </section>
   );
@@ -830,6 +896,7 @@ function SectionFAQ() {
         <FAQ q="Perlu semua platform?" a="Tidak. Mulai dari 1–2 kanal utama yang paling cocok dengan audiens, tambah kanal pendukung saat proses sudah stabil. Misalnya, fokus IG Reels dulu sebelum masuk YouTube." />
         <FAQ q="Kapan mulai monetisasi?" a="Saat ada tanda minat nyata: komentar tanya beli, DM konsultasi, atau trafik stabil ke aset (newsletter/website). Kumpulkan testimoni awal sebelum buka penawaran besar." />
         <FAQ q="Bagaimana kalau masih malu depan kamera?" a="Mulai dari format suara atau teks. Gunakan footage stok/B-roll dan tambahkan narasi Anda. Coba tampilkan tangan atau layar kerja sebelum berani menampilkan wajah." />
+        <FAQ q="Apa saja checklist untuk Mode Profesional Facebook?" a="Pastikan konten orisinal, aktif posting minimal 5 kali dalam 30 hari, patuhi Kebijakan Monetisasi, dan aktifkan 2FA. Rajin balas pesan di kotak masuk gabungan agar badge responsif tetap hijau." />
       </div>
     </section>
   );
