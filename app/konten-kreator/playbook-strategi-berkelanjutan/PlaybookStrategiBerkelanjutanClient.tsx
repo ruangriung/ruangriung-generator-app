@@ -132,9 +132,18 @@ export default function PlaybookStrategiBerkelanjutan() {
               sampai tim konten profesional yang ingin membangun hubungan jangka panjang.
             </p>
             <ul className="mt-5 text-slate-700 list-disc pl-5 space-y-2">
-              <li>Mulai dari dasar (tujuan, audiens, identitas) dengan contoh ringan dan bahasa sehari-hari.</li>
-              <li>Bangun mesin cerita, kolaborasi, dan etika sebagai bahan bakar kepercayaan.</li>
-              <li>Lengkapi dengan template, contoh copy, dan glosarium agar mudah diterapkan siapa pun.</li>
+              <li>
+                Mulai dari dasar (tujuan, audiens, identitas) — misalnya, pilih satu tujuan 90 hari dan gambarkan sosok penonton
+                ideal seperti “Rina, mahasiswa tingkat akhir yang cari tips edit murah”.
+              </li>
+              <li>
+                Bangun mesin cerita, kolaborasi, dan etika — contoh: buat seri cerita 4 episode, ajak teman UKM lokal kolaborasi,
+                dan selalu sebutkan sumber ide.
+              </li>
+              <li>
+                Lengkapi dengan template, contoh copy, dan glosarium — gunakan kalender 2 minggu dan contoh CTA agar siapa pun
+                bisa langsung mempraktikkan.
+              </li>
             </ul>
           </div>
           <div className="rounded-3xl bg-white p-5 border border-slate-200 shadow-sm">
@@ -276,15 +285,27 @@ function SectionTujuan() {
         {[
           {
             title: 'Personal Branding',
-            items: ['Dokumentasikan proses belajar mingguan', 'Cerita gagal dan pelajaran jujur', 'Highlight karya terbaik tiap bulan'],
+            items: [
+              'Dokumentasikan proses belajar mingguan — contohnya, ceritakan apa yang kamu kuasai setelah mencoba efek baru di CapCut.',
+              'Cerita gagal dan pelajaran jujur — misal, jelaskan kenapa video kemarin sepi dan apa perbaikanmu minggu ini.',
+              'Highlight karya terbaik tiap bulan — tunjukkan sebelum vs sesudah desain/foto untuk membuktikan progresmu.',
+            ],
           },
           {
             title: 'Penjualan Produk/Jasa',
-            items: ['Demo sederhana (sebelum vs sesudah)', 'Testimoni pelanggan awam', 'Promo terbatas dengan CTA jelas'],
+            items: [
+              'Demo sederhana (sebelum vs sesudah) — rekam produk dipakai orang biasa agar penonton mudah membayangkan hasilnya.',
+              'Testimoni pelanggan awam — rekam suara atau kutip pesan WhatsApp dari pelanggan pertama sebagai bukti sosial.',
+              'Promo terbatas dengan CTA jelas — contohnya, “Diskon 20% sampai Jumat, klik link bio untuk pesan”.',
+            ],
           },
           {
             title: 'Hiburan & Edukasi Ringan',
-            items: ['Sketsa lucu dari masalah harian', 'Fun fact 30–60 detik', 'Meme yang bantu orang paham konsep sulit'],
+            items: [
+              'Sketsa lucu dari masalah harian — contoh: adegan orang tua nanya pekerjaan kreator lengkap dengan punchline sederhana.',
+              'Fun fact 30–60 detik — bacakan fakta ringan lalu beri contoh penerapan sehari-hari supaya cepat dipahami.',
+              'Meme yang bantu orang paham konsep sulit — gunakan perbandingan gambar/teks populer untuk menjelaskan istilah teknis.',
+            ],
           },
         ].map((card) => (
           <Card key={card.title} title={card.title} items={card.items} />
@@ -305,23 +326,27 @@ function SectionAudiens() {
       <div className="mt-4 grid md:grid-cols-2 gap-4">
         <PersonaCard
           title="Mahasiswa 18–25 (TikTok/IG)"
-          bullets={['Durasi 15–45 detik, hook cepat dan relatable', 'Humor ringan + contoh keseharian kampus', 'Caption singkat dengan ajakan komentar']}
+          bullets={[
+            'Durasi 15–45 detik, hook cepat dan relatable — contohnya, buka dengan pertanyaan “Siapa di sini yang masih skripsi?”',
+            'Humor ringan + contoh keseharian kampus — rekam adegan antre print atau drama dosen killer.',
+            'Caption singkat dengan ajakan komentar — misal, “Pilih tim nugas pagi atau begadang?”',
+          ]}
         />
         <PersonaCard
           title="Profesional/Founder (LinkedIn/YouTube)"
           bullets={[
-            'Bahasa formal, sertakan data dan grafik sederhana',
-            'Format studi kasus 5–10 menit dengan langkah jelas',
-            'Akhiri dengan CTA ke newsletter atau lead magnet',
+            'Bahasa formal, sertakan data dan grafik sederhana — misalnya, tampilkan tabel biaya marketing sebelum dan sesudah konten.',
+            'Format studi kasus 5–10 menit dengan langkah jelas — jelaskan tahap masalah → solusi → hasil nyata.',
+            'Akhiri dengan CTA ke newsletter atau lead magnet — contoh: “Unduh template pitch deck gratis di link komentar”.',
           ]}
         />
       </div>
       <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-100/60 p-4 text-sm text-slate-600">
         <p className="font-semibold text-slate-700">Tip cepat untuk pemula:</p>
         <ul className="mt-2 list-disc pl-5 space-y-1">
-          <li>Tulis 3 kalimat tentang apa yang bikin audiens Anda stres.</li>
-          <li>Sebutkan 3 hal yang bikin mereka senyum. Jadikan dua daftar ini sumber ide konten.</li>
-          <li>Uji lewat IG story poll atau Google Form singkat.</li>
+          <li>Tulis 3 kalimat tentang apa yang bikin audiens Anda stres — contoh: “Susah cari ide konten karena alat minim”.</li>
+          <li>Sebutkan 3 hal yang bikin mereka senyum lalu jadikan sumber ide — misal, “Senang lihat before-after desain murid”.</li>
+          <li>Uji lewat IG story poll atau Google Form singkat — tanyakan pilihan sederhana seperti “Lebih butuh tips edit atau naskah?”.</li>
         </ul>
       </div>
     </section>
@@ -339,13 +364,28 @@ function SectionIdentitas() {
       <div className="mt-4 grid md:grid-cols-3 gap-4">
         <Spec
           title="Tone of Voice"
-          items={['Edukasi ramah, langsung ke intinya', 'Gunakan analogi sederhana', 'Hindari jargon kecuali dijelaskan']}
+          items={[
+            'Edukasi ramah, langsung ke intinya — jelaskan langkah satu per satu tanpa istilah rumit.',
+            'Gunakan analogi sederhana — misal, bandingkan algoritma dengan “satpam komplek” yang pilih konten rapi.',
+            'Hindari jargon kecuali dijelaskan — kalau sebut “retensi”, langsung tambah kalimat “artinya berapa lama orang nonton”.',
+          ]}
         />
         <Spec
           title="Identitas Visual"
-          items={['Palet biru/putih/abu atau sesuaikan brand', 'Tipografi tegas untuk headline', 'Gunakan pola pembuka yang sama (misal, “Hai, saya...”)']}
+          items={[
+            'Palet biru/putih/abu atau sesuaikan brand — tulis kode warna sederhana agar desain konsisten.',
+            'Tipografi tegas untuk headline — contohnya, pakai font Montserrat untuk judul dan font ringan untuk isi.',
+            'Gunakan pola pembuka yang sama (misal, “Hai, saya...”) — latih audiens mengenali videomu dari 2 detik pertama.',
+          ]}
         />
-        <Spec title="Nilai Inti" items={['Keaslian lebih penting daripada sensasi', 'Transparansi proses produksi', 'Anti-plagiarisme & kredit jelas']} />
+        <Spec
+          title="Nilai Inti"
+          items={[
+            'Keaslian lebih penting daripada sensasi — lebih baik cerita apa adanya meski views kecil.',
+            'Transparansi proses produksi — tunjukkan behind the scenes agar penonton paham kerja kerasmu.',
+            'Anti-plagiarisme & kredit jelas — cantumkan nama sumber foto, musik, atau ide inspirasi.',
+          ]}
+        />
       </div>
     </section>
   );
@@ -360,10 +400,10 @@ function SectionProduksi() {
       </p>
       <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
         <div className="grid sm:grid-cols-4 gap-3 text-sm">
-          <Stage k="M1" v="Riset tren, kumpulkan 20 ide, pilih 5 terbaik" />
-          <Stage k="M2" v="Tulis naskah dan shot list 8–12 konten" />
-          <Stage k="M3" v="Batch shooting 1–2 hari, rekam VO" />
-          <Stage k="M4" v="Editing, jadwalkan unggahan, siapkan thumbnail/caption" />
+          <Stage k="M1" v="Riset tren, kumpulkan 20 ide, pilih 5 terbaik — cek topik populer di TikTok dan catat yang cocok." />
+          <Stage k="M2" v="Tulis naskah dan shot list 8–12 konten — buat skrip singkat + daftar adegan agar syuting hemat waktu." />
+          <Stage k="M3" v="Batch shooting 1–2 hari, rekam VO — atur outfit seragam dan rekam suara terpisah supaya rapi." />
+          <Stage k="M4" v="Editing, jadwalkan unggahan, siapkan thumbnail/caption — pakai fitur schedule YouTube/IG biar konsisten." />
         </div>
         <p className="mt-3 text-xs text-slate-500">Gunakan Notion, Trello, atau Google Calendar untuk ceklis status tiap konten.</p>
       </div>
@@ -371,14 +411,18 @@ function SectionProduksi() {
         <Card
           title="Tim Kecil"
           items={[
-            'Bagikan tugas: riset, penulis naskah, editor',
-            'Simpan file di folder cloud dengan penamaan tanggal',
-            'Gunakan grup chat khusus update produksi',
+            'Bagikan tugas: riset, penulis naskah, editor — tulis siapa melakukan apa di dokumen Google.',
+            'Simpan file di folder cloud dengan penamaan tanggal — contoh: “2024-05-brief-produk-a”.',
+            'Gunakan grup chat khusus update produksi — bisa WhatsApp/Discord agar info tidak tercecer.',
           ]}
         />
         <Card
           title="Solo Creator"
-          items={['Gunakan template skrip 1 halaman', 'Ambil gambar tambahan (B-roll) sekali banyak', 'Siapkan slot buffer untuk revisi dadakan']}
+          items={[
+            'Gunakan template skrip 1 halaman — isi kolom hook, poin utama, dan CTA untuk setiap ide.',
+            'Ambil gambar tambahan (B-roll) sekali banyak — misalnya rekam stok tangan mengetik untuk dipakai ulang.',
+            'Siapkan slot buffer untuk revisi dadakan — sisakan satu hari tanpa upload agar bisa perbaiki jika perlu.',
+          ]}
         />
       </div>
     </section>
@@ -393,9 +437,30 @@ function SectionDistribusi() {
         Satu konten bisa hadir di banyak format. Utamakan platform utama Anda, lalu ubah versi ringkasnya untuk kanal lain.
       </p>
       <div className="mt-4 grid md:grid-cols-3 gap-4">
-        <Card title="Multi-Platform" items={['YouTube (versi panjang)', 'Shorts/Reels/TikTok (klip utama)', 'Carousel/Thread (ringkasan teks)']} />
-        <Card title="Komunitas & Kolaborasi" items={['Bagikan di grup niche', 'Live bareng atau duet kreator lain', 'Balas komentar populer dengan video lanjutan']} />
-        <Card title="Promosi Terkendali" items={['Boost konten pilar terbaik', 'CTA ke newsletter atau grup WA/Discord', 'Remarketing ringan untuk konten edukasi']} />
+        <Card
+          title="Multi-Platform"
+          items={[
+            'YouTube (versi panjang) — jelaskan topik lengkap 5–8 menit dengan contoh kasus nyata.',
+            'Shorts/Reels/TikTok (klip utama) — potong bagian terbaik 30 detik dengan subtitle jelas.',
+            'Carousel/Thread (ringkasan teks) — ubah poin penting jadi slide atau tweet bernomor.',
+          ]}
+        />
+        <Card
+          title="Komunitas & Kolaborasi"
+          items={[
+            'Bagikan di grup niche — misal, komunitas Facebook UMKM dan sertakan pertanyaan pemantik.',
+            'Live bareng atau duet kreator lain — pilih topik ringan seperti “Tips konten modal HP”.',
+            'Balas komentar populer dengan video lanjutan — tunjukkan Anda dengar kebutuhan audiens.',
+          ]}
+        />
+        <Card
+          title="Promosi Terkendali"
+          items={[
+            'Boost konten pilar terbaik — pakai budget kecil Rp20 ribu/hari untuk konten edukasi utama.',
+            'CTA ke newsletter atau grup WA/Discord — ajak penonton lanjut ngobrol di ruang privat.',
+            'Remarketing ringan untuk konten edukasi — arahkan ulang orang yang pernah nonton 50% videomu.',
+          ]}
+        />
       </div>
       <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
         <p className="font-semibold">Contoh nyata:</p>
@@ -446,9 +511,9 @@ function SectionAnalitik() {
       <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
         <p className="font-semibold">Catatan mingguan sederhana:</p>
         <ol className="mt-2 list-decimal pl-5 space-y-1">
-          <li>Pilih 1 konten terbaik dan 1 yang kurang perform.</li>
-          <li>Tulis dugaan penyebab dalam 2 kalimat.</li>
-          <li>Rencanakan eksperimen untuk minggu depan.</li>
+          <li>Pilih 1 konten terbaik dan 1 yang kurang perform — contohnya, bandingkan video tips vs vlog santai.</li>
+          <li>Tulis dugaan penyebab dalam 2 kalimat — misal, “Hook vlog terlalu lama, jadi banyak yang skip”.</li>
+          <li>Rencanakan eksperimen untuk minggu depan — coba ubah opening atau thumbnail sesuai catatan.</li>
         </ol>
       </div>
     </section>
@@ -461,16 +526,37 @@ function SectionAdaptasi() {
       <h3 className="text-2xl font-bold">7) Adaptasi & Eksperimen</h3>
       <p className="mt-2 text-slate-700">Eksperimen terukur: ubah satu variabel per iterasi, catat hasilnya, ulangi yang berhasil.</p>
       <div className="mt-4 grid md:grid-cols-3 gap-4">
-        <Card title="Variabel Uji" items={['Hook 3 variasi (pertanyaan, fakta, cerita)', 'Durasi 20/40/60 detik', 'Kecepatan cut 1.0x vs 1.25x']} />
-        <Card title="Dokumentasi" items={['Log eksperimen mingguan', 'Template A/B judul', 'Daftar kemenangan kecil tiap bulan']} />
-        <Card title="Pembelajaran" items={['Ikut workshop/webinar', 'Bedah kanal mentor', 'Bikin rangkuman buku/artikel bulanan']} />
+        <Card
+          title="Variabel Uji"
+          items={[
+            'Hook 3 variasi (pertanyaan, fakta, cerita) — lihat mana yang bikin penonton bertahan 10 detik.',
+            'Durasi 20/40/60 detik — cocok untuk tahu panjang video favorit audiensmu.',
+            'Kecepatan cut 1.0x vs 1.25x — bandingkan hasil edit biasa dengan versi lebih cepat.',
+          ]}
+        />
+        <Card
+          title="Dokumentasi"
+          items={[
+            'Log eksperimen mingguan — tulis hasil di spreadsheet sederhana setiap Jumat.',
+            'Template A/B judul — simpan dua versi judul dan catat mana yang CTR-nya tinggi.',
+            'Daftar kemenangan kecil tiap bulan — misalnya, “Live perdana ditonton 30 orang”.',
+          ]}
+        />
+        <Card
+          title="Pembelajaran"
+          items={[
+            'Ikut workshop/webinar — pilih acara gratis YouTube atau komunitas lokal.',
+            'Bedah kanal mentor — tonton ulang video kreator favorit sambil catat pola bagusnya.',
+            'Bikin rangkuman buku/artikel bulanan — tulis 5 poin penting supaya mudah diingat.',
+          ]}
+        />
       </div>
       <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
         <p className="font-semibold">Eksperimen awam yang gampang dicoba:</p>
         <ul className="mt-2 list-disc pl-5 space-y-1">
-          <li>Rekam dua versi pembuka, minta teman pilih yang paling bikin penasaran.</li>
-          <li>Post di jam berbeda (pagi vs malam) selama seminggu, catat perbedaannya.</li>
-          <li>Ubah call-to-action dari “Like dong” menjadi ajakan spesifik seperti “Simpan untuk praktek weekend”.</li>
+          <li>Rekam dua versi pembuka, minta teman pilih yang paling bikin penasaran — kirim lewat chat dan lihat respon spontan.</li>
+          <li>Post di jam berbeda (pagi vs malam) selama seminggu, catat perbedaannya — cukup tulis di catatan HP.</li>
+          <li>Ubah call-to-action dari “Like dong” menjadi ajakan spesifik seperti “Simpan untuk praktek weekend” — lihat apakah simpanan meningkat.</li>
         </ul>
       </div>
     </section>
@@ -486,14 +572,29 @@ function SectionStory() {
         latar belakang Anda.
       </p>
       <div className="mt-4 grid md:grid-cols-3 gap-4">
-        <Card title="Struktur 3 Bab" items={['Masalah: jelaskan rasa sakit penonton', 'Perjalanan: tunjukkan langkah yang Anda ambil', 'Hasil: bagikan perubahan yang dirasakan']} />
+        <Card
+          title="Struktur 3 Bab"
+          items={[
+            'Masalah: jelaskan rasa sakit penonton — contohnya, “Aku bingung atur jadwal konten sambil kerja kantoran”.',
+            'Perjalanan: tunjukkan langkah yang Anda ambil — ceritakan proses coba-coba sampai menemukan cara yang pas.',
+            'Hasil: bagikan perubahan yang dirasakan — misal, “Sekarang bisa posting 3 kali tanpa begadang”.',
+          ]}
+        />
         <Card
           title="Format Cerita"
-          items={['Diary harian (30 detik cerita “hari ini saya coba...”)', 'Serial mingguan (Episode 1–4)', 'Cerita pelanggan: tanya jawab singkat + foto/video sebelum sesudah']}
+          items={[
+            'Diary harian (30 detik cerita “hari ini saya coba...”) — update singkat layaknya voice note ke teman.',
+            'Serial mingguan (Episode 1–4) — tiap pekan fokus ke langkah berbeda agar penonton menanti kelanjutannya.',
+            'Cerita pelanggan: tanya jawab singkat + foto/video sebelum sesudah — tunjukkan dampak nyata di kehidupan mereka.',
+          ]}
         />
         <Card
           title="Stok Cerita"
-          items={['Catat momen kecil di notes HP', 'Ambil foto/video BTS meski seadanya', 'Simpan tangkapan layar komentar bagus (minta izin kalau pribadi)']}
+          items={[
+            'Catat momen kecil di notes HP — tulis kejadian unik begitu selesai terjadi.',
+            'Ambil foto/video BTS meski seadanya — misalnya, kamera disangga tumpukan buku.',
+            'Simpan tangkapan layar komentar bagus (minta izin kalau pribadi) — gunakan untuk bukti sosial di konten berikutnya.',
+          ]}
         />
       </div>
       <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
@@ -517,17 +618,38 @@ function SectionKolaborasi() {
         mikro di niche serupa.
       </p>
       <div className="mt-4 grid md:grid-cols-3 gap-4">
-        <Card title="Cara Kolab" items={['Tukar konten (saya edit video kamu, kamu bantu script)', 'Live bareng bahas topik hangat', 'Buat challenge mingguan dengan hashtag khusus']} />
-        <Card title="Bangun Komunitas" items={['Buka grup WA/Discord kecil berisi 20 orang pertama', 'Adakan sesi review karya tiap Jumat', 'Sediakan folder resource bersama (template, referensi)']} />
-        <Card title="Dukungan Psikologis" items={['Rutin tanya kabar rekan kreator', 'Rayakan pencapaian kecil bersama', 'Buat jadwal coworking online (Zoom 60 menit)']} />
+        <Card
+          title="Cara Kolab"
+          items={[
+            'Tukar konten (saya edit video kamu, kamu bantu script) — jelas peran agar waktu tidak saling tabrakan.',
+            'Live bareng bahas topik hangat — contoh: ngobrol santai soal harga jasa kreator.',
+            'Buat challenge mingguan dengan hashtag khusus — misal, #30HariCeritaBisnis.',
+          ]}
+        />
+        <Card
+          title="Bangun Komunitas"
+          items={[
+            'Buka grup WA/Discord kecil berisi 20 orang pertama — jaga agar diskusi tetap akrab.',
+            'Adakan sesi review karya tiap Jumat — gantian memberi masukan sopan dan jelas.',
+            'Sediakan folder resource bersama (template, referensi) — pakai Google Drive agar mudah diakses.',
+          ]}
+        />
+        <Card
+          title="Dukungan Psikologis"
+          items={[
+            'Rutin tanya kabar rekan kreator — kirim pesan “Ada yang bisa dibantu?” seminggu sekali.',
+            'Rayakan pencapaian kecil bersama — contoh, buat ucapan selamat ketika follower teman naik 1000.',
+            'Buat jadwal coworking online (Zoom 60 menit) — nyalakan kamera sambil kerja agar merasa ditemani.',
+          ]}
+        />
       </div>
       <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
         <p className="font-semibold">Checklist kirim pitch kolaborasi:</p>
         <ol className="mt-2 list-decimal pl-5 space-y-1">
-          <li>Sebut nama dan alasan spesifik kenapa tertarik.</li>
-          <li>Tawarkan ide kolab yang win-win (misal, cross-post, giveaway bareng).</li>
-          <li>Sertakan contoh konten Anda dan angka ringkas (view rata-rata, ER).</li>
-          <li>Tutup dengan ajakan aksi sederhana: “Kalau setuju, balas DM ini atau isi link form”.</li>
+          <li>Sebut nama dan alasan spesifik kenapa tertarik — contoh: “Aku suka cara kamu jelasin finansial dengan bahasa ringan”.</li>
+          <li>Tawarkan ide kolab yang win-win (misal, cross-post, giveaway bareng) — jelaskan apa yang kamu siapkan.</li>
+          <li>Sertakan contoh konten Anda dan angka ringkas (view rata-rata, ER) — cukup pakai 1–2 link terbaik.</li>
+          <li>Tutup dengan ajakan aksi sederhana: “Kalau setuju, balas DM ini atau isi link form” — beri tenggat sopan 3 hari.</li>
         </ol>
       </div>
     </section>
@@ -543,16 +665,37 @@ function SectionEtika() {
         dipercaya dan diingat.
       </p>
       <div className="mt-4 grid md:grid-cols-3 gap-4">
-        <Card title="Transparansi" items={['Sebutkan sponsor atau penggunaan AI', 'Cantumkan sumber data & kredit karya', 'Respons keluhan dengan sopan dan terbuka']} />
-        <Card title="Keamanan Data" items={['Hindari menampilkan data pribadi tanpa izin', 'Blur wajah anak-anak jika belum ada persetujuan', 'Gunakan musik bebas lisensi atau berbayar resmi']} />
-        <Card title="Kode Etik Komunitas" items={['Tidak menyebar hoaks atau clickbait menyesatkan', 'Jujur soal hasil: tampilkan proses, bukan cuma sukses', 'Siapkan SOP menghadapi hate speech (moderasi komentar)']} />
+        <Card
+          title="Transparansi"
+          items={[
+            'Sebutkan sponsor atau penggunaan AI — cukup tambahkan teks “Video ini disponsori oleh...”',
+            'Cantumkan sumber data & kredit karya — tulis nama pemilik foto/musik di deskripsi.',
+            'Respons keluhan dengan sopan dan terbuka — balas komentar negatif dengan solusi, bukan debat.',
+          ]}
+        />
+        <Card
+          title="Keamanan Data"
+          items={[
+            'Hindari menampilkan data pribadi tanpa izin — sensor nomor telepon/alamat dengan stiker.',
+            'Blur wajah anak-anak jika belum ada persetujuan — pakai fitur blur di aplikasi edit.',
+            'Gunakan musik bebas lisensi atau berbayar resmi — cek perpustakaan audio YouTube atau Artlist.',
+          ]}
+        />
+        <Card
+          title="Kode Etik Komunitas"
+          items={[
+            'Tidak menyebar hoaks atau clickbait menyesatkan — pastikan judul sesuai isi.',
+            'Jujur soal hasil: tampilkan proses, bukan cuma sukses — ceritakan juga tantangan dan kegagalan.',
+            'Siapkan SOP menghadapi hate speech (moderasi komentar) — tulis aturan di deskripsi/live chat.',
+          ]}
+        />
       </div>
       <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
         <p className="font-semibold">Langkah cepat bangun kepercayaan:</p>
         <ul className="mt-2 list-disc pl-5 space-y-1">
-          <li>Buat halaman “Disclaimer” atau “Tentang” singkat yang menjelaskan nilai Anda.</li>
-          <li>Jawab minimal 5 komentar setiap posting dalam 1 jam pertama.</li>
-          <li>Kalau salah, revisi konten dan jelaskan pembaruan secara terbuka.</li>
+          <li>Buat halaman “Disclaimer” atau “Tentang” singkat yang menjelaskan nilai Anda — bisa ditaruh di link bio.</li>
+          <li>Jawab minimal 5 komentar setiap posting dalam 1 jam pertama — gunakan jawaban hangat seperti ngobrol langsung.</li>
+          <li>Kalau salah, revisi konten dan jelaskan pembaruan secara terbuka — tulis “Update: angka yang benar adalah...” di caption.</li>
         </ul>
       </div>
     </section>
@@ -567,17 +710,52 @@ function SectionTemplate() {
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <h4 className="font-semibold">Template Pilar Konten (isi cepat)</h4>
           <div className="mt-3 grid md:grid-cols-3 gap-3 text-sm">
-            <Template t="Edukasi" ex={['Tutorial 60 detik', 'Mini case study', 'Myth vs Fact']} />
-            <Template t="Inspirasi" ex={['Kisah gagal → bangkit', 'Showcase karya/audiens', 'Quote + konteks pengalaman pribadi']} />
-            <Template t="Diskusi/Humor" ex={['Hot take sopan', 'Meme penjelas konsep', 'Tanya pendapat dengan opsi sederhana']} />
+            <Template
+              t="Edukasi"
+              ex={[
+                'Tutorial 60 detik — tunjukkan langkah praktis seperti cara atur lighting dengan lampu meja.',
+                'Mini case study — ceritakan perubahan klien sebelum dan sesudah memakai tipsmu.',
+                'Myth vs Fact — luruskan salah kaprah, contohnya “Editing harus pakai laptop mahal?”.',
+              ]}
+            />
+            <Template
+              t="Inspirasi"
+              ex={[
+                'Kisah gagal → bangkit — bagikan momen down dan apa yang kamu pelajari.',
+                'Showcase karya/audiens — tampilkan karya follower dan jelaskan prosesnya.',
+                'Quote + konteks pengalaman pribadi — pilih kutipan yang kamu alami sendiri.',
+              ]}
+            />
+            <Template
+              t="Diskusi/Humor"
+              ex={[
+                'Hot take sopan — utarakan pendapat unik dengan alasan jelas.',
+                'Meme penjelas konsep — pakai format meme populer untuk menerangkan istilah sulit.',
+                'Tanya pendapat dengan opsi sederhana — misal, “Tim video horizontal atau vertikal?”.',
+              ]}
+            />
           </div>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <h4 className="font-semibold">Contoh Kalender 2 Minggu (4–6 konten)</h4>
           <div className="mt-3 grid sm:grid-cols-2 gap-3 text-sm">
-            <Cal title="Minggu A" items={['Senin: Edukasi (tutorial 60 detik)', 'Rabu: Inspirasi (cerita proses)', 'Jumat: Diskusi (polling topik)']} />
-            <Cal title="Minggu B" items={['Selasa: Edukasi (case study)', 'Kamis: Humor (meme relate)', 'Sabtu: Live Q&A 30 menit']} />
+            <Cal
+              title="Minggu A"
+              items={[
+                'Senin: Edukasi (tutorial 60 detik) — ajari cara setting tripod murah.',
+                'Rabu: Inspirasi (cerita proses) — kisahkan perjalanan edit video pertama.',
+                'Jumat: Diskusi (polling topik) — tanya audiens mau belajar apa minggu depan.',
+              ]}
+            />
+            <Cal
+              title="Minggu B"
+              items={[
+                'Selasa: Edukasi (case study) — bagikan hasil konten klien UKM setelah 2 minggu.',
+                'Kamis: Humor (meme relate) — unggah meme kehidupan kreator saat deadline.',
+                'Sabtu: Live Q&A 30 menit — jawab pertanyaan basic sambil tunjukkan layar.',
+              ]}
+            />
           </div>
           <p className="mt-2 text-xs text-slate-500">Sesuaikan slot dengan jam aktif audiens berdasarkan insight platform.</p>
         </div>
@@ -585,20 +763,38 @@ function SectionTemplate() {
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <h4 className="font-semibold">Checklist Evaluasi Bulanan</h4>
           <ul className="mt-2 list-disc pl-5 text-sm space-y-1">
-            <li>3 konten performa terbaik dan alasannya.</li>
-            <li>3 hipotesis eksperimen berikutnya.</li>
-            <li>Perbandingan angka retensi/CTR/ER vs bulan lalu.</li>
-            <li>Kolaborasi yang terjadi & tindak lanjut.</li>
-            <li>Perkembangan aset: email list, komunitas, library konten.</li>
+            <li>3 konten performa terbaik dan alasannya — catat apa yang bikin penonton betah.</li>
+            <li>3 hipotesis eksperimen berikutnya — tulis ide seperti “coba judul pakai angka”.</li>
+            <li>Perbandingan angka retensi/CTR/ER vs bulan lalu — gunakan tabel sederhana di spreadsheet.</li>
+            <li>Kolaborasi yang terjadi & tindak lanjut — misal, “Live bareng Dina, lanjut bikin e-book bersama”.</li>
+            <li>Perkembangan aset: email list, komunitas, library konten — cek apakah ada penambahan anggota.</li>
           </ul>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <h4 className="font-semibold">Contoh CTA & Copy Mini</h4>
           <div className="mt-3 grid md:grid-cols-3 gap-3 text-sm">
-            <Copy title="Edukasi" lines={['Simpan dulu, praktekkan akhir pekan.', 'Kalau membantu, kirim ke satu teman yang butuh.']} />
-            <Copy title="Diskusi" lines={['Setuju atau ada sudut lain? Tulis satu kalimat di komentar.', 'Pilih A/B di polling, hasilnya dibahas besok.']} />
-            <Copy title="Monetisasi" lines={['Butuh bimbingan? DM “COACH” untuk detail.', 'Template lengkap ada di tautan bio.']} />
+            <Copy
+              title="Edukasi"
+              lines={[
+                'Simpan dulu, praktekkan akhir pekan — cocok untuk penonton yang ingin mencoba pelan-pelan.',
+                'Kalau membantu, kirim ke satu teman yang butuh — dorong penyebaran organik.',
+              ]}
+            />
+            <Copy
+              title="Diskusi"
+              lines={[
+                'Setuju atau ada sudut lain? Tulis satu kalimat di komentar — memancing cerita pribadi.',
+                'Pilih A/B di polling, hasilnya dibahas besok — bikin penonton menunggu update.',
+              ]}
+            />
+            <Copy
+              title="Monetisasi"
+              lines={[
+                'Butuh bimbingan? DM “COACH” untuk detail — jelas siapa yang harus menghubungi dan bagaimana.',
+                'Template lengkap ada di tautan bio — arahkan ke produk digital tanpa memaksa.',
+              ]}
+            />
           </div>
         </div>
       </div>
@@ -614,12 +810,12 @@ function SectionGlosarium() {
         Cocok untuk teman atau klien yang baru masuk dunia konten. Simpan dan bagikan ketika ada yang bingung istilah teknis.
       </p>
       <div className="mt-4 grid md:grid-cols-2 gap-4 text-sm text-slate-700">
-        <Glossary term="Hook" meaning="Kalimat/potongan pertama yang bikin penonton lanjut menonton." />
-        <Glossary term="Retention" meaning="Seberapa lama penonton bertahan menonton konten Anda." />
-        <Glossary term="CTR" meaning="Persentase orang yang klik konten setelah melihat thumbnail/judul." />
-        <Glossary term="ER (Engagement Rate)" meaning="Perbandingan interaksi (like, komentar, share) dengan jumlah orang yang melihat." />
-        <Glossary term="CTA" meaning="Ajakan yang Anda ucapkan atau tulis supaya penonton melakukan tindakan tertentu." />
-        <Glossary term="Funnel" meaning="Tahapan sederhana dari kenal → suka → percaya → membeli/bergabung." />
+        <Glossary term="Hook" meaning="Kalimat/potongan pertama yang bikin penonton lanjut menonton. Contoh: “Cuma pakai lampu belajar, video kamu bisa kelihatan mahal.”" />
+        <Glossary term="Retention" meaning="Seberapa lama penonton bertahan menonton konten Anda. Contoh: 45% orang menonton sampai habis berarti ceritamu kuat." />
+        <Glossary term="CTR" meaning="Persentase orang yang klik konten setelah melihat thumbnail/judul. Misal, 100 orang melihat dan 5 klik berarti CTR 5%." />
+        <Glossary term="ER (Engagement Rate)" meaning="Perbandingan interaksi (like, komentar, share) dengan jumlah orang yang melihat. Jika 200 orang lihat dan 20 orang berinteraksi, ER-nya 10%." />
+        <Glossary term="CTA" meaning="Ajakan yang Anda ucapkan atau tulis supaya penonton melakukan tindakan tertentu, misalnya “Klik link daftar kelas gratis”." />
+        <Glossary term="Funnel" meaning="Tahapan sederhana dari kenal → suka → percaya → membeli/bergabung. Contoh: lihat Reels → follow → daftar newsletter → beli template." />
       </div>
     </section>
   );
@@ -630,10 +826,10 @@ function SectionFAQ() {
     <section id="faq" className="scroll-mt-24">
       <h3 className="text-2xl font-bold">FAQ Singkat</h3>
       <div className="mt-4 grid gap-3">
-        <FAQ q="Seberapa sering harus posting?" a="Mulai 3–5 kali per minggu. Fokus konsistensi dan kualitas sinyal (retensi/ER), bukan kuantitas semata." />
-        <FAQ q="Perlu semua platform?" a="Tidak. Mulai dari 1–2 kanal utama yang paling cocok dengan audiens, tambah kanal pendukung saat proses sudah stabil." />
-        <FAQ q="Kapan mulai monetisasi?" a="Saat ada tanda minat nyata: komentar tanya beli, DM konsultasi, atau trafik stabil ke aset (newsletter/website)." />
-        <FAQ q="Bagaimana kalau masih malu depan kamera?" a="Mulai dari format suara atau teks. Gunakan footage stok/B-roll dan tambahkan narasi Anda." />
+        <FAQ q="Seberapa sering harus posting?" a="Mulai 3–5 kali per minggu. Fokus konsistensi dan kualitas sinyal (retensi/ER), bukan kuantitas semata. Contoh: unggah Senin, Rabu, Jumat agar penonton tahu jadwalnya." />
+        <FAQ q="Perlu semua platform?" a="Tidak. Mulai dari 1–2 kanal utama yang paling cocok dengan audiens, tambah kanal pendukung saat proses sudah stabil. Misalnya, fokus IG Reels dulu sebelum masuk YouTube." />
+        <FAQ q="Kapan mulai monetisasi?" a="Saat ada tanda minat nyata: komentar tanya beli, DM konsultasi, atau trafik stabil ke aset (newsletter/website). Kumpulkan testimoni awal sebelum buka penawaran besar." />
+        <FAQ q="Bagaimana kalau masih malu depan kamera?" a="Mulai dari format suara atau teks. Gunakan footage stok/B-roll dan tambahkan narasi Anda. Coba tampilkan tangan atau layar kerja sebelum berani menampilkan wajah." />
       </div>
     </section>
   );
