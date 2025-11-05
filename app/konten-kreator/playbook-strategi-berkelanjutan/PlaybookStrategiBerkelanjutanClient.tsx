@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { List, Sparkles, X } from 'lucide-react';
 
 const sections = [
   { id: 'tujuan', title: '1) Menentukan Tujuan Utama' },
@@ -19,8 +20,43 @@ const sections = [
   { id: 'faq', title: 'FAQ Singkat' },
 ] as const;
 
+type Metric = {
+  metric: string;
+  definition: string;
+  purpose: string;
+  baseline: string;
+};
+
+const ANALYTICS_METRICS: Metric[] = [
+  {
+    metric: 'Retention',
+    definition: 'Persentase durasi tonton',
+    purpose: 'Validasi struktur cerita',
+    baseline: '>35–45% shorts; 40%+ video 5 menit',
+  },
+  {
+    metric: 'CTR',
+    definition: 'Klik per impresi',
+    purpose: 'Kualitas judul & thumbnail',
+    baseline: '2–5% awal',
+  },
+  {
+    metric: 'ER',
+    definition: '(Like+komen+share) / reach',
+    purpose: 'Keterlibatan emosi',
+    baseline: '5–10% awal',
+  },
+  {
+    metric: 'Conversion',
+    definition: 'Tindakan lanjut (email/DM/beli)',
+    purpose: 'Kesesuaian CTA',
+    baseline: 'Tergantung funnel',
+  },
+];
+
 export default function PlaybookStrategiBerkelanjutan() {
   const [active, setActive] = useState<(typeof sections)[number]['id']>(sections[0].id);
+  const [isTocOpen, setIsTocOpen] = useState(false);
   const observer = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
@@ -43,17 +79,38 @@ export default function PlaybookStrategiBerkelanjutan() {
     return () => observer.current?.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return undefined;
+    }
+
+    const { body } = document;
+    const originalOverflow = body.style.overflow;
+
+    if (isTocOpen) {
+      body.style.overflow = 'hidden';
+    } else {
+      body.style.overflow = originalOverflow || '';
+    }
+
+    return () => {
+      body.style.overflow = originalOverflow;
+    };
+  }, [isTocOpen]);
+
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900">
       <header className="sticky top-0 z-40 backdrop-blur bg-white/80 border-b border-slate-200">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+        <div className="mx-auto max-w-6xl px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-2xl bg-slate-900" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white">
+              <Sparkles className="h-5 w-5" aria-hidden />
+            </div>
             <h1 className="text-xl font-semibold tracking-tight">Playbook Strategi Kreator Berkelanjutan</h1>
           </div>
           <a
             href="#template"
-            className="rounded-xl px-4 py-2 text-sm font-medium bg-slate-900 text-white hover:opacity-90"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:opacity-90 sm:w-auto"
           >
             Mulai Pakai Template
           </a>
@@ -81,7 +138,7 @@ export default function PlaybookStrategiBerkelanjutan() {
             </ul>
           </div>
           <div className="rounded-3xl bg-white p-5 border border-slate-200 shadow-sm">
-            <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-2 md:grid-cols-3">
               {[
                 { k: 'Retensi', v: '>45%' },
                 { k: 'ER', v: '5–10%' },
@@ -140,6 +197,57 @@ export default function PlaybookStrategiBerkelanjutan() {
           <SectionFAQ />
         </div>
       </main>
+
+      <button
+        type="button"
+        onClick={() => setIsTocOpen(true)}
+        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg transition hover:opacity-90 md:hidden"
+        aria-label="Buka daftar isi"
+      >
+        <List className="h-5 w-5" aria-hidden />
+      </button>
+
+      {isTocOpen ? (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button
+            type="button"
+            aria-label="Tutup daftar isi"
+            onClick={() => setIsTocOpen(false)}
+            className="absolute inset-0 bg-slate-900/60"
+          />
+          <div className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Daftar Isi</p>
+              <button
+                type="button"
+                onClick={() => setIsTocOpen(false)}
+                className="rounded-full p-2 text-slate-500 hover:bg-slate-100"
+                aria-label="Tutup"
+              >
+                <X className="h-5 w-5" aria-hidden />
+              </button>
+            </div>
+            <ul className="mt-4 space-y-2">
+              {sections.map((section) => (
+                <li key={section.id}>
+                  <a
+                    href={`#${section.id}`}
+                    onClick={() => setIsTocOpen(false)}
+                    className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium transition ${
+                      active === section.id
+                        ? 'border-slate-900 bg-slate-900 text-white'
+                        : 'border-slate-200 text-slate-700 hover:border-slate-300'
+                    }`}
+                  >
+                    <span>{section.title}</span>
+                    <span className="text-xs text-slate-400">{section.id}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : null}
 
       <footer className="border-t border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-8 text-sm text-slate-600 flex flex-col md:flex-row items-center justify-between gap-3">
@@ -307,8 +415,8 @@ function SectionAnalitik() {
       <p className="mt-2 text-slate-700">
         Jangan terpaku pada like. Pantau metrik yang berhubungan langsung dengan tujuan Anda. Simpan catatan sederhana tiap minggu.
       </p>
-      <div className="mt-4 overflow-x-auto">
-        <table className="min-w-full text-sm border border-slate-200 rounded-2xl overflow-hidden">
+      <div className="mt-4 hidden overflow-x-auto md:block">
+        <table className="min-w-full overflow-hidden rounded-2xl border border-slate-200 text-sm">
           <thead className="bg-slate-100">
             <tr>
               <Th>Metrik</Th>
@@ -318,12 +426,22 @@ function SectionAnalitik() {
             </tr>
           </thead>
           <tbody className="divide-y">
-            <Row m="Retention" d="Persentase durasi tonton" g="Validasi struktur cerita" a=">35–45% shorts; 40%+ video 5 menit" />
-            <Row m="CTR" d="Klik per impresi" g="Kualitas judul & thumbnail" a="2–5% awal" />
-            <Row m="ER" d="(Like+komen+share) / reach" g="Keterlibatan emosi" a="5–10% awal" />
-            <Row m="Conversion" d="Tindakan lanjut (email/DM/beli)" g="Kesesuaian CTA" a="Tergantung funnel" />
+            {ANALYTICS_METRICS.map((metric) => (
+              <Row
+                key={metric.metric}
+                metric={metric.metric}
+                definition={metric.definition}
+                purpose={metric.purpose}
+                baseline={metric.baseline}
+              />
+            ))}
           </tbody>
         </table>
+      </div>
+      <div className="mt-4 grid gap-3 md:hidden">
+        {ANALYTICS_METRICS.map((metric) => (
+          <MetricCard key={metric.metric} {...metric} />
+        ))}
       </div>
       <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
         <p className="font-semibold">Catatan mingguan sederhana:</p>
@@ -573,14 +691,39 @@ function Th({ children }: { children: ReactNode }) {
   return <th className="text-left p-3 text-slate-600 text-xs uppercase tracking-wide">{children}</th>;
 }
 
-function Row({ m, d, g, a }: { m: string; d: string; g: string; a: string }) {
+function Row({ metric, definition, purpose, baseline }: Metric) {
   return (
     <tr className="hover:bg-slate-50">
-      <td className="p-3 font-medium">{m}</td>
-      <td className="p-3 text-slate-700">{d}</td>
-      <td className="p-3 text-slate-700">{g}</td>
-      <td className="p-3 text-slate-700">{a}</td>
+      <td className="p-3 font-medium">{metric}</td>
+      <td className="p-3 text-slate-700">{definition}</td>
+      <td className="p-3 text-slate-700">{purpose}</td>
+      <td className="p-3 text-slate-700">{baseline}</td>
     </tr>
+  );
+}
+
+function MetricCard({ metric, definition, purpose, baseline }: Metric) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+      <div className="flex items-start justify-between gap-3">
+        <p className="font-semibold text-slate-800">{metric}</p>
+        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">{baseline}</span>
+      </div>
+      <dl className="mt-3 space-y-3 text-sm text-slate-600">
+        <div>
+          <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Definisi</dt>
+          <dd>{definition}</dd>
+        </div>
+        <div>
+          <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Gunanya</dt>
+          <dd>{purpose}</dd>
+        </div>
+        <div>
+          <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ambang Awal</dt>
+          <dd>{baseline}</dd>
+        </div>
+      </dl>
+    </div>
   );
 }
 
