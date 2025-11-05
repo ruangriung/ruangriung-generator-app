@@ -10,7 +10,12 @@ import TextareaModal from './TextareaModal';
 import ApiKeyModal from './ApiKeyModal';
 import toast from 'react-hot-toast';
 
-export default function Chatbot() {
+type ChatbotProps = {
+  initialPrompt?: string;
+  autoSend?: boolean;
+};
+
+export default function Chatbot({ initialPrompt, autoSend = false }: ChatbotProps) {
   const {
     sessions, setSessions, activeSessionId, setActiveSessionId,
     activeChat, isLoading, models, processAndSendMessage, startNewChat,
@@ -28,10 +33,12 @@ export default function Chatbot() {
   const renameInputRef = useRef<HTMLInputElement>(null);
 
   const [isTextareaModalOpen, setIsTextareaModalOpen] = useState(false);
-  const [chatInput, setChatInput] = useState('');
+  const [chatInput, setChatInput] = useState(initialPrompt ?? '');
 
   const [isGeminiKeyModalOpen, setIsGeminiKeyModalOpen] = useState(false);
   const [isDalleKeyModalOpen, setIsDalleKeyModalOpen] = useState(false);
+
+  const hasInitializedPrompt = useRef(false);
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -128,6 +135,20 @@ export default function Chatbot() {
         textarea.focus();
     }
   };
+
+  useEffect(() => {
+    if (!sessions || !activeChat) return;
+    if (!initialPrompt || hasInitializedPrompt.current) return;
+
+    if (autoSend) {
+      processAndSendMessage({ role: 'user', content: initialPrompt });
+      setChatInput('');
+    } else {
+      setChatInput(initialPrompt);
+    }
+
+    hasInitializedPrompt.current = true;
+  }, [sessions, activeChat, initialPrompt, autoSend, processAndSendMessage]);
 
   if (!sessions || !activeChat) {
     return (

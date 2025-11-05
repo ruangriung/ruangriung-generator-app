@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import Link from 'next/link';
 import { Bot, List, Sparkles, X } from 'lucide-react';
 
 const sections = [
@@ -952,6 +953,7 @@ function SectionFAQ() {
 
 function AskAICallout({ question, prompt }: { question: string; prompt: string }) {
   const encodedPrompt = encodeURIComponent(prompt);
+  const aiHref = `/asisten-ai?prompt=${encodedPrompt}&autoSend=1`;
 
   return (
     <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-sky-200 bg-sky-50/70 p-4 text-sm text-slate-700 md:flex-row md:items-center md:justify-between">
@@ -961,14 +963,15 @@ function AskAICallout({ question, prompt }: { question: string; prompt: string }
         </span>
         <p className="font-medium text-slate-800">{question}</p>
       </div>
-      <a
-        href={`https://www.meta.ai/?q=${encodedPrompt}`}
+      <Link
+        href={aiHref}
         target="_blank"
         rel="noreferrer"
+        prefetch={false}
         className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700"
       >
         Tanyakan ke AI
-      </a>
+      </Link>
     </div>
   );
 }
