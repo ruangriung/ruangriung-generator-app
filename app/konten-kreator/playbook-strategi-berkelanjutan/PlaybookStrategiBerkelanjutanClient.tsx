@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { List, Sparkles, X } from 'lucide-react';
+import { Bot, List, Sparkles, X } from 'lucide-react';
 
 const sections = [
   { id: 'tujuan', title: '1) Menentukan Tujuan Utama' },
@@ -320,6 +320,10 @@ function SectionTujuan() {
           <Card key={card.title} title={card.title} items={card.items} />
         ))}
       </div>
+      <AskAICallout
+        question="Masih bingung memilih tujuan utama yang paling pas?"
+        prompt="Bantu saya memilih tujuan 90 hari untuk Mode Profesional Facebook. Profil saya fokus pada ______ dan saya ingin tahu tujuan mana yang sebaiknya jadi prioritas."
+      />
     </section>
   );
 }
@@ -367,6 +371,10 @@ function SectionAudiens() {
           <li>Cek tab Insight di Professional Dashboard Facebook — lihat jam aktif utama lalu cocokkan dengan jadwal upload.</li>
         </ul>
       </div>
+      <AskAICallout
+        question="Belum yakin persona mana yang harus diprioritaskan?"
+        prompt="Saya ingin membuat persona audiens untuk konten Facebook Mode Profesional. Target saya adalah ______. Tolong bantu susun deskripsi singkat tentang umur, kebiasaan, masalah utama, dan jam online mereka."
+      />
     </section>
   );
 }
@@ -408,6 +416,10 @@ function SectionIdentitas() {
           ]}
         />
       </div>
+      <AskAICallout
+        question="Masih ragu menentukan gaya bahasa atau visual?"
+        prompt="Saya butuh ide tone of voice dan identitas visual untuk konten Facebook. Posisi brand saya adalah ______. Tolong berikan contoh kalimat pembuka dan kombinasi warna/font yang cocok."
+      />
     </section>
   );
 }
@@ -446,6 +458,10 @@ function SectionProduksi() {
           ]}
         />
       </div>
+      <AskAICallout
+        question="Jadwal produksi masih terasa berantakan?"
+        prompt="Saya sedang menyusun kalender produksi konten Facebook. Tolong bantu buatkan jadwal mingguan untuk ______ (solo creator/tim kecil) dengan detail tugas harian dan alat yang bisa dipakai."
+      />
     </section>
   );
 }
@@ -498,6 +514,10 @@ function SectionDistribusi() {
           <li>Podcast audio → highlight quote untuk Twitter → poster tips A4 untuk komunitas sekolah → postingan grup Facebook untuk diskusi lanjutan.</li>
         </ul>
       </div>
+      <AskAICallout
+        question="Masih bingung menentukan jalur distribusi?"
+        prompt="Saya ingin mendistribusikan konten Facebook ke beberapa kanal. Tolong buatkan strategi repurpose dari satu konten utama bertema ______ ke Reels, grup komunitas, dan email dengan contoh CTA."
+      />
     </section>
   );
 }
@@ -553,6 +573,10 @@ function SectionAnalitik() {
           <li>Cek fitur Monetisasi untuk memantau kelayakan Stars, Bonus Reels, atau Iklan In-Stream dan catat syarat yang belum terpenuhi.</li>
         </ul>
       </div>
+      <AskAICallout
+        question="Masih bingung membaca angka insight?"
+        prompt="Saya melihat data insight Facebook seperti retensi, CTR, dan engagement rate. Tolong jelaskan artinya dalam bahasa sederhana dan beri saran tindakan jika retensi saya hanya ______%."
+      />
     </section>
   );
 }
@@ -604,6 +628,10 @@ function SectionAdaptasi() {
           <li>Catat performa Live di tab Insight Live — perhatikan titik drop-off untuk mengatur ulang rundown sesi berikutnya.</li>
         </ul>
       </div>
+      <AskAICallout
+        question="Butuh ide eksperimen yang aman dicoba?"
+        prompt="Saya ingin melakukan eksperimen konten Facebook. Kondisi saya: ______. Tolong sarankan 3 eksperimen sederhana yang bisa saya lakukan minggu ini beserta cara mengukur hasilnya."
+      />
     </section>
   );
 }
@@ -650,6 +678,10 @@ function SectionStory() {
           <li>“Ibu saya baru paham kenapa saya jadi kreator setelah lihat angka insight ini di Facebook.”</li>
         </ul>
       </div>
+      <AskAICallout
+        question="Sulit menyusun cerita yang menyentuh?"
+        prompt="Saya ingin membuat seri cerita Facebook tentang ______. Tolong bantu susun kerangka 3 episode (pembuka, konflik, penutup) dan contoh kalimat hook untuk setiap episodenya."
+      />
     </section>
   );
 }
@@ -697,6 +729,10 @@ function SectionKolaborasi() {
           <li>Tutup dengan ajakan aksi sederhana: “Kalau setuju, balas DM ini atau isi link form” — beri tenggat sopan 3 hari.</li>
         </ol>
       </div>
+      <AskAICallout
+        question="Butuh bantuan menulis pesan kolaborasi?"
+        prompt="Saya ingin mengirim pesan kolaborasi ke kreator ______ di Facebook. Tolong buatkan draft DM yang sopan, menyebut alasan saya tertarik, ide konten bersama, dan ajakan tindak lanjut."
+      />
     </section>
   );
 }
@@ -751,6 +787,10 @@ function SectionEtika() {
           <li>Simpan arsip live penting dan berikan akses ulang hanya untuk anggota komunitas yang sudah mendaftar.</li>
         </ul>
       </div>
+      <AskAICallout
+        question="Takut salah langkah soal etika atau kebijakan?"
+        prompt="Saya ingin memastikan konten Facebook saya mematuhi kebijakan. Tolong jelaskan aturan utama untuk ______ (misal, konten bermerek, penggunaan musik, data pelanggan) dan beri contoh kalimat transparansi yang bisa saya pakai."
+      />
     </section>
   );
 }
@@ -861,6 +901,10 @@ function SectionTemplate() {
           </div>
         </div>
       </div>
+      <AskAICallout
+        question="Butuh template yang lebih spesifik?"
+        prompt="Saya ingin template konten Facebook untuk niche ______. Tolong buatkan struktur pilar konten, contoh format Reels, caption, dan CTA yang sesuai."
+      />
     </section>
   );
 }
@@ -883,6 +927,10 @@ function SectionGlosarium() {
         <Glossary term="Stars" meaning="Mata uang virtual di Facebook. Penonton bisa membeli dan mengirim Stars saat live atau video on-demand sebagai bentuk dukungan." />
         <Glossary term="Meta Business Suite" meaning="Dashboard gratis untuk mengatur jadwal posting, menjawab pesan, dan membaca insight Facebook + Instagram di satu tempat." />
       </div>
+      <AskAICallout
+        question="Masih ada istilah yang bikin bingung?"
+        prompt="Saya menemukan istilah ______ saat belajar konten Facebook. Tolong jelaskan artinya dengan bahasa sehari-hari dan berikan contoh penerapannya."
+      />
     </section>
   );
 }
@@ -899,6 +947,29 @@ function SectionFAQ() {
         <FAQ q="Apa saja checklist untuk Mode Profesional Facebook?" a="Pastikan konten orisinal, aktif posting minimal 5 kali dalam 30 hari, patuhi Kebijakan Monetisasi, dan aktifkan 2FA. Rajin balas pesan di kotak masuk gabungan agar badge responsif tetap hijau." />
       </div>
     </section>
+  );
+}
+
+function AskAICallout({ question, prompt }: { question: string; prompt: string }) {
+  const encodedPrompt = encodeURIComponent(prompt);
+
+  return (
+    <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-sky-200 bg-sky-50/70 p-4 text-sm text-slate-700 md:flex-row md:items-center md:justify-between">
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 text-sky-700">
+          <Bot className="h-4 w-4" aria-hidden />
+        </span>
+        <p className="font-medium text-slate-800">{question}</p>
+      </div>
+      <a
+        href={`https://www.meta.ai/?q=${encodedPrompt}`}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700"
+      >
+        Tanyakan ke AI
+      </a>
+    </div>
   );
 }
 
