@@ -7,7 +7,7 @@ facebook: ""
 link: ""
 image: ""
 date: "2025-11-08"
-tool: "GPT5"
+tool: "sora by OpenAI"
 tags:
   - busrol
   - kurir-pos
