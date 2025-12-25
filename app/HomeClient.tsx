@@ -104,7 +104,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -289,74 +289,74 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
 
         {/* Dropdown Fitur Lainnya */}
         <div className="relative flex-1 w-full" ref={toolsMenuRef}>
-            <button
-                onClick={() => setIsToolsMenuOpen(!isToolsMenuOpen)}
-                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset hover:bg-purple-700 transition-colors"
-            >
-                <LayoutGrid size={18} />
-                <span>Fitur Lainnya</span>
-                <ChevronDown size={18} className={`transition-transform duration-200 ${isToolsMenuOpen ? 'rotate-180' : ''}`} />
-            </button>
+          <button
+            onClick={() => setIsToolsMenuOpen(!isToolsMenuOpen)}
+            className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset hover:bg-purple-700 transition-colors"
+          >
+            <LayoutGrid size={18} />
+            <span>Fitur Lainnya</span>
+            <ChevronDown size={18} className={`transition-transform duration-200 ${isToolsMenuOpen ? 'rotate-180' : ''}`} />
+          </button>
 
-            {isToolsMenuOpen && (
-                <div className="absolute top-full mt-2 w-full bg-gray-700 dark:bg-dark-bg border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-10">
-                    <ul className="py-2">
-                        <li>
-                            <Link
-                                href="/UniqueArtName"
-                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
-                                onClick={() => setIsToolsMenuOpen(false)}
-                            >
-                                <Sparkles size={18} />
-                                <span>Tema Unik</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/storyteller"
-                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
-                                onClick={() => setIsToolsMenuOpen(false)}
-                            >
-                                <BookOpen size={18} />
-                                <span>StoryTeller AI</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/id-card-generator"
-                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
-                                onClick={() => setIsToolsMenuOpen(false)}
-                            >
-                                <QrCode size={18} />
-                                <span>ID CARD Generator</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/comment-overlay"
-                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
-                                onClick={() => setIsToolsMenuOpen(false)}
-                            >
-                                <MessageSquare size={18} />
-                                <span>Bubble Komentar</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/v1/random-spinner.html"
-                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
-                                onClick={() => setIsToolsMenuOpen(false)}
-                            >
-                                <RefreshCw size={18} />
-                                <span>Random Spinner</span>
-                            </Link>
-                        </li>
-                    </ul>
-                </div>
-            )}
+          {isToolsMenuOpen && (
+            <div className="absolute top-full mt-2 w-full bg-gray-700 dark:bg-dark-bg border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-10">
+              <ul className="py-2">
+                <li>
+                  <Link
+                    href="/UniqueArtName"
+                    className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
+                    onClick={() => setIsToolsMenuOpen(false)}
+                  >
+                    <Sparkles size={18} />
+                    <span>Tema Unik</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/storyteller"
+                    className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
+                    onClick={() => setIsToolsMenuOpen(false)}
+                  >
+                    <BookOpen size={18} />
+                    <span>StoryTeller AI</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/id-card-generator"
+                    className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
+                    onClick={() => setIsToolsMenuOpen(false)}
+                  >
+                    <QrCode size={18} />
+                    <span>ID CARD Generator</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/comment-overlay"
+                    className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
+                    onClick={() => setIsToolsMenuOpen(false)}
+                  >
+                    <MessageSquare size={18} />
+                    <span>Bubble Komentar</span>
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href="/v1/random-spinner.html"
+                    className="w-full flex items-center gap-3 px-4 py-2 text-gray-100 dark:text-gray-100 hover:bg-purple-700 dark:hover:bg-gray-700 transition-colors"
+                    onClick={() => setIsToolsMenuOpen(false)}
+                  >
+                    <RefreshCw size={18} />
+                    <span>Random Spinner</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
-      
+
       <div className="w-full max-w-4xl flex flex-col gap-4 mb-4 md:flex-row md:items-stretch md:gap-6">
         <AuthButton />
         <div className="w-full md:w-auto md:self-stretch">
