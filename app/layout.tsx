@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   verification: {
     google: "3Mybm59m8--LyAZpVYIGHrVk1fSkYemj33bq5RBBdxA",
   },
-  
+
   openGraph: {
     title: "RuangRiung AI Image Generator - Create Stunning Digital Art",
     description: "Transform text into beautiful AI-generated artwork in various styles including photography, anime, digital painting and more.",
@@ -88,13 +88,13 @@ export default function RootLayout({
             `,
           }}
         />
-        <Script
+        {/* <Script
           id="google-adsense-script"
           async
           strategy="afterInteractive"
           crossOrigin="anonymous"
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6394253519537490"
-        />
+        /> */}
       </body>
     </html>
   );
