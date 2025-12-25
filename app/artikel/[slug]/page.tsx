@@ -10,8 +10,9 @@ import ArticleSubmissionTrigger from '@/components/ArticleSubmissionTrigger';
 import ArticleSearchForm from '@/components/ArticleSearchForm';
 import GoogleAd from '@/components/GoogleAd';
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const article: Article | undefined = getArticleBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const article: Article | undefined = getArticleBySlug(slug);
   if (!article) {
     return {};
   }
@@ -53,16 +54,16 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug }));
 }
 
-export default async function ArticlePage({ params }: { params: { slug: string } }) {
-  const article: Article | undefined = getArticleBySlug(params.slug);
+export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const article: Article | undefined = getArticleBySlug(slug);
 
   if (!article) {
     notFound();
   }
 
-  // === PERBAIKAN DI SINI ===
   // Variabel relatedArticles didefinisikan di dalam komponen
-  const relatedArticles = getRelatedArticles(params.slug);
+  const relatedArticles = getRelatedArticles(slug);
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -124,11 +125,11 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       <div className="flex justify-center items-center flex-wrap gap-4 mb-6">
         <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900 rounded-full px-3 py-1">{article.category}</span>
         <div className="flex flex-wrap justify-center gap-2">
-            {article.tags.map(tag => (
-                <span key={tag} className="text-xs font-semibold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-1">
-                    #{tag}
-                </span>
-            ))}
+          {article.tags.map(tag => (
+            <span key={tag} className="text-xs font-semibold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-1">
+              #{tag}
+            </span>
+          ))}
         </div>
       </div>
       <p className="text-lg text-center text-gray-700 dark:text-gray-300 border-l-4 border-gray-500 pl-4 mb-8 italic">
