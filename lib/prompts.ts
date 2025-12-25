@@ -214,7 +214,7 @@ const readPromptsFromDirectory = async (directory: string): Promise<Prompt[]> =>
             facebook: data.facebook,
             image: data.image,
             link: data.link,
-            date: data.date,
+            date: data.date ? String(data.date) : new Date().toISOString().split('T')[0],
             tool: data.tool,
             tags: data.tags || [],
             promptContent: content.trim(),

@@ -37,8 +37,9 @@ const toIsoString = (value: string | undefined): string | undefined => {
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 };
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const prompt = await getPromptBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const prompt = await getPromptBySlug(slug);
 
   if (!prompt) {
     return {};
@@ -90,9 +91,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export const revalidate = 0;
 
-export default async function PromptDetailPage({ params }: { params: { slug: string } }) {
+export default async function PromptDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const prompts = await getAllPrompts();
-  const prompt = prompts.find(currentPrompt => currentPrompt.slug === params.slug);
+  const prompt = prompts.find(currentPrompt => currentPrompt.slug === slug);
 
   if (!prompt) {
     notFound();
