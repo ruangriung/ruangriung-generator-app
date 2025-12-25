@@ -14,9 +14,9 @@ import { creatorSlugs, getCreatorBySlug } from '../../creators';
 import { socialPlatforms } from '../../social-platforms';
 
 type PageProps = {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 };
 
 const siteUrl = 'https://ruangriung.my.id';
@@ -33,8 +33,9 @@ export const generateStaticParams = () => {
   return creatorSlugs.map((slug) => ({ slug }));
 };
 
-export const generateMetadata = ({ params }: PageProps): Metadata => {
-  const creator = getCreatorBySlug(params.slug);
+export const generateMetadata = async ({ params }: PageProps): Promise<Metadata> => {
+  const { slug } = await params;
+  const creator = getCreatorBySlug(slug);
 
   if (!creator) {
     return {
@@ -99,8 +100,9 @@ const renderParagraphs = (text: string) => {
     .filter(Boolean);
 };
 
-const CreatorProfilePage = ({ params }: PageProps) => {
-  const creator = getCreatorOrThrow(params.slug);
+const CreatorProfilePage = async ({ params }: PageProps) => {
+  const { slug } = await params;
+  const creator = getCreatorOrThrow(slug);
   const availableSocials = socialPlatforms.filter((platform) => creator.socials[platform.key]);
 
   return (

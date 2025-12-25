@@ -7,9 +7,9 @@ import { getStoreById, getStores } from '@/lib/umkm';
 import ThemeToggle from '@/components/ThemeToggle';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     storeId: string;
-  };
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -18,7 +18,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const store = await getStoreById(params.storeId);
+  const { storeId } = await params;
+  const store = await getStoreById(storeId);
 
   if (!store) {
     return {
@@ -72,7 +73,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function StoreDetailPage({ params }: PageProps) {
-  const store = await getStoreById(params.storeId);
+  const { storeId } = await params;
+  const store = await getStoreById(storeId);
 
   if (!store) {
     notFound();
