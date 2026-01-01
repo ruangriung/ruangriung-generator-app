@@ -54,18 +54,18 @@ export default function Tabs() {
 
   return (
     <div className="w-full max-w-4xl">
-      <div className="p-2 bg-light-bg dark:bg-dark-bg rounded-xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset grid grid-cols-3 sm:grid-cols-4 gap-2">
+      <div className="p-2 bg-light-bg dark:bg-dark-bg rounded-xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset grid grid-cols-2 md:grid-cols-5 gap-2">
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.name;
 
-          const layoutClass = index === tabs.length - 1 ? 'col-span-3 sm:col-span-1' : '';
+          const layoutClass = index === tabs.length - 1 ? 'col-span-2 md:col-span-1' : '';
 
           return (
             <button
               key={tab.name}
               onClick={() => setActiveTab(tab.name)}
-              className={`flex items-center justify-center gap-x-2 px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${layoutClass}
+              className={`flex items-center justify-center gap-x-2 px-2 md:px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${layoutClass}
                 ${isActive
                   ? 'bg-purple-600 text-white shadow-neumorphic-button dark:shadow-dark-neumorphic-button'
                   : 'text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-500'
