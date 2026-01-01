@@ -182,7 +182,7 @@ export default function Generator() {
 
     const fetchImageModels = async () => {
       try {
-        const response = await fetch('https://image.pollinations.ai/models');
+        const response = await fetch('/api/pollinations/models/image');
         if (!response.ok) throw new Error(`Gagal mengambil model: ${response.statusText}`);
         const data = await response.json();
         const fetchedModels = extractModelNames(data);
@@ -315,11 +315,11 @@ export default function Generator() {
     setImageUrls([]);
 
     setTimeout(() => {
-        imageDisplayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      imageDisplayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
 
     const newRandomSeed = Math.floor(Math.random() * 1000000);
-    setSettings(prev => ({...prev, seed: newRandomSeed}));
+    setSettings(prev => ({ ...prev, seed: newRandomSeed }));
     let currentSeed = newRandomSeed;
 
     const { model, prompt, negativePrompt, width, height, imageQuality, batchSize, artStyle, private: isPrivate, safe, transparent, inputImages = [], cfg_scale } = settings;
@@ -345,7 +345,8 @@ export default function Generator() {
           referenceImages.forEach(url => params.append('image', url));
         }
 
-        finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?${params.toString()}`;
+        // Use internal API route
+        finalUrl = `/api/pollinations/image?prompt=${encodeURIComponent(fullPrompt)}&${params.toString()}`;
 
         const response = await fetch(finalUrl);
         if (!response.ok) throw new Error(`Gagal membuat gambar #${i + 1}`);
@@ -360,12 +361,12 @@ export default function Generator() {
 
     const generatedUrls = (await Promise.all(generatePromises)).filter((url): url is string => url !== null);
 
-    if(generatedUrls.length > 0) {
-        setImageUrls(generatedUrls);
-        generatedUrls.forEach(url => addToHistory({ imageUrl: url, prompt: settings.prompt, timestamp: Date.now() }));
-        toast.success(`Berhasil membuat ${generatedUrls.length} gambar!`);
+    if (generatedUrls.length > 0) {
+      setImageUrls(generatedUrls);
+      generatedUrls.forEach(url => addToHistory({ imageUrl: url, prompt: settings.prompt, timestamp: Date.now() }));
+      toast.success(`Berhasil membuat ${generatedUrls.length} gambar!`);
     } else {
-        toast.error("Tidak ada gambar yang berhasil dibuat.");
+      toast.error("Tidak ada gambar yang berhasil dibuat.");
     }
 
     setIsLoading(false);
@@ -374,8 +375,8 @@ export default function Generator() {
   // === PERUBAHAN BARU: Fungsi handleSurpriseMe ===
   const handleSurpriseMe = () => {
     if (modelList.length === 0) {
-        toast.error("Model AI belum dimuat. Coba lagi sebentar.");
-        return;
+      toast.error("Model AI belum dimuat. Coba lagi sebentar.");
+      return;
     }
 
     const randomPrompt = getRandomDefaultPrompt(); // Gunakan salah satu prompt default acak
