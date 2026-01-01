@@ -87,7 +87,13 @@ export async function POST(request: Request) {
         // So for the POST handler:
         let prompt = "";
         if (messages && Array.isArray(messages)) {
-            prompt = messages.map((m: any) => m.content).join('\n');
+            prompt = messages.map((m: any) => {
+                if (typeof m.content === 'string') return m.content;
+                if (Array.isArray(m.content)) {
+                    return m.content.map((c: any) => c.text || '').join(' ');
+                }
+                return '';
+            }).join('\n');
         } else if (body.prompt) {
             prompt = body.prompt;
         }

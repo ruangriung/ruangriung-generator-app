@@ -12,12 +12,12 @@ interface ImageAnalysisAssistantProps {
 }
 
 const LabelWithIcon = ({ icon: Icon, text, htmlFor }: { icon: React.ElementType, text: string, htmlFor: string }) => (
-    <div className="flex items-center gap-x-2 mb-2">
-      <Icon className="h-4 w-4 text-purple-600" />
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600 dark:text-gray-300">
-        {text}
-      </label>
-    </div>
+  <div className="flex items-center gap-x-2 mb-2">
+    <Icon className="h-4 w-4 text-purple-600" />
+    <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600 dark:text-gray-300">
+      {text}
+    </label>
+  </div>
 );
 
 const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
@@ -30,43 +30,60 @@ export default function ImageAnalysisAssistant({ onUsePrompt }: ImageAnalysisAss
   const [isLoading, setIsLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  
-  const [models, setModels] = useState<{name: string, description: string}[]>([]);
+
+  const [models, setModels] = useState<{ name: string, description: string }[]>([]);
   const [selectedModel, setSelectedModel] = useState('openai');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // --- PERUBAHAN LOGIKA MODEL DIMULAI DI SINI ---
+  // --- PERUBAHAN LOGIKA MODEL DIMULAI DI SINI ---
   useEffect(() => {
-    const modelData = [
-      {"name": "llama-fast-roblox", "description": "Llama 3.2 11B Vision (Cloudflare)", "vision": true, "input_modalities": ["text", "image"]},
-      {"name": "mistral", "description": "Mistral Small 3.1 24B", "vision": true, "input_modalities": ["text", "image"]},
-      {"name": "mistral-roblox", "description": "Mistral Small 3.1 24B (Cloudflare)", "vision": true, "input_modalities": ["text", "image"]},
-      {"name": "openai", "description": "OpenAI GPT-4o Mini", "vision": true, "input_modalities": ["text", "image"]},
-      {"name": "openai-audio", "description": "OpenAI GPT-4o Mini Audio Preview", "vision": true, "input_modalities": ["text", "image", "audio"]},
-      {"name": "openai-fast", "description": "OpenAI GPT-4.1 Nano", "vision": true, "input_modalities": ["text", "image"]},
-      {"name": "openai-large", "description": "OpenAI GPT-4.1", "vision": true, "input_modalities": ["text", "image"]},
-      {"name": "openai-reasoning", "description": "OpenAI O3", "vision": true, "input_modalities": ["text", "image"]},
-      {"name": "openai-roblox", "description": "OpenAI GPT-4.1 Mini (Roblox)", "vision": true, "input_modalities": ["text", "image"]},
-      {"name": "phi", "description": "Phi-4 Mini Instruct", "vision": true, "input_modalities": ["text", "image", "audio"]},
-      {"name": "bidara", "description": "BIDARA by NASA", "vision": true, "input_modalities": ["text", "image"]},
-      {"name": "evil", "description": "Evil (Uncensored)", "vision": true, "input_modalities": ["text", "image"]},
-      {"name": "mirexa", "description": "Mirexa AI Companion", "vision": true, "input_modalities": ["text", "image"]},
-      {"name": "sur", "description": "Sur AI Assistant", "vision": true, "input_modalities": ["text", "image"]},
-      {"name": "unity", "description": "Unity Unrestricted Agent", "vision": true, "input_modalities": ["text", "image"]}
-    ];
+    const fetchModels = async () => {
+      try {
+        // Kita coba fetch semua model text, karena biasanya endpoint text juga memuat info vision di metadata
+        // Atau jika endpoint terpisah belum ada, kita pakai asumsi atau fetch dari text endpoint
+        const response = await fetch('/api/pollinations/models/text');
+        if (response.ok) {
+          const data = await response.json();
+          let allModels: any[] = [];
+          if (Array.isArray(data)) allModels = data;
 
-    const visionModels = modelData
-        .filter(model => model.vision || model.input_modalities.includes('image'))
-        .map(model => ({ name: model.name, description: model.description }));
-    
-    setModels(visionModels);
-    
-    if (visionModels.some(m => m.name === 'openai')) {
-        setSelectedModel('openai');
-    } else if (visionModels.length > 0) {
-        setSelectedModel(visionModels[0].name);
-    }
+          // Jika API mengembalikan data lengkap, kita filter yang vision-capable
+          // Jika hanya string array, kita tidak tahu mana yang vision.
+          // Fallback: jika string, anggap 'openai' dan 'mistral' support.
+          // Tapi baiknya jika data object: check .vision atau input_modalities
+
+          const visionModels = allModels.filter((m: any) => {
+            if (typeof m === 'string') {
+              return ['openai', 'mistral', 'gpt-4o', 'gpt-4o-mini'].some(v => m.includes(v));
+            }
+            return m.vision === true || (m.input_modalities && m.input_modalities.includes('image'));
+          }).map((m: any) => {
+            if (typeof m === 'string') return { name: m, description: m };
+            return { name: m.name, description: m.description || m.name };
+          });
+
+          if (visionModels.length > 0) {
+            setModels(visionModels);
+            setSelectedModel(visionModels[0].name);
+          } else {
+            // Fallback visual list if API doesn't specify vision explicitly or is minimal
+            setModels([
+              { name: 'openai', description: 'OpenAI GPT-4o Mini' },
+              { name: 'mistral', description: 'Mistral Small' },
+            ]);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch models for analysis", e);
+        setModels([
+          { name: 'openai', description: 'OpenAI GPT-4o Mini' },
+        ]);
+      }
+    };
+
+    fetchModels();
   }, []);
   // --- AKHIR PERUBAHAN LOGIKA MODEL ---
 
@@ -97,35 +114,39 @@ export default function ImageAnalysisAssistant({ onUsePrompt }: ImageAnalysisAss
 
     reader.onloadend = async () => {
       const base64String = reader.result as string;
-      const analyzePromise = fetch('https://text.pollinations.ai/openai', {
+      const analyzePromise = fetch('/api/pollinations/text', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          // 'Authorization': ... handled by proxy
+        },
         body: JSON.stringify({
           model: selectedModel,
           messages: [{ "role": "user", "content": [{ "type": "text", "text": "Jelaskan gambar ini secara ringkas namun detail, fokus pada subjek utama, gaya, dan elemen penting lainnya. Format output sebagai potensi prompt untuk generator gambar." }, { "type": "image_url", "image_url": { "url": base64String } }] }],
-          max_tokens: 300
+          max_tokens: 300,
+          json: false
         }),
       })
-      .then(async (res) => {
-        if (!res.ok) {
-          const errorBody = await res.text();
-          throw new Error(`Gagal menganalisis gambar. Status: ${res.status}. Pesan: ${errorBody}`);
-        }
-        return res.json();
-      })
-      .then(result => {
-        const description = result.choices?.[0]?.message?.content?.trim();
-        if (!description) throw new Error("API tidak memberikan deskripsi yang valid.");
-        setAnalysisResult(description);
-        return "Analisis gambar berhasil!";
-      })
-      .catch(err => {
-        setAnalysisResult("Gagal menganalisis gambar. Periksa konsol untuk detail.");
-        throw err;
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+        .then(async (res) => {
+          if (!res.ok) {
+            const errorBody = await res.text();
+            throw new Error(`Gagal menganalisis gambar. Status: ${res.status}. Pesan: ${errorBody}`);
+          }
+          // Proxy returns text
+          return res.text();
+        })
+        .then(description => {
+          if (!description) throw new Error("API tidak memberikan deskripsi yang valid.");
+          setAnalysisResult(description);
+          return "Analisis gambar berhasil!";
+        })
+        .catch(err => {
+          setAnalysisResult("Gagal menganalisis gambar. Periksa konsol untuk detail.");
+          throw err;
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
 
       toast.promise(analyzePromise, {
         loading: 'Menganalisis gambar...',
@@ -155,17 +176,17 @@ export default function ImageAnalysisAssistant({ onUsePrompt }: ImageAnalysisAss
     <Accordion title={<div className="flex items-center gap-2"><Image className="text-purple-600" />Asisten Analisis Gambar</div>} className="mt-6">
       <div className="space-y-4">
         <div>
-            <LabelWithIcon icon={Cpu} text="Pilih Model Analisis" htmlFor="analysis-model" />
-            <div className="relative">
-                <select id="analysis-model" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className={selectStyle} disabled={models.length === 0}>
-                    {models.length > 0 ? models.map(model => (
-                        <option key={model.name} value={model.name} className="bg-white dark:bg-gray-700">
-                            {model.description} ({model.name})
-                        </option>
-                    )) : <option>Memuat...</option>}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
-            </div>
+          <LabelWithIcon icon={Cpu} text="Pilih Model Analisis" htmlFor="analysis-model" />
+          <div className="relative">
+            <select id="analysis-model" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className={selectStyle} disabled={models.length === 0}>
+              {models.length > 0 ? models.map(model => (
+                <option key={model.name} value={model.name} className="bg-white dark:bg-gray-700">
+                  {model.description} ({model.name})
+                </option>
+              )) : <option>Memuat...</option>}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
+          </div>
         </div>
 
         <div>

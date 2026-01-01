@@ -51,7 +51,7 @@ export default function VideoCreator() {
     konsistensi: 75, // Opsi baru: Konsistensi (nilai numerik untuk slider)
     intensitasGerakan: 50, // Opsi baru: Intensitas Gerakan (nilai numerik untuk slider)
   });
-  
+
   const [videoIdea, setVideoIdea] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -128,7 +128,7 @@ export default function VideoCreator() {
     fullPrompt += `- Nilai Seed: ${inputs.nilaiSeed}\n`;
     fullPrompt += `- Konsistensi: ${inputs.konsistensi}%\n`;
     fullPrompt += `- Intensitas Gerakan: ${inputs.intensitasGerakan}%\n\n`;
-    
+
     fullPrompt += `Berikan hasilnya dalam format JSON. JSON harus memiliki struktur berikut:
 {
   "title": "Judul video yang menarik",
@@ -164,25 +164,37 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
 
     const generatePromise = new Promise<string>(async (resolve, reject) => {
       try {
-        const response = await fetch('https://text.pollinations.ai/openai', {
+        const response = await fetch('/api/pollinations/text', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN}`
           },
           body: JSON.stringify({
             model: 'openai',
             messages: [{ role: 'user', content: fullPrompt }],
+            json: true // We request JSON because the prompt asks for it and we want the proxy to ideally handle it if possible, but our prompt structure demands JSON text anyway.
+            // Note: route.ts passes json=true to upstream if we send it.
           }),
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`API Error: ${response.statusText} - ${errorText}`);
+          const errorText = await response.text();
+          throw new Error(`API Error: ${response.statusText} - ${errorText}`);
         }
 
+        // The proxy returns text (which should be JSON string because we prompted for it + json=true param)
+        let idea = await response.text();
+
+        // Ensure it's treated as string before parsing.
+        // Old code expected { choices: ... } from OpenAI format.
+        // New proxy returns raw text/json from upstream.
+
+        // NO update needed for parsing below because `idea` is already the content string.
+
+        /* 
         const result = await response.json();
-        let idea = result.choices[0].message.content;
+        let idea = result.choices[0].message.content; 
+        */
 
         try {
           // Attempt to parse the idea as JSON
@@ -209,7 +221,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
       error: (message: string) => `Gagal membuat ide video: ${message}`,
     });
   };
-  
+
   const handleCopy = () => {
     if (!videoIdea) return;
     navigator.clipboard.writeText(videoIdea).then(() => {
@@ -221,7 +233,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
 
   const handleDownloadJson = () => {
     if (!videoIdea) return;
-    
+
     let dataToSave;
     try {
       dataToSave = JSON.parse(videoIdea); // Coba parse jika sudah berupa string JSON
@@ -234,11 +246,11 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
         timestamp: new Date().toISOString()
       };
     }
-    
+
     const jsonString = JSON.stringify(dataToSave, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    
+
     const a = document.createElement('a');
     a.href = url;
     a.download = `video_prompt_${Date.now()}.json`;
@@ -246,7 +258,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     toast.success("File JSON berhasil diunduh!");
   };
 
@@ -261,16 +273,16 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
     <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
       <div className="space-y-4">
         <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-200 flex items-center justify-center gap-x-2">
-                <Film className="text-purple-600" />
-                Creator Prompt Video
-            </h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">Masukkan topik, dan biarkan AI membuatkan ide video untuk Anda.</p>
+          <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-200 flex items-center justify-center gap-x-2">
+            <Film className="text-purple-600" />
+            Creator Prompt Video
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Masukkan topik, dan biarkan AI membuatkan ide video untuk Anda.</p>
         </div>
-        
+
         {/* Konsep Utama Video */}
         <div>
-          <label htmlFor="konsep" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Type size={16} className="text-purple-600"/>Konsep Utama Video *</label>
+          <label htmlFor="konsep" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Type size={16} className="text-purple-600" />Konsep Utama Video *</label>
           <div className="relative w-full">
             <textarea id="konsep" value={inputs.konsep} onChange={(e) => handleInputChange('konsep', e.target.value)} className={`${textareaStyle} h-24`} placeholder="Ketik di sini atau klik perbesar untuk edit..." />
             <div className="absolute top-2 right-2 flex gap-x-1">
@@ -279,22 +291,22 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
             </div>
           </div>
         </div>
-        
+
         {/* Narasi (Opsional) */}
         <div>
-          <label htmlFor="narasi" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Type size={16} className="text-purple-600"/>Narasi (Opsional)</label>
+          <label htmlFor="narasi" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Type size={16} className="text-purple-600" />Narasi (Opsional)</label>
           <div className="relative w-full">
             <textarea id="narasi" value={inputs.narasi} onChange={(e) => handleInputChange('narasi', e.target.value)} className={`${textareaStyle} h-20`} placeholder="Ketik di sini atau klik perbesar untuk edit..." />
             <div className="absolute top-2 right-2 flex gap-x-1">
-              {inputs.narasi && <button title="Hapus" onClick={(e) => { e.stopPropagation(); handleInputChange('narasi', '')}} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><X size={18} /></button>}
+              {inputs.narasi && <button title="Hapus" onClick={(e) => { e.stopPropagation(); handleInputChange('narasi', '') }} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><X size={18} /></button>}
               <button title="Perbesar" onClick={() => setEditingField('narasi')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><Expand size={18} /></button>
             </div>
           </div>
         </div>
-        
+
         {/* Model Video AI */}
         <div>
-          <label htmlFor="model" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Clapperboard size={16} className="text-purple-600"/>Model Video AI</label>
+          <label htmlFor="model" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 mb-2"><Clapperboard size={16} className="text-purple-600" />Model Video AI</label>
           <div className="relative">
             <select id="model" value={inputs.model} onChange={(e) => handleInputChange('model', e.target.value)} className={selectStyleWithIcon}>
               <option value="Sora" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Sora (OpenAI)</option>
@@ -307,7 +319,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
               <option value="Stable Video" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Stable Video Diffusion</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-              <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+              <ChevronDown className="h-5 w-5" aria-hidden="true" />
             </div>
           </div>
         </div>
@@ -328,7 +340,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
                     <option value="2m">2 menit</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                    <ChevronDown className="h-5 w-5" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -342,7 +354,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
                     <option value="4:3">4:3 (Klasik)</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                    <ChevronDown className="h-5 w-5" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -356,7 +368,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
                     <option value="120">120 (Slow Motion)</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                    <ChevronDown className="h-5 w-5" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -380,7 +392,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
                   <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Abstrak</option>
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                  <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                  <ChevronDown className="h-5 w-5" aria-hidden="true" />
                 </div>
               </div>
               {/* Gradasi Warna */}
@@ -395,7 +407,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
                     <option value="High Contrast">Kontras Tinggi</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                    <ChevronDown className="h-5 w-5" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -408,13 +420,13 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
                     <option value="High Dynamic Range (HDR)">High Dynamic Range (HDR)</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                    <ChevronDown className="h-5 w-5" aria-hidden="true" />
                   </div>
                 </div>
               </div>
             </div>
           </Accordion>
-          
+
           {/* Sinematografi */}
           <Accordion title={<div className="flex items-center gap-2"><Camera size={16} /> <span className="text-gray-700 dark:text-gray-300">Sinematografi</span></div>}>
             <div className="space-y-4 mt-2">
@@ -430,7 +442,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
                     <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Point of View (POV)</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                    <ChevronDown className="h-5 w-5" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -449,7 +461,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
                     <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Drone Shot</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                    <ChevronDown className="h-5 w-5" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -465,7 +477,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
                     <option value="Overhead">Overhead (Atas Kepala)</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                    <ChevronDown className="h-5 w-5" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -480,7 +492,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
                     <option value="Fisheye">Fisheye</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                    <ChevronDown className="h-5 w-5" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -494,13 +506,13 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
                     <option value="Rack Focus">Rack Focus (pergeseran fokus)</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                    <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                    <ChevronDown className="h-5 w-5" aria-hidden="true" />
                   </div>
                 </div>
               </div>
             </div>
           </Accordion>
-          
+
           {/* Efek Visual (Diubah menjadi checkboxes) */}
           <Accordion title={<div className="flex items-center gap-2"><Wand size={16} /> <span className="text-gray-700 dark:text-gray-300">Efek Visual</span></div>}>
             <div className="space-y-3 mt-2">
@@ -520,7 +532,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
               ))}
             </div>
           </Accordion>
-          
+
           {/* Mood & Suasana */}
           <Accordion title={<div className="flex items-center gap-2"><Smile size={16} /> <span className="text-gray-700 dark:text-gray-300">Mood & Suasana</span></div>}>
             <div className="relative mt-2">
@@ -536,7 +548,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
                 <option className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Tenang/Damai</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                <ChevronDown className="h-5 w-5" aria-hidden="true"/>
+                <ChevronDown className="h-5 w-5" aria-hidden="true" />
               </div>
             </div>
           </Accordion>
