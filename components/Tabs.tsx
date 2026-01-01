@@ -9,6 +9,7 @@ import Generator from '@/components/Generator';
 import VideoCreator from '@/components/VideoCreator';
 import AudioGenerator from '@/components/AudioGenerator';
 import Chatbot from '@/components/Chatbot';
+import TextToVideo from '@/components/TextToVideo';
 
 // Komponen Placeholder untuk konten yang terkunci
 const LockedContent = () => (
@@ -29,7 +30,8 @@ const LockedContent = () => (
 export default function Tabs() {
   const tabs = [
     { name: 'chatbot', label: 'Chatbot', icon: MessageSquare, content: <Chatbot />, isProtected: false },
-    { name: 'video', label: 'Video', icon: Video, content: <VideoCreator />, isProtected: true },
+    { name: 'video', label: 'Video Prompt', icon: Video, content: <VideoCreator />, isProtected: true },
+    { name: 'text-to-video', label: 'Text to Video', icon: Video, content: <TextToVideo />, isProtected: true },
     { name: 'audio', label: 'Audio', icon: AudioLines, content: <AudioGenerator />, isProtected: true },
     { name: 'image', label: 'Image', icon: Image, content: <Generator />, isProtected: false }
   ];
@@ -37,13 +39,13 @@ export default function Tabs() {
   // --- PERBAIKAN DI SINI: Ubah state awal ---
   const [activeTab, setActiveTab] = useState('image'); // Langsung set ke 'image'
   // --- AKHIR PERBAIKAN ---
-  
+
   const { status } = useSession();
 
   const activeContent = () => {
     const currentTab = tabs.find(tab => tab.name === activeTab);
     if (!currentTab) return null;
-    
+
     if (currentTab.isProtected && status !== 'authenticated') {
       return <LockedContent />;
     }
@@ -56,7 +58,7 @@ export default function Tabs() {
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.name;
-          
+
           const layoutClass = index === tabs.length - 1 ? 'col-span-3 sm:col-span-1' : '';
 
           return (
@@ -64,10 +66,9 @@ export default function Tabs() {
               key={tab.name}
               onClick={() => setActiveTab(tab.name)}
               className={`flex items-center justify-center gap-x-2 px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${layoutClass}
-                ${
-                  isActive
-                    ? 'bg-purple-600 text-white shadow-neumorphic-button dark:shadow-dark-neumorphic-button'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-500' 
+                ${isActive
+                  ? 'bg-purple-600 text-white shadow-neumorphic-button dark:shadow-dark-neumorphic-button'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-500'
                 }`
               }
             >
