@@ -15,24 +15,8 @@ import LockedAccordion from './LockedAccordion';
 import toast from 'react-hot-toast';
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
 
-const TEXT_MODEL_DATA: {
-  name: string;
-  description: string;
-  input_modalities: string[];
-  output_modalities: string[];
-}[] = [
-  { name: 'deepseek', description: 'DeepSeek V3', input_modalities: ['text'], output_modalities: ['text'] },
-  { name: 'deepseek-reasoning', description: 'DeepSeek R1 0528', input_modalities: ['text'], output_modalities: ['text'] },
-  { name: 'grok', description: 'xAI Grok-3 Mini', input_modalities: ['text'], output_modalities: ['text'] },
-  { name: 'llamascout', description: 'Llama 4 Scout 17B', input_modalities: ['text'], output_modalities: ['text'] },
-  { name: 'mistral', description: 'Mistral Small 3.1 24B', input_modalities: ['text', 'image'], output_modalities: ['text'] },
-  { name: 'openai', description: 'OpenAI GPT-4o Mini', input_modalities: ['text', 'image'], output_modalities: ['text'] },
-  { name: 'openai-fast', description: 'OpenAI GPT-4.1 Nano', input_modalities: ['text', 'image'], output_modalities: ['text'] },
-  { name: 'openai-large', description: 'OpenAI GPT-4.1', input_modalities: ['text', 'image'], output_modalities: ['text'] },
-  { name: 'phi', description: 'Phi-4 Mini Instruct', input_modalities: ['text', 'image', 'audio'], output_modalities: ['text'] },
-  { name: 'rtist', description: 'Rtist', input_modalities: ['text'], output_modalities: ['text'] },
-  { name: 'midijourney', description: 'MIDIjourney', input_modalities: ['text'], output_modalities: ['text'] },
-];
+// Hardcoded models removed in favor of dynamic API loading
+
 
 export interface GeneratorSettings {
   prompt: string;
@@ -78,27 +62,48 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
   const [selectedEnhancementModel, setSelectedEnhancementModel] = useState('openai');
 
   useEffect(() => {
-    const relevantModels = TEXT_MODEL_DATA.filter(
-      (model) => model.input_modalities.includes('text') && model.output_modalities.includes('text')
-    ).map(({ name, description }) => ({ name, description }));
+    const fetchModels = async () => {
+      try {
+        const response = await fetch('/api/pollinations/models/text');
+        if (!response.ok) throw new Error('Failed to fetch text models');
+        const data = await response.json();
 
-    if (relevantModels.length > 0) {
-      setEnhancementModels(relevantModels);
-      if (relevantModels.some((model) => model.name === 'openai')) {
+        // Adapt the data structure if needed
+        let models: { name: string; description: string }[] = [];
+        if (Array.isArray(data)) {
+          models = data.map((m: any) => {
+            if (typeof m === 'string') return { name: m, description: m };
+            return { name: m.name, description: m.description || m.name };
+          });
+        }
+
+        if (models.length > 0) {
+          setEnhancementModels(models);
+          if (models.some(m => m.name === 'openai')) {
+            setSelectedEnhancementModel('openai');
+          } else {
+            setSelectedEnhancementModel(models[0].name);
+          }
+        } else {
+          throw new Error('No models found');
+        }
+
+      } catch (error) {
+        console.error("Failed to fetch models, using fallback", error);
+        // Fallback
+        const fallbackModels = [
+          { name: 'openai', description: 'OpenAI GPT-4o Mini' },
+          { name: 'mistral', description: 'Mistral Small 3.1 24B' },
+          { name: 'grok', description: 'xAI Grok-3 Mini' },
+          { name: 'deepseek', description: 'DeepSeek V3' },
+        ];
+        setEnhancementModels(fallbackModels);
         setSelectedEnhancementModel('openai');
-      } else {
-        setSelectedEnhancementModel(relevantModels[0].name);
       }
-    } else {
-      const fallbackModels = [
-        { name: 'openai', description: 'OpenAI GPT-4o Mini' },
-        { name: 'mistral', description: 'Mistral Small 3.1 24B' },
-        { name: 'grok', description: 'xAI Grok-3 Mini' },
-        { name: 'deepseek', description: 'DeepSeek V3' },
-      ];
-      setEnhancementModels(fallbackModels);
-      setSelectedEnhancementModel('openai');
-    }
+    };
+
+    fetchModels();
+
   }, []);
 
   useEffect(() => {
@@ -130,15 +135,17 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
   const callPromptApi = async (promptForApi: string, temperature = 0.5) => {
     try {
-      const response = await fetch('https://text.pollinations.ai/openai', {
+      // Use internal API route
+      const response = await fetch('/api/pollinations/text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           model: selectedEnhancementModel,
-          messages: [{ role: 'user', content: promptForApi }],
+          prompt: promptForApi,
           temperature: temperature,
+          json: false
         }),
       });
 
@@ -147,8 +154,12 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
         throw new Error(`API merespons dengan status ${response.status}. Isi: ${errorBody}`);
       }
 
-      const result = await response.json();
-      const aiContent = result?.choices?.[0]?.message?.content ?? '';
+      // If proxy returns text directly (which it does for GET-based backend)
+      // We need to handle text response.
+      const aiContent = await response.text();
+      // const result = await response.json(); // Old logic
+      // const aiContent = result?.choices?.[0]?.message?.content ?? ''; // Old logic
+
       const trimmedContent = aiContent.trim();
 
       let cleanedContent = trimmedContent;
@@ -198,7 +209,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     setIsRandomizing(true);
 
     const randomThemes = [
-        'science fiction', 'spiderman', 'sports', 'surreal', 'vintage', 'wild nature', 'fantasy', 'photography', 'caricature', 'digital art', 'steampunk', 'cyberpunk', 'retro-futuristic', 'abstract', 'minimalist', 'cosmic horror', 'fairy tale', 'dystopian', 'utopian', 'mythology', 'ancient', 'modern', 'post-apocalyptic', 'galaxy war', 'classical painting', 'pop art', 'street art', 'traditional art', 'contemporary art', 'conceptual art', 'installation art', 'sculpture', 'textile art', 'ceramic art', 'graphic art', 'collage art', 'mixed media', '3D art', 'VR art', 'AR art', 'AI art', 'generative art', 'participatory art', 'art', 'graffiti', 'mural art', 'wall painting', 'fine art', 'modern sculpture', 'classical sculpture', 'abstract sculpture', 'figurative sculpture', 'installation sculpture', 'kinetic sculpture', 'interactive sculpture', 'digital sculpture'
+      'science fiction', 'spiderman', 'sports', 'surreal', 'vintage', 'wild nature', 'fantasy', 'photography', 'caricature', 'digital art', 'steampunk', 'cyberpunk', 'retro-futuristic', 'abstract', 'minimalist', 'cosmic horror', 'fairy tale', 'dystopian', 'utopian', 'mythology', 'ancient', 'modern', 'post-apocalyptic', 'galaxy war', 'classical painting', 'pop art', 'street art', 'traditional art', 'contemporary art', 'conceptual art', 'installation art', 'sculpture', 'textile art', 'ceramic art', 'graphic art', 'collage art', 'mixed media', '3D art', 'VR art', 'AR art', 'AI art', 'generative art', 'participatory art', 'art', 'graffiti', 'mural art', 'wall painting', 'fine art', 'modern sculpture', 'classical sculpture', 'abstract sculpture', 'figurative sculpture', 'installation sculpture', 'kinetic sculpture', 'interactive sculpture', 'digital sculpture'
     ];
 
     const selectedTheme = randomThemes[Math.floor(Math.random() * randomThemes.length)];
@@ -479,21 +490,21 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
               className={`${featureButtonStyle} order-1 sm:order-1`}
               disabled={isRandomizing || isEnhancing || isGeneratingJson}
             >
-                {isRandomizing ? <ButtonSpinner /> : <Shuffle size={16} />} <span>Acak Prompt</span>
+              {isRandomizing ? <ButtonSpinner /> : <Shuffle size={16} />} <span>Acak Prompt</span>
             </button>
             <button
               onClick={onSurpriseMe}
               className={`${featureButtonStyle} order-2 sm:order-2`}
               disabled={isLoading || isRandomizing || isEnhancing || isGeneratingJson}
             >
-                <FlaskConical size={16} /> <span>Surprise Me!</span>
+              <FlaskConical size={16} /> <span>Surprise Me!</span>
             </button>
             <button
               onClick={handleEnhancePrompt}
               className={`${featureButtonStyle} order-3 sm:order-3`}
               disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}
             >
-                {isEnhancing ? <ButtonSpinner /> : <Wand2 size={16} />} <span>Sempurnakan</span>
+              {isEnhancing ? <ButtonSpinner /> : <Wand2 size={16} />} <span>Sempurnakan</span>
             </button>
             <button
               onClick={handleGenerateJsonPrompt}
@@ -533,7 +544,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
               className={`${featureButtonStyle} ${isSaving ? '!text-green-500' : ''} col-span-2 sm:col-span-1 order-6 sm:order-6`}
               disabled={isSaving || !settings.prompt}
             >
-                <Save size={16} /> <span>{isSaving ? 'Tersimpan!' : 'Simpan'}</span>
+              <Save size={16} /> <span>{isSaving ? 'Tersimpan!' : 'Simpan'}</span>
             </button>
           </div>
 
@@ -592,28 +603,28 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
         )}
 
         {savedPrompts.length > 0 && (
-            <Accordion
-                title={<div className="flex items-center gap-2"><Save size={16} className="text-purple-600" />Prompt Tersimpan ({savedPrompts.length})</div>}
-                className="mt-4"
-            >
-                <div className="flex justify-end mb-4">
-                    <button onClick={handleClearAllSavedPrompts} className="text-sm text-red-500 hover:underline">
-                        Hapus Semua
-                    </button>
-                </div>
-                <ul className="space-y-3">
-                    {savedPrompts.map((prompt, index) => (
-                        <li key={index} className="flex justify-between items-center bg-white dark:bg-gray-700 p-3 rounded-lg shadow-md dark:shadow-dark-neumorphic cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                            <span onClick={() => handleSelectSavedPrompt(prompt)} className="flex-grow text-sm text-gray-700 dark:text-gray-200 truncate mr-4">
-                                {prompt}
-                            </span>
-                            <button onClick={() => handleDeleteSavedPrompt(prompt)} className="p-1 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" title="Hapus">
-                                <X size={16} />
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </Accordion>
+          <Accordion
+            title={<div className="flex items-center gap-2"><Save size={16} className="text-purple-600" />Prompt Tersimpan ({savedPrompts.length})</div>}
+            className="mt-4"
+          >
+            <div className="flex justify-end mb-4">
+              <button onClick={handleClearAllSavedPrompts} className="text-sm text-red-500 hover:underline">
+                Hapus Semua
+              </button>
+            </div>
+            <ul className="space-y-3">
+              {savedPrompts.map((prompt, index) => (
+                <li key={index} className="flex justify-between items-center bg-white dark:bg-gray-700 p-3 rounded-lg shadow-md dark:shadow-dark-neumorphic cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                  <span onClick={() => handleSelectSavedPrompt(prompt)} className="flex-grow text-sm text-gray-700 dark:text-gray-200 truncate mr-4">
+                    {prompt}
+                  </span>
+                  <button onClick={() => handleDeleteSavedPrompt(prompt)} className="p-1 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" title="Hapus">
+                    <X size={16} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </Accordion>
         )}
       </div>
       <TextareaModal
