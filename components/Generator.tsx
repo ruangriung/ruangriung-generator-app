@@ -63,7 +63,7 @@ const mergeUniqueModels = (...modelGroups: string[][]): string[] => {
 };
 
 const DEFAULT_BASE_MODELS = ['flux'];
-const PREMIUM_MODELS = ['DALL-E 3', 'Leonardo'];
+const PREMIUM_MODELS: string[] = [];
 const IMAGE_TO_IMAGE_MODELS = new Set(['nanobanana', 'seedream', 'kontext']);
 const MAX_REFERENCE_IMAGES = 4;
 const createEmptyReferenceImages = () => [''];
@@ -132,8 +132,8 @@ export default function Generator() {
   });
 
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
-  const [modelRequiringKey, setModelRequiringKey] = useState<'DALL-E 3' | 'Leonardo' | ''>('');
-  const [apiKeys, setApiKeys] = useState({ dalle: '', leonardo: '' });
+  const [modelRequiringKey, setModelRequiringKey] = useState<''>('');
+  const [apiKeys, setApiKeys] = useState<{}>({});
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [modelList, setModelList] = useState<string[]>(() => mergeUniqueModels(DEFAULT_BASE_MODELS, PREMIUM_MODELS));
@@ -213,10 +213,7 @@ export default function Generator() {
     };
     fetchImageModels();
 
-    const savedDalleKey = localStorage.getItem('dalle_api_key');
-    const savedLeonardoKey = localStorage.getItem('leonardo_api_key');
-    if (savedDalleKey) setApiKeys(prev => ({ ...prev, dalle: savedDalleKey }));
-    if (savedLeonardoKey) setApiKeys(prev => ({ ...prev, leonardo: savedLeonardoKey }));
+
   }, []);
 
   useEffect(() => {
@@ -282,26 +279,11 @@ export default function Generator() {
   };
 
   const handleModelSelect = (model: string) => {
-    if (model === 'DALL-E 3' || model === 'Leonardo') {
-      setModelRequiringKey(model);
-      setIsApiKeyModalOpen(true);
-    } else {
-      applyModelSelection(model);
-    }
+    applyModelSelection(model);
   };
 
   const handleApiKeySubmit = (apiKey: string) => {
-    if (modelRequiringKey === 'DALL-E 3') {
-      setApiKeys(prev => ({ ...prev, dalle: apiKey }));
-      localStorage.setItem('dalle_api_key', apiKey);
-      applyModelSelection('DALL-E 3');
-      toast.success('API Key DALL-E 3 disimpan!');
-    } else if (modelRequiringKey === 'Leonardo') {
-      setApiKeys(prev => ({ ...prev, leonardo: apiKey }));
-      localStorage.setItem('leonardo_api_key', apiKey);
-      applyModelSelection('Leonardo');
-      toast.success('API Key Leonardo disimpan!');
-    }
+    // Legacy support removal
     setModelRequiringKey('');
   };
 

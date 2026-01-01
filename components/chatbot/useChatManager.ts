@@ -18,9 +18,7 @@ export const useChatManager = () => {
   const [sessions, setSessions] = useState<ChatSession[] | null>(null);
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [models, setModels] = useState<string[]>(['openai', 'Gemini']); // Default models
-  const [geminiApiKey, setGeminiApiKey] = useState<string>('');
-  const [dalleApiKey, setDalleApiKey] = useState<string>('');
+  const [models, setModels] = useState<string[]>(['openai']); // Default models
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const activeChat = sessions?.find((s) => s.id === activeSessionId);
@@ -52,10 +50,6 @@ export const useChatManager = () => {
     try {
       const saved = localStorage.getItem('ruangriung_chatbot_sessions_v3');
       if (saved) initialSessions = JSON.parse(saved);
-      const savedGeminiKey = localStorage.getItem('gemini_api_key');
-      if (savedGeminiKey) setGeminiApiKey(savedGeminiKey);
-      const savedDalleKey = localStorage.getItem('dalle_api_key');
-      if (savedDalleKey) setDalleApiKey(savedDalleKey);
     } catch (error) {
       console.error("Gagal memuat sesi:", error);
     }
@@ -84,24 +78,21 @@ export const useChatManager = () => {
         if (!responseText.ok) throw new Error('Gagal mengambil daftar model teks.');
         const textModels = await responseText.json();
 
-        const imageGenerationModels = ["Flux", "gptimage", "DALL-E 3"];
+        const imageGenerationModels = ["Flux", "gptimage"];
 
-        // Filter model teks (API lokal sudah mengembalikan list yang bisa digunakan, tapi kita bisa filter lagi jika perlu)
-        // Asumsi response dari /api/pollinations/models/text sudah array of strings atau objects
         let availableTextModels: string[] = [];
-
         if (Array.isArray(textModels)) {
           availableTextModels = textModels.map((m: any) => typeof m === 'string' ? m : m.name);
         }
 
         // Gabungkan
-        const availableModels = [...imageGenerationModels, ...availableTextModels, "openai", "Gemini"];
+        const availableModels = [...imageGenerationModels, ...availableTextModels, "openai"];
 
         setModels([...new Set(availableModels)]);
       } catch (error) {
         console.error("Gagal memuat model dinamis:", error);
         // Fallback
-        setModels(["Flux", "gptimage", "DALL-E 3", "openai", "Gemini", "deepseek", "grok"]);
+        setModels(["Flux", "gptimage", "openai", "deepseek", "grok"]);
         toast.error("Gagal memuat daftar model terbaru, menggunakan daftar default.");
       }
     };
@@ -158,7 +149,7 @@ export const useChatManager = () => {
     setIsLoading(true);
 
     const isImageUpload = typeof newMessage.content === 'object' && newMessage.content.type === 'image_url';
-    const imageGenerationModels = ['Flux', 'gptimage', 'DALL-E 3'];
+    const imageGenerationModels = ['Flux', 'gptimage'];
     const isImageGenerationMode = imageGenerationModels.includes(activeChat.model);
 
     try {
@@ -191,94 +182,59 @@ export const useChatManager = () => {
       } else if (isImageGenerationMode) {
         let promptText = newMessage.content as string;
 
-        if (activeChat.model === 'DALL-E 3') {
-          if (!dalleApiKey) throw new Error('API Key DALL-E 3 diperlukan.');
-          const response = await fetch('/api/dalle', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: promptText, apiKey: dalleApiKey })
-          });
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Gagal membuat gambar dengan DALL-E 3.");
-          }
-          const data = await response.json();
-          updateMessages(currentActiveChatId, prev => [...prev, {
-            role: 'assistant',
-            content: { type: 'image_url', image_url: { url: data.imageUrl }, text: `Gambar DALL-E 3 untuk: "${promptText}"` }
-          }]);
-        } else {
-          const params = new URLSearchParams({
-            model: activeChat.model,
-            nologo: 'true',
-            enhance: 'true',
-            safe: 'false',
-            referrer: 'ruangriung.my.id',
-            seed: Math.floor(Math.random() * 100000).toString(),
-            width: '1024',
-            height: '1024',
-            prompt: promptText // Pass prompt in params for our proxy
-          });
-          // Use internal proxy
-          const imageUrl = `/api/pollinations/image?${params.toString()}`;
+      } else if (isImageGenerationMode) {
+        let promptText = newMessage.content as string;
 
-          // We can't verify 200 OK easily without fetching, but for <img> src it's fine.
-          // However, the original code validates it with fetch.
-          const imageResponse = await fetch(imageUrl);
+        const params = new URLSearchParams({
+          model: activeChat.model,
+          nologo: 'true',
+          enhance: 'true',
+          safe: 'false',
+          referrer: 'ruangriung.my.id',
+          seed: Math.floor(Math.random() * 100000).toString(),
+          width: '1024',
+          height: '1024',
+          prompt: promptText // Pass prompt in params for our proxy
+        });
+        // Use internal proxy
+        const imageUrl = `/api/pollinations/image?${params.toString()}`;
 
-          if (!imageResponse.ok) throw new Error('Gagal saat menghubungi API gambar Pollinations.');
+        // We can't verify 200 OK easily without fetching, but for <img> src it's fine.
+        // However, the original code validates it with fetch.
+        const imageResponse = await fetch(imageUrl);
 
-          updateMessages(currentActiveChatId, prev => [...prev, {
-            role: 'assistant',
-            content: { type: 'image_url', image_url: { url: imageResponse.url }, text: `Gambar untuk: "${promptText}"` }
-          }]);
-        }
+        if (!imageResponse.ok) throw new Error('Gagal saat menghubungi API gambar Pollinations.');
+
+        updateMessages(currentActiveChatId, prev => [...prev, {
+          role: 'assistant',
+          content: { type: 'image_url', image_url: { url: imageResponse.url }, text: `Gambar untuk: "${promptText}"` }
+        }]);
       } else {
         const textModel = activeChat.model || 'openai';
         const messagesForApi = [...activeChat.messages, newMessage];
 
-        if (textModel === 'Gemini') {
-          if (!geminiApiKey) {
-            toast.error('API Key Gemini diperlukan untuk fitur chat ini.');
-            updateMessages(currentActiveChatId, prev => prev.slice(0, -1));
-            setIsLoading(false);
-            return;
-          }
-          const response = await fetch('/api/gemini', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages: messagesForApi, apiKey: geminiApiKey })
-          });
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Respons API tidak baik.");
-          }
-          const data = await response.json();
-          updateMessages(currentActiveChatId, prev => [...prev, { role: 'assistant', content: data.text }]);
-        } else {
-          // Use internal proxy
-          const response = await fetch('/api/pollinations/text', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              model: textModel,
-              messages: messagesForApi.map((m: any) => ({
-                role: m.role === 'assistant' ? 'assistant' : 'user',
-                content: typeof m.content === 'string' ? m.content : m.content.text || ''
-              })),
-              json: false
-            })
-          });
-          if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Gagal melakukan chat: ${response.statusText} - ${errorText}`);
-          }
-          // Proxy returns text directly
-          const reply = await response.text();
-          updateMessages(currentActiveChatId, prev => [...prev, { role: 'assistant', content: reply }]);
+        // Use internal proxy
+        const response = await fetch('/api/pollinations/text', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: textModel,
+            messages: messagesForApi.map((m: any) => ({
+              role: m.role === 'assistant' ? 'assistant' : 'user',
+              content: typeof m.content === 'string' ? m.content : m.content.text || ''
+            })),
+            json: false
+          })
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Gagal melakukan chat: ${response.statusText} - ${errorText}`);
         }
+        // Proxy returns text directly
+        const reply = await response.text();
+        updateMessages(currentActiveChatId, prev => [...prev, { role: 'assistant', content: reply }]);
       }
     } catch (error: any) {
       console.error("Gagal memproses pesan:", error);
@@ -307,8 +263,6 @@ export const useChatManager = () => {
     sessions, setSessions, activeSessionId, setActiveSessionId,
     activeChat, isLoading, models, processAndSendMessage, startNewChat,
     stopGenerating, regenerateResponse, deleteAllSessions,
-    geminiApiKey, setGeminiApiKey,
-    dalleApiKey, setDalleApiKey,
     setModelForImage
   };
 };

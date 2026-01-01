@@ -40,10 +40,9 @@ interface StoryPart {
   description: string;
 }
 
-type ImageModelType = 'flux' | 'dall-e-3' | 'leonardo' | string;
+type ImageModelType = 'flux' | string;
 type TextModelType = 'openai' | 'gemini-1.5-flash';
-type Dalle3Size = '1024x1024' | '1792x1024' | '1024x1792';
-type ApiKeyModelName = 'DALL-E 3' | 'Gemini' | 'Leonardo' | '';
+type ApiKeyModelName = 'Gemini' | '';
 
 interface PollinationsOpenAIResponse {
   choices?: Array<{ message?: { content?: string } }>;
@@ -67,7 +66,7 @@ export default function StorytellerClient() {
   const [progressMessage, setProgressMessage] = useState<string>('');
   const [currentStep, setCurrentStep] = useState<number>(0);
   // Total langkah: 1 (generate prompts) + 5 (generate images) + 5 (generate descriptions)
-  const totalSteps = 1 + 5 + 5; 
+  const totalSteps = 1 + 5 + 5;
 
   // --- State Pengaturan Lanjutan ---
   const [imageModel, setImageModel] = useState<ImageModelType>('flux');
@@ -76,20 +75,18 @@ export default function StorytellerClient() {
   const [imageHeight, setImageHeight] = useState(1024);
   const [imageSeed, setImageSeed] = useState(Math.floor(Math.random() * 1000000));
   const [imageQuality, setImageQuality] = useState<'standard' | 'hd'>('standard');
-  const [dalle3Size, setDalle3Size] = useState<Dalle3Size>('1024x1024');
+  const [dalle3Size, setDalle3Size] = useState<string>('1024x1024');
 
   // --- State API Keys (dari localStorage) ---
-  const [dalleApiKey, setDalleApiKey] = useState('');
   const [geminiApiKey, setGeminiApiKey] = useState('');
-  const [leonardoApiKey, setLeonardoApiKey] = useState('');
 
   // --- State untuk Modal API Key ---
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [modelRequiringKey, setModelRequiringKey] = useState<ApiKeyModelName>('');
 
   // --- State untuk Model Dinamis ---
-  const [availableImageModels, setAvailableImageModels] = useState<ImageModelType[]>(['flux', 'dall-e-3', 'leonardo']);
-  const [availableTextModels, setAvailableTextModels] = useState<TextModelType[]>(['openai', 'gemini-1.5-flash']); 
+  const [availableImageModels, setAvailableImageModels] = useState<ImageModelType[]>(['flux']);
+  const [availableTextModels, setAvailableTextModels] = useState<TextModelType[]>(['openai', 'gemini-1.5-flash']);
 
   // --- State untuk Modal Zoom Gambar ---
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -100,13 +97,9 @@ export default function StorytellerClient() {
   // --- Hooks Efek ---
   useEffect(() => {
     // Memuat API keys dari localStorage
-    const savedDalleKey = localStorage.getItem('dalle_api_key');
     const savedGeminiKey = localStorage.getItem('gemini_api_key');
-    const savedLeonardoKey = localStorage.getItem('leonardo_api_key');
 
-    if (savedDalleKey) setDalleApiKey(savedDalleKey);
     if (savedGeminiKey) setGeminiApiKey(savedGeminiKey);
-    if (savedLeonardoKey) setLeonardoApiKey(savedLeonardoKey);
 
     // Feedback jika token Pollinations.ai tidak ditemukan
     if (!POLLINATIONS_TOKEN) {
@@ -114,27 +107,23 @@ export default function StorytellerClient() {
     }
 
     // Periksa API key untuk model default saat mount
-    if (imageModel === 'dall-e-3' && !savedDalleKey) {
-      checkAndOpenApiKeyModal('DALL-E 3');
-    } else if (imageModel === 'leonardo' && !savedLeonardoKey) {
-      checkAndOpenApiKeyModal('Leonardo');
-    } else if (textModel === 'gemini-1.5-flash' && !savedGeminiKey) {
+    if (textModel === 'gemini-1.5-flash' && !savedGeminiKey) {
       checkAndOpenApiKeyModal('Gemini');
     }
 
     // --- Muat Model AI Secara Dinamis (Hanya Gambar) ---
-    const fetchImageModels = async () => { 
+    const fetchImageModels = async () => {
       try {
         const imgResponse = await fetch(POLLINATIONS_IMAGE_MODELS_URL);
         const imgData = await imgResponse.json();
         let fetchedImgModels: string[] = [];
         if (Array.isArray(imgData)) {
-            fetchedImgModels = imgData.filter(item => typeof item === 'string');
+          fetchedImgModels = imgData.filter(item => typeof item === 'string');
         }
-        setAvailableImageModels([...new Set([...fetchedImgModels, 'flux', 'dall-e-3', 'leonardo'])]);
+        setAvailableImageModels([...new Set([...fetchedImgModels, 'flux'])]);
       } catch (error) {
         console.error("Error fetching image models:", error);
-        setAvailableImageModels(['flux', 'dall-e-3', 'leonardo']); // Fallback
+        setAvailableImageModels(['flux']); // Fallback
       }
     };
     fetchImageModels();
@@ -144,28 +133,26 @@ export default function StorytellerClient() {
   // --- Fungsi untuk memeriksa dan membuka modal API Key ---
   const checkAndOpenApiKeyModal = (model: ApiKeyModelName): boolean => {
     let keyMissing = false;
-    if (model === 'DALL-E 3' && !dalleApiKey) keyMissing = true;
     if (model === 'Gemini' && !geminiApiKey) keyMissing = true;
-    if (model === 'Leonardo' && !leonardoApiKey) keyMissing = true;
 
     if (keyMissing) {
       setModelRequiringKey(model);
       setIsApiKeyModalOpen(true);
-      return true; 
+      return true;
     }
-    return false; 
+    return false;
   };
 
   // --- Fungsi Handle Generate Story ---
   const handleGenerateStory = async () => {
     // Validasi dasar
     if (!mainPrompt) { toast.error('Ide cerita tidak boleh kosong!'); return; }
-    if (!POLLINATIONS_TOKEN && textModel === 'openai') { 
+    if (!POLLINATIONS_TOKEN && textModel === 'openai') {
       toast.error('Token Pollinations.ai untuk teks tidak ditemukan. Silakan atur NEXT_PUBLIC_POLLINATIONS_TOKEN.'); return;
     }
-    
-    // Periksa dan tampilkan modal jika API key gambar atau teks yang dipilih kosong
-    if (checkAndOpenApiKeyModal(imageModel === 'dall-e-3' ? 'DALL-E 3' : imageModel === 'leonardo' ? 'Leonardo' : '')) return;
+
+
+    // Periksa dan tampilkan modal jika API key teks yang dipilih kosong
     if (checkAndOpenApiKeyModal(textModel === 'gemini-1.5-flash' ? 'Gemini' : '')) return;
 
     setIsLoading(true);
@@ -175,17 +162,17 @@ export default function StorytellerClient() {
     setGeneratedStoryParts([]);
 
     setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
 
-    const currentSeed = imageSeed; 
+    const currentSeed = imageSeed;
 
     try {
       // --- Step 1: Minta AI Teks untuk membuat 5 prompt gambar dari ide cerita utama ---
       setProgressMessage('AI sedang menyusun ide-ide adegan...');
       setCurrentStep(1);
       const promptInstructionForImages = `Dari ide cerita berikut: '${mainPrompt}', buat 5 deskripsi gambar yang sangat detail, unik, dan berbeda satu sama lain, cocok untuk digunakan sebagai prompt AI Image Generator (contoh: DALL-E 3 atau Stable Diffusion). Setiap deskripsi harus berdiri sendiri dan tidak lebih dari 100 kata. Berikan dalam format daftar berpoin (gunakan bullet point atau nomor 1-5). Jangan sertakan teks lain selain daftar prompt.`;
-      
+
       let imagePromptsText = '';
       if (textModel === 'openai') {
         const imagePromptsResponse = await fetch(`${POLLINATIONS_TEXT_API_BASE_URL}?token=${POLLINATIONS_TOKEN}`, {
@@ -197,9 +184,9 @@ export default function StorytellerClient() {
             temperature: 0.7,
           }),
         });
-        if (!imagePromptsResponse.ok) { 
-            const errorBody = await imagePromptsResponse.text(); 
-            throw new Error(`Gagal membuat prompt gambar dari Pollinations.ai: ${errorBody || 'Unknown error'}`); 
+        if (!imagePromptsResponse.ok) {
+          const errorBody = await imagePromptsResponse.text();
+          throw new Error(`Gagal membuat prompt gambar dari Pollinations.ai: ${errorBody || 'Unknown error'}`);
         }
         const imagePromptsResult: PollinationsOpenAIResponse = await imagePromptsResponse.json();
         imagePromptsText = imagePromptsResult.choices?.[0]?.message?.content?.trim() || '';
@@ -210,12 +197,12 @@ export default function StorytellerClient() {
           body: JSON.stringify({
             messages: [{ role: 'user', content: promptInstructionForImages }],
             apiKey: geminiApiKey,
-            model: textModel, 
+            model: textModel,
           }),
         });
-        if (!imagePromptsResponse.ok) { 
-            const errorData = await imagePromptsResponse.json(); 
-            throw new Error(`Gagal membuat prompt gambar dari Gemini API: ${errorData.message || 'Unknown error'}`); 
+        if (!imagePromptsResponse.ok) {
+          const errorData = await imagePromptsResponse.json();
+          throw new Error(`Gagal membuat prompt gambar dari Gemini API: ${errorData.message || 'Unknown error'}`);
         }
         const imagePromptsResult: GeminiApiResponse = await imagePromptsResponse.json();
         imagePromptsText = imagePromptsResult.text || '';
@@ -231,36 +218,17 @@ export default function StorytellerClient() {
         setProgressMessage(`Membuat gambar untuk adegan ${index + 1} dari ${rawImagePrompts.slice(0, 5).length}...`);
         setCurrentStep(prev => prev + 1);
 
-        if (imageModel === 'flux' || (imageModel === 'leonardo' && leonardoApiKey)) { 
+        if (imageModel === 'flux' || true) {
           const modelParam = imageModel;
-          const tokenParam = (imageModel === 'flux' && POLLINATIONS_TOKEN) ? `&token=${POLLINATIONS_TOKEN}` : ''; 
-          const apiKeyParam = (imageModel === 'leonardo' && leonardoApiKey) ? `&key=${leonardoApiKey}` : '';
-          let url = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?model=${modelParam}&width=${imageWidth}&height=${imageHeight}&seed=${currentSeed + index}&nologo=true&referrer=ruangriung.my.id${apiKeyParam}${tokenParam}`; 
-          
+          const tokenParam = (imageModel === 'flux' && POLLINATIONS_TOKEN) ? `&token=${POLLINATIONS_TOKEN}` : '';
+          let url = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?model=${modelParam}&width=${imageWidth}&height=${imageHeight}&seed=${currentSeed + index}&nologo=true&referrer=ruangriung.my.id${tokenParam}`;
+
           const imageResponse = await fetch(url);
           if (!imageResponse.ok) { throw new Error(`Gagal membuat gambar ${imageModel} #${index + 1}: ${imageResponse.statusText}`); }
           finalImageUrl = imageResponse.url;
-        } else if (imageModel === 'dall-e-3' && dalleApiKey) { 
-          const dalleResponse = await fetch('/api/dalle', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              prompt: imgPrompt,
-              apiKey: dalleApiKey,
-              size: dalle3Size,
-              quality: imageQuality,
-            }),
-          });
-          if (!dalleResponse.ok) { 
-              const errorData = await dalleResponse.json(); 
-              throw new Error(`Gagal membuat gambar DALL-E 3 #${index + 1}: ${errorData.message || 'Unknown error'}`); 
-          }
-          const dalleData = await dalleResponse.json();
-          finalImageUrl = dalleData.imageUrl;
         } else {
-            console.warn(`Model gambar ${imageModel} tidak dapat digunakan atau API key hilang.`);
-            toast.error(`API key untuk model gambar ${imageModel} hilang atau tidak didukung.`);
-            return { imagePrompt: imgPrompt, imageUrl: '', description: 'Gambar tidak dapat dihasilkan karena masalah konfigurasi.' };
+          console.warn(`Model gambar ${imageModel} tidak dapat digunakan.`);
+          return { imagePrompt: imgPrompt, imageUrl: '', description: 'Gambar tidak dapat dihasilkan karena masalah konfigurasi.' };
         }
 
         // --- Minta AI Teks untuk deskripsi singkat gambar ---
@@ -268,7 +236,7 @@ export default function StorytellerClient() {
         setCurrentStep(prev => prev + 1); // Langkah untuk deskripsi
 
         const promptInstructionForDescription = `Buatkan deskripsi singkat (sekitar 50-80 kata) yang menarik untuk gambar yang dihasilkan dari prompt AI berikut: '${imgPrompt}'. Fokus pada apa yang terlihat di gambar dan suasana yang diciptakan.`;
-        
+
         let descriptionText = '';
         if (textModel === 'openai') {
           const descriptionResponse = await fetch(`${POLLINATIONS_TEXT_API_BASE_URL}?token=${POLLINATIONS_TOKEN}`, {
@@ -280,13 +248,13 @@ export default function StorytellerClient() {
               temperature: 0.7,
             }),
           });
-          if (!descriptionResponse.ok) { 
-              const errorBody = await descriptionResponse.text(); 
-              console.warn(`Gagal membuat deskripsi dari Pollinations.ai #${index + 1}: ${errorBody || 'Unknown error'}`); 
-              descriptionText = 'Deskripsi gambar tidak dapat dihasilkan.'; 
-          } else { 
-              const descriptionResult: PollinationsOpenAIResponse = await descriptionResponse.json(); 
-              descriptionText = descriptionResult.choices?.[0]?.message?.content?.trim() || "Maaf, saya tidak dapat memberikan respons saat ini."; 
+          if (!descriptionResponse.ok) {
+            const errorBody = await descriptionResponse.text();
+            console.warn(`Gagal membuat deskripsi dari Pollinations.ai #${index + 1}: ${errorBody || 'Unknown error'}`);
+            descriptionText = 'Deskripsi gambar tidak dapat dihasilkan.';
+          } else {
+            const descriptionResult: PollinationsOpenAIResponse = await descriptionResponse.json();
+            descriptionText = descriptionResult.choices?.[0]?.message?.content?.trim() || "Maaf, saya tidak dapat memberikan respons saat ini.";
           }
         } else if (textModel === 'gemini-1.5-flash') {
           const descriptionResponse = await fetch('/api/gemini', {
@@ -295,16 +263,16 @@ export default function StorytellerClient() {
             body: JSON.stringify({
               messages: [{ role: 'user', content: promptInstructionForDescription }],
               apiKey: geminiApiKey,
-              model: textModel, 
+              model: textModel,
             }),
           });
-          if (!descriptionResponse.ok) { 
-              const errorData = await descriptionResponse.json(); 
-              console.warn(`Gagal membuat deskripsi dari Gemini API #${index + 1}: ${errorData.message || 'Unknown error'}`); 
-              descriptionText = 'Deskripsi gambar tidak dapat dihasilkan.'; 
-          } else { 
-              const descriptionResult: GeminiApiResponse = await descriptionResponse.json(); 
-              descriptionText = descriptionResult.text || "Maaf, saya tidak dapat memberikan respons saat ini."; 
+          if (!descriptionResponse.ok) {
+            const errorData = await descriptionResponse.json();
+            console.warn(`Gagal membuat deskripsi dari Gemini API #${index + 1}: ${errorData.message || 'Unknown error'}`);
+            descriptionText = 'Deskripsi gambar tidak dapat dihasilkan.';
+          } else {
+            const descriptionResult: GeminiApiResponse = await descriptionResponse.json();
+            descriptionText = descriptionResult.text || "Maaf, saya tidak dapat memberikan respons saat ini.";
           }
         }
 
@@ -315,13 +283,13 @@ export default function StorytellerClient() {
       setGeneratedStoryParts(results.filter(part => part.imageUrl));
 
       if (results.filter(part => part.imageUrl).length > 0) {
-        toast.success(`Berhasil membuat ${results.filter(part => part.imageUrl).length} gambar untuk cerita!`, {id: generationToastId});
+        toast.success(`Berhasil membuat ${results.filter(part => part.imageUrl).length} gambar untuk cerita!`, { id: generationToastId });
       } else {
-        toast.error("Tidak ada gambar yang berhasil dibuat untuk cerita.", {id: generationToastId});
+        toast.error("Tidak ada gambar yang berhasil dibuat untuk cerita.", { id: generationToastId });
       }
 
     } catch (error: any) {
-      toast.error(`Error: ${error.message}`, {id: generationToastId});
+      toast.error(`Error: ${error.message}`, { id: generationToastId });
       console.error("Error creating story:", error);
     } finally {
       setIsLoading(false);
@@ -332,8 +300,8 @@ export default function StorytellerClient() {
 
   // --- Fungsi Handle Random Prompt ---
   const handleRandomPrompt = async () => {
-    if (isGeneratingRandomPrompt || isLoading || isGeneratingTitle) return; 
-    if (!POLLINATIONS_TOKEN && textModel === 'openai') { 
+    if (isGeneratingRandomPrompt || isLoading || isGeneratingTitle) return;
+    if (!POLLINATIONS_TOKEN && textModel === 'openai') {
       toast.error('Token Pollinations.ai untuk menghasilkan ide acak tidak ditemukan. Silakan atur NEXT_PUBLIC_POLLINATIONS_TOKEN.');
       return;
     }
@@ -350,7 +318,7 @@ export default function StorytellerClient() {
 
     try {
       const promptInstruction = `Hasilkan satu ide cerita yang kreatif, unik, dan menarik (sekitar 100-150 kata) yang dapat digunakan sebagai titik awal untuk menghasilkan cerita visual dengan 5 adegan. Ide cerita harus imajinatif dan kaya visual. Berikan hanya ide ceritanya, tanpa teks lain. Timestamp:${Date.now()}`;
-      
+
       let generatedPromptText = '';
       if (textModel === 'openai') {
         const response = await fetch(`${POLLINATIONS_TEXT_API_BASE_URL}?token=${POLLINATIONS_TOKEN}`, {
@@ -359,12 +327,12 @@ export default function StorytellerClient() {
           body: JSON.stringify({
             model: 'openai',
             messages: [{ role: 'user', content: promptInstruction }],
-            temperature: 0.95, 
+            temperature: 0.95,
           }),
         });
-        if (!response.ok) { 
-            const errorBody = await response.text(); 
-            throw new Error(`Gagal membuat ide acak dari Pollinations.ai: ${errorBody || 'Unknown error'}`); 
+        if (!response.ok) {
+          const errorBody = await response.text();
+          throw new Error(`Gagal membuat ide acak dari Pollinations.ai: ${errorBody || 'Unknown error'}`);
         }
         const result: PollinationsOpenAIResponse = await response.json();
         generatedPromptText = result.choices?.[0]?.message?.content?.trim() || "Maaf, saya tidak dapat menghasilkan ide cerita saat ini.";
@@ -375,22 +343,22 @@ export default function StorytellerClient() {
           body: JSON.stringify({
             messages: [{ role: 'user', content: promptInstruction }],
             apiKey: geminiApiKey,
-            model: textModel, 
+            model: textModel,
           }),
         });
-        if (!response.ok) { 
-            const errorData = await response.json(); 
-            throw new Error(`Gagal membuat ide acak dari Gemini API: ${errorData.message || 'Unknown error'}`); 
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`Gagal membuat ide acak dari Gemini API: ${errorData.message || 'Unknown error'}`);
         }
         const result: GeminiApiResponse = await response.json();
         generatedPromptText = result.text || "Maaf, saya tidak dapat menghasilkan ide cerita saat ini.";
       }
-      
+
       setMainPrompt(generatedPromptText);
-      toast.success("Ide cerita acak berhasil dimuat!", {id: randomPromptToastId});
+      toast.success("Ide cerita acak berhasil dimuat!", { id: randomPromptToastId });
     } catch (error: any) {
       console.error("Gagal menghasilkan ide acak:", error);
-      toast.error(`Gagal menghasilkan ide acak: ${error.message}`, {id: randomPromptToastId});
+      toast.error(`Gagal menghasilkan ide acak: ${error.message}`, { id: randomPromptToastId });
       setMainPrompt("Gagal memuat ide cerita acak. Silakan coba lagi atau masukkan ide Anda sendiri.");
     } finally {
       setIsGeneratingRandomPrompt(false);
@@ -399,8 +367,8 @@ export default function StorytellerClient() {
 
   // --- Fungsi untuk membuat Judul Cerita dengan AI ---
   const handleGenerateTitle = async () => {
-    if (isGeneratingTitle || isLoading || isGeneratingRandomPrompt || !mainPrompt) return; 
-    if (!POLLINATIONS_TOKEN && textModel === 'openai') { 
+    if (isGeneratingTitle || isLoading || isGeneratingRandomPrompt || !mainPrompt) return;
+    if (!POLLINATIONS_TOKEN && textModel === 'openai') {
       toast.error('Token Pollinations.ai untuk menghasilkan judul tidak ditemukan. Silakan atur NEXT_PUBLIC_POLLINATIONS_TOKEN.');
       return;
     }
@@ -424,12 +392,12 @@ export default function StorytellerClient() {
           body: JSON.stringify({
             model: 'openai',
             messages: [{ role: 'user', content: promptInstruction }],
-            temperature: 0.9, 
+            temperature: 0.9,
           }),
         });
-        if (!response.ok) { 
-            const errorBody = await response.text(); 
-            throw new Error(`Gagal membuat judul dari Pollinations.ai: ${errorBody || 'Unknown error'}`); 
+        if (!response.ok) {
+          const errorBody = await response.text();
+          throw new Error(`Gagal membuat judul dari Pollinations.ai: ${errorBody || 'Unknown error'}`);
         }
         const result: PollinationsOpenAIResponse = await response.json();
         generatedTitleText = result.choices?.[0]?.message?.content?.trim() || "Tidak dapat menghasilkan judul.";
@@ -440,23 +408,23 @@ export default function StorytellerClient() {
           body: JSON.stringify({
             messages: [{ role: 'user', content: promptInstruction }],
             apiKey: geminiApiKey,
-            model: textModel, 
+            model: textModel,
           }),
         });
-        if (!response.ok) { 
-            const errorData = await response.json(); 
-            throw new Error(`Gagal membuat judul dari Gemini API: ${errorData.message || 'Unknown error'}`); 
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`Gagal membuat judul dari Gemini API: ${errorData.message || 'Unknown error'}`);
         }
         const result: GeminiApiResponse = await response.json();
         generatedTitleText = result.text || "Maaf, saya tidak dapat menghasilkan judul saat ini.";
       }
 
       setStoryTitle(generatedTitleText);
-      toast.success("Judul berhasil dibuat!", {id: titleToastId});
+      toast.success("Judul berhasil dibuat!", { id: titleToastId });
 
     } catch (error: any) {
       console.error("Gagal menghasilkan judul:", error);
-      toast.error(`Gagal menghasilkan judul: ${error.message}`, {id: titleToastId});
+      toast.error(`Gagal menghasilkan judul: ${error.message}`, { id: titleToastId });
       setStoryTitle("Gagal memuat judul. Silakan coba lagi.");
     } finally {
       setIsGeneratingTitle(false);
@@ -517,18 +485,10 @@ export default function StorytellerClient() {
 
   // --- Fungsi Handle Submit API Key dari Modal ---
   const handleApiKeySubmit = (apiKey: string) => {
-    if (modelRequiringKey === 'DALL-E 3') {
-      setDalleApiKey(apiKey);
-      localStorage.setItem('dalle_api_key', apiKey);
-      toast.success('API Key DALL-E 3 disimpan!');
-    } else if (modelRequiringKey === 'Gemini') {
+    if (modelRequiringKey === 'Gemini') {
       setGeminiApiKey(apiKey);
       localStorage.setItem('gemini_api_key', apiKey);
       toast.success('API Key Gemini disimpan!');
-    } else if (modelRequiringKey === 'Leonardo') {
-      setLeonardoApiKey(apiKey);
-      localStorage.setItem('leonardo_api_key', apiKey);
-      toast.success('API Key Leonardo disimpan!');
     }
     setIsApiKeyModalOpen(false);
     setModelRequiringKey('');
@@ -544,7 +504,7 @@ export default function StorytellerClient() {
       {/* Bagian Input untuk Ide Cerita */}
       <div className="bg-light-bg dark:bg-dark-bg p-6 rounded-2xl shadow-neumorphic-card dark:shadow-dark-neumorphic-card">
         <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Ide Cerita Anda</h2>
-        
+
         {/* Judul Cerita */}
         <label htmlFor="story-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Judul Cerita (Opsional):
@@ -566,10 +526,10 @@ export default function StorytellerClient() {
             title="Buat Judul dengan AI"
             aria-label="Buat Judul Cerita dengan AI"
           >
-            {isGeneratingTitle ? <Loader2 size={20} className="animate-spin"/> : <Sparkles size={20} />}
+            {isGeneratingTitle ? <Loader2 size={20} className="animate-spin" /> : <Sparkles size={20} />}
           </button>
         </div>
-        
+
         {/* Ide Cerita Utama */}
         <label htmlFor="main-prompt" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Ide Cerita Utama:
@@ -577,13 +537,13 @@ export default function StorytellerClient() {
         <div className="relative mb-6">
           <textarea
             id="main-prompt"
-            className={`${inputFieldStyle} min-h-[180px] resize-y pr-20`} 
+            className={`${inputFieldStyle} min-h-[180px] resize-y pr-20`}
             placeholder={isGeneratingRandomPrompt ? "AI sedang membuat ide cerita..." : "Tekan tombol 'Ide Acak' atau masukkan ide Anda sendiri di sini..."}
             value={mainPrompt}
             onChange={(e) => setMainPrompt(e.target.value)}
             disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle}
           ></textarea>
-          {mainPrompt && ( 
+          {mainPrompt && (
             <button
               onClick={() => setMainPrompt('')}
               disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle}
@@ -601,7 +561,7 @@ export default function StorytellerClient() {
             title="Dapatkan Ide Acak"
             aria-label="Dapatkan Ide Cerita Acak"
           >
-            {isGeneratingRandomPrompt ? <Loader2 size={20} className="animate-spin"/> : <Sparkles size={20} />}
+            {isGeneratingRandomPrompt ? <Loader2 size={20} className="animate-spin" /> : <Sparkles size={20} />}
           </button>
         </div>
 
@@ -642,11 +602,6 @@ export default function StorytellerClient() {
                 value={imageModel}
                 onChange={(e) => {
                   setImageModel(e.target.value as ImageModelType);
-                  if (e.target.value === 'dall-e-3' && !dalleApiKey) {
-                    checkAndOpenApiKeyModal('DALL-E 3');
-                  } else if (e.target.value === 'leonardo' && !leonardoApiKey) {
-                    checkAndOpenApiKeyModal('Leonardo');
-                  }
                 }}
                 className={selectStyle}
               >
@@ -657,53 +612,13 @@ export default function StorytellerClient() {
             </div>
 
             {/* Kualitas Gambar (hanya untuk DALL-E 3) */}
-            {imageModel === 'dall-e-3' && (
-              <div>
-                <label htmlFor="image-quality" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Kualitas Gambar (DALL-E 3):
-                  <span className="ml-1 cursor-help" title="HD menghasilkan gambar yang lebih detail dan tajam, tetapi mungkin lebih lambat atau lebih mahal.">
-                    <Info size={14} className="inline-block text-gray-500 dark:text-gray-400" />
-                  </span>
-                </label>
-                <select
-                  id="image-quality"
-                  value={imageQuality}
-                  onChange={(e) => setImageQuality(e.target.value as 'standard' | 'hd')}
-                  className={selectStyle}
-                >
-                  <option value="standard">Standar</option>
-                  <option value="hd">HD (High Definition)</option>
-                </select>
-              </div>
-            )}
 
-            {/* Ukuran Gambar DALL-E 3 */}
-            {imageModel === 'dall-e-3' && (
-              <div>
-                <label htmlFor="dalle3-size" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Ukuran Gambar (DALL-E 3):
-                  <span className="ml-1 cursor-help" title="Pilih dimensi gambar yang dihasilkan. Ukuran yang lebih besar memerlukan lebih banyak waktu dan sumber daya.">
-                    <Info size={14} className="inline-block text-gray-500 dark:text-gray-400" />
-                  </span>
-                </label>
-                <select
-                  id="dalle3-size"
-                  value={dalle3Size}
-                  onChange={(e) => setDalle3Size(e.target.value as Dalle3Size)}
-                  className={selectStyle}
-                >
-                  <option value="1024x1024">1024x1024 (Kotak)</option>
-                  <option value="1792x1024">1792x1024 (Lansekap)</option>
-                  <option value="1024x1792">1024x1792 (Potret)</option>
-                </select>
-              </div>
-            )}
 
             {/* Lebar Gambar (untuk Flux/Leonardo) */}
-            {(imageModel === 'flux' || imageModel === 'leonardo') && (
+            {(imageModel === 'flux') && (
               <div>
                 <label htmlFor="image-width" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Lebar Gambar (px, Flux/Leonardo):
+                  Lebar Gambar (px):
                   <span className="ml-1 cursor-help" title="Lebar gambar dalam piksel. Sesuaikan untuk rasio aspek atau ukuran tertentu.">
                     <Info size={14} className="inline-block text-gray-500 dark:text-gray-400" />
                   </span>
@@ -720,10 +635,10 @@ export default function StorytellerClient() {
             )}
 
             {/* Tinggi Gambar (untuk Flux/Leonardo) */}
-            {(imageModel === 'flux' || imageModel === 'leonardo') && (
+            {(imageModel === 'flux') && (
               <div>
                 <label htmlFor="image-height" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Tinggi Gambar (px, Flux/Leonardo):
+                  Tinggi Gambar (px):
                   <span className="ml-1 cursor-help" title="Tinggi gambar dalam piksel. Sesuaikan untuk rasio aspek atau ukuran tertentu.">
                     <Info size={14} className="inline-block text-gray-500 dark:text-gray-400" />
                   </span>
@@ -796,7 +711,7 @@ export default function StorytellerClient() {
             <Spinner />
             <p className="mt-4 text-center">{progressMessage || "AI RuangRIung Sedang Berpikir..."}</p>
             {currentStep > 0 && (
-                <p className="text-sm text-center">Langkah {currentStep} dari {totalSteps} selesai.</p>
+              <p className="text-sm text-center">Langkah {currentStep} dari {totalSteps} selesai.</p>
             )}
             <p className="text-sm text-center">Proses ini mungkin memakan waktu beberapa saat karena AI akan menghasilkan 5 gambar dan teks.</p>
           </div>
@@ -875,7 +790,7 @@ export default function StorytellerClient() {
         isOpen={isApiKeyModalOpen}
         onClose={() => setIsApiKeyModalOpen(false)}
         onSubmit={handleApiKeySubmit}
-        modelName={modelRequiringKey} 
+        modelName={modelRequiringKey}
       />
     </div>
   );

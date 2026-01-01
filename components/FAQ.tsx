@@ -21,7 +21,7 @@ const faqData: FAQItem[] = [
   },
   {
     question: "Bagaimana cara kerja pembuatan gambar?",
-    answer: "Kami menggunakan model AI canggih seperti DALL-E 3 dan model dari Pollinations.ai. Anda hanya perlu menuliskan deskripsi gambar (prompt) yang Anda inginkan, pilih gaya seni, dan AI akan menghasilkan gambar berdasarkan deskripsi tersebut."
+    answer: "Kami menggunakan model AI canggih seperti Flux dan model dari Pollinations.ai. Anda hanya perlu menuliskan deskripsi gambar (prompt) yang Anda inginkan, pilih gaya seni, dan AI akan menghasilkan gambar berdasarkan deskripsi tersebut."
   },
   {
     question: "Model AI apa saja yang tersedia di chatbot?",
@@ -74,15 +74,13 @@ const FAQ = () => {
             >
               <span className="text-lg font-semibold text-gray-800 dark:text-gray-200">{item.question}</span>
               <ChevronDown
-                className={`w-6 h-6 text-purple-600 transform transition-transform duration-300 ${
-                  activeIndex === index ? 'rotate-180' : ''
-                }`}
+                className={`w-6 h-6 text-purple-600 transform transition-transform duration-300 ${activeIndex === index ? 'rotate-180' : ''
+                  }`}
               />
             </button>
             <div
-              className={`grid transition-all duration-500 ease-in-out ${
-                activeIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-              }`}
+              className={`grid transition-all duration-500 ease-in-out ${activeIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                }`}
             >
               <div className="overflow-hidden">
                 <p className="px-6 pb-6 text-gray-600 dark:text-gray-400">
