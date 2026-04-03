@@ -45,33 +45,20 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
     setTranslatedText('');
     setIsCopied(false);
 
-    const promptInstruction = `Terjemahkan teks berikut dari ${sourceLanguage === 'id' ? 'Bahasa Indonesia' : 'Bahasa Inggris'} ke ${targetLanguage === 'id' ? 'Bahasa Indonesia' : 'Bahasa Inggris'}. Hanya berikan hasil terjemahan.`;
+    const promptInstruction = `Terjemahkan teks berikut dari ${sourceLanguage === 'id' ? 'Bahasa Indonesia' : 'Bahasa Inggris'} ke ${targetLanguage === 'id' ? 'Bahasa Indonesia' : 'Bahasa Inggris'}. Hanya berikan hasil terjemahan tanpa penjelasan tambahan.`;
     const textToTranslate = inputText.trim();
 
     const combinedPrompt = `${promptInstruction}\n\nTeks: "${textToTranslate}"`;
 
-    const POLLINATIONS_OPENAI_ENDPOINT = 'https://text.pollinations.ai/openai';
-    const POLLINATIONS_TOKEN = process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN?.trim();
-    const POLLINATIONS_REFERRER = 'ruangriung.my.id';
-
-    const pollinationsUrl = POLLINATIONS_TOKEN
-      ? POLLINATIONS_OPENAI_ENDPOINT
-      : `${POLLINATIONS_OPENAI_ENDPOINT}?referrer=${encodeURIComponent(POLLINATIONS_REFERRER)}`;
-
-    const pollinationsHeaders: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
-    if (POLLINATIONS_TOKEN) {
-      pollinationsHeaders.Authorization = `Bearer ${POLLINATIONS_TOKEN}`;
-    }
-
     try {
-      const response = await fetch(pollinationsUrl, {
+      const response = await fetch('/api/pollinations/text', {
         method: 'POST',
-        headers: pollinationsHeaders,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           model: 'openai',
+          json: false,
           messages: [{ role: 'user', content: combinedPrompt }],
         }),
       });
@@ -81,8 +68,21 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
         throw new Error(`API merespons dengan status ${response.status}. Isi: ${errorBody}`);
       }
 
-      const result = await response.json();
-      const newTranslatedText = result.choices[0].message.content.trim();
+      const responseText = await response.text();
+      let newTranslatedText = responseText.trim();
+
+      // Fallback jika upstream mengembalikan format JSON ala OpenAI.
+      try {
+        const parsed = JSON.parse(responseText);
+        newTranslatedText = parsed?.choices?.[0]?.message?.content?.trim() || newTranslatedText;
+      } catch {
+        // Abaikan: response memang plain text.
+      }
+
+      if (!newTranslatedText) {
+        throw new Error('Respons terjemahan kosong.');
+      }
+
       setTranslatedText(newTranslatedText);
       toast.success("Teks berhasil diterjemahkan!");
 
