@@ -186,23 +186,30 @@ const IdCardGeneratorClient = () => {
 
         try {
             const params = new URLSearchParams({
+                prompt: bgPrompt,
                 model: 'flux',
-                width: '500',
-                height: '300',
+                width: '1024',
+                height: '768',
                 seed: Date.now().toString(),
                 referrer: 'ruangriung.my.id',
                 enhance: 'true',
                 nologo: 'true'
             });
 
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(bgPrompt)}?${params.toString()}`;
+            // Ganti pemanggilan langsung ke API lokal yang aman
+            const url = `/api/pollinations/image?${params.toString()}`;
 
             const response = await fetch(url);
             if (!response.ok) {
-                throw new Error(`Gagal mengambil gambar dari API (Status: ${response.status})`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Gagal mengambil gambar dari API (Status: ${response.status})`);
             }
 
-            handleSettingChange('background', response.url);
+            // Karena respons proksi adalah file biner (gambar), kita perlu mengubahnya menjadi blob/URL
+            const imageBlob = await response.blob();
+            const imageUrl = URL.createObjectURL(imageBlob);
+
+            handleSettingChange('background', imageUrl);
             toast.success("Background berhasil dibuat!", { id: toastId });
 
         } catch (error: any) {

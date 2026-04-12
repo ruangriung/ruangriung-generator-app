@@ -39,33 +39,33 @@ export default function AudioGenerator() {
     };
   }, []);
 
-  // Fungsi createApiUrl untuk preview suara (ini juga menggunakan GET)
-  const createApiUrl = (prompt: string, voice: string) => {
-    const baseUrl = `https://text.pollinations.ai/${encodeURIComponent(prompt)}`;
-    const params = new URLSearchParams({
-      model: 'openai-audio',
-      voice: voice,
-      referrer: 'ruangriung.my.id'
-    });
-    return `${baseUrl}?${params.toString()}`;
-  };
-
   const handlePreviewVoice = (e: React.MouseEvent, voice: string) => {
     e.stopPropagation();
     if (audioPreviewRef.current) {
       audioPreviewRef.current.pause();
+      audioPreviewRef.current = null;
     }
     if (previewingVoice === voice) {
       setPreviewingVoice(null);
       return;
     }
     setPreviewingVoice(voice);
-    const sampleText = "Ini adalah pratinjau dari suara yang dipilih.";
-    const previewUrl = createApiUrl(sampleText, voice);
+    const sampleText = "Ini adalah pratinjau dari suara yang dipilih. Ruang Riung AI Generator.";
+    
+    // Gunakan proksi lokal yang sama dengan fungsi generate utama
+    const params = new URLSearchParams({
+      text: sampleText,
+      voice: voice
+    });
+    const previewUrl = `/api/generate-audio?${params.toString()}`;
 
     const audio = new Audio(previewUrl);
     audioPreviewRef.current = audio;
-    audio.play().catch(() => toast.error("Gagal memutar pratinjau."));
+    audio.play().catch((err: any) => {
+      console.error("Playback error:", err);
+      toast.error("Gagal memutar pratinjau.");
+      setPreviewingVoice(null);
+    });
     audio.onended = () => setPreviewingVoice(null);
     audio.onerror = () => {
       toast.error("Gagal memuat pratinjau audio.");

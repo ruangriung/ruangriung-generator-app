@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { request } from 'undici';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,29 +28,32 @@ export async function GET(req: Request) {
 
     const headers: Record<string, string> = {
       'Authorization': `Bearer ${POLLINATIONS_API_KEY}`,
+      'Referer': 'https://ruangriung.my.id',
     };
 
-    const { statusCode, body } = await request(pollinatorsApiUrl, {
+    // Gunakan fetch global (bawaan Node 18+ / Vercel)
+    const response = await fetch(pollinatorsApiUrl, {
       method: 'GET',
       headers,
     });
 
-    if (statusCode !== 200) {
-      const errorText = await body.text();
-      console.error('Error dari Pollinations.ai:', errorText);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error dari Pollinations.ai:', response.status, errorText);
       return NextResponse.json(
-        { message: `Gagal membuat audio: ${errorText}` },
-        { status: statusCode }
+        { message: `Gagal membuat audio: ${response.status}`, error: errorText },
+        { status: response.status }
       );
     }
 
-    // Mengambil buffer dari response undici
-    const arrayBuffer = await body.arrayBuffer();
+    // Mengambil buffer dari response fetch
+    const arrayBuffer = await response.arrayBuffer();
 
     return new NextResponse(arrayBuffer, {
       headers: {
         'Content-Type': 'audio/mpeg',
         'Content-Disposition': `attachment; filename="audio-${Date.now()}.mp3"`,
+        'Cache-Control': 'public, max-age=3600',
       },
       status: 200,
     });

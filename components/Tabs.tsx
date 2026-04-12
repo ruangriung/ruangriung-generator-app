@@ -31,7 +31,7 @@ const Tabs = memo(() => {
   const tabs = useMemo(() => [
     { name: 'chatbot', label: 'Chatbot', icon: MessageSquare, content: <Chatbot />, isProtected: false },
     { name: 'video', label: 'Video Prompt', icon: Video, content: <VideoCreator />, isProtected: true },
-    { name: 'text-to-video', label: 'Text to Video', icon: Video, content: <TextToVideo />, isProtected: true },
+    // { name: 'text-to-video', label: 'Text to Video', icon: Video, content: <TextToVideo />, isProtected: true },
     { name: 'audio', label: 'Audio', icon: AudioLines, content: <AudioGenerator />, isProtected: true },
     { name: 'image', label: 'Image', icon: Image, content: <Generator />, isProtected: false }
   ], []);
