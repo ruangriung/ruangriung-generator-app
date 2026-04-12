@@ -1,7 +1,7 @@
 // components/Chatbot.tsx
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { Bot, Loader, MessageSquare, Menu, X, Plus, Edit, Trash2, Cpu, Image as ImageIcon } from 'lucide-react';
 import { useChatManager } from './chatbot/useChatManager';
 import { ChatMessage } from './chatbot/ChatMessage';
@@ -14,7 +14,7 @@ type ChatbotProps = {
   autoSend?: boolean;
 };
 
-export default function Chatbot({ initialPrompt, autoSend = false }: ChatbotProps) {
+const Chatbot = memo(({ initialPrompt, autoSend = false }: ChatbotProps) => {
   const {
     sessions, setSessions, activeSessionId, setActiveSessionId,
     activeChat, isLoading, models, processAndSendMessage, startNewChat,
@@ -242,4 +242,8 @@ export default function Chatbot({ initialPrompt, autoSend = false }: ChatbotProp
 
     </>
   );
-}
+});
+
+Chatbot.displayName = 'Chatbot';
+
+export default Chatbot;

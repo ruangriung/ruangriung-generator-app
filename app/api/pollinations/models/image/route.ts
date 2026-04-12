@@ -1,5 +1,5 @@
-
 import { NextResponse } from 'next/server';
+import { fetch } from 'undici';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,23 +7,31 @@ export async function GET() {
     try {
         const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
 
-        const headers: HeadersInit = {};
+        const headers: Record<string, string> = {
+            'Accept': 'application/json',
+            'Referer': 'https://ruangriung.my.id',
+            'User-Agent': 'RuangRiung-Generator/1.0',
+        };
+
         if (POLLINATIONS_API_KEY) {
             headers['Authorization'] = `Bearer ${POLLINATIONS_API_KEY}`;
         }
 
-        const response = await fetch('https://gen.pollinations.ai/image/models', {
+        // Try getting from v1/models endpoint first for consistency with text models
+        let response = await fetch('https://gen.pollinations.ai/image/models', {
             headers: headers,
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to fetch models: ${response.statusText}`);
+            throw new Error(`Failed to fetch image models from primary endpoint: ${response.statusText}`);
         }
 
         const data = await response.json();
         return NextResponse.json(data);
     } catch (error: any) {
         console.error('Error fetching image models:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        // Fallback to a basic list if both fail
+        const fallbackModels = ['flux', 'flux-realism', 'any-dark', 'flux-anime', 'flux-3d', 'flux-pro', 'turbo'];
+        return NextResponse.json(fallbackModels);
     }
 }

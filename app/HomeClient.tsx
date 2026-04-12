@@ -25,7 +25,7 @@ import {
 import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import FAQ from '@/components/FAQ';
 import Link from 'next/link';
 import PromptSubmissionTrigger from '@/components/PromptSubmissionTrigger';
@@ -42,7 +42,81 @@ interface HomeClientProps {
   };
 }
 
-export default function HomeClient({ latestArticle }: HomeClientProps) {
+const HelpModal = memo(({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  if (!isOpen) return null;
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="help-modal-title"
+      onClick={onClose}
+    >
+      <div
+        className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2
+              id="help-modal-title"
+              className="text-xl font-bold text-gray-900 dark:text-gray-100"
+            >
+              Panduan Menggunakan RuangRiung AI Generator
+            </h2>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+              Ikuti petunjuk berikut untuk memaksimalkan setiap fitur di halaman utama kami.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="rounded-full bg-gray-100 p-1 text-gray-500 transition hover:text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:text-white"
+            onClick={onClose}
+            aria-label="Tutup panduan"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="mt-6 space-y-6 text-left text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+          <section>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">Navigasi Cepat</h3>
+            <ul className="mt-2 list-disc space-y-2 pl-5">
+              <li><span className="font-semibold">Prompt AI</span> membuka koleksi prompt siap pakai.</li>
+              <li><span className="font-semibold">Artikel</span> berisi tulisan terbaru tentang tren AI.</li>
+              <li><span className="font-semibold">Gabung Grup</span> mengarahkan ke komunitas Facebook.</li>
+              <li><span className="font-semibold">Email Kami</span> untuk mengirim pertanyaan atau saran.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">Fitur Utama</h3>
+            <ul className="mt-2 list-disc space-y-2 pl-5">
+              <li><span className="font-semibold">Submit Prompt</span> untuk membagikan prompt buatan Anda.</li>
+              <li><span className="font-semibold">Tema Unik</span> menghasilkan nama tema kreatif.</li>
+              <li><span className="font-semibold">Tutorial</span> panduan lengkap penggunaan generator.</li>
+              <li><span className="font-semibold">Fitur Lainnya</span> menu tambahan seperti StoryTeller AI & ID Card.</li>
+            </ul>
+          </section>
+        </div>
+
+        <div className="mt-6 flex justify-end">
+          <button
+            type="button"
+            className="inline-flex items-center rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-purple-700"
+            onClick={onClose}
+          >
+            Mengerti
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+HelpModal.displayName = 'HelpModal';
+
+const HomeClient = memo(({ latestArticle }: HomeClientProps) => {
   const [deferredPrompt, setDeferredPrompt] = useState<any | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
@@ -89,6 +163,12 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
     };
   }, []);
 
+  const toggleToolsMenu = useCallback(() => setIsToolsMenuOpen(prev => !prev), []);
+  const togglePromptMenu = useCallback(() => setIsPromptMenuOpen(prev => !prev), []);
+  const openHelp = useCallback(() => setIsHelpOpen(true), []);
+  const closeHelp = useCallback(() => setIsHelpOpen(false), []);
+  const handleCloseBanner = useCallback(() => setShowBanner(false), []);
+
   // Efek untuk menutup dropdown menu saat klik di luar area
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -110,7 +190,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
   }, []);
 
 
-  const handleInstallClick = async () => {
+  const handleInstallClick = useCallback(async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
@@ -119,11 +199,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         setShowInstallButton(false);
       }
     }
-  };
-
-  const handleCloseBanner = () => {
-    setShowBanner(false);
-  };
+  }, [deferredPrompt]);
 
   return (
     <div className="flex min-h-screen flex-col items-center p-4 sm:p-8">
@@ -159,7 +235,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
           </h1>
           <button
             type="button"
-            onClick={() => setIsHelpOpen(true)}
+            onClick={openHelp}
             className="absolute right-0 top-1/2 -translate-y-1/2 inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white/80 px-3 py-1 text-sm font-semibold text-purple-700 shadow-sm transition hover:bg-white dark:border-purple-700/60 dark:bg-gray-900/80 dark:text-purple-300"
             aria-label="Panduan penggunaan RuangRiung AI"
           >
@@ -178,7 +254,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         <div className="relative" ref={promptMenuRef}>
           <button
             type="button"
-            onClick={() => setIsPromptMenuOpen(current => !current)}
+            onClick={togglePromptMenu}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-light-bg px-4 py-3 text-center text-sm font-semibold text-gray-700 shadow-neumorphic-button transition-all hover:text-purple-600 active:shadow-neumorphic-inset dark:bg-dark-bg dark:text-gray-300 dark:shadow-dark-neumorphic-button dark:hover:text-purple-300 dark:active:shadow-dark-neumorphic-inset"
           >
             <LayoutGrid size={18} />
@@ -294,7 +370,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         {/* Dropdown Fitur Lainnya */}
         <div className="relative flex-1 w-full" ref={toolsMenuRef}>
           <button
-            onClick={() => setIsToolsMenuOpen(!isToolsMenuOpen)}
+            onClick={toggleToolsMenu}
             className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset hover:bg-purple-700 transition-colors"
           >
             <LayoutGrid size={18} />
@@ -361,7 +437,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         </div>
       </div>
 
-      <div className="w-full max-w-4xl flex flex-col gap-4 mb-4 md:flex-row md:items-stretch md:gap-6">
+      <div className="w-full max-w-4xl mb-4 flex flex-col gap-4 mb-4 md:flex-row md:items-stretch md:gap-6">
         <AuthButton />
         <div className="w-full md:w-auto md:self-stretch">
           <ThemeToggle />
@@ -400,146 +476,14 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         <FAQ />
       </div>
 
-      {isHelpOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="help-modal-title"
-          onClick={() => setIsHelpOpen(false)}
-        >
-          <div
-            className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2
-                  id="help-modal-title"
-                  className="text-xl font-bold text-gray-900 dark:text-gray-100"
-                >
-                  Panduan Menggunakan RuangRiung AI Generator
-                </h2>
-                <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                  Ikuti petunjuk berikut untuk memaksimalkan setiap fitur di halaman utama kami.
-                </p>
-              </div>
-              <button
-                type="button"
-                className="rounded-full bg-gray-100 p-1 text-gray-500 transition hover:text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:text-white"
-                onClick={() => setIsHelpOpen(false)}
-                aria-label="Tutup panduan"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="mt-6 space-y-6 text-left text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-              <section>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Navigasi Cepat</h3>
-                <ul className="mt-2 list-disc space-y-2 pl-5">
-                  <li>
-                    <span className="font-semibold">Prompt AI</span> membuka koleksi prompt siap pakai untuk berbagai platform kreatif.
-                  </li>
-                  <li>
-                    <span className="font-semibold">Artikel</span> berisi tulisan terbaru tentang tren dan tips pemanfaatan AI.
-                  </li>
-                  <li>
-                    <span className="font-semibold">Gabung Grup</span> mengarahkan Anda ke komunitas Facebook RuangRiung untuk berbagi ide dan hasil karya.
-                  </li>
-                  <li>
-                    <span className="font-semibold">Email Kami</span> memudahkan Anda mengirim pertanyaan atau saran langsung ke tim.
-                  </li>
-                </ul>
-              </section>
-
-              <section>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Fitur Utama</h3>
-                <ul className="mt-2 list-disc space-y-2 pl-5">
-                  <li>
-                    <span className="font-semibold">Submit Prompt</span> memungkinkan Anda mengajukan prompt buatan sendiri agar dapat ditinjau dan dibagikan ke pengguna lain.
-                  </li>
-                  <li>
-                    <span className="font-semibold">Tema Unik</span> membantu menghasilkan nama tema kreatif untuk karya atau koleksi konten Anda.
-                  </li>
-                  <li>
-                    <span className="font-semibold">Tutorial</span> mengarahkan ke panduan lengkap penggunaan generator dari awal hingga mahir.
-                  </li>
-                  <li>
-                    <span className="font-semibold">Fitur Lainnya</span> membuka menu tambahan seperti <em>StoryTeller AI</em>, <em>ID Card Generator</em>, dan <em>Bubble Komentar</em> untuk memperkaya kebutuhan branding Anda.
-                  </li>
-                </ul>
-              </section>
-
-              <section>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Generator &amp; Personalisasi</h3>
-                <p className="mt-2">
-                  Bagian tab generator di tengah halaman berisi berbagai alat AI (misalnya chatbot, video, audio, dan generator gambar). Pilih tab yang sesuai, isi prompt utama, lengkapi kolom <em>negative prompt</em> bila perlu, lalu tekan tombol <span className="font-semibold">Buat Gambar</span> untuk memperoleh hasil instan.
-                </p>
-                <p className="mt-2">
-                  Gunakan tombol <span className="font-semibold">Masuk/Daftar</span> untuk mengakses fitur premium seperti pengaturan lanjutan, asisten prompt, dan penyimpanan riwayat. Tombol <span className="font-semibold">Tema Gelap/Terang</span> menyesuaikan tampilan halaman agar nyaman di mata.
-                </p>
-              </section>
-
-              <section>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Tombol Aksi Prompt</h3>
-                <ul className="mt-2 list-disc space-y-2 pl-5">
-                  <li>
-                    <span className="font-semibold">Acak Prompt</span> meminta AI menyusun ide unik berdasarkan tema acak sehingga Anda selalu memiliki inspirasi baru.
-                  </li>
-                  <li>
-                    <span className="font-semibold">Surprise Me!</span> mengacak seluruh pengaturan (model, gaya, rasio, kualitas, hingga seed) untuk mengeksplorasi kombinasi tak terduga. Cukup tekan <span className="font-semibold">Buat Gambar</span> setelahnya untuk melihat hasilnya.
-                  </li>
-                  <li>
-                    <span className="font-semibold">Sempurnakan</span> memoles prompt yang sudah ada agar lebih detail dan siap dipakai menghasilkan visual berkualitas.
-                  </li>
-                  <li>
-                    <span className="font-semibold">JSON</span> mengubah prompt menjadi struktur data terformat yang berguna untuk dokumentasi atau integrasi dengan workflow lain.
-                  </li>
-                  <li>
-                    <span className="font-semibold">Simpan</span> menyimpan prompt favorit Anda ke dalam daftar riwayat sehingga dapat dipakai ulang kapan saja.
-                  </li>
-                </ul>
-              </section>
-
-              <section>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Pengaturan &amp; Asisten</h3>
-                <ul className="mt-2 list-disc space-y-2 pl-5">
-                  <li>
-                    <span className="font-semibold">Pengaturan Lanjutan</span> (tersedia setelah login) membuka kontrol tambahan seperti memilih model, rasio, kualitas gambar, CFG, hingga mode privat/safe.
-                  </li>
-                  <li>
-                    Preset <span className="font-semibold">Negative Prompt</span> membantu menghapus kualitas buruk, anatomi salah, atau watermark dari hasil gambar.
-                  </li>
-                  <li>
-                    Asisten terintegrasi seperti <span className="font-semibold">Prompt Assistant</span>, <span className="font-semibold">Translation Assistant</span>, dan <span className="font-semibold">Image Analysis Assistant</span> siap memberikan saran, menerjemahkan ide, atau menganalisis referensi visual.
-                  </li>
-                </ul>
-              </section>
-
-              <section>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Tips Tambahan</h3>
-                <ul className="mt-2 list-disc space-y-2 pl-5">
-                  <li>Manfaatkan banner atas untuk memasang aplikasi RuangRiung AI pada perangkat Anda dan akses generator secara cepat.</li>
-                  <li>Baca artikel terbaru melalui kartu sorotan agar selalu mendapatkan inspirasi konten terkini.</li>
-                  <li>Jika mengalami kendala, klik tombol ini kapan saja untuk kembali melihat panduan.</li>
-                </ul>
-              </section>
-            </div>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                type="button"
-                className="inline-flex items-center rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-purple-700"
-                onClick={() => setIsHelpOpen(false)}
-              >
-                Mengerti
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      <HelpModal
+        isOpen={isHelpOpen}
+        onClose={closeHelp}
+      />
     </div>
   );
-}
+});
+
+HomeClient.displayName = 'HomeClient';
+
+export default HomeClient;

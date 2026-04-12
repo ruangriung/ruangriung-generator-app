@@ -1,7 +1,7 @@
 // components/TranslationAssistant.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Languages, Copy, Check, Sparkles, X, Expand } from 'lucide-react';
 import Accordion from './Accordion';
 import ButtonSpinner from './ButtonSpinner';
@@ -12,7 +12,7 @@ interface TranslationAssistantProps {
   onUsePrompt: (prompt: string) => void;
 }
 
-export default function TranslationAssistant({ onUsePrompt }: TranslationAssistantProps) {
+const TranslationAssistant = memo(({ onUsePrompt }: TranslationAssistantProps) => {
   const [inputText, setInputText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
   const [sourceLanguage, setSourceLanguage] = useState('id');
@@ -254,4 +254,8 @@ export default function TranslationAssistant({ onUsePrompt }: TranslationAssista
       />
     </Accordion>
   );
-}
+});
+
+TranslationAssistant.displayName = 'TranslationAssistant';
+
+export default TranslationAssistant;

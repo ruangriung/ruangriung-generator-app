@@ -1,7 +1,7 @@
 // components/ImageAnalysisAssistant.tsx
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { Image, Copy, Check, Sparkles, Upload, Cpu, ChevronDown, RefreshCw, Loader } from 'lucide-react';
 import Accordion from './Accordion';
 import ButtonSpinner from './ButtonSpinner';
@@ -24,7 +24,7 @@ const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neu
 const textareaStyle = `${inputStyle} resize-none`;
 const selectStyle = `${inputStyle} appearance-none`;
 
-export default function ImageAnalysisAssistant({ onUsePrompt }: ImageAnalysisAssistantProps) {
+const ImageAnalysisAssistant = memo(({ onUsePrompt }: ImageAnalysisAssistantProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [analysisResult, setAnalysisResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -224,4 +224,8 @@ export default function ImageAnalysisAssistant({ onUsePrompt }: ImageAnalysisAss
       </div>
     </Accordion>
   );
-}
+});
+
+ImageAnalysisAssistant.displayName = 'ImageAnalysisAssistant';
+
+export default ImageAnalysisAssistant;

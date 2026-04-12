@@ -1,5 +1,6 @@
-// components/AdvancedSettings.tsx
 'use client';
+
+import { memo, useCallback } from 'react';
 
 import { GeneratorSettings } from './ControlPanel';
 import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sparkles, ImageIcon, Sprout, ChevronDown, Lock, Shield, EyeOff, Link2, Plus, X } from 'lucide-react';
@@ -17,12 +18,12 @@ interface AdvancedSettingsProps {
   onModelSelect: (model: string) => void;
 }
 
-export default function AdvancedSettings({ settings, setSettings, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, className, onModelSelect }: AdvancedSettingsProps) {
-  const handleSettingChange = (field: keyof GeneratorSettings, value: string | number | boolean) => {
+const AdvancedSettings = memo(({ settings, setSettings, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, className, onModelSelect }: AdvancedSettingsProps) => {
+  const handleSettingChange = useCallback((field: keyof GeneratorSettings, value: string | number | boolean) => {
     if (field === 'model') {
-        onModelSelect(value as string);
+      onModelSelect(value as string);
     } else if (field === 'private' || field === 'safe' || field === 'transparent') {
-        setSettings(prev => ({ ...prev, [field]: value as boolean }));
+      setSettings(prev => ({ ...prev, [field]: value as boolean }));
     } else if (field === 'width' || field === 'height' || field === 'batchSize' || field === 'seed') {
       const parsedValue = parseInt(value as string, 10);
       const numValue = isNaN(parsedValue) ? 0 : parsedValue;
@@ -38,7 +39,7 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
     } else {
       setSettings(prev => ({ ...prev, [field]: value }));
     }
-  };
+  }, [onModelSelect, setSettings, onManualDimensionChange, settings.width, settings.height]);
 
   const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
   const selectStyle = `${inputStyle} appearance-none`;
@@ -58,30 +59,30 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
   const isImageToImageModel = imageToImageModels.includes(settings.model.toLowerCase());
   const MAX_REFERENCE_IMAGES = 4;
 
-  const handleReferenceImageChange = (index: number, url: string) => {
+  const handleReferenceImageChange = useCallback((index: number, url: string) => {
     setSettings(prev => {
       const updated = [...(prev.inputImages ?? [])];
       updated[index] = url;
       return { ...prev, inputImages: updated };
     });
-  };
+  }, [setSettings]);
 
-  const handleAddReferenceImage = () => {
+  const handleAddReferenceImage = useCallback(() => {
     setSettings(prev => {
       const currentImages = prev.inputImages ?? [];
       if (currentImages.length >= MAX_REFERENCE_IMAGES) return prev;
       return { ...prev, inputImages: [...currentImages, ''] };
     });
-  };
+  }, [setSettings]);
 
-  const handleRemoveReferenceImage = (index: number) => {
+  const handleRemoveReferenceImage = useCallback((index: number) => {
     setSettings(prev => {
       const currentImages = prev.inputImages ?? [];
       if (currentImages.length === 0) return prev;
       const updated = currentImages.filter((_, i) => i !== index);
       return { ...prev, inputImages: updated.length ? updated : [''] };
     });
-  };
+  }, [setSettings]);
 
   const referenceImagesRaw = settings.inputImages ?? [];
   const filledReferenceCount = referenceImagesRaw.filter(url => url.trim().length > 0).length;
@@ -231,4 +232,8 @@ export default function AdvancedSettings({ settings, setSettings, models, aspect
         </div>
     </div>
   );
-}
+});
+
+AdvancedSettings.displayName = 'AdvancedSettings';
+
+export default AdvancedSettings;

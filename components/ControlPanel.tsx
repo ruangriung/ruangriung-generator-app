@@ -1,7 +1,7 @@
 // components/ControlPanel.tsx
 'use client';
 
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction, useCallback, useMemo, memo } from 'react';
 import { useSession } from 'next-auth/react';
 import AdvancedSettings from './AdvancedSettings';
 import ButtonSpinner from './ButtonSpinner';
@@ -49,7 +49,7 @@ interface ControlPanelProps {
   onSurpriseMe: () => void;
 }
 
-export default function ControlPanel({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, onModelSelect, onSurpriseMe }: ControlPanelProps) {
+const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, onModelSelect, onSurpriseMe }: ControlPanelProps) => {
   const { status } = useSession();
   const isAuthenticated = status === 'authenticated';
   const [editingField, setEditingField] = useState<null | 'prompt' | 'negativePrompt'>(null);
@@ -58,7 +58,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
   const [isSaving, setIsSaving] = useState(false);
   const [savedPrompts, setSavedPrompts] = useState<string[]>([]);
   const [isGeneratingJson, setIsGeneratingJson] = useState(false);
-  const [enhancementModels, setEnhancementModels] = useState<{ name: string; description: string }[]>([]);
+  const [enhancementModels, setEnhancementModels] = useState<{ id: string; name: string }[]>([]);
   const [selectedEnhancementModel, setSelectedEnhancementModel] = useState('openai');
 
   useEffect(() => {
@@ -68,21 +68,20 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
         if (!response.ok) throw new Error('Failed to fetch text models');
         const data = await response.json();
 
-        // Adapt the data structure if needed
-        let models: { name: string; description: string }[] = [];
+        let relevantModels: { id: string; name: string }[] = [];
         if (Array.isArray(data)) {
-          models = data.map((m: any) => {
-            if (typeof m === 'string') return { name: m, description: m };
-            return { name: m.name, description: m.description || m.name };
+          relevantModels = data.map((m: any) => {
+            if (typeof m === 'string') return { id: m, name: m };
+            return { id: m.id || m.name, name: m.id || m.name };
           });
         }
 
-        if (models.length > 0) {
-          setEnhancementModels(models);
-          if (models.some(m => m.name === 'openai')) {
+        if (relevantModels.length > 0) {
+          setEnhancementModels(relevantModels);
+          if (relevantModels.some(m => m.id === 'openai')) {
             setSelectedEnhancementModel('openai');
           } else {
-            setSelectedEnhancementModel(models[0].name);
+            setSelectedEnhancementModel(relevantModels[0].id);
           }
         } else {
           throw new Error('No models found');
@@ -90,12 +89,11 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
       } catch (error) {
         console.error("Failed to fetch models, using fallback", error);
-        // Fallback
         const fallbackModels = [
-          { name: 'openai', description: 'OpenAI GPT-4o Mini' },
-          { name: 'mistral', description: 'Mistral Small 3.1 24B' },
-          { name: 'grok', description: 'xAI Grok-3 Mini' },
-          { name: 'deepseek', description: 'DeepSeek V3' },
+          { id: 'openai', name: 'OpenAI GPT-4o Mini' },
+          { id: 'mistral', name: 'Mistral Small 3.1 24B' },
+          { id: 'grok', name: 'xAI Grok-3 Mini' },
+          { id: 'deepseek', name: 'DeepSeek V3' },
         ];
         setEnhancementModels(fallbackModels);
         setSelectedEnhancementModel('openai');
@@ -125,13 +123,13 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     }
   }, [savedPrompts]);
 
-  const handleClearPrompt = () => {
+  const handleClearPrompt = useCallback(() => {
     setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: '' }));
-  };
+  }, [setSettings]);
 
-  const handleClearNegativePrompt = () => {
+  const handleClearNegativePrompt = useCallback(() => {
     setSettings((prev: GeneratorSettings) => ({ ...prev, negativePrompt: '' }));
-  };
+  }, [setSettings]);
 
   const callPromptApi = async (promptForApi: string, temperature = 0.5) => {
     try {
@@ -179,31 +177,21 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
     }
   };
 
-  const mergePromptWithEnhancement = (originalPrompt: string, enhancedPrompt: string) => {
+  const mergePromptWithEnhancement = useCallback((originalPrompt: string, enhancedPrompt: string) => {
     const trimmedOriginal = originalPrompt.trim();
     const trimmedEnhanced = enhancedPrompt.trim();
 
-    if (!trimmedOriginal) {
-      return trimmedEnhanced;
-    }
-
-    if (!trimmedEnhanced) {
-      return trimmedOriginal;
-    }
+    if (!trimmedOriginal) return trimmedEnhanced;
+    if (!trimmedEnhanced) return trimmedOriginal;
 
     const normalizedOriginal = trimmedOriginal.toLowerCase();
     const normalizedEnhanced = trimmedEnhanced.toLowerCase();
 
-    if (normalizedEnhanced.includes(normalizedOriginal)) {
-      return trimmedEnhanced;
-    }
-
-    if (normalizedOriginal.includes(normalizedEnhanced)) {
-      return trimmedOriginal;
-    }
+    if (normalizedEnhanced.includes(normalizedOriginal)) return trimmedEnhanced;
+    if (normalizedOriginal.includes(normalizedEnhanced)) return trimmedOriginal;
 
     return `${trimmedOriginal}\n\n${trimmedEnhanced}`;
-  };
+  }, []);
 
   const handleRandomPrompt = async () => {
     setIsRandomizing(true);
@@ -527,8 +515,8 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
                 >
                   {enhancementModels.length > 0 ? (
                     enhancementModels.map((model) => (
-                      <option key={model.name} value={model.name} className="bg-white dark:bg-gray-700">
-                        {model.description} ({model.name})
+                      <option key={model.id} value={model.id} className="bg-white dark:bg-gray-700">
+                        {model.name} ({model.id})
                       </option>
                     ))
                   ) : (
@@ -553,54 +541,39 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
               Pilih Model AI untuk Bantuan Prompt
             </label>
             <div className="relative">
-              <select
-                id="enhancement-model-desktop"
-                value={selectedEnhancementModel}
-                onChange={(event) => setSelectedEnhancementModel(event.target.value)}
-                className="w-full appearance-none p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800 dark:text-gray-200"
-                disabled={enhancementModels.length === 0}
-              >
-                {enhancementModels.length > 0 ? (
-                  enhancementModels.map((model) => (
-                    <option key={model.name} value={model.name} className="bg-white dark:bg-gray-700">
-                      {model.description} ({model.name})
-                    </option>
-                  ))
-                ) : (
-                  <option>Memuat...</option>
-                )}
-              </select>
+                <select
+                  id="enhancement-model-desktop"
+                  value={selectedEnhancementModel}
+                  onChange={(event) => setSelectedEnhancementModel(event.target.value)}
+                  className="w-full appearance-none p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800 dark:text-gray-200"
+                  disabled={enhancementModels.length === 0}
+                >
+                  {enhancementModels.length > 0 ? (
+                    enhancementModels.map((model) => (
+                      <option key={model.id} value={model.id} className="bg-white dark:bg-gray-700">
+                        {model.name} ({model.id})
+                      </option>
+                    ))
+                  ) : (
+                    <option>Memuat...</option>
+                  )}
+                </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
             </div>
           </div>
         </div>
 
-        {/* Asisten-asisten Prompt */}
-        {status === 'authenticated' ? (
-          <PromptAssistant
-            onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
-          />
-        ) : (
-          <LockedAccordion
-            title={<div className="flex items-center gap-2"><Megaphone className="text-purple-600" />Asisten Prompt</div>}
-            className="mt-6"
-          />
-        )}
+        <PromptAssistant
+          onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
+        />
 
         <TranslationAssistant
           onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
         />
 
-        {status === 'authenticated' ? (
-          <ImageAnalysisAssistant
-            onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
-          />
-        ) : (
-          <LockedAccordion
-            title={<div className="flex items-center gap-2"><ImageIcon className="text-purple-600" />Asisten Analisis Gambar</div>}
-            className="mt-6"
-          />
-        )}
+        <ImageAnalysisAssistant
+          onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
+        />
 
         {savedPrompts.length > 0 && (
           <Accordion
@@ -642,4 +615,8 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
       />
     </>
   );
-}
+});
+
+ControlPanel.displayName = 'ControlPanel';
+
+export default ControlPanel;

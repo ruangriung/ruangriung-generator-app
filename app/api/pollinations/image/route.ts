@@ -1,65 +1,124 @@
-
 import { NextResponse } from 'next/server';
+import { request } from 'undici';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+export async function GET(requestObj: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const queryString = searchParams.toString();
-    
-    // Construct the target URL. 
-    // The prompt is usually part of the path in the original URL, but here we can pass it as a query param or handle it differently.
-    // Based on user request, the format is 'https://gen.pollinations.ai/image/PROMPT?params...'
-    // So we need to extract the 'prompt' from searchParams and put it in the path.
-    
+    const { searchParams } = new URL(requestObj.url);
     const prompt = searchParams.get('prompt');
+
     if (!prompt) {
-         return NextResponse.json({ message: 'Prompt is required' }, { status: 400 });
+      return NextResponse.json({ message: 'Prompt is required' }, { status: 400 });
     }
 
-    // Remove prompt from params to avoid duplication if it's there, 
-    // though keeping it usually doesn't hurt. 
-    // Let's just forward the entire query string as is, but append the prompt to the path.
-    // Actually, let's look at how the user provided the example:
-    // request('https://gen.pollinations.ai/image/a beautiful sunset...?model=zimage&...')
+    // Bangun query parameter Pollinations secara eksplisit
+    const pollParams = new URLSearchParams();
+
+    // Copy basic parameters
+    const width = searchParams.get('width');
+    if (width) pollParams.append('width', width);
+
+    const height = searchParams.get('height');
+    if (height) pollParams.append('height', height);
+
+    const seed = searchParams.get('seed');
+    if (seed) pollParams.append('seed', seed);
+
+    const model = searchParams.get('model');
+    if (model) pollParams.append('model', model);
+
+    const nologo = searchParams.get('nologo');
+    if (nologo) pollParams.append('nologo', nologo);
+
+    const enhance = searchParams.get('enhance');
+    if (enhance) pollParams.append('enhance', enhance);
+
+    const privateParam = searchParams.get('private');
+    if (privateParam) pollParams.append('private', privateParam);
+
+    const safe = searchParams.get('safe');
+    if (safe) pollParams.append('safe', safe);
+
+    const transparent = searchParams.get('transparent');
+    if (transparent) pollParams.append('transparent', transparent);
+
+    const referrer = searchParams.get('referrer');
+    if (referrer) pollParams.append('referrer', referrer);
+
+    const cfg_scale = searchParams.get('guidance_scale') || searchParams.get('cfg_scale');
+    if (cfg_scale) pollParams.append('guidance_scale', cfg_scale);
+
+    const negative_prompt = searchParams.get('negative_prompt');
+    if (negative_prompt) pollParams.append('negative_prompt', negative_prompt);
+
+    const aspectRatio = searchParams.get('aspectRatio');
+    if (aspectRatio) {
+      pollParams.append('aspectRatio', aspectRatio);
+    }
+
+    // Add optional parameters jika ada
+    const duration = searchParams.get('duration');
+    if (duration && !isNaN(Number(duration))) {
+      pollParams.append('duration', duration);
+    }
+
+    const image = searchParams.get('image');
+    if (image) {
+      pollParams.append('image', image);
+    }
+
+    const audio = searchParams.get('audio');
+    if (audio === 'true') {
+      pollParams.append('audio', 'true');
+    }
+
+    const apiUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?${pollParams.toString()}`;
     
-    // We will assume the client sends all parameters including 'prompt' as query params to THIS route.
-    // e.g. /api/pollinations/image?prompt=foo&model=bar
-    
-    // We need to reconstruct the Pollinations URL.
-    const baseUrl = 'https://gen.pollinations.ai/image';
-    const finalUrl = `${baseUrl}/${encodeURIComponent(prompt)}?${queryString}`;
+    console.log('[API] Image Request:', apiUrl);
 
     const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
 
-    const headers: HeadersInit = {};
+    const headers: Record<string, string> = {};
     if (POLLINATIONS_API_KEY) {
-        headers['Authorization'] = `Bearer ${POLLINATIONS_API_KEY}`;
+      headers['Authorization'] = `Bearer ${POLLINATIONS_API_KEY}`;
     }
 
-    const response = await fetch(finalUrl, {
+    // Use undici for the request
+    const { statusCode, body, headers: responseHeaders } = await request(apiUrl, {
       method: 'GET',
-      headers: headers,
+      headers,
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      return NextResponse.json({ message: `Pollinations API Error: ${response.statusText}`, error: errorText }, { status: response.status });
+    if (statusCode !== 200) {
+      const errorText = await body.text();
+      console.error('[API] Pollinations API Error:', statusCode, errorText);
+      return NextResponse.json(
+        { message: `Pollinations API Error: ${statusCode}`, error: errorText },
+        { status: statusCode }
+      );
     }
 
-    const imageBlob = await response.blob();
-    
-    return new NextResponse(imageBlob, {
-        headers: {
-            'Content-Type': response.headers.get('Content-Type') || 'image/jpeg',
-            'Cache-Control': 'public, max-age=31536000, immutable',
-        },
-        status: 200
+    // Get the image buffer
+    const imageBuffer = await body.arrayBuffer();
+    const contentType = responseHeaders['content-type'] as string || 'image/jpeg';
+
+    return new NextResponse(imageBuffer, {
+      headers: {
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
+      status: 200,
     });
 
   } catch (error: any) {
     console.error('Error in Pollinations Image Proxy:', error);
-    return NextResponse.json({ message: 'Internal Server Error', error: error.message }, { status: 500 });
+    return NextResponse.json(
+      {
+        message: 'Internal Server Error',
+        error: error.message,
+      },
+      { status: 500 }
+    );
   }
 }

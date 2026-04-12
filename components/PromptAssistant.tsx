@@ -1,7 +1,7 @@
 // components/PromptAssistant.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { Sparkles, Wand2, Copy, Check, Megaphone, Cpu, ChevronDown, Star, Expand, X } from 'lucide-react';
 import Accordion from './Accordion';
 import ButtonSpinner from './ButtonSpinner';
@@ -25,14 +25,14 @@ const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neu
 const textareaStyle = `${inputStyle} resize-none`;
 const selectStyle = `${inputStyle} appearance-none`;
 
-export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
+const PromptAssistant = memo(({ onUsePrompt }: PromptAssistantProps) => {
   const [assistantSubject, setAssistantSubject] = useState('');
   const [assistantDetails, setAssistantDetails] = useState('');
   const [generatedAssistantPrompt, setGeneratedAssistantPrompt] = useState('');
   const [isGeneratingAssistantPrompt, setIsGeneratingAssistantPrompt] = useState(false);
   const [isAssistantPromptCopied, setIsAssistantPromptCopied] = useState(false);
 
-  const [models, setModels] = useState<{ name: string, description: string }[]>([]);
+  const [models, setModels] = useState<{ id: string, name: string }[]>([]);
   const [selectedModel, setSelectedModel] = useState('openai');
   const [editingField, setEditingField] = useState<null | 'subject' | 'details'>(null);
 
@@ -44,33 +44,21 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
         if (!response.ok) throw new Error('Failed to fetch text models');
         const modelData = await response.json();
 
-        // Filter model yang relevan untuk Asisten Prompt (inputnya teks, outputnya teks)
-        // Adjust based on the actual API response structure if needed.
-        // Assuming the API returns the same structure as the hardcoded data or close to it.
-        // Pollinations 'text/models' returns a list of strings usually, or objects?
-        // Let's assume it returns an array of string names based on the user's "image/models" example which returned strings or simple objects.
-        // But wait, the user's code for image models in Generator.tsx handled complex objects.
-        // For text models, if it returns simple strings:
-
-        let relevantModels: { name: string, description: string }[] = [];
+        let relevantModels: { id: string, name: string }[] = [];
 
         if (Array.isArray(modelData)) {
-          // Check if items are strings or objects
           relevantModels = modelData.map((m: any) => {
-            if (typeof m === 'string') return { name: m, description: m };
-            return { name: m.name, description: m.description || m.name };
+            if (typeof m === 'string') return { id: m, name: m };
+            return { id: m.id || m.name, name: m.id || m.name };
           });
         }
 
-        // If we want to strictly filter like before we need metadata, but we might not get it from simple list.
-        // Let's trust the API returns valid text models.
-
         if (relevantModels.length > 0) {
           setModels(relevantModels);
-          if (relevantModels.some(m => m.name === 'openai')) {
+          if (relevantModels.some(m => m.id === 'openai')) {
             setSelectedModel('openai');
           } else {
-            setSelectedModel(relevantModels[0].name);
+            setSelectedModel(relevantModels[0].id);
           }
         } else {
           throw new Error('Tidak ada model teks yang relevan ditemukan');
@@ -78,10 +66,10 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
       } catch (error) {
         console.error("Gagal memproses daftar model:", error);
         const fallbackModels = [
-          { name: 'openai', description: 'OpenAI GPT-4o Mini' },
-          { name: 'mistral', description: 'Mistral Small 3.1 24B' },
-          { name: 'grok', description: 'xAI Grok-3 Mini' },
-          { name: 'deepseek', description: 'DeepSeek V3' }
+          { id: 'openai', name: 'OpenAI GPT-4o Mini' },
+          { id: 'mistral', name: 'Mistral Small 3.1 24B' },
+          { id: 'grok', name: 'xAI Grok-3 Mini' },
+          { id: 'deepseek', name: 'DeepSeek V3' }
         ];
         setModels(fallbackModels);
         setSelectedModel('openai');
@@ -102,7 +90,7 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
     setGeneratedAssistantPrompt('');
     setIsAssistantPromptCopied(false);
 
-    const fullPromptInstruction = `Kembangkan subjek berikut untuk prompt pembuatan gambar yang kreatif dan deskriptif secara visual. Jadikan ringkas dan jangan gunakan tanda kutip dalam respons Anda.`;
+    const fullPromptInstruction = `Kembangkan subjek berikut menjadi prompt pembuatan gambar yang sangat kreatif, artistik, dan detail secara visual. Sertakan informasi tentang gaya pencahayaan, tekstur, komposisi, dan suasana. Jadikan ringkas dan jangan gunakan tanda kutip dalam respons Anda.`;
     const subjectContent = `Subjek: ${assistantSubject}`;
     const detailsContent = assistantDetails ? `Detail tambahan: ${assistantDetails}` : '';
     const combinedPrompt = `${fullPromptInstruction}\n${subjectContent}\n${detailsContent}`;
@@ -114,25 +102,13 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: selectedModel,
-        prompt: combinedPrompt, // Note: The internal route expects 'prompt' or 'messages' but passing 'prompt' is safer with our adapter
+        prompt: combinedPrompt,
         json: false
       }),
     })
       .then(res => {
         if (!res.ok) throw new Error('Respons API tidak baik');
-        return res.text(); // Read as text since our proxy returns raw text
-      })
-      .then(result => {
-        // The internal route returns raw text if configured that way, or we might need to adjust based on route.ts
-        // Our route.ts returns raw text in response to text request.
-        // But let's check if the result is a string or object.
-        // If the route returns text/plain, result.choices won't exist.
-        // We should read text() instead of json() in the first .then if we expect text.
-
-        // WAIT: In the previous .then block, we called res.json(). 
-        // Our route.ts currently returns text for GET, and for POST it returns text.
-        // So we should change res.json() to res.text() below.
-        return result;
+        return res.text();
       })
       .then(text => {
         const newPrompt = text.replace(/"/g, '').trim();
@@ -149,8 +125,8 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
 
     toast.promise(apiPromise, {
       loading: 'Asisten AI sedang bekerja...',
-      success: (message) => message,
-      error: (errorMessage) => errorMessage.toString(),
+      success: (message: string) => message,
+      error: (errorMessage: any) => errorMessage.toString(),
     });
   };
 
@@ -179,8 +155,8 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
             <div className="relative">
               <select id="assistant-model" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className={selectStyle} disabled={models.length === 0}>
                 {models.length > 0 ? models.map(model => (
-                  <option key={model.name} value={model.name} className="bg-white dark:bg-gray-700">
-                    {model.description} ({model.name})
+                  <option key={model.id} value={model.id} className="bg-white dark:bg-gray-700">
+                    {model.name} ({model.id})
                   </option>
                 )) : <option>Memuat...</option>}
               </select>
@@ -260,4 +236,8 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
       />
     </>
   );
-}
+});
+
+PromptAssistant.displayName = 'PromptAssistant';
+
+export default PromptAssistant;

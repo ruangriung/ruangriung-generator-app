@@ -1,7 +1,7 @@
 // components/ImageDisplay.tsx
 'use client';
 
-import { useState, useRef, useEffect, forwardRef } from 'react';
+import { useState, useRef, useEffect, forwardRef, memo } from 'react';
 import toast from 'react-hot-toast';
 import Spinner from './Spinner';
 import { ZoomIn, Download, Paintbrush, Shuffle, X, Sun, Contrast, Droplets, RefreshCw } from 'lucide-react'; // Import RefreshCw
@@ -40,7 +40,7 @@ const DEFAULT_FILTER_SETTINGS: FilterSettings = {
   saturate: 100,
 };
 
-const ImageDisplay = forwardRef<HTMLDivElement, ImageDisplayProps>(({
+const ImageDisplay = memo(forwardRef<HTMLDivElement, ImageDisplayProps>(({
     isLoading,
     imageUrls,
     prompt,
@@ -207,7 +207,7 @@ const ImageDisplay = forwardRef<HTMLDivElement, ImageDisplayProps>(({
       )}
     </div>
   );
-});
+}));
 
 ImageDisplay.displayName = 'ImageDisplay';
 export default ImageDisplay;

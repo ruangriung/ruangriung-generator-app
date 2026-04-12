@@ -1,11 +1,10 @@
-// components/Generator.tsx
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React from 'react';
 import ControlPanel, { GeneratorSettings } from './ControlPanel';
 import ImageDisplay from './ImageDisplay';
 import ImageModal from './ImageModal';
-import ApiKeyModal from './ApiKeyModal';
 import HistoryPanel, { HistoryItem } from './HistoryPanel';
 import toast from 'react-hot-toast';
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles'; // Import artStyles
@@ -131,9 +130,6 @@ export default function Generator() {
     };
   });
 
-  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
-  const [modelRequiringKey, setModelRequiringKey] = useState<''>('');
-  const [apiKeys, setApiKeys] = useState<{}>({});
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [modelList, setModelList] = useState<string[]>(() => mergeUniqueModels(DEFAULT_BASE_MODELS, PREMIUM_MODELS));
@@ -144,6 +140,39 @@ export default function Generator() {
 
   const imageDisplayRef = useRef<HTMLDivElement>(null);
   const initialDefaultPromptRef = useRef(settings.prompt);
+
+  // Memoized handlers for performance
+  const handleModelSelect = useCallback((model: string) => {
+    setSettings(prev => ({
+      ...prev,
+      model,
+      ...(IMAGE_TO_IMAGE_MODELS.has(model.toLowerCase()) ? {} : { inputImages: createEmptyReferenceImages() }),
+    }));
+  }, []);
+
+  const onAspectRatioChange = useCallback((preset: 'Kotak' | 'Portrait' | 'Lansekap') => {
+    setAspectRatio(preset);
+    let newWidth = 1024, newHeight = 1024;
+    if (preset === 'Portrait') { newWidth = 1024; newHeight = 1792; }
+    else if (preset === 'Lansekap') { newWidth = 1792; newHeight = 1024; }
+    setSettings(prev => ({ ...prev, width: newWidth, height: newHeight, imageQuality: 'Standar' }));
+  }, []);
+
+  const onManualDimensionChange = useCallback((newWidth: number, newHeight: number) => {
+    setSettings(prev => ({ ...prev, width: newWidth, height: newHeight, imageQuality: 'Standar' }));
+    if (newWidth === 1024 && newHeight === 1024) setAspectRatio('Kotak');
+    else if (newWidth === 1024 && newHeight === 1792) setAspectRatio('Portrait');
+    else if (newWidth === 1792 && newHeight === 1024) setAspectRatio('Lansekap');
+    else setAspectRatio('Custom');
+  }, []);
+
+  const onImageQualityChange = useCallback((quality: 'Standar' | 'HD' | 'Ultra') => {
+    setSettings(prev => ({ ...prev, imageQuality: quality }));
+  }, []);
+
+  const addToHistory = useCallback((newItem: HistoryItem) => {
+    setHistory(prev => [newItem, ...prev.filter(i => i.imageUrl !== newItem.imageUrl)].slice(0, 15));
+  }, []);
 
   useEffect(() => {
     let hasStoredSettings = false;
@@ -246,47 +275,6 @@ export default function Generator() {
     }
   }, [settings.prompt]);
 
-  const addToHistory = (newItem: HistoryItem) => {
-    setHistory(prev => [newItem, ...prev.filter(i => i.imageUrl !== newItem.imageUrl)].slice(0, 15));
-  };
-
-  const onAspectRatioChange = (preset: 'Kotak' | 'Portrait' | 'Lansekap') => {
-    setAspectRatio(preset);
-    let newWidth = 1024, newHeight = 1024;
-    if (preset === 'Portrait') { newWidth = 1024; newHeight = 1792; }
-    else if (preset === 'Lansekap') { newWidth = 1792; newHeight = 1024; }
-    setSettings(prev => ({ ...prev, width: newWidth, height: newHeight, imageQuality: 'Standar' }));
-  };
-
-  const onManualDimensionChange = (newWidth: number, newHeight: number) => {
-    setSettings(prev => ({ ...prev, width: newWidth, height: newHeight, imageQuality: 'Standar' }));
-    if (newWidth === 1024 && newHeight === 1024) setAspectRatio('Kotak');
-    else if (newWidth === 1024 && newHeight === 1792) setAspectRatio('Portrait');
-    else if (newWidth === 1792 && newHeight === 1024) setAspectRatio('Lansekap');
-    else setAspectRatio('Custom');
-  };
-
-  const onImageQualityChange = (quality: 'Standar' | 'HD' | 'Ultra') => {
-    setSettings(prev => ({ ...prev, imageQuality: quality }));
-  };
-
-  const applyModelSelection = (model: string) => {
-    setSettings(prev => ({
-      ...prev,
-      model,
-      ...(IMAGE_TO_IMAGE_MODELS.has(model.toLowerCase()) ? {} : { inputImages: createEmptyReferenceImages() }),
-    }));
-  };
-
-  const handleModelSelect = (model: string) => {
-    applyModelSelection(model);
-  };
-
-  const handleApiKeySubmit = (apiKey: string) => {
-    // Legacy support removal
-    setModelRequiringKey('');
-  };
-
   const handleGenerate = async (isVariation = false) => {
     if (!settings.prompt) {
       toast.error('Prompt tidak boleh kosong!');
@@ -336,7 +324,7 @@ export default function Generator() {
 
       } catch (error: any) {
         toast.error(error.message || `Gagal membuat gambar #${i + 1}`);
-        applyModelSelection('flux');
+        handleModelSelect('flux');
         return null;
       }
     });
@@ -432,13 +420,6 @@ export default function Generator() {
           imageUrl={imageUrls.length > 0 ? imageUrls[0] : ''}
         />
       </div>
-
-      <ApiKeyModal
-        isOpen={isApiKeyModalOpen}
-        onClose={() => setIsApiKeyModalOpen(false)}
-        onSubmit={handleApiKeySubmit}
-        modelName={modelRequiringKey}
-      />
 
       <HistoryPanel
         history={history}

@@ -1,53 +1,56 @@
-// app/api/generate-audio/route.ts
-export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
+import { request } from 'undici';
 
-export async function GET(request: Request) { // Ubah dari POST menjadi GET
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const text = searchParams.get('text'); // Ambil teks dari parameter URL
-    const voice = searchParams.get('voice'); // Ambil suara dari parameter URL
+    const { searchParams } = new URL(req.url);
+    const text = searchParams.get('text');
+    const voice = searchParams.get('voice');
 
     if (!text || !voice) {
       return NextResponse.json({ message: 'Teks dan suara wajib diisi sebagai parameter URL.' }, { status: 400 });
     }
 
-    const POLLINATIONS_TOKEN = process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN; // Tetap gunakan ini seperti yang Anda inginkan
+    const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
 
-    if (!POLLINATIONS_TOKEN) {
+    if (!POLLINATIONS_API_KEY) {
       return NextResponse.json({ message: 'Pollinations AI Token tidak ditemukan di server.' }, { status: 500 });
     }
 
-    // === PERUBAHAN PENTING DI SINI ===
-    // Buat URL GET untuk Pollinations.ai Text-to-Speech
-    const pollinatorsApiUrl = `https://text.pollinations.ai/${encodeURIComponent(text)}?model=openai-audio&voice=${voice}&referrer=ruangriung.my.id`;
-    // ================================
-
-    // Kirim permintaan GET ke Pollinations.ai dari backend
-    const response = await fetch(pollinatorsApiUrl, {
-      method: 'GET', // Metode GET
-      // Header Authorization tidak diperlukan untuk endpoint GET ini (biasanya berbasis referrer)
-      // Namun, jika token diperlukan untuk kuota, bisa ditambahkan sebagai query param 'token'
-      // Sesuai dokumentasi, endpoint GET untuk TTS tidak secara eksplisit menyebut Authorization header.
-      // Jika Anda memiliki tier yang lebih tinggi, Anda mungkin perlu menambahkan `&token=${POLLINATIONS_TOKEN}` ke URL.
+    const queryParams = new URLSearchParams({
+      voice: voice,
+      response_format: 'mp3',
+      model: 'tts-1', // Default model for tts
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error dari Pollinations.ai (melalui proxy GET):', errorText);
-      try {
-        const errorJson = JSON.parse(errorText); // Coba parse error sebagai JSON
-        return NextResponse.json({ message: `Gagal membuat audio dari AI: ${errorJson.error || errorText}` }, { status: response.status });
-      } catch {
-        return NextResponse.json({ message: `Gagal membuat audio dari AI: ${response.statusText} - ${errorText}` }, { status: response.status });
-      }
+    const pollinatorsApiUrl = `https://gen.pollinations.ai/audio/${encodeURIComponent(text)}?${queryParams.toString()}`;
+
+    const headers: Record<string, string> = {
+      'Authorization': `Bearer ${POLLINATIONS_API_KEY}`,
+    };
+
+    const { statusCode, body } = await request(pollinatorsApiUrl, {
+      method: 'GET',
+      headers,
+    });
+
+    if (statusCode !== 200) {
+      const errorText = await body.text();
+      console.error('Error dari Pollinations.ai:', errorText);
+      return NextResponse.json(
+        { message: `Gagal membuat audio: ${errorText}` },
+        { status: statusCode }
+      );
     }
 
-    const audioBlob = await response.blob();
+    // Mengambil buffer dari response undici
+    const arrayBuffer = await body.arrayBuffer();
 
-    return new NextResponse(audioBlob, {
+    return new NextResponse(arrayBuffer, {
       headers: {
-        'Content-Type': 'audio/mpeg', // Pastikan tipe konten adalah audio/mpeg
+        'Content-Type': 'audio/mpeg',
         'Content-Disposition': `attachment; filename="audio-${Date.now()}.mp3"`,
       },
       status: 200,

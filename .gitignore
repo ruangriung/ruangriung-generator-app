@@ -21,6 +21,7 @@
 /build
 
 # misc
+github-recovery-codes.txt
 .DS_Store
 *.pem
 

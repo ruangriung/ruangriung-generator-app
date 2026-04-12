@@ -1,7 +1,7 @@
 // components/Tabs.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { useSession } from 'next-auth/react';
 import { Lock, Image, Video, AudioLines, MessageSquare } from 'lucide-react';
 import AuthButton from './AuthButton';
@@ -27,22 +27,19 @@ const LockedContent = () => (
   </div>
 );
 
-export default function Tabs() {
-  const tabs = [
+const Tabs = memo(() => {
+  const tabs = useMemo(() => [
     { name: 'chatbot', label: 'Chatbot', icon: MessageSquare, content: <Chatbot />, isProtected: false },
     { name: 'video', label: 'Video Prompt', icon: Video, content: <VideoCreator />, isProtected: true },
     { name: 'text-to-video', label: 'Text to Video', icon: Video, content: <TextToVideo />, isProtected: true },
     { name: 'audio', label: 'Audio', icon: AudioLines, content: <AudioGenerator />, isProtected: true },
     { name: 'image', label: 'Image', icon: Image, content: <Generator />, isProtected: false }
-  ];
+  ], []);
 
-  // --- PERBAIKAN DI SINI: Ubah state awal ---
-  const [activeTab, setActiveTab] = useState('image'); // Langsung set ke 'image'
-  // --- AKHIR PERBAIKAN ---
-
+  const [activeTab, setActiveTab] = useState('image');
   const { status } = useSession();
 
-  const activeContent = () => {
+  const activeContent = useMemo(() => {
     const currentTab = tabs.find(tab => tab.name === activeTab);
     if (!currentTab) return null;
 
@@ -50,7 +47,7 @@ export default function Tabs() {
       return <LockedContent />;
     }
     return currentTab.content;
-  };
+  }, [activeTab, tabs, status]);
 
   return (
     <div className="w-full max-w-4xl">
@@ -80,8 +77,12 @@ export default function Tabs() {
       </div>
 
       <div className="pt-8">
-        {activeContent()}
+        {activeContent}
       </div>
     </div>
   );
-}
+});
+
+Tabs.displayName = 'Tabs';
+
+export default Tabs;

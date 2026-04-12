@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { fetch } from 'undici';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +11,9 @@ function getApiKey() {
 
 function buildAuthHeaders() {
   const apiKey = getApiKey();
-  const headers: HeadersInit = {};
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
 
   if (apiKey) {
     headers.Authorization = `Bearer ${apiKey}`;
@@ -28,12 +31,15 @@ export async function GET(request: Request) {
       return NextResponse.json({ message: 'Prompt/Text is required' }, { status: 400 });
     }
 
-    const queryString = searchParams.toString();
-    const finalUrl = `${POLLINATIONS_BASE_URL}/text/${encodeURIComponent(prompt)}?${queryString}`;
+    // Forwarding additional query params to Pollinations (e.g., model, seed)
+    const pollParams = new URLSearchParams(searchParams);
+    const finalUrl = `${POLLINATIONS_BASE_URL}/text/${encodeURIComponent(prompt)}?${pollParams.toString()}`;
 
     const response = await fetch(finalUrl, {
       method: 'GET',
-      headers: buildAuthHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     if (!response.ok) {
@@ -59,7 +65,12 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    let body: any = {};
+    try {
+      body = await request.json();
+    } catch {
+      // Body is empty or not JSON, default to empty object
+    }
 
     const model = body?.model || 'openai';
     const messages = Array.isArray(body?.messages)
@@ -70,7 +81,14 @@ export async function POST(request: Request) {
 
     if (!messages.length) {
       return NextResponse.json(
-        { message: 'messages atau prompt wajib diisi untuk request POST.' },
+        {
+          error: {
+            message: 'messages atau prompt wajib diisi untuk request POST.',
+            type: 'invalid_request_error',
+            param: 'messages',
+            code: null
+          }
+        },
         { status: 400 }
       );
     }
@@ -80,25 +98,37 @@ export async function POST(request: Request) {
       messages,
     };
 
+    // Forward all OpenAI-compatible parameters
     if (typeof body?.temperature !== 'undefined') upstreamPayload.temperature = body.temperature;
     if (typeof body?.seed !== 'undefined') upstreamPayload.seed = body.seed;
     if (typeof body?.stream !== 'undefined') upstreamPayload.stream = body.stream;
     if (typeof body?.max_tokens !== 'undefined') upstreamPayload.max_tokens = body.max_tokens;
     if (body?.response_format) upstreamPayload.response_format = body.response_format;
+    if (typeof body?.json !== 'undefined') upstreamPayload.json = body.json;
 
     const response = await fetch(`${POLLINATIONS_BASE_URL}/v1/chat/completions`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...buildAuthHeaders(),
-      },
+      headers: buildAuthHeaders(),
       body: JSON.stringify(upstreamPayload),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
+      let errorJson;
+      try {
+        errorJson = JSON.parse(errorText);
+      } catch {
+        errorJson = { message: errorText };
+      }
+      
       return NextResponse.json(
-        { message: `Pollinations API Error: ${response.statusText}`, error: errorText },
+        { 
+          error: errorJson.error || {
+            message: `Pollinations API Error: ${response.statusText}`,
+            type: 'api_error',
+            code: response.status
+          }
+        },
         { status: response.status }
       );
     }
@@ -107,6 +137,13 @@ export async function POST(request: Request) {
 
     try {
       const parsed = JSON.parse(raw);
+      
+      // Jika client minta full response (OpenAI format)
+      if (body?.return_full_response === true) {
+        return NextResponse.json(parsed);
+      }
+
+      // Default: Hanya return content string untuk kemudahan penggunaan di UI
       const content = parsed?.choices?.[0]?.message?.content;
 
       if (typeof content === 'string') {
@@ -122,21 +159,38 @@ export async function POST(request: Request) {
           .join('')
           .trim();
 
-        return new NextResponse(textFromArray || raw, {
+        return new NextResponse(textFromArray || JSON.stringify(parsed), {
           headers: { 'Content-Type': 'text/plain; charset=utf-8' },
           status: 200,
         });
       }
+
+      // Fallback ke JSON jika content tidak ditemukan
+      return new NextResponse(JSON.stringify(parsed), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+      });
     } catch {
-      // Upstream can still return plain text on some models/modes.
+      // Jika gagal parse JSON, kembalikan teks mentah
+      return new NextResponse(raw, {
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        status: 200,
+      });
     }
 
-    return new NextResponse(raw, {
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-      status: 200,
-    });
   } catch (error: any) {
     console.error('Error in Pollinations Text Proxy (POST):', error);
-    return NextResponse.json({ message: 'Internal Server Error', error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { 
+        error: {
+          message: 'Internal Server Error',
+          type: 'internal_error',
+          param: null,
+          code: 'internal_error'
+        },
+        details: error.message 
+      },
+      { status: 500 }
+    );
   }
 }

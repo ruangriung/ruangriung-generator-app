@@ -1,19 +1,15 @@
 // components/StorytellerClient.tsx
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import toast from 'react-hot-toast';
 // Impor ikon Info di sini
 import { Send, Download, Loader2, Sparkles, ZoomIn, Copy, Settings, X, Info } from 'lucide-react';
 import Spinner from './Spinner';
 import ImageModal from './ImageModal';
 import Accordion from './Accordion';
-import ApiKeyModal from './ApiKeyModal';
 
 // --- Konstanta API ---
-const POLLINATIONS_TEXT_API_BASE_URL = 'https://text.pollinations.ai/openai';
-const POLLINATIONS_IMAGE_MODELS_URL = 'https://image.pollinations.ai/models';
-const POLLINATIONS_TOKEN = process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
 
 // --- Daftar Prompt Acak ---
 const DEFAULT_STORY_PROMPTS = [
@@ -40,9 +36,8 @@ interface StoryPart {
   description: string;
 }
 
-type ImageModelType = 'flux' | string;
-type TextModelType = 'openai' | 'gemini-1.5-flash';
-type ApiKeyModelName = 'Gemini' | '';
+type ImageModelType = string;
+type TextModelType = string;
 
 interface PollinationsOpenAIResponse {
   choices?: Array<{ message?: { content?: string } }>;
@@ -54,7 +49,7 @@ interface GeminiApiResponse {
 
 
 // --- Komponen StorytellerClient ---
-export default function StorytellerClient() {
+const StorytellerClient = memo(() => {
   const [mainPrompt, setMainPrompt] = useState('');
   const [storyTitle, setStoryTitle] = useState('');
   const [generatedStoryParts, setGeneratedStoryParts] = useState<StoryPart[]>([]);
@@ -75,18 +70,10 @@ export default function StorytellerClient() {
   const [imageHeight, setImageHeight] = useState(1024);
   const [imageSeed, setImageSeed] = useState(Math.floor(Math.random() * 1000000));
   const [imageQuality, setImageQuality] = useState<'standard' | 'hd'>('standard');
-  const [dalle3Size, setDalle3Size] = useState<string>('1024x1024');
-
-  // --- State API Keys (dari localStorage) ---
-  const [geminiApiKey, setGeminiApiKey] = useState('');
-
-  // --- State untuk Modal API Key ---
-  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
-  const [modelRequiringKey, setModelRequiringKey] = useState<ApiKeyModelName>('');
 
   // --- State untuk Model Dinamis ---
   const [availableImageModels, setAvailableImageModels] = useState<ImageModelType[]>(['flux']);
-  const [availableTextModels, setAvailableTextModels] = useState<TextModelType[]>(['openai', 'gemini-1.5-flash']);
+  const [availableTextModels, setAvailableTextModels] = useState<TextModelType[]>(['openai']);
 
   // --- State untuk Modal Zoom Gambar ---
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -96,64 +83,49 @@ export default function StorytellerClient() {
 
   // --- Hooks Efek ---
   useEffect(() => {
-    // Memuat API keys dari localStorage
-    const savedGeminiKey = localStorage.getItem('gemini_api_key');
-
-    if (savedGeminiKey) setGeminiApiKey(savedGeminiKey);
-
-    // Feedback jika token Pollinations.ai tidak ditemukan
-    if (!POLLINATIONS_TOKEN) {
-      toast.error('Token Pollinations.ai (NEXT_PUBLIC_POLLINATIONS_TOKEN) tidak ditemukan. Pastikan sudah diatur di environment variables Anda.');
-    }
-
-    // Periksa API key untuk model default saat mount
-    if (textModel === 'gemini-1.5-flash' && !savedGeminiKey) {
-      checkAndOpenApiKeyModal('Gemini');
-    }
-
-    // --- Muat Model AI Secara Dinamis (Hanya Gambar) ---
-    const fetchImageModels = async () => {
+    // --- Muat Model AI Secara Dinamis ---
+    const fetchModels = async () => {
       try {
-        const imgResponse = await fetch(POLLINATIONS_IMAGE_MODELS_URL);
-        const imgData = await imgResponse.json();
-        let fetchedImgModels: string[] = [];
-        if (Array.isArray(imgData)) {
-          fetchedImgModels = imgData.filter(item => typeof item === 'string');
+        // Fetch Image Models
+        const imgResponse = await fetch('/api/pollinations/models/image');
+        let imgModelsList = ['flux'];
+        if (imgResponse.ok) {
+          const imgData = await imgResponse.json();
+          if (Array.isArray(imgData)) {
+            imgModelsList = [...new Set(['flux', ...imgData.map((m: any) => typeof m === 'string' ? m : m.id || m.name)])];
+          }
         }
-        setAvailableImageModels([...new Set([...fetchedImgModels, 'flux'])]);
+        setAvailableImageModels(imgModelsList as any);
+
+        // Fetch Text Models
+        const textResponse = await fetch('/api/pollinations/models/text');
+        let textModelsList = ['openai'];
+        if (textResponse.ok) {
+          const textData = await textResponse.json();
+          if (Array.isArray(textData)) {
+            textModelsList = [...new Set([...textData.map((m: any) => m.id || m.name)])];
+          }
+        }
+        if (textModelsList.length > 0) {
+          setAvailableTextModels(textModelsList as any);
+          if (!textModelsList.includes(textModel as any)) {
+            setTextModel(textModelsList[0] as any); // fallback selection
+          }
+        }
+
       } catch (error) {
-        console.error("Error fetching image models:", error);
-        setAvailableImageModels(['flux']); // Fallback
+        console.error("Error fetching dynamic models:", error);
+        setAvailableImageModels(['flux']); 
+        setAvailableTextModels(['openai', 'mistral']);
       }
     };
-    fetchImageModels();
-
+    fetchModels();
   }, []);
 
-  // --- Fungsi untuk memeriksa dan membuka modal API Key ---
-  const checkAndOpenApiKeyModal = (model: ApiKeyModelName): boolean => {
-    let keyMissing = false;
-    if (model === 'Gemini' && !geminiApiKey) keyMissing = true;
-
-    if (keyMissing) {
-      setModelRequiringKey(model);
-      setIsApiKeyModalOpen(true);
-      return true;
-    }
-    return false;
-  };
-
   // --- Fungsi Handle Generate Story ---
-  const handleGenerateStory = async () => {
+  const handleGenerateStory = useCallback(async () => {
     // Validasi dasar
     if (!mainPrompt) { toast.error('Ide cerita tidak boleh kosong!'); return; }
-    if (!POLLINATIONS_TOKEN && textModel === 'openai') {
-      toast.error('Token Pollinations.ai untuk teks tidak ditemukan. Silakan atur NEXT_PUBLIC_POLLINATIONS_TOKEN.'); return;
-    }
-
-
-    // Periksa dan tampilkan modal jika API key teks yang dipilih kosong
-    if (checkAndOpenApiKeyModal(textModel === 'gemini-1.5-flash' ? 'Gemini' : '')) return;
 
     setIsLoading(true);
     setCurrentStep(0); // Reset langkah
@@ -165,150 +137,82 @@ export default function StorytellerClient() {
       resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
 
-    const currentSeed = imageSeed;
-
     try {
       // --- Step 1: Minta AI Teks untuk membuat 5 prompt gambar dari ide cerita utama ---
       setProgressMessage('AI sedang menyusun ide-ide adegan...');
       setCurrentStep(1);
-      const promptInstructionForImages = `Dari ide cerita berikut: '${mainPrompt}', buat 5 deskripsi gambar yang sangat detail, unik, dan berbeda satu sama lain, cocok untuk digunakan sebagai prompt AI Image Generator (contoh: DALL-E 3 atau Stable Diffusion). Setiap deskripsi harus berdiri sendiri dan tidak lebih dari 100 kata. Berikan dalam format daftar berpoin (gunakan bullet point atau nomor 1-5). Jangan sertakan teks lain selain daftar prompt.`;
+      const promptInstructionForImages = `Berdasarkan ide cerita berikut: '${mainPrompt}', buatlah 5 deskripsi prompt gambar yang sangat kreatif, sinematik, dan detail secara visual. Setiap prompt harus menggambarkan satu adegan penting yang berurutan untuk membentuk sebuah cerita visual yang utuh. Sertakan detail tentang gaya seni, pencahayaan, suasana, dan komposisi. Berikan dalam format daftar berpoin (1-5). Jangan sertakan teks penjelasan lainnya, cukup daftar prompt saja.`;
 
       let imagePromptsText = '';
-      if (textModel === 'openai') {
-        const imagePromptsResponse = await fetch(`${POLLINATIONS_TEXT_API_BASE_URL}?token=${POLLINATIONS_TOKEN}`, {
+      
+      const imagePromptsResponse = await fetch('/api/pollinations/text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: textModel,
+          prompt: promptInstructionForImages,
+          temperature: 0.8,
+        }),
+      });
+      
+      if (!imagePromptsResponse.ok) throw new Error(`Gagal membuat prompt gambar.`);
+      
+      imagePromptsText = await imagePromptsResponse.text();
+
+      const rawImagePrompts = imagePromptsText.split(/\n[\*-]?\s*\d*\.?\s*/).filter((p: string) => p.trim() !== '');
+      if (rawImagePrompts.length === 0) throw new Error('AI tidak dapat menghasilkan prompt gambar yang valid.');
+
+      // --- Step 2: Hasilkan gambar dan deskripsinya secara paralel for setiap prompt ---
+      const storyPromises = rawImagePrompts.slice(0, 5).map(async (imgPrompt: string, index: number) => {
+        setProgressMessage(`Adegan ${index + 1}...`);
+        
+        const imageParams = new URLSearchParams({
+          prompt: imgPrompt,
+          model: imageModel,
+          width: imageWidth.toString(),
+          height: imageHeight.toString(),
+          seed: (imageSeed + index).toString(),
+          nologo: 'true',
+          referrer: 'ruangriung.my.id'
+        });
+
+        const imageResponse = await fetch(`/api/pollinations/image?${imageParams.toString()}`);
+        if (!imageResponse.ok) throw new Error(`Gagal membuat gambar #${index + 1}`);
+        const finalImageUrl = imageResponse.url;
+
+        const promptInstructionForDescription = `Buatkan narasi pendek (sekitar 60-100 kata) untuk adegan: '${imgPrompt}'.`;
+
+        const descriptionResponse = await fetch('/api/pollinations/text', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: 'openai',
-            messages: [{ role: 'user', content: promptInstructionForImages }],
+            model: textModel,
+            prompt: promptInstructionForDescription,
             temperature: 0.7,
           }),
         });
-        if (!imagePromptsResponse.ok) {
-          const errorBody = await imagePromptsResponse.text();
-          throw new Error(`Gagal membuat prompt gambar dari Pollinations.ai: ${errorBody || 'Unknown error'}`);
-        }
-        const imagePromptsResult: PollinationsOpenAIResponse = await imagePromptsResponse.json();
-        imagePromptsText = imagePromptsResult.choices?.[0]?.message?.content?.trim() || '';
-      } else if (textModel === 'gemini-1.5-flash') {
-        const imagePromptsResponse = await fetch('/api/gemini', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: [{ role: 'user', content: promptInstructionForImages }],
-            apiKey: geminiApiKey,
-            model: textModel,
-          }),
-        });
-        if (!imagePromptsResponse.ok) {
-          const errorData = await imagePromptsResponse.json();
-          throw new Error(`Gagal membuat prompt gambar dari Gemini API: ${errorData.message || 'Unknown error'}`);
-        }
-        const imagePromptsResult: GeminiApiResponse = await imagePromptsResponse.json();
-        imagePromptsText = imagePromptsResult.text || '';
-      }
 
-      const rawImagePrompts = imagePromptsText.split(/\n[\*-]?\s*\d*\.?\s*/).filter((p: string) => p.trim() !== '');
-      if (rawImagePrompts.length === 0) { throw new Error('AI tidak dapat menghasilkan prompt gambar yang valid. Coba ide cerita lain yang lebih spesifik.'); }
-
-      // --- Step 2: Hasilkan gambar dan deskripsinya secara paralel untuk setiap prompt ---
-      const storyPromises = rawImagePrompts.slice(0, 5).map(async (imgPrompt: string, index: number) => {
-        let finalImageUrl = '';
-
-        setProgressMessage(`Membuat gambar untuk adegan ${index + 1} dari ${rawImagePrompts.slice(0, 5).length}...`);
-        setCurrentStep(prev => prev + 1);
-
-        if (imageModel === 'flux' || true) {
-          const modelParam = imageModel;
-          const tokenParam = (imageModel === 'flux' && POLLINATIONS_TOKEN) ? `&token=${POLLINATIONS_TOKEN}` : '';
-          let url = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?model=${modelParam}&width=${imageWidth}&height=${imageHeight}&seed=${currentSeed + index}&nologo=true&referrer=ruangriung.my.id${tokenParam}`;
-
-          const imageResponse = await fetch(url);
-          if (!imageResponse.ok) { throw new Error(`Gagal membuat gambar ${imageModel} #${index + 1}: ${imageResponse.statusText}`); }
-          finalImageUrl = imageResponse.url;
-        } else {
-          console.warn(`Model gambar ${imageModel} tidak dapat digunakan.`);
-          return { imagePrompt: imgPrompt, imageUrl: '', description: 'Gambar tidak dapat dihasilkan karena masalah konfigurasi.' };
-        }
-
-        // --- Minta AI Teks untuk deskripsi singkat gambar ---
-        setProgressMessage(`Membuat deskripsi untuk adegan ${index + 1} dari ${rawImagePrompts.slice(0, 5).length}...`);
-        setCurrentStep(prev => prev + 1); // Langkah untuk deskripsi
-
-        const promptInstructionForDescription = `Buatkan deskripsi singkat (sekitar 50-80 kata) yang menarik untuk gambar yang dihasilkan dari prompt AI berikut: '${imgPrompt}'. Fokus pada apa yang terlihat di gambar dan suasana yang diciptakan.`;
-
-        let descriptionText = '';
-        if (textModel === 'openai') {
-          const descriptionResponse = await fetch(`${POLLINATIONS_TEXT_API_BASE_URL}?token=${POLLINATIONS_TOKEN}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              model: 'openai',
-              messages: [{ role: 'user', content: promptInstructionForDescription }],
-              temperature: 0.7,
-            }),
-          });
-          if (!descriptionResponse.ok) {
-            const errorBody = await descriptionResponse.text();
-            console.warn(`Gagal membuat deskripsi dari Pollinations.ai #${index + 1}: ${errorBody || 'Unknown error'}`);
-            descriptionText = 'Deskripsi gambar tidak dapat dihasilkan.';
-          } else {
-            const descriptionResult: PollinationsOpenAIResponse = await descriptionResponse.json();
-            descriptionText = descriptionResult.choices?.[0]?.message?.content?.trim() || "Maaf, saya tidak dapat memberikan respons saat ini.";
-          }
-        } else if (textModel === 'gemini-1.5-flash') {
-          const descriptionResponse = await fetch('/api/gemini', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              messages: [{ role: 'user', content: promptInstructionForDescription }],
-              apiKey: geminiApiKey,
-              model: textModel,
-            }),
-          });
-          if (!descriptionResponse.ok) {
-            const errorData = await descriptionResponse.json();
-            console.warn(`Gagal membuat deskripsi dari Gemini API #${index + 1}: ${errorData.message || 'Unknown error'}`);
-            descriptionText = 'Deskripsi gambar tidak dapat dihasilkan.';
-          } else {
-            const descriptionResult: GeminiApiResponse = await descriptionResponse.json();
-            descriptionText = descriptionResult.text || "Maaf, saya tidak dapat memberikan respons saat ini.";
-          }
-        }
+        const descriptionText = descriptionResponse.ok ? await descriptionResponse.text() : 'Deskripsi tidak tersedia.';
 
         return { imagePrompt: imgPrompt, imageUrl: finalImageUrl, description: descriptionText };
       });
 
       const results = await Promise.all(storyPromises);
       setGeneratedStoryParts(results.filter(part => part.imageUrl));
-
-      if (results.filter(part => part.imageUrl).length > 0) {
-        toast.success(`Berhasil membuat ${results.filter(part => part.imageUrl).length} gambar untuk cerita!`, { id: generationToastId });
-      } else {
-        toast.error("Tidak ada gambar yang berhasil dibuat untuk cerita.", { id: generationToastId });
-      }
+      toast.success(`Berhasil!`, { id: generationToastId });
 
     } catch (error: any) {
       toast.error(`Error: ${error.message}`, { id: generationToastId });
-      console.error("Error creating story:", error);
     } finally {
       setIsLoading(false);
-      setProgressMessage(''); // Reset pesan kemajuan
-      setCurrentStep(0); // Reset langkah
+      setProgressMessage('');
+      setCurrentStep(0);
     }
-  };
+  }, [mainPrompt, textModel, imageModel, imageWidth, imageHeight, imageSeed]);
 
   // --- Fungsi Handle Random Prompt ---
-  const handleRandomPrompt = async () => {
+  const handleRandomPrompt = useCallback(async () => {
     if (isGeneratingRandomPrompt || isLoading || isGeneratingTitle) return;
-    if (!POLLINATIONS_TOKEN && textModel === 'openai') {
-      toast.error('Token Pollinations.ai untuk menghasilkan ide acak tidak ditemukan. Silakan atur NEXT_PUBLIC_POLLINATIONS_TOKEN.');
-      return;
-    }
-    if (textModel === 'gemini-1.5-flash' && !geminiApiKey) {
-      checkAndOpenApiKeyModal('Gemini');
-      return;
-    }
 
     setIsGeneratingRandomPrompt(true);
     const randomPromptToastId = toast.loading("AI RuangRIung Sedang Berpikir...");
@@ -317,119 +221,67 @@ export default function StorytellerClient() {
     setGeneratedStoryParts([]);
 
     try {
-      const promptInstruction = `Hasilkan satu ide cerita yang kreatif, unik, dan menarik (sekitar 100-150 kata) yang dapat digunakan sebagai titik awal untuk menghasilkan cerita visual dengan 5 adegan. Ide cerita harus imajinatif dan kaya visual. Berikan hanya ide ceritanya, tanpa teks lain. Timestamp:${Date.now()}`;
+      const promptInstruction = `Hasilkan satu ide cerita yang sangat kreatif, unik, dan penuh imajinasi (sekitar 100-150 kata). Ide ini akan digunakan untuk membuat cerita visual 5 adegan. Pastikan ceritanya memiliki konflik yang menarik dan nuansa visual yang kuat. Berikan hanya ide ceritanya saja. Timestamp:${Date.now()}`;
 
-      let generatedPromptText = '';
-      if (textModel === 'openai') {
-        const response = await fetch(`${POLLINATIONS_TEXT_API_BASE_URL}?token=${POLLINATIONS_TOKEN}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'openai',
-            messages: [{ role: 'user', content: promptInstruction }],
-            temperature: 0.95,
-          }),
-        });
-        if (!response.ok) {
-          const errorBody = await response.text();
-          throw new Error(`Gagal membuat ide acak dari Pollinations.ai: ${errorBody || 'Unknown error'}`);
-        }
-        const result: PollinationsOpenAIResponse = await response.json();
-        generatedPromptText = result.choices?.[0]?.message?.content?.trim() || "Maaf, saya tidak dapat menghasilkan ide cerita saat ini.";
-      } else if (textModel === 'gemini-1.5-flash') {
-        const response = await fetch('/api/gemini', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: [{ role: 'user', content: promptInstruction }],
-            apiKey: geminiApiKey,
-            model: textModel,
-          }),
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(`Gagal membuat ide acak dari Gemini API: ${errorData.message || 'Unknown error'}`);
-        }
-        const result: GeminiApiResponse = await response.json();
-        generatedPromptText = result.text || "Maaf, saya tidak dapat menghasilkan ide cerita saat ini.";
-      }
+      const response = await fetch('/api/pollinations/text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: textModel,
+          prompt: promptInstruction,
+          temperature: 0.95,
+        }),
+      });
 
+      if (!response.ok) throw new Error(`Gagal membuat ide acak.`);
+
+      const generatedPromptText = await response.text();
       setMainPrompt(generatedPromptText);
       toast.success("Ide cerita acak berhasil dimuat!", { id: randomPromptToastId });
     } catch (error: any) {
       console.error("Gagal menghasilkan ide acak:", error);
       toast.error(`Gagal menghasilkan ide acak: ${error.message}`, { id: randomPromptToastId });
-      setMainPrompt("Gagal memuat ide cerita acak. Silakan coba lagi atau masukkan ide Anda sendiri.");
+      setMainPrompt("Gagal memuat ide cerita acak. Silakan coba lagi.");
     } finally {
       setIsGeneratingRandomPrompt(false);
     }
-  };
+  }, [isGeneratingRandomPrompt, isLoading, isGeneratingTitle, textModel]);
 
   // --- Fungsi untuk membuat Judul Cerita dengan AI ---
-  const handleGenerateTitle = async () => {
+  const handleGenerateTitle = useCallback(async () => {
     if (isGeneratingTitle || isLoading || isGeneratingRandomPrompt || !mainPrompt) return;
-    if (!POLLINATIONS_TOKEN && textModel === 'openai') {
-      toast.error('Token Pollinations.ai untuk menghasilkan judul tidak ditemukan. Silakan atur NEXT_PUBLIC_POLLINATIONS_TOKEN.');
-      return;
-    }
-    if (textModel === 'gemini-1.5-flash' && !geminiApiKey) {
-      checkAndOpenApiKeyModal('Gemini');
-      return;
-    }
 
     setIsGeneratingTitle(true);
     const titleToastId = toast.loading("AI RuangRIung Sedang Berpikir...");
     setStoryTitle('');
 
     try {
-      const promptInstruction = `Berdasarkan ide cerita berikut, sarankan judul yang ringkas dan menarik (maksimal 10 kata). Berikan hanya judulnya, tanpa teks lain:\n\n'${mainPrompt}' Timestamp:${Date.now()}`;
-      let generatedTitleText = '';
+      const promptInstruction = `Berdasarkan ide cerita berikut, buatlah judul yang puitis dan menarik (maksimal 7 kata). Berikan hanya judulnya saja tanpa tanda kutip:\n\n'${mainPrompt}' Timestamp:${Date.now()}`;
+      
+      const response = await fetch('/api/pollinations/text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: textModel,
+          prompt: promptInstruction,
+          temperature: 0.8,
+        }),
+      });
 
-      if (textModel === 'openai') {
-        const response = await fetch(`${POLLINATIONS_TEXT_API_BASE_URL}?token=${POLLINATIONS_TOKEN}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'openai',
-            messages: [{ role: 'user', content: promptInstruction }],
-            temperature: 0.9,
-          }),
-        });
-        if (!response.ok) {
-          const errorBody = await response.text();
-          throw new Error(`Gagal membuat judul dari Pollinations.ai: ${errorBody || 'Unknown error'}`);
-        }
-        const result: PollinationsOpenAIResponse = await response.json();
-        generatedTitleText = result.choices?.[0]?.message?.content?.trim() || "Tidak dapat menghasilkan judul.";
-      } else if (textModel === 'gemini-1.5-flash') {
-        const response = await fetch('/api/gemini', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: [{ role: 'user', content: promptInstruction }],
-            apiKey: geminiApiKey,
-            model: textModel,
-          }),
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(`Gagal membuat judul dari Gemini API: ${errorData.message || 'Unknown error'}`);
-        }
-        const result: GeminiApiResponse = await response.json();
-        generatedTitleText = result.text || "Maaf, saya tidak dapat menghasilkan judul saat ini.";
-      }
+      if (!response.ok) throw new Error(`Gagal membuat judul.`);
 
-      setStoryTitle(generatedTitleText);
+      const generatedTitleText = await response.text();
+      setStoryTitle(generatedTitleText.replace(/"/g, ''));
       toast.success("Judul berhasil dibuat!", { id: titleToastId });
 
     } catch (error: any) {
       console.error("Gagal menghasilkan judul:", error);
       toast.error(`Gagal menghasilkan judul: ${error.message}`, { id: titleToastId });
-      setStoryTitle("Gagal memuat judul. Silakan coba lagi.");
+      setStoryTitle("Gagal memuat judul.");
     } finally {
       setIsGeneratingTitle(false);
     }
-  };
+  }, [isGeneratingTitle, isLoading, isGeneratingRandomPrompt, mainPrompt, textModel]);
 
 
   const handleCopyDescription = (text: string) => {
@@ -481,17 +333,6 @@ export default function StorytellerClient() {
     });
 
     toast.success('Cerita dan gambar mulai diunduh!');
-  };
-
-  // --- Fungsi Handle Submit API Key dari Modal ---
-  const handleApiKeySubmit = (apiKey: string) => {
-    if (modelRequiringKey === 'Gemini') {
-      setGeminiApiKey(apiKey);
-      localStorage.setItem('gemini_api_key', apiKey);
-      toast.success('API Key Gemini disimpan!');
-    }
-    setIsApiKeyModalOpen(false);
-    setModelRequiringKey('');
   };
 
   // --- Gaya Umum ---
@@ -576,12 +417,7 @@ export default function StorytellerClient() {
               <select
                 id="text-model"
                 value={textModel}
-                onChange={(e) => {
-                  setTextModel(e.target.value as TextModelType);
-                  if (e.target.value === 'gemini-1.5-flash' && !geminiApiKey) {
-                    checkAndOpenApiKeyModal('Gemini');
-                  }
-                }}
+                onChange={(e) => setTextModel(e.target.value as TextModelType)}
                 className={selectStyle}
               >
                 {availableTextModels.map(model => (
@@ -686,7 +522,7 @@ export default function StorytellerClient() {
 
         <button
           onClick={handleGenerateStory}
-          disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle || !mainPrompt || (textModel === 'openai' && !POLLINATIONS_TOKEN)}
+          disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle || !mainPrompt}
           className="mt-6 w-full py-3 px-6 rounded-xl text-white font-semibold flex items-center justify-center transition-all duration-300
                      bg-purple-600 hover:bg-purple-700 shadow-neumorphic-button dark:shadow-dark-neumorphic-button
                      active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset disabled:opacity-50 disabled:cursor-not-allowed"
@@ -785,13 +621,10 @@ export default function StorytellerClient() {
         imageUrl={modalImageUrl}
       />
 
-      {/* Modal untuk API Key: dirender di sini dan dikendalikan oleh state. */}
-      <ApiKeyModal
-        isOpen={isApiKeyModalOpen}
-        onClose={() => setIsApiKeyModalOpen(false)}
-        onSubmit={handleApiKeySubmit}
-        modelName={modelRequiringKey}
-      />
     </div>
   );
-}
+});
+
+StorytellerClient.displayName = 'StorytellerClient';
+
+export default StorytellerClient;

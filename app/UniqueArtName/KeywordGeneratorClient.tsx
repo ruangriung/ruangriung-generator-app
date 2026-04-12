@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
 import {
   Sparkles,
   RefreshCw,
@@ -71,44 +71,9 @@ const FALLBACK_MODELS: ModelOption[] = [
   { id: 'phi', name: 'Phi-4 Mini Instruct', description: 'Ahli dalam gaya naratif ringkas.' },
 ];
 
-const POLLINATIONS_TEXT_API_BASE_URL = 'https://text.pollinations.ai';
-const POLLINATIONS_MODELS_ENDPOINT = `${POLLINATIONS_TEXT_API_BASE_URL}/models`;
-const POLLINATIONS_OPENAI_ENDPOINT = `${POLLINATIONS_TEXT_API_BASE_URL}/openai`;
-const POLLINATIONS_TOKEN = process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN?.trim();
-const POLLINATIONS_REFERRER = 'ruangriung.my.id';
+const POLLINATIONS_MODELS_ENDPOINT = '/api/pollinations/models/text';
+const INTENAL_PROXY_TEXT_ENDPOINT = '/api/pollinations/text';
 
-const getPollinationsQueryParam = () => {
-  if (POLLINATIONS_TOKEN) {
-    return { name: 'token', value: POLLINATIONS_TOKEN } as const;
-  }
-
-  return { name: 'referrer', value: POLLINATIONS_REFERRER } as const;
-};
-
-const buildPollinationsUrl = (baseUrl: string) => {
-  try {
-    const url = new URL(baseUrl);
-    const { name, value } = getPollinationsQueryParam();
-    url.searchParams.set(name, value);
-    return url.toString();
-  } catch (error) {
-    console.warn('Gagal membangun URL Pollinations:', error);
-    const { name, value } = getPollinationsQueryParam();
-    const separator = baseUrl.includes('?') ? '&' : '?';
-    return `${baseUrl}${separator}${name}=${encodeURIComponent(value)}`;
-  }
-};
-
-const getPollinationsAuthHeaders = (hasJsonBody: boolean) => {
-  const headers: Record<string, string> = {};
-  if (hasJsonBody) {
-    headers['Content-Type'] = 'application/json';
-  }
-  if (POLLINATIONS_TOKEN) {
-    headers.Authorization = `Bearer ${POLLINATIONS_TOKEN}`;
-  }
-  return headers;
-};
 
 const shouldEnforceDefaultTemperature = (modelId: string) => {
   const normalized = modelId.trim().toLowerCase();
@@ -440,7 +405,62 @@ const formatArtistsForClipboard = (items: ArtistResult[]) =>
     )
     .join('\n');
 
-const KeywordGeneratorClient = () => {
+const TermCard = memo(({ item, index, onCopy, isCopied }: { item: KeywordResult; index: number; onCopy: (item: KeywordResult) => void; isCopied: boolean }) => (
+  <div className="group flex h-full flex-col justify-between rounded-3xl bg-white/80 p-5 text-gray-800 shadow-neumorphic dark:bg-dark-neumorphic-light dark:text-gray-100 dark:shadow-dark-neumorphic">
+    <div className="space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-purple-600/80 dark:text-purple-300/90">
+            #{index + 1}
+          </p>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{item.term}</h3>
+        </div>
+        <button
+          type="button"
+          onClick={() => onCopy(item)}
+          className="rounded-full bg-purple-600/10 p-2 text-purple-600 transition hover:bg-purple-600 hover:text-white dark:bg-purple-500/10 dark:text-purple-200"
+        >
+          {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+        </button>
+      </div>
+      <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">{item.description}</p>
+    </div>
+  </div>
+));
+
+TermCard.displayName = 'TermCard';
+
+const ArtistCard = memo(({ item, index, onCopy, isCopied }: { item: ArtistResult; index: number; onCopy: (item: ArtistResult) => void; isCopied: boolean }) => (
+  <div className="group flex h-full flex-col justify-between rounded-3xl bg-white/80 p-5 text-gray-800 shadow-neumorphic dark:bg-dark-neumorphic-light dark:text-gray-100 dark:shadow-dark-neumorphic">
+    <div className="space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-purple-600/80 dark:text-purple-300/90">
+            #{index + 1}
+          </p>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{item.name}</h3>
+          <p className="mt-1 text-xs font-semibold text-gray-500 dark:text-gray-300">Asal: {item.origin}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => onCopy(item)}
+          className="rounded-full bg-purple-600/10 p-2 text-purple-600 transition hover:bg-purple-600 hover:text-white dark:bg-purple-500/10 dark:text-purple-200"
+        >
+          {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+        </button>
+      </div>
+      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-300">
+        Gaya / Pergerakan:
+        <span className="ml-1 text-sm font-semibold text-gray-700 dark:text-gray-200">{item.movement}</span>
+      </p>
+      <p className="text-sm text-gray-700 dark:text-gray-300">{item.highlight}</p>
+    </div>
+  </div>
+));
+
+ArtistCard.displayName = 'ArtistCard';
+
+const KeywordGeneratorClient = memo(() => {
   const [models, setModels] = useState<ModelOption[]>([]);
   const [selectedModel, setSelectedModel] = useState('');
   const [isLoadingModels, setIsLoadingModels] = useState(false);
@@ -542,9 +562,7 @@ const KeywordGeneratorClient = () => {
       setIsLoadingModels(true);
       setModelError(null);
       try {
-        const response = await fetch(buildPollinationsUrl(POLLINATIONS_MODELS_ENDPOINT), {
-          headers: getPollinationsAuthHeaders(false),
-        });
+        const response = await fetch('/api/pollinations/models/text');
         if (!response.ok) {
           throw new Error(`Gagal memuat model (${response.status})`);
         }
@@ -727,9 +745,11 @@ const KeywordGeneratorClient = () => {
         payload.temperature = generationTemperature;
       }
 
-      const response = await fetch(buildPollinationsUrl(POLLINATIONS_OPENAI_ENDPOINT), {
+      const response = await fetch(INTENAL_PROXY_TEXT_ENDPOINT, {
         method: 'POST',
-        headers: getPollinationsAuthHeaders(true),
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(payload),
       });
 
@@ -738,8 +758,7 @@ const KeywordGeneratorClient = () => {
         throw new Error(`API Pollinations mengembalikan kesalahan: ${errorText}`);
       }
 
-      const data = (await response.json()) as PollinationsResponse;
-      const content = data.choices?.[0]?.message?.content?.trim();
+      const content = (await response.text()).trim();
 
       if (!content) {
         throw new Error('Respons model kosong.');
@@ -810,9 +829,11 @@ const KeywordGeneratorClient = () => {
         payload.temperature = generationTemperature;
       }
 
-      const response = await fetch(buildPollinationsUrl(POLLINATIONS_OPENAI_ENDPOINT), {
+      const response = await fetch(INTENAL_PROXY_TEXT_ENDPOINT, {
         method: 'POST',
-        headers: getPollinationsAuthHeaders(true),
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(payload),
       });
 
@@ -821,8 +842,7 @@ const KeywordGeneratorClient = () => {
         throw new Error(`API Pollinations mengembalikan kesalahan: ${errorText}`);
       }
 
-      const data = (await response.json()) as PollinationsResponse;
-      const content = data.choices?.[0]?.message?.content?.trim();
+      const content = (await response.text()).trim();
 
       if (!content) {
         throw new Error('Respons model kosong.');
@@ -936,14 +956,14 @@ const KeywordGeneratorClient = () => {
       });
   }, [artists]);
 
-  const handleResetArtists = () => {
+  const handleResetArtists = useCallback(() => {
     setArtists([]);
     setArtistRawContent('');
     setArtistError(null);
     setCopiedArtistName(null);
     setLastArtistsGeneratedAt(null);
     shouldAutoGenerateArtists.current = false;
-  };
+  }, []);
 
   const handleReset = () => {
     setResults([]);
@@ -988,9 +1008,11 @@ const KeywordGeneratorClient = () => {
         payload.temperature = askTemperature;
       }
 
-      const response = await fetch(buildPollinationsUrl(POLLINATIONS_OPENAI_ENDPOINT), {
+      const response = await fetch(INTENAL_PROXY_TEXT_ENDPOINT, {
         method: 'POST',
-        headers: getPollinationsAuthHeaders(true),
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(payload),
       });
 
@@ -999,8 +1021,7 @@ const KeywordGeneratorClient = () => {
         throw new Error(`API Pollinations mengembalikan kesalahan: ${errorText}`);
       }
 
-      const data = (await response.json()) as PollinationsResponse;
-      const content = data.choices?.[0]?.message?.content?.trim();
+      const content = (await response.text()).trim();
 
       if (!content) {
         throw new Error('Respons model kosong.');
@@ -1290,34 +1311,13 @@ const KeywordGeneratorClient = () => {
 
                     <div className="grid gap-4 md:grid-cols-2">
                       {artists.map((item, index) => (
-                        <div
+                        <ArtistCard
                           key={`${item.name}-${index}`}
-                          className="group flex h-full flex-col justify-between rounded-3xl bg-white/80 p-5 text-gray-800 shadow-neumorphic dark:bg-dark-neumorphic-light dark:text-gray-100 dark:shadow-dark-neumorphic"
-                        >
-                          <div className="space-y-3">
-                            <div className="flex items-start justify-between gap-3">
-                              <div>
-                                <p className="text-xs font-semibold uppercase tracking-wide text-purple-600/80 dark:text-purple-300/90">
-                                  #{index + 1}
-                                </p>
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{item.name}</h3>
-                                <p className="mt-1 text-xs font-semibold text-gray-500 dark:text-gray-300">Asal: {item.origin}</p>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => handleCopyArtist(item)}
-                                className="rounded-full bg-purple-600/10 p-2 text-purple-600 transition hover:bg-purple-600 hover:text-white dark:bg-purple-500/10 dark:text-purple-200"
-                              >
-                                {copiedArtistName === item.name ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                              </button>
-                            </div>
-                            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-300">
-                              Gaya / Pergerakan:
-                              <span className="ml-1 text-sm font-semibold text-gray-700 dark:text-gray-200">{item.movement}</span>
-                            </p>
-                            <p className="text-sm text-gray-700 dark:text-gray-300">{item.highlight}</p>
-                          </div>
-                        </div>
+                          item={item}
+                          index={index}
+                          onCopy={handleCopyArtist}
+                          isCopied={copiedArtistName === item.name}
+                        />
                       ))}
                     </div>
                   </div>
@@ -1371,29 +1371,13 @@ const KeywordGeneratorClient = () => {
 
                   <div className="grid gap-4 md:grid-cols-2">
                     {results.map((item, index) => (
-                      <div
+                      <TermCard
                         key={item.term}
-                        className="group flex h-full flex-col justify-between rounded-3xl bg-white/80 p-5 text-gray-800 shadow-neumorphic dark:bg-dark-neumorphic-light dark:text-gray-100 dark:shadow-dark-neumorphic"
-                      >
-                        <div className="space-y-3">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="text-xs font-semibold uppercase tracking-wide text-purple-600/80 dark:text-purple-300/90">
-                                #{index + 1}
-                              </p>
-                              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{item.term}</h3>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleCopyTerm(item)}
-                              className="rounded-full bg-purple-600/10 p-2 text-purple-600 transition hover:bg-purple-600 hover:text-white dark:bg-purple-500/10 dark:text-purple-200"
-                            >
-                              {copiedTerm === item.term ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                            </button>
-                          </div>
-                          <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">{item.description}</p>
-                        </div>
-                      </div>
+                        item={item}
+                        index={index}
+                        onCopy={handleCopyTerm}
+                        isCopied={copiedTerm === item.term}
+                      />
                     ))}
                   </div>
                 </div>
@@ -1614,7 +1598,8 @@ const KeywordGeneratorClient = () => {
       ) : null}
     </>
   );
+});
 
-};
+KeywordGeneratorClient.displayName = 'KeywordGeneratorClient';
 
 export default KeywordGeneratorClient;
