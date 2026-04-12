@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { request } from 'undici';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // Extend duration for image generation (Pro/Enterprise)
 
 export async function GET(requestObj: Request) {
   try {
@@ -79,29 +79,33 @@ export async function GET(requestObj: Request) {
 
     const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
 
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = {
+      'Accept': 'image/*, application/json',
+      'Referer': 'https://ruangriung.my.id',
+    };
+
     if (POLLINATIONS_API_KEY) {
       headers['Authorization'] = `Bearer ${POLLINATIONS_API_KEY}`;
     }
 
-    // Use undici for the request
-    const { statusCode, body, headers: responseHeaders } = await request(apiUrl, {
+    // Use global fetch (built-in in Vercel/Node 18+)
+    const response = await fetch(apiUrl, {
       method: 'GET',
       headers,
     });
 
-    if (statusCode !== 200) {
-      const errorText = await body.text();
-      console.error('[API] Pollinations API Error:', statusCode, errorText);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[API] Pollinations API Error:', response.status, errorText);
       return NextResponse.json(
-        { message: `Pollinations API Error: ${statusCode}`, error: errorText },
-        { status: statusCode }
+        { message: `Pollinations API Error: ${response.status}`, error: errorText },
+        { status: response.status }
       );
     }
 
     // Get the image buffer
-    const imageBuffer = await body.arrayBuffer();
-    const contentType = responseHeaders['content-type'] as string || 'image/jpeg';
+    const imageBuffer = await response.arrayBuffer();
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
 
     return new NextResponse(imageBuffer, {
       headers: {
