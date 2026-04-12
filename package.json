@@ -26,7 +26,8 @@
     "react-markdown": "^10.1.0",
     "react-qr-code": "^2.0.18",
     "rehype-highlight": "^7.0.2",
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.3",
+    "undici": "^8.0.2"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",

@@ -255,6 +255,181 @@ console.log(data); // Full response with tokens usage, etc
 ## Rate Limits
 - Check Pollinations API documentation untuk rate limits terkini
 
+---
+
+## Image Generation API
+
+### GET /api/pollinations/image
+Generate gambar menggunakan Pollinations image API dengan parameter terbaru.
+
+#### Request Parameters (Query String)
+```
+GET /api/pollinations/image?prompt=...&model=flux&width=1024&height=1024&...
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `prompt` | string | **required** | Deskripsi gambar yang ingin dibuat |
+| `model` | string | `"flux"` | Model yang digunakan (flux, nanobanana, seedream, kontext, dll) |
+| `width` | integer | `1024` | Lebar gambar dalam pixel (min: 256, max: 2048) |
+| `height` | integer | `1024` | Tinggi gambar dalam pixel (min: 256, max: 2048) |
+| `seed` | string/integer | `"0"` | Random seed untuk reproducibility |
+| `quality` | string | `"medium"` | Kualitas gambar (medium, high, ultra) |
+| `enhance` | string | `"false"` | Enhance quality dengan upscaling (true/false) |
+| `negative_prompt` | string | - | Deskripsi apa yang ingin dihindari dalam gambar |
+| `safe` | string | `"true"` | Filter konten tidak aman (true/false) |
+| `transparent` | string | `"false"` | Buat background transparent (true/false) |
+| `nologo` | string | `"false"` | Hapus watermark logo Pollinations (true/false) |
+| `aspectRatio` | string | - | Aspect ratio (e.g., "16:9", "3:2", auto-calculated dari width/height) |
+| `duration` | integer | - | Duration untuk video (seconds, optional) |
+| `audio` | string | `"false"` | Include audio untuk video (true/false) |
+| `image` | string | - | Base64 atau URL gambar untuk image-to-image generation |
+
+#### Response
+- **Content-Type**: `image/jpeg` atau format sesuai API
+- **Cache-Control**: `public, max-age=31536000, immutable`
+- **Body**: Binary image data
+
+#### Usage Examples
+
+**Basic Image Generation**
+```typescript
+const params = new URLSearchParams({
+  prompt: 'A serene Japanese garden with cherry blossoms',
+  model: 'flux',
+  width: '1024',
+  height: '1024',
+  seed: '42',
+  quality: 'medium',
+  enhance: 'true',
+  nologo: 'true',
+  negative_prompt: 'worst quality, blurry, watermark'
+});
+
+const response = await fetch(`/api/pollinations/image?${params.toString()}`);
+if (!response.ok) throw new Error('Failed to generate image');
+
+const blob = await response.blob();
+const imageUrl = URL.createObjectURL(blob);
+```
+
+**High Quality Image**
+```typescript
+const params = new URLSearchParams({
+  prompt: 'Cyberpunk city at night with neon signs',
+  model: 'flux',
+  width: '1792',
+  height: '1024',
+  quality: 'ultra',
+  enhance: 'true',
+  safe: 'true',
+  negative_prompt: 'distorted, blurry, low quality'
+});
+
+const response = await fetch(`/api/pollinations/image?${params.toString()}`);
+const blob = await response.blob();
+```
+
+**Image-to-Image Generation**
+```typescript
+const params = new URLSearchParams({
+  prompt: 'Make it more vibrant and colorful',
+  image: 'base64_encoded_image_or_url',
+  model: 'nanobanana',
+  width: '1024',
+  height: '1024',
+  quality: 'high'
+});
+
+const response = await fetch(`/api/pollinations/image?${params.toString()}`);
+const blob = await response.blob();
+```
+
+**Transparent Background**
+```typescript
+const params = new URLSearchParams({
+  prompt: 'A red apple isolated',
+  model: 'flux',
+  width: '512',
+  height: '512',
+  transparent: 'true',
+  quality: 'high'
+});
+
+const response = await fetch(`/api/pollinations/image?${params.toString()}`);
+const blob = await response.blob();
+```
+
+### Model Selection Guide
+
+| Model | Use Case | Speed | Quality | Best For |
+|-------|----------|-------|---------|----------|
+| **flux** | General purpose | Fast | High | Most use cases, detailed scenes |
+| **nanobanana** | Fast generation | Very Fast | Medium | Quick previews, iterations |
+| **seedream** | Creative | Medium | High | Artistic, stylized images |
+| **kontext** | Image-to-image | Medium | High | Variations, refinements |
+
+### Quality Presets
+
+- **medium** (default): Balanced quality & speed
+- **high**: Better quality, slightly slower
+- **ultra**: Highest quality, slowest generation
+
+### Negative Prompts Examples
+
+```
+// Untuk menghindari kualitas rendah
+"worst quality, blurry, distorted, low quality"
+
+// Untuk fotografi realistis
+"cartoon, drawing, illustration, artistic"
+
+// Untuk menghindari artefak
+"duplicate, text, watermark, signature, glitch"
+
+// Kombinasi
+"worst quality, blurry, watermark, duplicate, text, low resolution"
+```
+
+### Best Practices for Image Generation
+
+1. **Seed Management**
+   - Gunakan seed yang sama untuk reproducibility
+   - Variasi seed untuk explore berbagai output
+
+2. **Aspect Ratio**
+   - Landscape: 16:9 (1792x1024)
+   - Portrait: 9:16 (1024x1792)
+   - Square: 1:1 (1024x1024)
+
+3. **Prompting Tips**
+   - Lebih detail = hasil lebih akurat
+   - Sebutkan gaya (photorealistic, oil painting, etc)
+   - Spesifikkan lighting dan mood
+   - Gunakan negative prompts untuk hasil lebih baik
+
+4. **Performance**
+   - Cache hasil gambar di client
+   - Gunakan nologo=true untuk hasil cleaner
+   - Compress gambar untuk storage/transmission
+
+5. **Error Handling**
+```typescript
+try {
+  const response = await fetch(`/api/pollinations/image?${params}`);
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Image generation failed');
+  }
+  // Process image
+} catch (error) {
+  console.error('Image generation error:', error);
+  // Fallback atau retry logic
+}
+```
+
+---
+
 ## Support
 Untuk issues atau pertanyaan, cek:
 - https://pollinations.ai/docs

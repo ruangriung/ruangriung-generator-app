@@ -186,23 +186,27 @@ const IdCardGeneratorClient = () => {
 
         try {
             const params = new URLSearchParams({
+                prompt: bgPrompt,
                 model: 'flux',
                 width: '500',
                 height: '300',
                 seed: Date.now().toString(),
-                referrer: 'ruangriung.my.id',
                 enhance: 'true',
-                nologo: 'true'
+                nologo: 'true',
+                quality: 'medium',
+                safe: 'true',
+                transparent: 'false',
+                negative_prompt: 'worst quality, blurry, watermark',
             });
 
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(bgPrompt)}?${params.toString()}`;
-
-            const response = await fetch(url);
+            const response = await fetch(`/api/pollinations/image?${params.toString()}`);
             if (!response.ok) {
                 throw new Error(`Gagal mengambil gambar dari API (Status: ${response.status})`);
             }
 
-            handleSettingChange('background', response.url);
+            const blob = await response.blob();
+            const imageUrl = URL.createObjectURL(blob);
+            handleSettingChange('background', imageUrl);
             toast.success("Background berhasil dibuat!", { id: toastId });
 
         } catch (error: any) {
