@@ -11,7 +11,7 @@ import Accordion from './Accordion';
 import ApiKeyModal from './ApiKeyModal';
 
 // --- Konstanta API ---
-const POLLINATIONS_TEXT_API_BASE_URL = 'https://text.pollinations.ai/openai';
+const POLLINATIONS_TEXT_API_URL = '/api/pollinations/text';
 const POLLINATIONS_IMAGE_MODELS_URL = 'https://image.pollinations.ai/models';
 const POLLINATIONS_TOKEN = process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
 
@@ -175,21 +175,22 @@ export default function StorytellerClient() {
 
       let imagePromptsText = '';
       if (textModel === 'openai') {
-        const imagePromptsResponse = await fetch(`${POLLINATIONS_TEXT_API_BASE_URL}?token=${POLLINATIONS_TOKEN}`, {
+        const imagePromptsResponse = await fetch(POLLINATIONS_TEXT_API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: 'openai',
             messages: [{ role: 'user', content: promptInstructionForImages }],
             temperature: 0.7,
+            top_p: 0.9,
+            max_tokens: 1500,
           }),
         });
         if (!imagePromptsResponse.ok) {
           const errorBody = await imagePromptsResponse.text();
           throw new Error(`Gagal membuat prompt gambar dari Pollinations.ai: ${errorBody || 'Unknown error'}`);
         }
-        const imagePromptsResult: PollinationsOpenAIResponse = await imagePromptsResponse.json();
-        imagePromptsText = imagePromptsResult.choices?.[0]?.message?.content?.trim() || '';
+        imagePromptsText = await imagePromptsResponse.text();
       } else if (textModel === 'gemini-1.5-flash') {
         const imagePromptsResponse = await fetch('/api/gemini', {
           method: 'POST',
@@ -239,13 +240,15 @@ export default function StorytellerClient() {
 
         let descriptionText = '';
         if (textModel === 'openai') {
-          const descriptionResponse = await fetch(`${POLLINATIONS_TEXT_API_BASE_URL}?token=${POLLINATIONS_TOKEN}`, {
+          const descriptionResponse = await fetch(POLLINATIONS_TEXT_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               model: 'openai',
               messages: [{ role: 'user', content: promptInstructionForDescription }],
               temperature: 0.7,
+              top_p: 0.9,
+              max_tokens: 200,
             }),
           });
           if (!descriptionResponse.ok) {
@@ -253,8 +256,8 @@ export default function StorytellerClient() {
             console.warn(`Gagal membuat deskripsi dari Pollinations.ai #${index + 1}: ${errorBody || 'Unknown error'}`);
             descriptionText = 'Deskripsi gambar tidak dapat dihasilkan.';
           } else {
-            const descriptionResult: PollinationsOpenAIResponse = await descriptionResponse.json();
-            descriptionText = descriptionResult.choices?.[0]?.message?.content?.trim() || "Maaf, saya tidak dapat memberikan respons saat ini.";
+            descriptionText = await descriptionResponse.text();
+            descriptionText = descriptionText?.trim() || "Maaf, saya tidak dapat memberikan respons saat ini.";
           }
         } else if (textModel === 'gemini-1.5-flash') {
           const descriptionResponse = await fetch('/api/gemini', {
@@ -321,21 +324,23 @@ export default function StorytellerClient() {
 
       let generatedPromptText = '';
       if (textModel === 'openai') {
-        const response = await fetch(`${POLLINATIONS_TEXT_API_BASE_URL}?token=${POLLINATIONS_TOKEN}`, {
+        const response = await fetch(POLLINATIONS_TEXT_API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: 'openai',
             messages: [{ role: 'user', content: promptInstruction }],
             temperature: 0.95,
+            top_p: 0.95,
+            max_tokens: 300,
           }),
         });
         if (!response.ok) {
           const errorBody = await response.text();
           throw new Error(`Gagal membuat ide acak dari Pollinations.ai: ${errorBody || 'Unknown error'}`);
         }
-        const result: PollinationsOpenAIResponse = await response.json();
-        generatedPromptText = result.choices?.[0]?.message?.content?.trim() || "Maaf, saya tidak dapat menghasilkan ide cerita saat ini.";
+        generatedPromptText = await response.text();
+        generatedPromptText = generatedPromptText?.trim() || "Maaf, saya tidak dapat menghasilkan ide cerita saat ini.";
       } else if (textModel === 'gemini-1.5-flash') {
         const response = await fetch('/api/gemini', {
           method: 'POST',
@@ -386,21 +391,23 @@ export default function StorytellerClient() {
       let generatedTitleText = '';
 
       if (textModel === 'openai') {
-        const response = await fetch(`${POLLINATIONS_TEXT_API_BASE_URL}?token=${POLLINATIONS_TOKEN}`, {
+        const response = await fetch(POLLINATIONS_TEXT_API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: 'openai',
             messages: [{ role: 'user', content: promptInstruction }],
             temperature: 0.9,
+            top_p: 0.9,
+            max_tokens: 50,
           }),
         });
         if (!response.ok) {
           const errorBody = await response.text();
           throw new Error(`Gagal membuat judul dari Pollinations.ai: ${errorBody || 'Unknown error'}`);
         }
-        const result: PollinationsOpenAIResponse = await response.json();
-        generatedTitleText = result.choices?.[0]?.message?.content?.trim() || "Tidak dapat menghasilkan judul.";
+        generatedTitleText = await response.text();
+        generatedTitleText = generatedTitleText?.trim() || "Tidak dapat menghasilkan judul.";
       } else if (textModel === 'gemini-1.5-flash') {
         const response = await fetch('/api/gemini', {
           method: 'POST',

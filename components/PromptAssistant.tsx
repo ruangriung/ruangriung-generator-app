@@ -108,31 +108,21 @@ export default function PromptAssistant({ onUsePrompt }: PromptAssistantProps) {
     const combinedPrompt = `${fullPromptInstruction}\n${subjectContent}\n${detailsContent}`;
 
 
-    // Use internal API route
+    // Use internal API route dengan parameter standar terbaru
     const apiPromise = fetch('/api/pollinations/text', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: selectedModel,
-        prompt: combinedPrompt, // Note: The internal route expects 'prompt' or 'messages' but passing 'prompt' is safer with our adapter
-        json: false
+        messages: [{ role: 'user', content: combinedPrompt }],
+        temperature: 0.8,
+        top_p: 0.9,
+        max_tokens: 500,
       }),
     })
       .then(res => {
         if (!res.ok) throw new Error('Respons API tidak baik');
-        return res.text(); // Read as text since our proxy returns raw text
-      })
-      .then(result => {
-        // The internal route returns raw text if configured that way, or we might need to adjust based on route.ts
-        // Our route.ts returns raw text in response to text request.
-        // But let's check if the result is a string or object.
-        // If the route returns text/plain, result.choices won't exist.
-        // We should read text() instead of json() in the first .then if we expect text.
-
-        // WAIT: In the previous .then block, we called res.json(). 
-        // Our route.ts currently returns text for GET, and for POST it returns text.
-        // So we should change res.json() to res.text() below.
-        return result;
+        return res.text();
       })
       .then(text => {
         const newPrompt = text.replace(/"/g, '').trim();
