@@ -135,7 +135,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
 
   const callPromptApi = async (promptForApi: string, temperature = 0.5) => {
     try {
-      // Use internal API route
+      // Use internal API route dengan parameter standar Pollinations
       const response = await fetch('/api/pollinations/text', {
         method: 'POST',
         headers: {
@@ -143,9 +143,17 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
         },
         body: JSON.stringify({
           model: selectedEnhancementModel,
-          prompt: promptForApi,
-          temperature: temperature,
-          json: false
+          messages: [
+            {
+              role: 'user',
+              content: promptForApi
+            }
+          ],
+          temperature: Math.max(0, Math.min(2, temperature)),
+          top_p: 0.9,
+          max_tokens: 1024,
+          frequency_penalty: 0,
+          presence_penalty: 0,
         }),
       });
 
@@ -154,12 +162,7 @@ export default function ControlPanel({ settings, setSettings, onGenerate, isLoad
         throw new Error(`API merespons dengan status ${response.status}. Isi: ${errorBody}`);
       }
 
-      // If proxy returns text directly (which it does for GET-based backend)
-      // We need to handle text response.
       const aiContent = await response.text();
-      // const result = await response.json(); // Old logic
-      // const aiContent = result?.choices?.[0]?.message?.content ?? ''; // Old logic
-
       const trimmedContent = aiContent.trim();
 
       let cleanedContent = trimmedContent;

@@ -157,8 +157,18 @@ export const useChatManager = () => {
         const content = newMessage.content as { type: 'image_url'; image_url: { url: string }; text?: string };
         const payload = {
           model: 'openai',
-          messages: [{ role: 'user', content: [{ type: 'image_url', image_url: { url: content.image_url.url } }, { type: 'text', text: content.text || 'Jelaskan gambar ini.' }] }],
-          max_tokens: 500
+          messages: [
+            {
+              role: 'user',
+              content: [
+                { type: 'image_url', image_url: { url: content.image_url.url } },
+                { type: 'text', text: content.text || 'Jelaskan gambar ini.' }
+              ]
+            }
+          ],
+          max_tokens: 500,
+          temperature: 0.7,
+          top_p: 0.9,
         };
 
         // Use internal proxy
@@ -213,7 +223,7 @@ export const useChatManager = () => {
         const textModel = activeChat.model || 'openai';
         const messagesForApi = [...activeChat.messages, newMessage];
 
-        // Use internal proxy
+        // Use internal proxy dengan parameter standar terbaru
         const response = await fetch('/api/pollinations/text', {
           method: 'POST',
           headers: {
@@ -225,7 +235,11 @@ export const useChatManager = () => {
               role: m.role === 'assistant' ? 'assistant' : 'user',
               content: typeof m.content === 'string' ? m.content : m.content.text || ''
             })),
-            json: false
+            temperature: 0.7,
+            top_p: 0.9,
+            max_tokens: 2048,
+            frequency_penalty: 0,
+            presence_penalty: 0,
           })
         });
         if (!response.ok) {
