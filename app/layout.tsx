@@ -7,13 +7,17 @@ import Script from 'next/script';
 import { Toaster } from 'react-hot-toast';
 import CookieConsent from '@/components/CookieConsent';
 import ThemeScript from '@/components/ThemeScript';
+import JsonLd from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ruangriung.my.id'),
 
-  title: "RuangRiung AI Generator - Buat Gambar, Video, Audio dengan Teknologi AI Canggih",
-  description: "Ruang Riung AI Generator adalah aplikasi Next.js modern yang memungkinkan Anda membuat gambar, ide video, dan audio menggunakan AI. Didukung oleh NextAuth.js (Google & Facebook Login), Tailwind CSS, dan Pollinations.ai API dan DALLE-3 untuk generasi gambar, serta ElevenLabs API untuk audio. Aplikasi ini dirancang untuk memberikan pengalaman pengguna yang cepat dan responsif dengan performa tinggi. Generate stunning AI art with multiple styles - from photorealistic to anime, cyberpunk to Studio Ghibli. Create professional photography, digital art, oil paintings and more with advanced AI image generation.",
-  keywords: "AI generator, ruangriung indonesia, image generator, video creator, audio generator, Next.js, React, NextAuth.js, Google login, Facebook login, Pollinations.ai, Tailwind CSS, Vercel, Ruang Riung, AI art, text to image, ruang riung, generator ai indonesia, text to audio, AI video prompt, aplikasi gambar AI, aplikasi video AI, aplikasi audio AI, teknologi AI, generasi gambar AI, generasi video AI, generasi audio AI, aplikasi Next.js, aplikasi React, aplikasi modern, aplikasi web, aplikasi AI, aplikasi generasi konten, aplikasi kreatif, aplikasi inovatif, aplikasi produktivitas, aplikasi teknologi, aplikasi berbasis AI, aplikasi generasi konten AI, aplikasi generasi gambar AI, aplikasi generasi video AI, aplikasi generasi audio AI, aplikasi AI modern, aplikasi AI canggih, aplikasi AI produktif, aplikasi AI kreatif, aplikasi AI inovatif, aplikasi AI generatif, aplikasi AI generasi konten, aplikasi AI generasi gambar, aplikasi AI generasi video, aplikasi AI generasi audio, aplikasi AI berbasis web, aplikasi AI berbasis React, aplikasi AI berbasis Next.js, aplikasi AI berbasis Tailwind CSS, aplikasi AI berbasis Pollinations.ai, aplikasi AI berbasis ElevenLabs, aplikasi AI berbasis Vercel, aplikasi AI berbasis cloud, aplikasi AI berbasis OpenAI, aplikasi AI berbasis OpenAI API, aplikasi AI berbasis OpenAI SDK",
+  title: {
+    default: "RuangRiung AI Generator - Kreativitas Tanpa Batas dengan AI",
+    template: "%s | RuangRiung"
+  },
+  description: "Ruang Riung AI Generator adalah platform kreatif bertenaga AI untuk membuat gambar artistik, naskah video, dan audio berkualitas tinggi. Solusi cerdas untuk konten kreator modern.",
+  keywords: ["AI generator", "ruangriung indonesia", "image generator", "video creator", "audio generator", "Next.js", "AI art", "text to image", "generator ai indonesia", "konten kreator"],
   authors: [
     {
       name: "Ayick",
@@ -21,28 +25,38 @@ export const metadata: Metadata = {
     },
   ],
   creator: "Ayick",
-  publisher: "Ayick",
+  publisher: "RuangRiung",
 
   verification: {
     google: "3Mybm59m8--LyAZpVYIGHrVk1fSkYemj33bq5RBBdxA",
   },
 
   openGraph: {
-    title: "RuangRiung AI Image Generator - Create Stunning Digital Art",
-    description: "Transform text into beautiful AI-generated artwork in various styles including photography, anime, digital painting and more.",
+    title: "RuangRiung AI Generator - Buat Gambar & Audio AI",
+    description: "Platform AI all-in-one untuk konten kreator. Generate gambar artistik, naskah video, dan audio dalam hitungan detik.",
     type: "website",
     url: "https://ruangriung.my.id",
+    siteName: "RuangRiung",
     images: [{
-      url: "https://www.ruangriung.my.id/assets/ruangriung.png",
-      alt: "RuangRiung AI Image Generator Banner",
+      url: "/assets/ruangriung.png",
+      width: 1200,
+      height: 630,
+      alt: "RuangRiung AI Generator - Official Banner",
     }],
+    locale: 'id_ID',
+  },
+
+  twitter: {
+    card: 'summary_large_image',
+    title: "RuangRiung AI Generator",
+    description: "Platform AI kreatif untuk gambar, video, dan audio.",
+    images: ['/assets/ruangriung.png'],
   },
 
   icons: {
     icon: [
       { url: "/favicon.ico", type: "image/x-icon" },
       { url: "/logo.png", sizes: "32x32", type: "image/png" },
-      { url: "/logo.png", sizes: "16x16", type: "image/png" },
     ],
     apple: "/logo.png",
   },
@@ -57,14 +71,36 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const organizationSchema = {
+    name: 'RuangRiung',
+    url: 'https://ruangriung.my.id',
+    logo: 'https://ruangriung.my.id/logo.png',
+    sameAs: [
+      'https://ariftirtana.my.id',
+    ],
+  };
+
+  const websiteSchema = {
+    name: 'RuangRiung AI Generator',
+    url: 'https://ruangriung.my.id',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: 'https://ruangriung.my.id/artikel?q={search_term_string}',
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="id" suppressHydrationWarning>
       <head>
         <ThemeScript />
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className="bg-light-bg font-sans">
+        <JsonLd type="Organization" data={organizationSchema} />
+        <JsonLd type="WebSite" data={websiteSchema} />
+        
         <AuthProvider>
           <div className="flex min-h-screen flex-col">
             <main className="flex-grow">{children}</main>

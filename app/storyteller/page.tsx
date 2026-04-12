@@ -1,6 +1,7 @@
 // app/storyteller/page.tsx
 import StorytellerClient from '@/components/StorytellerClient';
 import { Metadata } from 'next';
+import JsonLd from '@/components/JsonLd';
 import Link from 'next/link';
 import { ArrowLeft, Lock } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -76,9 +77,40 @@ export default async function StorytellerPage() {
     );
   }
 
+  const softwareSchema = {
+    name: 'RuangRiung AI Storyteller',
+    applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'Web',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'IDR',
+    },
+    description: 'Hasilkan cerita visual dengan lima gambar unik dan deskripsi teks menggunakan AI.',
+  };
+
+  const breadcrumbSchema = {
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Beranda',
+        item: 'https://ruangriung.my.id',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'AI Storyteller',
+        item: 'https://ruangriung.my.id/storyteller',
+      },
+    ],
+  };
+
   // Jika pengguna sudah login, render konten halaman Storyteller yang sebenarnya
   return (
     <div className="container mx-auto p-4 md:p-8 lg:p-12">
+      <JsonLd type="SoftwareApplication" data={softwareSchema} />
+      <JsonLd type="BreadcrumbList" data={breadcrumbSchema} />
       {/* Container untuk tombol navigasi dan toggle tema */}
       <div className="mb-4 flex justify-between items-center">
         {/* Tombol Kembali ke Beranda */}

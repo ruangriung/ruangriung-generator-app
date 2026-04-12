@@ -1,12 +1,16 @@
 import Chatbot from '@/components/Chatbot';
 import type { Metadata } from 'next';
+import JsonLd from '@/components/JsonLd';
 import Link from 'next/link';
 import { Bot, ArrowLeft } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Asisten AI RuangRiung',
+  title: 'Asisten AI RuangRiung - Chatbot Pintar untuk Kreator',
   description:
-    'Ngobrol dengan chatbot AI RuangRiung untuk mencari ide konten, menerjemahkan istilah rumit, atau mendapatkan panduan penggunaan fitur.',
+    'Dapatkan bantuan cerdas dari Asisten AI RuangRiung. Cari ide konten, strategi digital, atau panduan teknis langsung melalui chat yang responsif.',
+  alternates: {
+    canonical: 'https://ruangriung.my.id/asisten-ai',
+  },
 };
 
 type AsistenAIPageProps = {
@@ -23,8 +27,39 @@ export default function AsistenAIPage({ searchParams }: AsistenAIPageProps) {
   const autoSendParam = Array.isArray(rawAutoSend) ? rawAutoSend[0] : rawAutoSend;
   const autoSend = autoSendParam === '1' || autoSendParam === 'true';
 
+  const softwareSchema = {
+    name: 'RuangRiung AI Assistant',
+    applicationCategory: 'CommunicationApplication',
+    operatingSystem: 'Web',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'IDR',
+    },
+    description: 'Chatbot AI untuk membantu strategi konten dan penggunaan fitur RuangRiung.',
+  };
+
+  const breadcrumbSchema = {
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Beranda',
+        item: 'https://ruangriung.my.id',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Asisten AI',
+        item: 'https://ruangriung.my.id/asisten-ai',
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
+      <JsonLd type="SoftwareApplication" data={softwareSchema} />
+      <JsonLd type="BreadcrumbList" data={breadcrumbSchema} />
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">

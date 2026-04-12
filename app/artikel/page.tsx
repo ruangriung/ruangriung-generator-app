@@ -1,18 +1,44 @@
-
 import { Suspense } from 'react';
 import { getAllArticles } from '@/lib/articles';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import ArticlePaginationClient from './ArticlePaginationClient';
 import ArticleSubmissionTrigger from '@/components/ArticleSubmissionTrigger';
-// import GoogleAd from '@/components/GoogleAd'; // DISABLED - Google Ads disabled temporarily
+import { Metadata } from 'next';
+import JsonLd from '@/components/JsonLd';
+
+export const metadata: Metadata = {
+  title: 'Artikel & Panduan AI | RuangRiung',
+  description: 'Temukan artikel terbaru, tips, dan panduan mendalam tentang penggunaan teknologi AI untuk meningkatkan produktivitas dan kreativitas Anda.',
+  alternates: {
+    canonical: 'https://ruangriung.my.id/artikel',
+  },
+};
 
 
 export default function ArticleListPage() {
   const articles = getAllArticles();
 
+  const breadcrumbSchema = {
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Beranda',
+        item: 'https://ruangriung.my.id',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Artikel',
+        item: 'https://ruangriung.my.id/artikel',
+      },
+    ],
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
+      <JsonLd type="BreadcrumbList" data={breadcrumbSchema} />
       <div className="mb-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
         <Link
           href="/"

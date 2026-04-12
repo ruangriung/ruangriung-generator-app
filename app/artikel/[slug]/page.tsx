@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import JsonLd from '@/components/JsonLd';
 import ArticleSubmissionTrigger from '@/components/ArticleSubmissionTrigger';
 import ArticleSearchForm from '@/components/ArticleSearchForm';
 // import GoogleAd from '@/components/GoogleAd'; // DISABLED - Google Ads disabled temporarily
@@ -66,11 +67,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   // Variabel relatedArticles didefinisikan di dalam komponen
   const relatedArticles = getRelatedArticles(slug);
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
+  const articleSchema = {
     headline: article.title,
-    image: 'https://ruangriung.my.id/assets/ruangriung.png',
+    image: article.image || 'https://ruangriung.my.id/assets/ruangriung.png',
     author: {
       '@type': 'Person',
       name: article.author,
@@ -80,7 +79,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       name: 'RuangRiung',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://ruangriung.my.id/assets/ruangriung.png',
+        url: 'https://ruangriung.my.id/logo.png',
       },
     },
     datePublished: new Date(article.date).toISOString(),
@@ -92,8 +91,33 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     },
   };
 
+  const breadcrumbSchema = {
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Beranda',
+        item: 'https://ruangriung.my.id',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Artikel',
+        item: 'https://ruangriung.my.id/artikel',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: article.title,
+        item: `https://ruangriung.my.id/artikel/${article.slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
+      <JsonLd type="Article" data={articleSchema} />
+      <JsonLd type="BreadcrumbList" data={breadcrumbSchema} />
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Link href="/artikel" className="inline-flex items-center text-blue-600 hover:text-blue-800">
           <ArrowLeft className="mr-2" size={20} />
@@ -174,10 +198,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         </div>
       )}
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+
     </div>
   );
 }

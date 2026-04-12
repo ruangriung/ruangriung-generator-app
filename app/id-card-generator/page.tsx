@@ -1,5 +1,6 @@
 import IdCardGeneratorClient from './IdCardGeneratorClient';
 import { Metadata } from 'next';
+import JsonLd from '@/components/JsonLd';
 
 // --- METADATA SEO YANG DIOPTIMALKAN ---
 export const metadata: Metadata = {
@@ -43,5 +44,40 @@ export const metadata: Metadata = {
 };
 
 export default function IdCardGeneratorPage() {
-  return <IdCardGeneratorClient />;
+  const softwareSchema = {
+    name: 'RuangRiung ID Card Generator',
+    applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'Web',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'IDR',
+    },
+    description: 'Aplikasi web untuk membuat kartu tanda mahasiswa kustom secara online.',
+  };
+
+  const breadcrumbSchema = {
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Beranda',
+        item: 'https://ruangriung.my.id',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'ID Card Generator',
+        item: 'https://ruangriung.my.id/id-card-generator',
+      },
+    ],
+  };
+
+  return (
+    <>
+      <JsonLd type="SoftwareApplication" data={softwareSchema} />
+      <JsonLd type="BreadcrumbList" data={breadcrumbSchema} />
+      <IdCardGeneratorClient />
+    </>
+  );
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import KeywordGeneratorClient from './KeywordGeneratorClient';
+import JsonLd from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ruangriung.my.id'),
@@ -46,5 +47,40 @@ export const metadata: Metadata = {
 };
 
 export default function UniqueArtNamePage() {
-  return <KeywordGeneratorClient />;
+  const softwareSchema = {
+    name: 'RuangRiung Unique Art Name Theme AI',
+    applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'Web',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'IDR',
+    },
+    description: 'Eksplorasi tema AI — dapatkan 20 tema visual eksperimental untuk memperkuat prompt AI Anda.',
+  };
+
+  const breadcrumbSchema = {
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Beranda',
+        item: 'https://ruangriung.my.id',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Unique Art Name',
+        item: 'https://ruangriung.my.id/UniqueArtName',
+      },
+    ],
+  };
+
+  return (
+    <>
+      <JsonLd type="SoftwareApplication" data={softwareSchema} />
+      <JsonLd type="BreadcrumbList" data={breadcrumbSchema} />
+      <KeywordGeneratorClient />
+    </>
+  );
 }
