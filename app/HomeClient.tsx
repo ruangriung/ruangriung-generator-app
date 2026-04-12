@@ -29,7 +29,7 @@ import { useState, useEffect, useRef } from 'react';
 import FAQ from '@/components/FAQ';
 import Link from 'next/link';
 import PromptSubmissionTrigger from '@/components/PromptSubmissionTrigger';
-import GoogleAd from '@/components/GoogleAd';
+
 
 interface HomeClientProps {
   latestArticle: {
@@ -171,7 +171,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         </p>
       </header>
 
-      <GoogleAd className="w-full max-w-4xl mb-8" />
+
 
       <div className="w-full max-w-4xl mb-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         <div className="relative" ref={promptMenuRef}>
@@ -368,7 +368,7 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         <Tabs />
       </main>
 
-      <GoogleAd className="w-full max-w-4xl my-8" />
+
 
       <div className="w-full max-w-4xl mt-10 mb-6">
         <Link
