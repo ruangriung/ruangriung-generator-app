@@ -74,6 +74,17 @@ export default function RootLayout({
         <Toaster />
         <CookieConsent />
 
+        {/* Google AdSense Script - DISABLED */}
+        {/* 
+        <Script
+          id="google-adsense-script"
+          async
+          strategy="afterInteractive"
+          crossOrigin="anonymous"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6394253519537490"
+        />
+        */}
+
         {/* Google Analytics Script */}
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-7T365LMTJ7" />
         <Script

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { creators, type Creator } from './creators';
 import { socialPlatforms } from './social-platforms';
+// import GoogleAd from '@/components/GoogleAd'; // DISABLED - Google Ads disabled temporarily
 
 
 type SubmissionBenefit = {

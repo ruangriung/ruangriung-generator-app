@@ -8,6 +8,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ArticleSubmissionTrigger from '@/components/ArticleSubmissionTrigger';
 import ArticleSearchForm from '@/components/ArticleSearchForm';
+// import GoogleAd from '@/components/GoogleAd'; // DISABLED - Google Ads disabled temporarily
 
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {

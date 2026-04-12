@@ -29,6 +29,7 @@ import { useState, useEffect, useRef } from 'react';
 import FAQ from '@/components/FAQ';
 import Link from 'next/link';
 import PromptSubmissionTrigger from '@/components/PromptSubmissionTrigger';
+// import GoogleAd from '@/components/GoogleAd'; // DISABLED - Google Ads disabled temporarily
 
 
 interface HomeClientProps {
@@ -237,6 +238,9 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         </Link>
       </div>
 
+      {/* Google Ad - DISABLED */}
+      {/* <GoogleAd className="w-full max-w-4xl mb-8" /> */}
+
       <div className="w-full max-w-4xl mb-6">
         <a
           href="https://www.facebook.com/groups/1182261482811767/?ref=share&mibextid=lOuIew"
@@ -368,7 +372,8 @@ export default function HomeClient({ latestArticle }: HomeClientProps) {
         <Tabs />
       </main>
 
-
+      {/* Google Ad - DISABLED */}
+      {/* <GoogleAd className="w-full max-w-4xl my-8" /> */}
 
       <div className="w-full max-w-4xl mt-10 mb-6">
         <Link

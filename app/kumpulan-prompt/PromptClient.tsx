@@ -9,6 +9,7 @@ import Pagination from '../../components/Pagination';
 
 import { ArrowLeft, Filter, Search, XCircle } from 'lucide-react';
 import { usePromptSuggestions } from './usePromptSuggestions';
+// import GoogleAd from '@/components/GoogleAd'; // DISABLED - Google Ads disabled temporarily
 
 const PROMPTS_PER_PAGE = 9;
 
