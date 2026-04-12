@@ -190,7 +190,7 @@ const IdCardGeneratorClient = () => {
                 model: 'flux',
                 width: '1024',
                 height: '768',
-                seed: Date.now().toString(),
+                seed: Math.floor(Math.random() * 1000000).toString(),
                 referrer: 'ruangriung.my.id',
                 enhance: 'true',
                 nologo: 'true'
