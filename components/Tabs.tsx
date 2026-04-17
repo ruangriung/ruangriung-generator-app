@@ -29,9 +29,9 @@ const LockedContent = () => (
 
 const Tabs = memo(() => {
   const tabs = useMemo(() => [
-    { name: 'chatbot', label: 'Chatbot', icon: MessageSquare, content: <Chatbot />, isProtected: false },
+    { name: 'chatbot', label: 'Chatbot', icon: MessageSquare, content: <Chatbot />, isProtected: false, isDisabled: true },
     { name: 'video', label: 'Video Prompt', icon: Video, content: <VideoCreator />, isProtected: true },
-    // { name: 'text-to-video', label: 'Text to Video', icon: Video, content: <TextToVideo />, isProtected: true },
+    { name: 'text-to-video', label: 'Text to Video', icon: Video, content: <TextToVideo />, isProtected: true, isDisabled: true },
     { name: 'audio', label: 'Audio', icon: AudioLines, content: <AudioGenerator />, isProtected: true },
     { name: 'image', label: 'Image', icon: Image, content: <Generator />, isProtected: false }
   ], []);
@@ -41,7 +41,7 @@ const Tabs = memo(() => {
 
   const activeContent = useMemo(() => {
     const currentTab = tabs.find(tab => tab.name === activeTab);
-    if (!currentTab) return null;
+    if (!currentTab || currentTab.isDisabled) return null;
 
     if (currentTab.isProtected && status !== 'authenticated') {
       return <LockedContent />;
@@ -55,22 +55,32 @@ const Tabs = memo(() => {
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.name;
+          const isDisabled = tab.isDisabled;
 
           const layoutClass = index === tabs.length - 1 ? 'col-span-2 md:col-span-1' : '';
 
           return (
             <button
               key={tab.name}
-              onClick={() => setActiveTab(tab.name)}
-              className={`flex items-center justify-center gap-x-2 px-2 md:px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${layoutClass}
+              onClick={() => !isDisabled && setActiveTab(tab.name)}
+              disabled={isDisabled}
+              className={`flex flex-col items-center justify-center py-2 px-1 md:px-4 rounded-lg font-semibold transition-all duration-300 ${layoutClass}
+                ${isDisabled ? 'opacity-50 cursor-not-allowed grayscale' : ''}
                 ${isActive
                   ? 'bg-purple-600 text-white shadow-neumorphic-button dark:shadow-dark-neumorphic-button'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-500'
+                  : !isDisabled ? 'text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-500' : 'text-gray-400'
                 }`
               }
             >
-              <Icon size={20} />
-              <span>{tab.label}</span>
+              <div className="flex items-center gap-x-2">
+                <Icon size={18} />
+                <span className="text-sm md:text-base">{tab.label}</span>
+              </div>
+              {isDisabled && (
+                <span className="text-[10px] text-red-500 font-bold mt-1 animate-pulse">
+                  NONAKTIF
+                </span>
+              )}
             </button>
           )
         })}

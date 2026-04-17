@@ -1,10 +1,10 @@
-// components/chatbot/ChatMessage.tsx
 import { useState } from 'react';
-import { Bot, User, Copy, Check, RefreshCw, Download } from 'lucide-react'; // Tambahkan ikon Download
+import { Bot, User, Copy, Check, RefreshCw, Download } from 'lucide-react'; 
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import toast from 'react-hot-toast';
 import { Message } from './useChatManager';
+import Image from 'next/image';
 
 interface ChatMessageProps {
   message: Message;
@@ -92,11 +92,9 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
 
   return (
     <div className={`flex items-start gap-2 sm:gap-4 ${message.role === 'user' ? 'justify-end' : ''}`}>
-      {isAssistant && (
-        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-600 flex items-center justify-center text-white shrink-0">
-            <Bot size={22} />
+        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm border border-purple-100 overflow-hidden relative">
+            <Image src="/logo.png" alt="RR" width={24} height={24} className="object-contain" />
         </div>
-      )}
 
       <div className={`max-w-xl flex flex-col`}>
         <div className={`break-words ${isAssistant ? 'prose dark:prose-invert text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 shadow-md rounded-xl p-3 sm:p-4' : 'p-3 sm:p-4 rounded-xl bg-purple-600 text-white shadow-md'}`}>

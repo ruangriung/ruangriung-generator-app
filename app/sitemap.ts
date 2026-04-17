@@ -15,7 +15,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: 'https://ruangriung.my.id', priority: 1.0, changeFrequency: 'daily' },
     { url: 'https://ruangriung.my.id/artikel', priority: 0.9, changeFrequency: 'daily' },
     { url: 'https://ruangriung.my.id/id-card-generator', priority: 0.8, changeFrequency: 'weekly' },
-    { url: 'https://ruangriung.my.id/asisten-ai', priority: 0.8, changeFrequency: 'weekly' },
     { url: 'https://ruangriung.my.id/storyteller', priority: 0.8, changeFrequency: 'weekly' },
     { url: 'https://ruangriung.my.id/UniqueArtName', priority: 0.8, changeFrequency: 'weekly' },
     { url: 'https://ruangriung.my.id/video-prompt', priority: 0.7, changeFrequency: 'monthly' },

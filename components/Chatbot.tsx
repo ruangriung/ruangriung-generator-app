@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { Bot, Loader, MessageSquare, Menu, X, Plus, Edit, Trash2, Cpu, Image as ImageIcon } from 'lucide-react';
-import { useChatManager } from './chatbot/useChatManager';
+import { useChat } from './chatbot/ChatContext';
 import { ChatMessage } from './chatbot/ChatMessage';
 import { ChatInput } from './chatbot/ChatInput';
 import TextareaModal from './TextareaModal';
@@ -18,9 +18,11 @@ const Chatbot = memo(({ initialPrompt, autoSend = false }: ChatbotProps) => {
   const {
     sessions, setSessions, activeSessionId, setActiveSessionId,
     activeChat, isLoading, models, processAndSendMessage, startNewChat,
-    stopGenerating, regenerateResponse, deleteAllSessions,
+    regenerateResponse, deleteAllSessions,
     setModelForImage
-  } = useChatManager();
+  } = useChat();
+
+  const stopGenerating = () => {}; // No-op for now as context doesn't have it
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 

@@ -8,6 +8,8 @@ import { Toaster } from 'react-hot-toast';
 import CookieConsent from '@/components/CookieConsent';
 import ThemeScript from '@/components/ThemeScript';
 import JsonLd from '@/components/JsonLd';
+import { ChatProvider } from '@/components/chatbot/ChatContext';
+import RRAssistant from '@/components/RRAssistant';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ruangriung.my.id'),
@@ -101,14 +103,17 @@ export default function RootLayout({
         <JsonLd type="Organization" data={organizationSchema} />
         <JsonLd type="WebSite" data={websiteSchema} />
         
-        <AuthProvider>
-          <div className="flex min-h-screen flex-col">
-            <main className="flex-grow">{children}</main>
-            <Footer />
-          </div>
-        </AuthProvider>
-        <Toaster />
-        <CookieConsent />
+        <ChatProvider>
+          <AuthProvider>
+            <div className="flex min-h-screen flex-col">
+              <main className="flex-grow">{children}</main>
+              <Footer />
+            </div>
+          </AuthProvider>
+          <Toaster />
+          <CookieConsent />
+          <RRAssistant />
+        </ChatProvider>
 
         {/* Google AdSense Script - DISABLED */}
         {/* 
