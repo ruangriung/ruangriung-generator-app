@@ -127,7 +127,7 @@ const RRAssistant = () => {
   return (
     <div 
       className={`fixed z-50 transition-all duration-300 ease-in-out ${
-         isFullScreen 
+         (isAssistantOpen && isFullScreen) 
           ? 'inset-0 w-full h-full sm:inset-4 sm:w-auto sm:h-auto' 
           : isAssistantOpen 
             ? 'bottom-6 left-6 w-[95vw] sm:w-[450px] h-[80vh] max-h-[700px]' 
