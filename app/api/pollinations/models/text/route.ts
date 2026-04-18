@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { fetch } from 'undici';
 
 export const dynamic = 'force-dynamic';
 

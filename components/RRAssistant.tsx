@@ -88,7 +88,7 @@ const RRAssistant = () => {
         setTypingText(phrases[i]);
       }, 2500);
     } else {
-      setTypingText('AI sedang mengetik...');
+      setTypingText('Agent sedang mengetik...');
     }
     return () => clearInterval(interval);
   }, [isLoading]);

@@ -73,20 +73,26 @@ export async function GET(requestObj: Request) {
       pollParams.append('audio', 'true');
     }
 
-    const apiUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?${pollParams.toString()}`;
+    const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
+    
+    // Gunakan endpoint gen.pollinations.ai jika ada API Key (Pro), 
+    // jika tidak ada, gunakan endpoint publik pollinations.ai/p/
+    const baseUrl = POLLINATIONS_API_KEY 
+      ? `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`
+      : `https://pollinations.ai/p/${encodeURIComponent(prompt)}`;
+
+    const apiUrl = `${baseUrl}?${pollParams.toString()}`;
     
     console.log('[API] Image Request:', apiUrl);
 
-    const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
-
     const headers: Record<string, string> = {
       'Accept': 'image/*, application/json',
-      'Referer': 'https://ruangriung.my.id',
     };
 
     if (POLLINATIONS_API_KEY) {
       headers['Authorization'] = `Bearer ${POLLINATIONS_API_KEY}`;
     }
+
 
     // Use global fetch (built-in in Vercel/Node 18+)
     const response = await fetch(apiUrl, {

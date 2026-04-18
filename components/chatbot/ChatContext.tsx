@@ -173,11 +173,24 @@ Pengetahuan Fitur:
 - Generator Teks: Mendukung model OpenAI, Gemini, DeepSeek, Grok, dll.
 - Anda terintegrasi secara global sebagai RR AGENT (floating assistant).
 
+KEMAMPUAN GENERASI GAMBAR (PENTING):
+- Jika pengguna meminta untuk dibuatkan gambar, lukisan, atau visual, Anda HARUS membantu mereka.
+- Caranya adalah dengan memberikan deskripsi singkat dan menyertakan Markdown Image dengan format: 
+  ![image](https://pollinations.ai/p/[PROMPT]?model=zimage&width=1024&height=1024&nologo=true&seed=[RANDOM])
+- Ganti [PROMPT] dengan deskripsi visual yang sangat detail dalam Bahasa Inggris (English) agar hasilnya maksimal. Pastikan prompt di-URL-encode dengan benar (gunakan %20 untuk spasi).
+- Ganti [RANDOM] dengan angka acak bulat (integer).
+- Contoh: Jika user minta "Gambar kucing lucu", Anda kirim pesan: "Tentu! Ini gambar kucing lucu untuk Anda: ![image](https://pollinations.ai/p/cute%20cat%20fluffy%20highly%20detailed?model=zimage&width=1024&height=1024&nologo=true&seed=42)\n\njika ingin lebih banya model gunakan Tools kami di beranda"
+
 Catatan Khusus:
 - Selalu sebutkan RuangRiung dengan bangga.
 - Ajak pengguna bergabung ke Grup Facebook RuangRiung jika mereka ingin berinteraksi lebih dalam dengan komunitas.
-- Jika ditanya siapa Anda, jawablah Anda adalah asisten resmi RuangRiung.`
+- Jika ditanya siapa Anda, jawablah Anda adalah asisten resmi RuangRiung.
+- Sertakan teks "jika ingin lebih banya model gunakan Tools kami di beranda" (cetak tebal atau miring jika perlu) di akhir setiap pesan yang menghasilkan gambar.`
       };
+
+      const userText = typeof newMessage.content === 'string' ? newMessage.content : (newMessage.content as any).text || '';
+      const imageKeywords = /(gambarkan|buatkan gambar|buat gambar|tampilkan gambar|lukiskan|bikinkan gambar|draw|create image|generate image)/i;
+      const isImageIntent = imageKeywords.test(userText);
 
       if (isImageUpload) {
         const content = newMessage.content as any;
@@ -194,12 +207,29 @@ Catatan Khusus:
         });
         const reply = await response.text();
         updateMessages(currentActiveChatId, prev => [...prev, { role: 'assistant', content: reply }]);
-      } else if (isImageGenerationMode) {
-        const promptText = newMessage.content as string;
-        const imageUrl = `/api/pollinations/image?model=${activeChat.model}&prompt=${encodeURIComponent(promptText)}&seed=${Math.random()}`;
+      } else if (isImageGenerationMode || isImageIntent) {
+        // Jika mode gambar aktif ATAU terdeteksi permintaan gambar via teks
+        let promptText = userText;
+        if (isImageIntent && !isImageGenerationMode) {
+          // Bersihkan teks perintah untuk mengambil prompt inti
+          promptText = userText.replace(imageKeywords, '').trim() || 'Pemandangan indah digital art';
+        }
+
+        const seed = Math.floor(Math.random() * 1000000);
+        const proxyUrl = `/api/pollinations/image?prompt=${encodeURIComponent(promptText)}&model=zimage&width=1024&height=1024&nologo=true&seed=${seed}`;
+        
+        // Buat jeda buatan agar indikator "sedang mengetik" terlihat lebih lama
+        await new Promise(resolve => setTimeout(resolve, 2500));
+
+        const assistantReply = { 
+          type: 'image_url', 
+          image_url: { url: proxyUrl }, 
+          text: `Hasil gambar untuk: "${promptText}".\n\nJika ingin lebih banyak model, gunakan Tools kami di beranda.` 
+        };
+
         updateMessages(currentActiveChatId, prev => [...prev, {
           role: 'assistant',
-          content: { type: 'image_url', image_url: { url: imageUrl }, text: `Gambar untuk: "${promptText}"` }
+          content: assistantReply as any
         }]);
       } else {
         const response = await fetch('/api/pollinations/text', {

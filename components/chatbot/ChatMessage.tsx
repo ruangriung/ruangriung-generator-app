@@ -37,15 +37,11 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
     }
   };
 
-  const handleDownload = async () => {
-    if (typeof message.content !== 'object' || !('image_url' in message.content)) return;
-
-    const imageUrl = message.content.image_url.url;
+  const downloadImage = async (url: string) => {
     toast.loading('Mempersiapkan unduhan...');
 
     try {
-      // Fetch gambar sebagai blob untuk memastikan unduhan berjalan di semua browser
-      const response = await fetch(imageUrl);
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Gagal mengambil data gambar dari URL.');
       const blob = await response.blob();
       
@@ -53,7 +49,7 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
       
       const a = document.createElement('a');
       a.href = objectUrl;
-      a.download = `ruangriung-ai-image-${Date.now()}.png`; // Nama file lebih deskriptif
+      a.download = `ruangriung-ai-image-${Date.now()}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -69,12 +65,72 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
     }
   };
 
+  const handleDownload = async () => {
+    if (typeof message.content === 'object' && message.content !== null && 'image_url' in message.content) {
+      downloadImage(message.content.image_url.url);
+    }
+  };
+
+  const ImageWithLoader = ({ src, alt, className, showDownload = false }: { src: string; alt: string; className?: string; showDownload?: boolean }) => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
+
+    const getProxiedUrl = (url: string) => {
+      if (url.includes('pollinations.ai/p/')) {
+        const parts = url.split('/p/');
+        const promptAndParams = parts[1];
+        if (promptAndParams) {
+          const [prompt, query] = promptAndParams.split('?');
+          return `/api/pollinations/image?prompt=${prompt}${query ? '&' + query : ''}`;
+        }
+      }
+      return url;
+    };
+
+    const imageUrl = getProxiedUrl(src);
+
+    return (
+      <span className="relative group my-2 block min-h-[200px]">
+        {isLoading && (
+          <span className="absolute inset-0 w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg flex flex-col items-center justify-center gap-2">
+            <Bot className="text-purple-400 animate-bounce" size={32} />
+            <span className="text-[10px] text-gray-500 uppercase tracking-widest animate-pulse">Memproses Visual...</span>
+          </span>
+        )}
+        {hasError && (
+          <span className="w-full min-h-[200px] bg-red-50 dark:bg-red-900/20 rounded-lg flex flex-col items-center justify-center p-4 text-center">
+            <Bot className="text-red-400 mb-2" size={32} />
+            <span className="text-xs text-red-500">Gagal memuat gambar. Silakan coba lagi.</span>
+          </span>
+        )}
+        <img 
+          src={imageUrl} 
+          alt={alt} 
+          className={`${className} ${isLoading ? 'opacity-0 h-0' : 'opacity-100 h-auto transition-opacity duration-500'}`}
+          onLoad={() => setIsLoading(false)}
+          onError={() => {
+            setIsLoading(false);
+            setHasError(true);
+          }}
+        />
+        {!isLoading && !hasError && showDownload && (
+          <button 
+            onClick={() => downloadImage(imageUrl || '')}
+            className="absolute top-2 right-2 p-2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 text-purple-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md border border-purple-100"
+            title="Unduh Gambar"
+          >
+            <Download size={16} />
+          </button>
+        )}
+      </span>
+    );
+  };
 
   const renderContent = () => {
     if (typeof message.content === 'object' && message.content !== null && 'type' in message.content && message.content.type === 'image_url') {
       return (
         <div className="flex flex-col gap-2">
-          <img 
+          <ImageWithLoader 
             src={message.content.image_url.url} 
             alt={message.content.text || "Generated AI image"} 
             className="rounded-lg max-w-full object-contain"
@@ -84,7 +140,19 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
       );
     }
     return (
-      <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+      <ReactMarkdown 
+        rehypePlugins={[rehypeHighlight]}
+        components={{
+          img: ({ src, alt }) => (
+            <ImageWithLoader 
+              src={src || ''} 
+              alt={alt || 'image'} 
+              className="rounded-lg max-w-full object-contain shadow-sm" 
+              showDownload={true} 
+            />
+          )
+        }}
+      >
         {String(message.content)}
       </ReactMarkdown>
     );
