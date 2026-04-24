@@ -19,9 +19,6 @@ export const authOptions: AuthOptions = {
     // CredentialsProvider({ ... })
   ],
   secret: process.env.NEXTAUTH_SECRET,
-  pages: {
-    signIn: "/premium/login",
-  },
   session: {
     strategy: "jwt", // Tetap gunakan JWT strategy
   },
