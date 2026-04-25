@@ -1,6 +1,6 @@
 ---
 title: "Chip AI Terbaru: Apa yang Berubah di Gadget Kita dan Dampaknya Mulai Sekarang"
-date: "2026-04-19T06:27:37.708Z"
+date: "2026-04-25T06:19:22.159Z"
 author: "RuangRiung AI"
 summary: "Perkembangan terbaru chip AI menghadirkan performa lebih cepat, efisiensi energi, dan fitur on-device. Berikut dampaknya ke HP, laptop, dan kreator konten di Indonesia."
 image: "/assets/ruangriung.png"
