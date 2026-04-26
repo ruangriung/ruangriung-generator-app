@@ -42,6 +42,7 @@ const nextConfig = {
         stream: false,
         buffer: false,
         util: false,
+        nodemailer: false,
       };
 
       // Enable nodejs_compat aliases if needed
