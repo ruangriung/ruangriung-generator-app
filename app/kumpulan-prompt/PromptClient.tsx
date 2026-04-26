@@ -339,15 +339,26 @@ export default function PromptClient({
           </button>
           
           <div className="flex items-center gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`h-12 w-12 rounded-2xl text-xs font-black transition-all ${currentPage === page ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' : 'glass border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-primary-500/30'}`}
-              >
-                {page}
-              </button>
-            ))}
+            {(() => {
+              const maxButtons = 7;
+              let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+              let endPage = startPage + maxButtons - 1;
+
+              if (endPage > totalPages) {
+                endPage = totalPages;
+                startPage = Math.max(1, endPage - maxButtons + 1);
+              }
+
+              return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`h-12 w-12 rounded-2xl text-xs font-black transition-all ${currentPage === page ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' : 'glass border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-primary-500/30'}`}
+                >
+                  {page}
+                </button>
+              ));
+            })()}
           </div>
 
           <button
