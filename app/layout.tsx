@@ -58,9 +58,9 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico", type: "image/x-icon" },
-      { url: "/logo.png", sizes: "32x32", type: "image/png" },
+      { url: "/logo.webp", sizes: "32x32", type: "image/webp" },
     ],
-    apple: "/logo.png",
+    apple: "/logo.webp",
   },
 };
 
@@ -76,7 +76,7 @@ export default function RootLayout({
   const organizationSchema = {
     name: 'RuangRiung',
     url: 'https://ruangriung.my.id',
-    logo: 'https://ruangriung.my.id/logo.png',
+    logo: 'https://ruangriung.my.id/logo.webp',
     sameAs: [
       'https://ariftirtana.my.id',
     ],
@@ -97,7 +97,7 @@ export default function RootLayout({
       <head>
         <ThemeScript />
         <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" href="/logo.webp" />
       </head>
       <body className="bg-light-bg font-sans relative">
         {/* Optimized Fixed Background Layer */}

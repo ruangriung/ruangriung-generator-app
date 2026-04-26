@@ -161,7 +161,7 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
   return (
     <div className={`flex items-start gap-2 sm:gap-4 ${message.role === 'user' ? 'justify-end' : ''}`}>
         <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm border border-purple-100 overflow-hidden relative">
-            <Image src="/logo.png" alt="RR" width={24} height={24} className="object-contain" />
+            <Image src="/logo.webp" alt="RR" width={24} height={24} className="object-contain" />
         </div>
 
       <div className={`max-w-xl flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300`}>

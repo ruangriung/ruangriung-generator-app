@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     siteName: 'RuangRiung AI Generator',
     images: [
       {
-        url: 'https://ruangriung.my.id/logo.png',
+        url: 'https://ruangriung.my.id/logo.webp',
         width: 1200,
         height: 630,
         alt: 'AI Storytelling',

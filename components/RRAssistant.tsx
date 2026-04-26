@@ -156,7 +156,7 @@ const RRAssistant = () => {
           aria-label="Buka RR AGENT"
         >
           <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white/50 bg-white">
-             <Image src="/logo.png" alt="RR" width={32} height={32} className="object-cover" />
+             <Image src="/logo.webp" alt="RR" width={32} height={32} className="object-cover" />
           </div>
           <span className="font-bold text-sm pr-2 whitespace-nowrap">RR AGENT</span>
         </button>
@@ -166,7 +166,7 @@ const RRAssistant = () => {
           <div className="p-4 bg-gradient-to-r from-primary-600 to-indigo-600 text-white flex justify-between items-center shrink-0">
             <div className="flex items-center gap-3">
               <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/30 bg-white flex items-center justify-center">
-                <Image src="/logo.png" alt="RR" width={32} height={32} className="object-contain" />
+                <Image src="/logo.webp" alt="RR" width={32} height={32} className="object-contain" />
               </div>
               <div>
                 <h3 className="font-bold text-sm leading-none text-white">RR AGENT</h3>
@@ -220,7 +220,7 @@ const RRAssistant = () => {
                 {!activeChat || activeChat.messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center px-4">
                     <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-inner border-2 border-purple-100">
-                      <Image src="/logo.png" alt="RR AGENT" width={60} height={60} className="rounded-full object-contain" />
+                      <Image src="/logo.webp" alt="RR AGENT" width={60} height={60} className="rounded-full object-contain" />
                     </div>
                     <h4 className="font-bold text-gray-800 dark:text-gray-100 mb-2">Halo! Saya RR AGENT</h4>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -239,7 +239,7 @@ const RRAssistant = () => {
                 {isLoading && (
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 border border-purple-100 shadow-sm overflow-hidden relative">
-                      <Image src="/logo.png" alt="RR" width={24} height={24} className="object-contain" />
+                      <Image src="/logo.webp" alt="RR" width={24} height={24} className="object-contain" />
                     </div>
                     <div className="max-w-xl p-4 rounded-xl bg-white dark:bg-gray-800 shadow-md flex flex-col gap-2">
                       <div className="flex items-center gap-2">

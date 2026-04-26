@@ -80,7 +80,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       name: 'RuangRiung',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://ruangriung.my.id/logo.png',
+        url: 'https://ruangriung.my.id/logo.webp',
       },
     },
     datePublished: new Date(article.date).toISOString(),
