@@ -1,4 +1,3 @@
-export const runtime = 'edge';
 // app/storyteller/page.tsx
 import StorytellerClient from '@/components/StorytellerClient';
 import { Metadata } from 'next';
@@ -172,4 +171,4 @@ export default async function StorytellerPage() {
       </div>
     </div>
   );
-}
+}

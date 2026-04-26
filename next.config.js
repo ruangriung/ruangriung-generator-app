@@ -28,36 +28,15 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        path: false,
-        net: false,
-        tls: false,
-        dns: false,
-        child_process: false,
-        crypto: false,
-        stream: false,
-        buffer: false,
-        util: false,
-        nodemailer: false,
-      };
-
-      // Enable nodejs_compat aliases if needed
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        'crypto': 'node:crypto',
-        'stream': 'node:stream',
-        'buffer': 'node:buffer',
-        'util': 'node:util',
-      };
-    }
-    return config;
+  async rewrites() {
+    return [
+      {
+        source: '/v1/:path*',
+        destination: '/v1/:path*',
+      },
+    ];
   },
 };
-
 
 module.exports = withPWA({
   dest: 'public',

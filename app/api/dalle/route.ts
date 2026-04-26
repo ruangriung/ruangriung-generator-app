@@ -1,5 +1,4 @@
 // ruangriung/ruangriung-generator-app/ruangriung-generator-app-3a68b1c6536b7de1915cdc5d286c7ce19bf9481e/app/api/dalle/route.ts
-export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {

@@ -282,4 +282,4 @@ export default function ArticlePaginationClient({ initialArticles }: ArticlePagi
             )}
         </div>
     );
-}
+}

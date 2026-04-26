@@ -1,14 +1,8 @@
+import fs from 'fs/promises';
+import path from 'path';
 import matter from 'gray-matter';
 
-// Dynamic imports for Node.js built-ins to avoid bundling them in Edge runtime
-const getFs = () => (process.env.NEXT_RUNTIME !== 'edge' ? require('fs/promises') : null);
-const getPath = () => (process.env.NEXT_RUNTIME !== 'edge' ? require('path') : null);
-
-const path = getPath();
-const fs = getFs();
-
-
-const promptsDirectory = path ? path.join(process.cwd(), 'content/prompts') : '';
+const promptsDirectory = path.join(process.cwd(), 'content/prompts');
 const READ_ONLY_ERROR_CODES = new Set(['EROFS', 'EACCES', 'EPERM']);
 
 type TransientPromptStore = {
