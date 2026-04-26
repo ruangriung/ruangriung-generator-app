@@ -36,20 +36,7 @@ const RRAssistant = () => {
     }
   }, [pendingPrompt, setIsAssistantOpen, setPendingPrompt]);
 
-  // Onboarding: Welcome message for V2 transition
-  useEffect(() => {
-    if (isMounted) {
-      const hasSeenOnboarding = localStorage.getItem('has_seen_v2_onboarding');
-      if (!hasSeenOnboarding) {
-        // Hanya siapkan pesan, jangan buka otomatis
-        processAndSendMessage({
-          role: 'assistant',
-          content: "Halo! Selamat datang di **RuangRiung V2**. Saya adalah **RR AGENT**, asisten AI baru Anda.\n\nKami telah melakukan banyak perubahan besar pada antarmuka untuk membuat kreasi Anda lebih cepat dan mudah. \n\nAda yang bisa saya bantu jelaskan mengenai fitur-fitur baru kami hari ini?"
-        });
-        localStorage.setItem('has_seen_v2_onboarding', 'true');
-      }
-    }
-  }, [isMounted, setIsAssistantOpen, processAndSendMessage]);
+
 
   // Auto-scroll to bottom
   useEffect(() => {
