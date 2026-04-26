@@ -1,4 +1,6 @@
 // app/layout.tsx
+// Netlify Auto-deploy test trigger
+
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import AuthProvider from '@/components/AuthProvider';
