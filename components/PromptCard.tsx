@@ -63,8 +63,20 @@ export default function PromptCard({ prompt }: PromptCardProps) {
         <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-2 text-slate-400">
             <Clock size={14} />
-            <span className="text-[10px] font-black uppercase tracking-widest">
-              {new Date(prompt.date).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' })}
+            <span 
+              className="text-[10px] font-black uppercase tracking-widest"
+              suppressHydrationWarning
+            >
+              {(() => {
+                try {
+                  const date = new Date(prompt.date);
+                  return isNaN(date.getTime()) 
+                    ? 'Baru saja' 
+                    : date.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+                } catch (e) {
+                  return 'Baru saja';
+                }
+              })()}
             </span>
           </div>
           <div className="text-primary-500 transform transition-transform duration-300 group-hover:translate-x-1">
