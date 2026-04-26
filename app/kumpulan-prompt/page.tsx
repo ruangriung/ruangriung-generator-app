@@ -53,5 +53,5 @@ export const metadata: Metadata = {
 export default async function KumpulanPromptPage() {
   const prompts = await getAllPrompts();
 
-  return <PromptClient prompts={prompts} />;
+  return <PromptClient initialPrompts={prompts} />;
 }

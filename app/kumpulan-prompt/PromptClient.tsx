@@ -2,11 +2,11 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { Search, Hash, PenTool, Sparkles, Filter, ChevronDown, Check, X, Tag as TagIcon, Clock, ArrowRight, User } from 'lucide-react';
 import PromptCard from '@/components/PromptCard';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { PromptData } from '@/lib/prompts';
+import { Prompt } from '@/lib/prompts';
 import { useSession } from 'next-auth/react';
 
 interface PromptClientProps {
-  initialPrompts: PromptData[];
+  initialPrompts: Prompt[];
 }
 
 export default function PromptClient({ initialPrompts }: PromptClientProps) {
@@ -25,7 +25,7 @@ export default function PromptClient({ initialPrompts }: PromptClientProps) {
   // Get all unique tags and tools for filters
   const allTags = useMemo(() => {
     const tags = new Set<string>();
-    initialPrompts.forEach(p => p.tags.forEach(t => tags.add(t)));
+    initialPrompts.forEach((p: Prompt) => p.tags.forEach((t: string) => tags.add(t)));
     return Array.from(tags).sort();
   }, [initialPrompts]);
 
@@ -51,7 +51,7 @@ export default function PromptClient({ initialPrompts }: PromptClientProps) {
     return initialPrompts.filter(prompt => {
       const matchesSearch = searchTerm === '' || 
         prompt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        prompt.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        prompt.promptContent.toLowerCase().includes(searchTerm.toLowerCase()) ||
         prompt.author.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesTag = selectedTag === '' || prompt.tags.includes(selectedTag);
