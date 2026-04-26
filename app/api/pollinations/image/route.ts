@@ -100,11 +100,10 @@ export async function GET(requestObj: Request) {
     }
 
 
-    // === OPTIMIZATION: Redirect instead of Proxying ===
-    // If we are NOT using a server-side private key (meaning it's public or BYOP),
-    // we can redirect the browser to fetch the image directly from Pollinations.
-    // This saves 100% of the image bandwidth on Vercel.
-    if (!process.env.POLLINATIONS_API_KEY || clientKey) {
+    // === OPTIMIZATION: Redirect for GET only (Public/BYOP) ===
+    // If it's a GET request and we are NOT using a server-side private key,
+    // we can redirect the browser to fetch the image directly.
+    if (requestObj.method === 'GET' && (!process.env.POLLINATIONS_API_KEY || clientKey)) {
       return NextResponse.redirect(apiUrl, { status: 307 });
     }
 
@@ -180,11 +179,7 @@ export async function POST(requestObj: Request) {
     const headers: Record<string, string> = { 'Accept': 'image/*, application/json' };
     if (activeApiKey) headers['Authorization'] = `Bearer ${activeApiKey}`;
 
-    // === OPTIMIZATION: Redirect instead of Proxying ===
-    if (!process.env.POLLINATIONS_API_KEY || clientKey) {
-      return NextResponse.redirect(apiUrl, { status: 307 });
-    }
-
+    // Proxy POST request (don't redirect as it will fail method switch)
     const response = await fetch(apiUrl, { method: 'GET', headers });
 
     if (!response.ok) {

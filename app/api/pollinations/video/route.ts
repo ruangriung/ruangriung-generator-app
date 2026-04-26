@@ -20,11 +20,7 @@ export async function POST(request: Request) {
         const clientKey = request.headers.get('x-pollinations-key');
         const activeApiKey = clientKey || POLLINATIONS_API_KEY;
 
-        // === OPTIMIZATION: Redirect for Public/BYOP ===
-        // Videos are very large. Redirecting saves tons of Vercel bandwidth.
-        if (!process.env.POLLINATIONS_API_KEY || clientKey) {
-            return NextResponse.redirect(finalUrl, { status: 307 });
-        }
+
 
         const headers: HeadersInit = {};
         if (activeApiKey) {

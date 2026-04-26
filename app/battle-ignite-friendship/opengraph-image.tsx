@@ -1,7 +1,6 @@
 import { ImageResponse } from 'next/og';
 import type { CSSProperties } from 'react';
 
-export const runtime = 'edge';
 
 export const size = {
   width: 1200,
