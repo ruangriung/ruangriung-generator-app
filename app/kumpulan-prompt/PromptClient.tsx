@@ -8,10 +8,24 @@ import { Prompt } from '@/lib/prompts';
 import { useSession } from 'next-auth/react';
 
 interface PromptClientProps {
-  initialPrompts: Prompt[];
+  prompts: Prompt[];
+  title?: string;
+  description?: string;
+  backHref?: string;
+  backLabel?: string;
+  basePath?: string;
+  showSubmissionTrigger?: boolean;
 }
 
-export default function PromptClient({ initialPrompts }: PromptClientProps) {
+export default function PromptClient({ 
+  prompts: initialPrompts, 
+  title = "Kumpulan Prompt Terbaik",
+  description = "Temukan koleksi prompt pilihan untuk berbagai alat AI favorit Anda. Mulai dari generasi gambar, teks, hingga kode.",
+  backHref = "/",
+  backLabel = "Beranda",
+  basePath = "/kumpulan-prompt",
+  showSubmissionTrigger = true
+}: PromptClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
@@ -99,7 +113,7 @@ export default function PromptClient({ initialPrompts }: PromptClientProps) {
     if (tool) params.set('tool', tool);
     
     const query = params.toString();
-    router.push(`/kumpulan-prompt${query ? `?${query}` : ''}`, { scroll: false });
+    router.push(`${basePath}${query ? `?${query}` : ''}`, { scroll: false });
   };
 
   const handleSearchChange = (value: string) => {
@@ -147,10 +161,10 @@ export default function PromptClient({ initialPrompts }: PromptClientProps) {
             Inspirasi Tanpa Batas
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white leading-[1.1] tracking-tight">
-            Kumpulan <span className="gradient-text">Prompt</span> Terbaik
+            {title.split(' ').map((word, i) => i === title.split(' ').length - 1 ? <span key={i} className="gradient-text"> {word}</span> : (i === 0 ? word : ` ${word}`))}
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
-            Temukan koleksi prompt pilihan untuk berbagai alat AI favorit Anda. Mulai dari generasi gambar, teks, hingga kode.
+            {description}
           </p>
         </div>
 
@@ -281,47 +295,49 @@ export default function PromptClient({ initialPrompts }: PromptClientProps) {
       </div>
 
       {/* Submission CTA */}
-      <div className="mt-24 glass-card !p-0 !rounded-[3rem] overflow-hidden">
-        <div className="relative p-10 md:p-16 flex flex-col lg:flex-row items-center gap-12">
-          {/* Decorative background */}
-          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary-500/10 to-transparent pointer-events-none" />
-          
-          <div className="flex-1 space-y-6 relative z-10">
-            <div className="h-14 w-14 rounded-2xl bg-primary-500 flex items-center justify-center text-white shadow-lg shadow-primary-500/30">
-              <PenTool size={28} />
-            </div>
-            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">
-              Punya <span className="gradient-text">Prompt</span> Andalan?
-            </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 font-medium max-w-xl">
-              Bagikan kreativitas Anda dengan komunitas! Kirimkan prompt terbaik Anda dan bantu orang lain menghasilkan karya yang luar biasa.
-            </p>
-            <button 
-              onClick={() => router.push('/kumpulan-prompt/kirim')}
-              className="btn-primary w-full sm:w-auto"
-            >
-              Kirim Prompt Sekarang <ArrowRight size={20} />
-            </button>
-          </div>
-
-          <div className="flex-1 grid grid-cols-2 gap-4 relative z-10 w-full lg:w-auto">
-            {[
-              { icon: <Hash />, label: "Terstruktur", desc: "Format rapi" },
-              { icon: <Check />, label: "Teruji", desc: "Hasil terjamin" },
-              { icon: <User />, label: "Profil", desc: "Dapatkan kredit" },
-              { icon: <Clock />, label: "Update", desc: "Selalu segar" }
-            ].map((item, i) => (
-              <div key={i} className="glass p-6 rounded-[2rem] border-slate-200/50 dark:border-white/5 space-y-3">
-                <div className="text-primary-500">{item.icon}</div>
-                <div>
-                  <div className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">{item.label}</div>
-                  <div className="text-[10px] font-bold text-slate-400">{item.desc}</div>
-                </div>
+      {showSubmissionTrigger && (
+        <div className="mt-24 glass-card !p-0 !rounded-[3rem] overflow-hidden">
+          <div className="relative p-10 md:p-16 flex flex-col lg:flex-row items-center gap-12">
+            {/* Decorative background */}
+            <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary-500/10 to-transparent pointer-events-none" />
+            
+            <div className="flex-1 space-y-6 relative z-10">
+              <div className="h-14 w-14 rounded-2xl bg-primary-500 flex items-center justify-center text-white shadow-lg shadow-primary-500/30">
+                <PenTool size={28} />
               </div>
-            ))}
+              <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">
+                Punya <span className="gradient-text">Prompt</span> Andalan?
+              </h2>
+              <p className="text-lg text-slate-600 dark:text-slate-400 font-medium max-w-xl">
+                Bagikan kreativitas Anda dengan komunitas! Kirimkan prompt terbaik Anda dan bantu orang lain menghasilkan karya yang luar biasa.
+              </p>
+              <button 
+                onClick={() => router.push('/kumpulan-prompt/kirim')}
+                className="btn-primary w-full sm:w-auto"
+              >
+                Kirim Prompt Sekarang <ArrowRight size={20} />
+              </button>
+            </div>
+
+            <div className="flex-1 grid grid-cols-2 gap-4 relative z-10 w-full lg:w-auto">
+              {[
+                { icon: <Hash />, label: "Terstruktur", desc: "Format rapi" },
+                { icon: <Check />, label: "Teruji", desc: "Hasil terjamin" },
+                { icon: <User />, label: "Profil", desc: "Dapatkan kredit" },
+                { icon: <Clock />, label: "Update", desc: "Selalu segar" }
+              ].map((item, i) => (
+                <div key={i} className="glass p-6 rounded-[2rem] border-slate-200/50 dark:border-white/5 space-y-3">
+                  <div className="text-primary-500">{item.icon}</div>
+                  <div>
+                    <div className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">{item.label}</div>
+                    <div className="text-[10px] font-bold text-slate-400">{item.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

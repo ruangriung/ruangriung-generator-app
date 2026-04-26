@@ -1,6 +1,7 @@
 
 
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { getAllPrompts } from '../../lib/prompts';
 import PromptClient from './PromptClient';
 
@@ -48,10 +49,16 @@ export const metadata: Metadata = {
   },
 };
 
-
-
 export default async function KumpulanPromptPage() {
   const prompts = await getAllPrompts();
 
-  return <PromptClient initialPrompts={prompts} />;
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+      </div>
+    }>
+      <PromptClient initialPrompts={prompts} />
+    </Suspense>
+  );
 }

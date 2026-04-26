@@ -230,12 +230,25 @@ const readPromptsFromDirectory = async (directory: string): Promise<Prompt[]> =>
   }
 };
 
+const directoryCache = new Map<string, Prompt[]>();
+
 export const getPromptsFromDirectory = async (directory: string): Promise<Prompt[]> => {
+  if (directoryCache.has(directory)) {
+    return directoryCache.get(directory)!;
+  }
   const prompts = await readPromptsFromDirectory(directory);
-  return prompts.sort((a, b) => getPromptSortValue(b) - getPromptSortValue(a));
+  const sorted = prompts.sort((a, b) => getPromptSortValue(b) - getPromptSortValue(a));
+  directoryCache.set(directory, sorted);
+  return sorted;
 };
 
+let promptsCache: Prompt[] | null = null;
+
 export async function getAllPrompts(): Promise<Prompt[]> {
+  if (promptsCache) {
+    return promptsCache;
+  }
+
   const persistedPrompts = await readPromptsFromDirectory(promptsDirectory);
   const transientPrompts = listTransientPrompts();
   const promptMap = new Map<string, Prompt>();
@@ -249,9 +262,10 @@ export async function getAllPrompts(): Promise<Prompt[]> {
     removeTransientPrompt(prompt.slug);
   });
 
-  return Array.from(promptMap.values()).sort(
+  promptsCache = Array.from(promptMap.values()).sort(
     (a, b) => getPromptSortValue(b) - getPromptSortValue(a),
   );
+  return promptsCache;
 }
 
 export async function getPromptBySlug(slug: string): Promise<Prompt | undefined> {

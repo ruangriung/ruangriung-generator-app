@@ -38,9 +38,17 @@ export async function GET(request: Request) {
       return NextResponse.json({ message: 'Prompt/Text is required' }, { status: 400 });
     }
 
+    // Support BYOP: Check client headers
+    const clientKey = request?.headers.get('x-pollinations-key') || 
+                      request?.headers.get('Authorization')?.replace('Bearer ', '');
+    const serverKey = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
+    const apiKey = clientKey || serverKey;
+
+    const baseUrl = apiKey ? 'https://gen.pollinations.ai' : 'https://text.pollinations.ai';
+
     // Forwarding additional query params to Pollinations (e.g., model, seed)
     const pollParams = new URLSearchParams(searchParams);
-    const finalUrl = `${POLLINATIONS_BASE_URL}/text/${encodeURIComponent(prompt)}?${pollParams.toString()}`;
+    const finalUrl = `${baseUrl}/text/${encodeURIComponent(prompt)}?${pollParams.toString()}`;
 
     const response = await fetch(finalUrl, {
       method: 'GET',
@@ -98,6 +106,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
+    
+    // Support BYOP: Check client headers
+    const clientKey = request?.headers.get('x-pollinations-key') || 
+                      request?.headers.get('Authorization')?.replace('Bearer ', '');
+    
+    const apiKey = clientKey || POLLINATIONS_API_KEY;
+
+    // Use gen.pollinations.ai for Pro (with key), otherwise use text.pollinations.ai
+    const baseUrl = apiKey ? 'https://gen.pollinations.ai' : 'https://text.pollinations.ai';
+
     const upstreamPayload: Record<string, unknown> = {
       model,
       messages,
@@ -111,7 +130,7 @@ export async function POST(request: Request) {
     if (body?.response_format) upstreamPayload.response_format = body.response_format;
     if (typeof body?.json !== 'undefined') upstreamPayload.json = body.json;
 
-    const response = await fetch(`${POLLINATIONS_BASE_URL}/v1/chat/completions`, {
+    const response = await fetch(`${baseUrl}/v1/chat/completions`, {
       method: 'POST',
       headers: buildAuthHeaders(request),
       body: JSON.stringify(upstreamPayload),

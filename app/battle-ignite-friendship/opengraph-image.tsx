@@ -162,53 +162,23 @@ const participantCard: CSSProperties = {
 export default function Image() {
   return new ImageResponse(
     (
-      <div style={containerStyle}>
-        <div style={ribbonStyle} />
-        {cornerAccents.map((accent, index) => (
-          <div key={index} style={accent.style} />
-        ))}
-        <div style={backgroundStyle}>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={titleStyle}>Battle ignite friendship</div>
-            <div style={igniteStyle}>ignite</div>
-            <div style={friendshipStyle}>
-              friendship
-              <span
-                style={{
-                  display: 'flex',
-                  width: 120,
-                  height: 6,
-                  backgroundColor: '#bef264',
-                }}
-              />
-            </div>
-            <div style={participantsContainer}>
-              {participantNames.map((name) => (
-                <div key={name} style={participantCard}>
-                  <span style={{ fontSize: 18, color: '#a5b4fc', letterSpacing: '0.45em' }}>
-                    Lolos 8 Besar
-                  </span>
-                  <span style={{ fontWeight: 600 }}>{name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            <div style={badgeStyle}>RuangRiung vs Timun-AI</div>
-            <div style={scheduleStyle}>17 – 21 September 2025</div>
-            <div style={stagesStyle}>
-              <span>16 Besar</span>
-              <span>Perempat Final</span>
-              <span>Semifinal</span>
-              <span>Final</span>
-              <span>3rd Place</span>
-            </div>
-            <div style={{ display: 'flex', fontSize: 20, letterSpacing: '0.35em', textTransform: 'uppercase', color: '#94a3b8' }}>
-              RuangRiung AI Image • 19.00 WIB
-            </div>
-          </div>
-        </div>
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#050505',
+          color: '#9ef01a',
+          fontSize: 80,
+          fontWeight: 800,
+          textTransform: 'uppercase',
+        }}
+      >
+        <div style={{ marginBottom: 20 }}>Battle Ignite</div>
+        <div style={{ color: '#ffffff', fontSize: 40 }}>Friendship Edition</div>
       </div>
     ),
     {

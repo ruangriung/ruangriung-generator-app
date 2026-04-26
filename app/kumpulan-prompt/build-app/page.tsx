@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { getBuildAppPrompts } from '@/lib/buildAppPrompts';
 import BuildAppPageClient from './BuildAppPageClient';
 
@@ -47,16 +48,19 @@ export const metadata: Metadata = {
   },
 };
 
-
-
-
 export default async function BuildAppPromptPage() {
   const prompts = await getBuildAppPrompts();
 
   return (
-    <BuildAppPageClient
-      prompts={prompts}
-      featuredPromptSlug={FEATURED_PROMPT_SLUG}
-    />
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+      </div>
+    }>
+      <BuildAppPageClient
+        prompts={prompts}
+        featuredPromptSlug={FEATURED_PROMPT_SLUG}
+      />
+    </Suspense>
   );
 }

@@ -335,7 +335,7 @@ export default function Generator() {
         
         const baseUrl = byopKey 
           ? `https://gen.pollinations.ai/image/${encodeURIComponent(fullPrompt)}`
-          : `https://pollinations.ai/p/${encodeURIComponent(fullPrompt)}`;
+          : `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}`;
 
         if (usePost) {
           const body = {

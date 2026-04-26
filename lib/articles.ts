@@ -26,6 +26,10 @@ export type Article = {
 };
 
 export function getArticleBySlug(slug: string): Article | undefined {
+  if (articlesCache) {
+    return articlesCache.find(a => a.slug === slug);
+  }
+
   const fullPath = path.join(articlesDirectory, `${slug}.md`);
   try {
     const fileContents = fs.readFileSync(fullPath, 'utf8');
@@ -47,14 +51,21 @@ export function getArticleBySlug(slug: string): Article | undefined {
   }
 }
 
+let articlesCache: Article[] | null = null;
+
 export function getAllArticles() {
+  if (articlesCache) {
+    return articlesCache;
+  }
+
   const slugs = getArticleSlugs();
   const articles = slugs
     .map((slug: string) => getArticleBySlug(slug))
     .filter((article): article is Article => article !== undefined);
 
   // Sort articles by date in descending order
-  return articles.sort((a: Article, b: Article) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  articlesCache = articles.sort((a: Article, b: Article) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return articlesCache;
 }
 
 export function getRelatedArticles(currentSlug: string, count: number = 3): Article[] {

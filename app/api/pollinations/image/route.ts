@@ -81,11 +81,10 @@ export async function GET(requestObj: Request) {
     
     const activeApiKey = clientKey || POLLINATIONS_API_KEY;
 
-    // Gunakan endpoint gen.pollinations.ai jika ada API Key (Pro), 
-    // jika tidak ada, gunakan endpoint publik pollinations.ai/p/
+    // Use gen.pollinations.ai for Pro (with key), otherwise use image.pollinations.ai
     const baseUrl = activeApiKey 
       ? `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`
-      : `https://pollinations.ai/p/${encodeURIComponent(prompt)}`;
+      : `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`;
 
     const apiUrl = `${baseUrl}?${pollParams.toString()}`;
     
@@ -173,7 +172,7 @@ export async function POST(requestObj: Request) {
 
     const baseUrl = activeApiKey 
       ? `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`
-      : `https://pollinations.ai/p/${encodeURIComponent(prompt)}`;
+      : `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`;
 
     const apiUrl = `${baseUrl}?${pollParams.toString()}`;
     
