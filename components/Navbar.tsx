@@ -6,8 +6,10 @@ import Image from 'next/image';
 import { Sparkles, LayoutGrid, Rss, Mail, Menu, X, Building2, LayoutDashboard, ChevronDown, ImageIcon, Video, Music, Film, BookOpen, QrCode, MessageSquare, HelpCircle } from 'lucide-react';
 import AuthButton from './AuthButton';
 import ThemeToggle from './ThemeToggle';
+import { useUI } from '@/context/UIContext';
 
-export default function Navbar({ onOpenHelp }: { onOpenHelp: () => void }) {
+export default function Navbar() {
+  const { openHelp } = useUI();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -179,7 +181,7 @@ export default function Navbar({ onOpenHelp }: { onOpenHelp: () => void }) {
                   <div className="h-px bg-slate-200 dark:bg-slate-800 my-1 mx-2" />
 
                   <button
-                    onClick={onOpenHelp}
+                    onClick={openHelp}
                     className="flex items-start gap-3 p-3 rounded-xl hover:bg-primary-500/10 transition-all w-full text-left group/item"
                   >
                     <div className="h-8 w-8 rounded-lg bg-primary-500/10 flex items-center justify-center text-primary-500 group-hover/item:scale-110 transition-transform">
@@ -240,7 +242,7 @@ export default function Navbar({ onOpenHelp }: { onOpenHelp: () => void }) {
               </Link>
             ))}
             <button
-              onClick={() => { onOpenHelp(); setIsMobileMenuOpen(false); }}
+              onClick={() => { openHelp(); setIsMobileMenuOpen(false); }}
               className="flex items-center justify-between px-4 py-3 rounded-2xl bg-primary-500/10 border border-primary-500/20 text-primary-600 dark:text-primary-400 font-bold transition-all"
             >
               <div className="flex items-center gap-4">

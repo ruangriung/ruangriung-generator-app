@@ -12,6 +12,9 @@ import ThemeScript from '@/components/ThemeScript';
 import JsonLd from '@/components/JsonLd';
 import { ChatProvider } from '@/components/chatbot/ChatContext';
 import RRAssistant from '@/components/RRAssistant';
+import { UIProvider } from '@/context/UIContext';
+import Navbar from '@/components/Navbar';
+import HelpModal from '@/components/HelpModal';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ruangriung.my.id'),
@@ -104,23 +107,27 @@ export default function RootLayout({
       <body className="bg-light-bg font-sans relative">
         {/* Optimized Fixed Background Layer */}
         <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(at_0%_0%,hsla(253,16%,95%,1)_0,transparent_50%),radial-gradient(at_50%_0%,hsla(225,39%,90%,1)_0,transparent_50%),radial-gradient(at_100%_0%,hsla(339,49%,90%,1)_0,transparent_50%)] dark:hidden" />
-          <div className="absolute inset-0 hidden bg-[radial-gradient(at_0%_0%,hsla(253,16%,7%,1)_0,transparent_50%),radial-gradient(at_50%_0%,hsla(225,39%,10%,1)_0,transparent_50%),radial-gradient(at_100%_0%,hsla(339,49%,10%,1)_0,transparent_50%)] dark:block" />
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:hidden" />
+          <div className="absolute inset-0 hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 dark:block" />
         </div>
         <JsonLd type="Organization" data={organizationSchema} />
         <JsonLd type="WebSite" data={websiteSchema} />
         
-        <ChatProvider>
-          <AuthProvider>
-            <div className="flex min-h-screen flex-col">
-              <main className="flex-grow">{children}</main>
-              <Footer />
-            </div>
-          </AuthProvider>
-          <Toaster />
-          <CookieConsent />
-          <RRAssistant />
-        </ChatProvider>
+        <AuthProvider>
+          <UIProvider>
+            <ChatProvider>
+              <Navbar />
+              <HelpModal />
+              <div className="flex min-h-screen flex-col pt-20">
+                <main className="flex-grow">{children}</main>
+                <Footer />
+              </div>
+              <Toaster />
+              <CookieConsent />
+              <RRAssistant />
+            </ChatProvider>
+          </UIProvider>
+        </AuthProvider>
 
         {/* Google AdSense Script */}
         <Script

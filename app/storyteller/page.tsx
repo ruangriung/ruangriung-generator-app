@@ -131,26 +131,7 @@ export default async function StorytellerPage() {
         <JsonLd type="SoftwareApplication" data={softwareSchema} />
         <JsonLd type="BreadcrumbList" data={breadcrumbSchema} />
         
-        <div className="mb-12 flex items-center justify-between gap-6">
-          <Link
-            href="/"
-            className="group flex items-center gap-3 px-6 py-3 glass-button rounded-full text-sm font-black uppercase tracking-widest text-slate-600 dark:text-slate-400"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              className="h-4 w-4 transition-transform group-hover:-translate-x-1"
-              aria-hidden="true"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-            </svg>
-            Beranda
-          </Link>
-          <ThemeToggle />
-        </div>
+
 
         <div className="text-center mb-16 relative">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary-500/10 blur-[100px] rounded-full -z-10" />

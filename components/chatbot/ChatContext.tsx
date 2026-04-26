@@ -129,32 +129,32 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveSessionId(newSession.id);
   };
 
-  const stopGenerating = () => {
+  const stopGenerating = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
       setIsLoading(false);
       toast.success("Generasi dihentikan.");
     }
-  };
+  }, []);
 
-  const deleteAllSessions = () => {
+  const deleteAllSessions = useCallback(() => {
     if (window.confirm("Hapus semua riwayat?")) {
       const newSession: ChatSession = { id: Date.now(), title: `Percakapan Baru`, messages: [], model: 'gemini-fast' };
       setSessions([newSession]);
       setActiveSessionId(newSession.id);
       toast.success("Riwayat dihapus.");
     }
-  };
+  }, []);
 
-  const setModelForImage = () => {
+  const setModelForImage = useCallback(() => {
     if (activeChat) {
       setSessions(prev => prev!.map(s => s.id === activeChat.id ? { ...s, model: 'Flux' } : s));
       toast('Mode Gambar Aktif!', { icon: '🎨' });
     }
-  };
+  }, [activeChat?.id]);
 
-  const processAndSendMessage = async (newMessage: Message) => {
+  const processAndSendMessage = useCallback(async (newMessage: Message) => {
     if (isLoading || !activeChat) return;
     
     stopGenerating();
@@ -282,17 +282,23 @@ Catatan Khusus:
         setIsLoading(false);
       }
     }
-  };
+  }, [isLoading, activeChat, stopGenerating]);
+
+  const contextValue = React.useMemo(() => ({
+    sessions, setSessions, activeSessionId, setActiveSessionId,
+    activeChat, isLoading, models, processAndSendMessage, startNewChat,
+    stopGenerating, regenerateResponse: () => {}, deleteAllSessions,
+    setModelForImage,
+    isAssistantOpen, setIsAssistantOpen,
+    pendingPrompt, setPendingPrompt
+  }), [
+    sessions, activeSessionId, activeChat, isLoading, models, 
+    processAndSendMessage, startNewChat, stopGenerating, deleteAllSessions, 
+    setModelForImage, isAssistantOpen, pendingPrompt
+  ]);
 
   return (
-    <ChatContext.Provider value={{
-      sessions, setSessions, activeSessionId, setActiveSessionId,
-      activeChat, isLoading, models, processAndSendMessage, startNewChat,
-      stopGenerating, regenerateResponse: () => {}, deleteAllSessions,
-      setModelForImage,
-      isAssistantOpen, setIsAssistantOpen,
-      pendingPrompt, setPendingPrompt
-    }}>
+    <ChatContext.Provider value={contextValue}>
       {children}
     </ChatContext.Provider>
   );

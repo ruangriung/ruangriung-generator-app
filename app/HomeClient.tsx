@@ -28,7 +28,6 @@ import {
 import Tabs from '../components/Tabs';
 import AuthButton from '@/components/AuthButton';
 import ThemeToggle from '@/components/ThemeToggle';
-import Navbar from '@/components/Navbar';
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import FAQ from '@/components/FAQ';
 import Link from 'next/link';
@@ -46,244 +45,7 @@ interface HomeClientProps {
   };
 }
 
-const HelpModal = memo(({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  if (!isOpen) return null;
-  return (
-    <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-950/40 backdrop-blur-sm p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="help-modal-title"
-      onClick={onClose}
-    >
-      <div
-        className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-[2.5rem] bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border border-white/20 dark:border-primary-500/10 p-6 md:p-10 shadow-2xl animate-in fade-in zoom-in duration-300"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-4 mb-8">
-          <div className="space-y-1">
-            <h2
-              id="help-modal-title"
-              className="text-2xl md:text-3xl font-black tracking-tight text-slate-900 dark:text-white uppercase"
-            >
-              Panduan <span className="text-primary-500">RuangRiung AI</span>
-            </h2>
-            <div className="h-1 w-20 bg-primary-500 rounded-full" />
-          </div>
-          <button
-            type="button"
-            className="h-10 w-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 transition-all hover:bg-red-500 hover:text-white hover:rotate-90"
-            onClick={onClose}
-            aria-label="Tutup panduan"
-          >
-            <X size={20} />
-          </button>
-        </div>
 
-        <div className="space-y-10">
-          {/* Section: Apa yang Baru (Evolusi V2) */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-8 w-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500">
-                <RefreshCw size={16} className="animate-spin-slow" />
-              </div>
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-orange-500">
-                Evolusi RuangRiung V2 (Apa yang Baru?)
-              </h3>
-            </div>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="glass-card p-6 bg-gradient-to-br from-orange-500/5 to-primary-500/5 border-orange-500/20">
-                <p className="text-[11px] md:text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                  Selamat datang di era baru RuangRiung! Kami telah merombak total antarmuka untuk pengalaman yang lebih cepat, profesional, dan bertenaga AI:
-                </p>
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="flex gap-3">
-                    <div className="h-5 w-5 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 shrink-0">
-                      <Sparkles size={10} />
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Tabbed Workspace</p>
-                      <p className="text-[9px] text-slate-500">Semua tools dalam satu panel rapi.</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="h-5 w-5 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
-                      <Sparkles size={10} />
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">RR Agent Assistant</p>
-                      <p className="text-[9px] text-slate-500">Bantuan cerdas di setiap langkah.</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="h-5 w-5 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500 shrink-0">
-                      <Sparkles size={10} />
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">BYOP (Advanced)</p>
-                      <p className="text-[9px] text-slate-500">Akses model premium tanpa batas.</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="h-5 w-5 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
-                      <Sparkles size={10} />
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Ultra Responsive</p>
-                      <p className="text-[9px] text-slate-500">Nyaman di HP maupun Tablet.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Section: Fitur Lanjutan (BYOP) */}
-          <section className="space-y-4">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3">
-              <Key size={14} className="text-primary-500" />
-              Fitur Lanjutan (BYOP)
-            </h3>
-            <div className="glass-inset p-5 rounded-3xl space-y-4">
-              <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                <strong>Bring Your Own Provider (BYOP)</strong> memungkinkan Anda memasukkan API Key pribadi (misalnya dari OpenAI atau Pollinations) untuk mendapatkan performa maksimal.
-              </p>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-[10px] text-slate-500">
-                  <CheckCircle size={12} className="text-green-500" />
-                  <span>Kunci API disimpan aman secara lokal di browser Anda.</span>
-                </div>
-                <div className="flex items-center gap-2 text-[10px] text-slate-500">
-                  <CheckCircle size={12} className="text-green-500" />
-                  <span>Akses model elit & PAID: <b className="text-slate-700 dark:text-slate-300">Grok Imagine, Pruna, Wan Pro, OpenAI.</b></span>
-                </div>
-                <div className="flex items-center gap-2 text-[10px] text-slate-500">
-                  <CheckCircle size={12} className="text-green-500" />
-                  <span>Membuka 🍌NanoBanana, Video Pro (Veo 3.1, Wan), & Nova Canvas.</span>
-                </div>
-                <div className="flex items-center gap-2 text-[10px] text-slate-500">
-                  <CheckCircle size={12} className="text-green-500" />
-                  <span>Buka melalui tombol [Pengaturan Lanjutan] di panel generator.</span>
-                </div>
-                <div className="flex items-center gap-2 text-[9px] text-slate-400 italic mt-2 border-t border-slate-100 dark:border-white/5 pt-2">
-                  <Github size={10} />
-                  <span>Wajib login menggunakan akun GitHub di Pollinations.ai</span>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Section: Navigasi */}
-          <section className="space-y-4">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3">
-              <LayoutGrid size={14} className="text-primary-500" />
-              Navigasi Pusat
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {[
-                { icon: Sparkles, label: 'Prompt Library', desc: 'Galeri inspirasi prompt AI' },
-                { icon: Building2, label: 'Direktori UMKM', desc: 'Dukung bisnis lokal kita' },
-                { icon: Rss, label: 'Artikel & Tips', desc: 'Wawasan dunia AI terbaru' },
-                { icon: BookOpen, label: 'StoryTeller', desc: 'Narasi visual bertenaga AI' },
-              ].map((item, idx) => (
-                <div key={idx} className="glass-inset p-4 rounded-2xl flex items-start gap-3 hover:bg-primary-500/5 transition-colors cursor-default">
-                  <div className="h-8 w-8 rounded-lg bg-primary-500/10 flex items-center justify-center text-primary-500 shrink-0">
-                    <item.icon size={16} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-black text-slate-900 dark:text-white uppercase leading-none mb-1">{item.label}</p>
-                    <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Section: Fitur AI */}
-          <section className="space-y-4">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3">
-              <Wand2 size={14} className="text-accent-500" />
-              Alat Generasi AI
-            </h3>
-            <div className="space-y-3">
-              <div className="glass-card !bg-primary-500/5 p-5 border-l-4 border-primary-500">
-                <div className="flex items-center gap-3 mb-2">
-                  <ImageIcon size={18} className="text-primary-500" />
-                  <h4 className="text-sm font-black uppercase tracking-tight text-slate-900 dark:text-white">Text to Image</h4>
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                  Ubah deskripsi teks menjadi gambar artistik. Anda bisa memilih berbagai model AI (Flux, DALL-E, Pollinations) dan menerapkan gaya seni (Cyberpunk, Anime, Realistik) secara instan.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="glass-card p-5">
-                   <div className="flex items-center gap-3 mb-2">
-                    <RefreshCw size={16} className="text-accent-500" />
-                    <h4 className="text-xs font-black uppercase tracking-tight text-slate-900 dark:text-white">Video & Audio</h4>
-                  </div>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                    Generate video singkat dari prompt atau ubah teks menjadi audio narasi berkualitas tinggi.
-                  </p>
-                </div>
-                <div className="glass-card p-5 bg-gradient-to-br from-primary-500/10 to-transparent">
-                   <div className="flex items-center gap-3 mb-2">
-                    <RefreshCw size={16} className="text-primary-500" />
-                    <h4 className="text-xs font-black uppercase tracking-tight text-slate-900 dark:text-white">Submit Prompt</h4>
-                  </div>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                    Punya prompt yang keren? Bagikan ke komunitas RuangRiung dan jadilah inspirasi bagi kreator lain.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Section: BYOP & Advanced */}
-          <section className="space-y-4">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3">
-              <RefreshCw size={14} className="text-blue-500" />
-              Advanced & BYOP
-            </h3>
-            <div className="glass-card p-6 border-dashed border-2 border-primary-500/20 bg-slate-500/5">
-              <div className="flex items-start gap-4">
-                <div className="h-10 w-10 rounded-xl bg-primary-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-primary-500/20">
-                  <RefreshCw size={20} className="animate-spin-slow" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-black uppercase tracking-tight text-slate-900 dark:text-white mb-2">Bring Your Own Provider (BYOP)</h4>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium mb-4">
-                    Gunakan kunci API pribadi Anda (seperti OpenAI, Gemini, atau Groq) untuk mendapatkan kontrol penuh atas biaya dan performa. Kunci disimpan secara aman di perangkat lokal Anda.
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-primary-500/10 text-primary-500 text-[10px] font-black uppercase tracking-widest">
-                    Cek di Pengaturan Lanjut
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <div className="mt-12 flex flex-col sm:flex-row gap-4 items-center justify-center">
-          <button
-            type="button"
-            className="glass-button w-full sm:w-auto px-10 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-primary-500 hover:bg-primary-500 hover:text-white transition-all shadow-xl shadow-primary-500/10"
-            onClick={onClose}
-          >
-            Paham, Mari Mulai!
-          </button>
-          <a
-            href="/kontak"
-            className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary-500 transition-colors"
-          >
-            Butuh Bantuan Lain?
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-});
-
-HelpModal.displayName = 'HelpModal';
 
 const HomeClient = memo(({ latestArticle }: HomeClientProps) => {
   const [deferredPrompt, setDeferredPrompt] = useState<any | null>(null);
@@ -291,7 +53,6 @@ const HomeClient = memo(({ latestArticle }: HomeClientProps) => {
   const [showBanner, setShowBanner] = useState(true);
   const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
   const toolsMenuRef = useRef<HTMLDivElement>(null);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   // Efek untuk PWA Install Prompt
   useEffect(() => {
@@ -318,7 +79,6 @@ const HomeClient = memo(({ latestArticle }: HomeClientProps) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setIsHelpOpen(false);
         setIsToolsMenuOpen(false);
       }
     };
@@ -330,8 +90,6 @@ const HomeClient = memo(({ latestArticle }: HomeClientProps) => {
   }, []);
 
   const toggleToolsMenu = useCallback(() => setIsToolsMenuOpen(prev => !prev), []);
-  const openHelp = useCallback(() => setIsHelpOpen(true), []);
-  const closeHelp = useCallback(() => setIsHelpOpen(false), []);
   const handleCloseBanner = useCallback(() => setShowBanner(false), []);
 
   // Efek untuk menutup dropdown menu saat klik di luar area
@@ -364,7 +122,7 @@ const HomeClient = memo(({ latestArticle }: HomeClientProps) => {
 
   return (
     <div className="flex min-h-screen flex-col items-center px-4 pt-32 pb-8 sm:px-8">
-      <Navbar onOpenHelp={openHelp} />
+
       
       {showBanner && (
         <div className="w-full max-w-5xl bg-gradient-to-r from-primary-600 via-primary-500 to-accent-500 text-white p-4 rounded-2xl shadow-xl shadow-primary-500/20 mb-12 flex flex-col sm:flex-row items-center justify-between gap-4 relative animate-in fade-in slide-in-from-top-4 duration-500">
