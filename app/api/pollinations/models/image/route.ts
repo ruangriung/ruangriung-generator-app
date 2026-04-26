@@ -25,9 +25,7 @@ export async function GET(request: Request) {
         // Switch endpoint based on whether we have an API Key
         // gen.pollinations.ai is for authenticated (Pro/Enterprise) users
         // image.pollinations.ai is for public users
-        const apiUrl = activeKey 
-            ? 'https://gen.pollinations.ai/image/models' 
-            : 'https://image.pollinations.ai/models';
+        const apiUrl = 'https://gen.pollinations.ai/image/models';
 
         const response = await fetch(apiUrl, {
             headers: headers,

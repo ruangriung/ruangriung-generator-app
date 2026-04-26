@@ -135,7 +135,7 @@ const AdvancedSettings = memo(({ settings, setSettings, models, aspectRatio, onA
   return (
     <div className={`space-y-8 overflow-visible ${className || ''}`}>
         {/* BYOP Section */}
-        <div className="w-full">
+        <div className="w-full mb-10 md:mb-6">
             <div className="flex items-center gap-2 mb-3 px-1">
               <Shield className="h-4 w-4 text-primary-500" />
               <h4 className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">Koneksi Provider (BYOP)</h4>

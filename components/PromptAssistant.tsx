@@ -170,11 +170,11 @@ const PromptAssistant = memo(({ onUsePrompt }: PromptAssistantProps) => {
               <textarea id="assistant-subject" value={assistantSubject} onChange={(e) => setAssistantSubject(e.target.value)} placeholder="Misal: Pemandangan kota futuristik" className={`${textareaStyle} h-24 pr-20`} required />
               <div className="absolute top-2 right-2 flex gap-x-1">
                 {assistantSubject && (
-                  <button onClick={() => setAssistantSubject('')} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus">
+                  <button type="button" onClick={() => setAssistantSubject('')} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus">
                     <X size={18} />
                   </button>
                 )}
-                <button onClick={() => setEditingField('subject')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
+                <button type="button" onClick={() => setEditingField('subject')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
                   <Expand size={18} />
                 </button>
               </div>
@@ -187,11 +187,11 @@ const PromptAssistant = memo(({ onUsePrompt }: PromptAssistantProps) => {
               <textarea id="assistant-details" rows={3} value={assistantDetails} onChange={(e) => setAssistantDetails(e.target.value)} placeholder="Misal: dengan mobil terbang, pencahayaan neon" className={`${textareaStyle} pr-20`} />
               <div className="absolute top-2 right-2 flex gap-x-1">
                 {assistantDetails && (
-                  <button onClick={() => setAssistantDetails('')} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus">
+                  <button type="button" onClick={() => setAssistantDetails('')} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus">
                     <X size={18} />
                   </button>
                 )}
-                <button onClick={() => setEditingField('details')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
+                <button type="button" onClick={() => setEditingField('details')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
                   <Expand size={18} />
                 </button>
               </div>
@@ -199,7 +199,7 @@ const PromptAssistant = memo(({ onUsePrompt }: PromptAssistantProps) => {
           </div>
 
           <div className="text-center pt-2">
-            <button onClick={handleGenerateAssistantPrompt} disabled={isGeneratingAssistantPrompt || !assistantSubject} className="inline-flex items-center justify-center px-6 py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed">
+            <button type="button" onClick={handleGenerateAssistantPrompt} disabled={isGeneratingAssistantPrompt || !assistantSubject} className="inline-flex items-center justify-center px-6 py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed">
               {isGeneratingAssistantPrompt ? <ButtonSpinner /> : <Wand2 className="w-5 h-5 mr-2" />}
               <span>Buat Prompt</span>
             </button>
@@ -210,10 +210,10 @@ const PromptAssistant = memo(({ onUsePrompt }: PromptAssistantProps) => {
               <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Prompt Hasil AI:</label>
               <textarea readOnly value={generatedAssistantPrompt} className={`${textareaStyle} h-40`} />
               <div className="flex justify-end gap-3 mt-3">
-                <button onClick={handleCopyAssistantPrompt} className={`inline-flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all ${isAssistantPromptCopied ? '!bg-green-200 text-green-700' : ''} hover:bg-gray-400 dark:hover:bg-gray-600`}>
+                <button type="button" onClick={handleCopyAssistantPrompt} className={`inline-flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all ${isAssistantPromptCopied ? '!bg-green-200 text-green-700' : ''} hover:bg-gray-400 dark:hover:bg-gray-600`}>
                   {isAssistantPromptCopied ? <Check size={16} className="mr-2" /> : <Copy size={16} className="mr-2" />} {isAssistantPromptCopied ? 'Tersalin!' : 'Salin'}
                 </button>
-                <button onClick={handleUseAssistantPrompt} className="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset">
+                <button type="button" onClick={handleUseAssistantPrompt} className="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset">
                   <Sparkles size={16} className="mr-2" />Gunakan
                 </button>
               </div>

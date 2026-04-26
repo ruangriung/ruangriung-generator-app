@@ -160,7 +160,7 @@ async function analyzeContent(facebookData) {
 ```javascript
 function generateAnalysisChart(type, data) {
   const prompt = `Create a professional ${type} chart visualization for: ${JSON.stringify(data)}`;
-  const chartUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=400&model=flux&referrer=ruangriung.my.id`;
+  const chartUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?width=800&height=400&model=flux&referrer=ruangriung.my.id`;
   return chartUrl;
 }
 ```

@@ -29,6 +29,7 @@ export default function HistoryPanel({ history, onSelect, onClear }: HistoryPane
           Riwayat Generate
         </h2>
         <button 
+          type="button"
           onClick={onClear} 
           className="text-sm text-red-500 hover:underline"
         >

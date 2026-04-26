@@ -16,6 +16,7 @@ export default function ImageModal({ isOpen, imageUrl, onClose }: ImageModalProp
       onClick={onClose} // Menutup modal saat backdrop diklik
     >
       <button 
+        type="button"
         className="absolute top-4 right-4 text-white text-4xl font-bold"
         onClick={onClose}
       >

@@ -143,8 +143,8 @@ const TranslationAssistant = memo(({ onUsePrompt }: TranslationAssistantProps) =
             </select>
           </div>
           <button
+            type="button"
             onClick={swapLanguages}
-            // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg, dark:shadow-dark-neumorphic-button, dark:active:shadow-dark-neumorphic-inset, dark:text-gray-300, dark:hover:text-purple-500
             className="mt-7 p-2 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-500 transition-all duration-150"
             aria-label="Tukar Bahasa"
           >
@@ -182,11 +182,11 @@ const TranslationAssistant = memo(({ onUsePrompt }: TranslationAssistantProps) =
             />
             <div className="absolute top-2 right-2 flex gap-x-1">
               {inputText && (
-                <button onClick={() => setInputText('')} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus">
+                <button type="button" onClick={() => setInputText('')} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus">
                   <X size={18} />
                 </button>
               )}
-              <button onClick={() => setEditingField('input')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
+              <button type="button" onClick={() => setEditingField('input')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
                 <Expand size={18} />
               </button>
             </div>
@@ -195,6 +195,7 @@ const TranslationAssistant = memo(({ onUsePrompt }: TranslationAssistantProps) =
 
         <div className="text-center pt-2">
           <button
+            type="button"
             onClick={handleTranslate}
             disabled={isLoading || !inputText.trim()}
             // <--- PERUBAHAN: Tambahkan dark:active:shadow-dark-neumorphic-button-active
@@ -216,13 +217,14 @@ const TranslationAssistant = memo(({ onUsePrompt }: TranslationAssistantProps) =
                 className={`${textareaStyle} pr-20`}
               />
               <div className="absolute top-2 right-2 flex gap-x-1">
-                <button onClick={() => setEditingField('output')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
-                  <Expand size={18} />
-                </button>
+              <button type="button" onClick={() => setEditingField('output')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
+                <Expand size={18} />
+              </button>
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-3">
               <button
+                type="button"
                 onClick={handleCopyTranslatedPrompt}
                 // <--- PERUBAHAN: Tambahkan dark:bg-gray-700, dark:text-gray-200, dark:active:shadow-dark-neumorphic-inset, dark:hover:bg-gray-600
                 className={`inline-flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all ${isCopied ? '!bg-gray-500 text-green-700' : ''} hover:bg-gray-400 dark:hover:bg-gray-600`}
@@ -230,6 +232,7 @@ const TranslationAssistant = memo(({ onUsePrompt }: TranslationAssistantProps) =
                 {isCopied ? <><Check size={16} className="mr-2" />Tersalin!</> : <><Copy size={16} className="mr-2" />Salin Teks</>}
               </button>
               <button
+                type="button"
                 onClick={handleUseTranslatedPrompt}
                 // <--- PERUBAHAN: Tambahkan dark:active:shadow-dark-neumorphic-inset
                 className="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset"

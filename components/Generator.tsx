@@ -267,7 +267,9 @@ export default function Generator() {
 
   useEffect(() => {
     try {
-      localStorage.setItem('ruangriung_generator_settings', JSON.stringify(settings));
+      // Exclude heavy data like inputImages from localStorage to prevent QuotaExceededError
+      const { inputImages, ...safeSettings } = settings;
+      localStorage.setItem('ruangriung_generator_settings', JSON.stringify(safeSettings));
     } catch (error) {
       console.error("Gagal menyimpan pengaturan generator:", error);
     }
@@ -295,7 +297,8 @@ export default function Generator() {
     }
   }, [settings.prompt]);
 
-  const handleGenerate = async (isVariation = false) => {
+  const handleGenerate = async (isVariation = false, e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!settings.prompt) {
       toast.error('Prompt tidak boleh kosong!');
       return;
@@ -329,67 +332,81 @@ export default function Generator() {
         };
         if (byopKey) headers['Authorization'] = `Bearer ${byopKey}`;
 
-        // === OPTIMIZATION: Direct Client Fetch ===
-        // If we have a BYOP Key or we are in a simple GET mode, we can try to fetch directly from Pollinations
-        // to save Vercel Edge Request and Bandwidth quotas.
+        // === OPTIMIZATION: Direct Client Fetch Fallback ===
+        // If we have a BYOP Key or we are in development and the proxy fails, 
+        // we can try to fetch directly from Pollinations to avoid local server bottlenecks.
         
-        const baseUrl = byopKey 
-          ? `https://gen.pollinations.ai/image/${encodeURIComponent(fullPrompt)}`
-          : `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}`;
+        const pollParams = new URLSearchParams({
+          model, width: width.toString(), height: height.toString(), seed: batchSeed.toString(),
+          enhance: imageQuality !== 'Standar' ? 'true' : 'false', nologo: 'true', referrer: 'ruangriung.my.id',
+          guidance_scale: cfg_scale.toString(),
+        });
+        if (negativePrompt) pollParams.append('negative_prompt', negativePrompt);
+        if (isPrivate) pollParams.append('private', 'true');
+        if (safe) pollParams.append('safe', 'true');
+        if (transparent && model.toLowerCase().includes('gptimage')) pollParams.append('transparent', 'true');
 
-        if (usePost) {
-          const body = {
-            prompt: fullPrompt,
-            model, width, height, seed: batchSeed,
-            enhance: imageQuality !== 'Standar' ? 'true' : 'false',
-            nologo: 'true', referrer: 'ruangriung.my.id',
-            guidance_scale: cfg_scale,
-            negative_prompt: negativePrompt,
-            private: isPrivate,
-            safe,
-            transparent: (transparent && model.toLowerCase().includes('gptimage')),
-            image: referenceImages[0], // Pollinations usually takes the first for i2i
-          };
-          
-          // For POST/i2i, we still use the API route as it handles multi-part/json complexity better
-          // but it will use our Redirect optimization if possible.
-          const response = await fetch('/api/pollinations/image', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(body),
-          });
+        let imageUrl: string | null = null;
 
-          if (!response.ok) throw new Error(`Gagal membuat gambar #${i + 1}`);
-          const blob = await response.blob();
-          return URL.createObjectURL(blob);
-        } else {
-          const params = new URLSearchParams({
-            model, width: width.toString(), height: height.toString(), seed: batchSeed.toString(),
-            enhance: imageQuality !== 'Standar' ? 'true' : 'false', nologo: 'true', referrer: 'ruangriung.my.id',
-            guidance_scale: cfg_scale.toString(),
-          });
-          if (negativePrompt) params.append('negative_prompt', negativePrompt);
-          if (isPrivate) params.append('private', 'true');
-          if (safe) params.append('safe', 'true');
-          if (transparent && model.toLowerCase().includes('gptimage')) params.append('transparent', 'true');
+        try {
+          if (usePost) {
+            // For POST (i2i), we must use our proxy because it handles the multipart/base64 logic
+            const body = {
+              prompt: fullPrompt,
+              model, width, height, seed: batchSeed,
+              enhance: imageQuality !== 'Standar' ? 'true' : 'false',
+              nologo: 'true', referrer: 'ruangriung.my.id',
+              guidance_scale: cfg_scale,
+              negative_prompt: negativePrompt,
+              private: isPrivate,
+              safe,
+              transparent: (transparent && model.toLowerCase().includes('gptimage')),
+              image: referenceImages[0],
+            };
 
-          // Check if we can bypass Vercel entirely
-          const canBypass = byopKey || !process.env.NEXT_PUBLIC_FORCE_PROXY; // Add a flag if needed
-          
-          if (canBypass) {
-            const directUrl = `${baseUrl}?${params.toString()}`;
-            const response = await fetch(directUrl, { headers });
-            if (!response.ok) throw new Error(`Gagal membuat gambar #${i + 1}`);
+            const response = await fetch('/api/pollinations/image', {
+              method: 'POST',
+              headers,
+              body: JSON.stringify(body),
+            });
+
+            if (!response.ok) throw new Error(`Proxy Error: ${response.status}`);
             const blob = await response.blob();
-            return URL.createObjectURL(blob);
+            imageUrl = URL.createObjectURL(blob);
           } else {
-            const finalUrl = `/api/pollinations/image?prompt=${encodeURIComponent(fullPrompt)}&${params.toString()}`;
-            const response = await fetch(finalUrl, { headers });
-            if (!response.ok) throw new Error(`Gagal membuat gambar #${i + 1}`);
-            const blob = await response.blob();
-            return URL.createObjectURL(blob);
+            // For GET (Text-to-Image), we must use gen.pollinations.ai
+            const proxyUrl = `/api/pollinations/image?prompt=${encodeURIComponent(fullPrompt)}&${pollParams.toString()}`;
+            const directUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(fullPrompt)}?${pollParams.toString()}`;
+
+            // Try proxy first (uses official key + handles slow dev server better now)
+            try {
+              const response = await fetch(proxyUrl, { headers, signal: AbortSignal.timeout(90000) }); // Increased to 90s
+              if (response.ok) {
+                const blob = await response.blob();
+                imageUrl = URL.createObjectURL(blob);
+              } else {
+                throw new Error(`Proxy status: ${response.status}`);
+              }
+            } catch (proxyError: any) {
+              // Only attempt direct fetch if we have a personal key (BYOP)
+              if (byopKey) {
+                console.warn('Proxy failed, attempting direct fetch with personal key:', proxyError);
+                const directResponse = await fetch(directUrl, { 
+                  headers: { 'Authorization': `Bearer ${byopKey}` }
+                });
+                if (!directResponse.ok) throw new Error(`Direct Fetch Error: ${directResponse.status}`);
+                const blob = await directResponse.blob();
+                imageUrl = URL.createObjectURL(blob);
+              } else {
+                throw new Error(`Gagal menghubungi server lokal (Proxy): ${proxyError.message}. Pastikan server pnpm dev tidak sedang macet.`);
+              }
+            }
           }
+        } catch (fetchError: any) {
+          throw new Error(`Gagal memproses gambar #${i + 1}: ${fetchError.message}`);
         }
+
+        return imageUrl;
 
       } catch (error: any) {
         toast.error(error.message || `Gagal membuat gambar #${i + 1}`);

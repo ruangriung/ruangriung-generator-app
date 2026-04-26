@@ -416,7 +416,7 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
                 <ChevronDown className="w-5 h-5 text-primary-500" />
               </div>
             </summary>
-            <div className="p-6 pt-0 border-t border-white/10 bg-white/5 overflow-visible">
+            <div className="p-6 pt-8 border-t border-white/10 bg-white/5 overflow-visible">
               {!isAuthenticated && (
                 <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold flex items-center gap-3">
                   <Shield size={16} />
@@ -448,7 +448,7 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
                 </label>
                 <div className="flex gap-2">
                    {settings.prompt && (
-                    <button onClick={handleClearPrompt} className="h-8 w-8 flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm" title="Hapus">
+                    <button type="button" onClick={handleClearPrompt} className="h-8 w-8 flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm" title="Hapus">
                       <X size={16} />
                     </button>
                   )}
@@ -475,11 +475,11 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
                 </label>
                 <div className="flex gap-2">
                   {settings.negativePrompt && (
-                    <button onClick={handleClearNegativePrompt} className="h-8 w-8 flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm" title="Hapus">
+                    <button type="button" onClick={handleClearNegativePrompt} className="h-8 w-8 flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm" title="Hapus">
                       <X size={16} />
                     </button>
                   )}
-                  <button onClick={() => setEditingField('negativePrompt')} className="h-8 w-8 flex items-center justify-center rounded-lg bg-primary-500/10 border border-primary-500/20 text-primary-600 dark:text-primary-400 hover:bg-primary-500 hover:text-white transition-all shadow-sm" title="Perbesar">
+                  <button type="button" onClick={() => setEditingField('negativePrompt')} className="h-8 w-8 flex items-center justify-center rounded-lg bg-primary-500/10 border border-primary-500/20 text-primary-600 dark:text-primary-400 hover:bg-primary-500 hover:text-white transition-all shadow-sm" title="Perbesar">
                     <Expand size={16} />
                   </button>
                 </div>
@@ -500,6 +500,7 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
                 ].map((preset) => (
                   <button 
                     key={preset.id}
+                    type="button"
                     onClick={() => addNegativePreset(preset.id as any)} 
                     className="px-4 py-2 rounded-xl glass text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary-500 hover:border-primary-500/30 transition-all"
                   >
@@ -512,6 +513,7 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
 
           <div className="mt-10 pt-8 border-t border-white/10 flex flex-col items-center gap-6">
             <button
+              type="button"
               onClick={onGenerate}
               className="btn-primary w-full max-w-md h-16 text-lg tracking-widest"
               disabled={isLoading}
@@ -531,6 +533,7 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
 
             <div className="flex flex-wrap justify-center gap-3 w-full">
               <button
+                type="button"
                 onClick={handleRandomPrompt}
                 className={featureButtonStyle}
                 disabled={isRandomizing || isEnhancing || isGeneratingJson}
@@ -538,6 +541,7 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
                 {isRandomizing ? <ButtonSpinner className="text-primary-500" /> : <Shuffle size={18} />} <span>Acak Idea</span>
               </button>
               <button
+                type="button"
                 onClick={onSurpriseMe}
                 className={featureButtonStyle}
                 disabled={isLoading || isRandomizing || isEnhancing || isGeneratingJson}
@@ -545,6 +549,7 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
                 <FlaskConical size={18} /> <span>Surprise!</span>
               </button>
               <button
+                type="button"
                 onClick={handleEnhancePrompt}
                 className={featureButtonStyle}
                 disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}
@@ -552,6 +557,7 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
                 {isEnhancing ? <ButtonSpinner className="text-primary-500" /> : <Wand2 size={18} />} <span>Sempurnakan</span>
               </button>
               <button
+                type="button"
                 onClick={handleGenerateJsonPrompt}
                 className={featureButtonStyle}
                 disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}
@@ -559,6 +565,7 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
                 {isGeneratingJson ? <ButtonSpinner className="text-primary-500" /> : <Braces size={18} />} <span>Prompt JSON</span>
               </button>
               <button
+                type="button"
                 onClick={handleSavePrompt}
                 className={`${featureButtonStyle} ${isSaving ? 'text-green-500' : ''}`}
                 disabled={isSaving || !settings.prompt}

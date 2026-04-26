@@ -228,6 +228,7 @@ const ImageDisplay = memo(forwardRef<HTMLDivElement, ImageDisplayProps>(({
       {isImageReady && (
         <div className="flex justify-center items-center gap-3 animate-in slide-in-from-bottom-4 duration-500">
           <button 
+            type="button"
             onClick={onVariationsClick} 
             className={`${actionButtonStyle} text-slate-700 dark:text-slate-200 hover:text-white`} 
             title="Buat Variasi"
@@ -236,6 +237,7 @@ const ImageDisplay = memo(forwardRef<HTMLDivElement, ImageDisplayProps>(({
           </button>
           <div className="h-8 w-px bg-white/10" />
           <button 
+            type="button"
             onClick={() => setIsEditing(!isEditing)} 
             className={`${actionButtonStyle} ${isEditing ? 'bg-primary-500 text-white border-primary-500' : 'text-primary-500'}`} 
             title={isEditing ? "Selesai Edit" : "Edit Gambar"}
@@ -244,6 +246,7 @@ const ImageDisplay = memo(forwardRef<HTMLDivElement, ImageDisplayProps>(({
             {isEditing ? <X size={20} /> : <Paintbrush size={20} />}
           </button>
           <button 
+            type="button"
             onClick={onZoomClick} 
             className={`${actionButtonStyle} text-slate-700 dark:text-slate-200 hover:text-white`} 
             title="Perbesar Gambar" 
@@ -253,6 +256,7 @@ const ImageDisplay = memo(forwardRef<HTMLDivElement, ImageDisplayProps>(({
           </button>
           <div className="h-8 w-px bg-white/10" />
           <button 
+            type="button"
             onClick={handleDownload} 
             className="h-12 px-6 glass-button text-primary-500 hover:bg-primary-500 hover:text-white"
             title="Unduh Gambar"
