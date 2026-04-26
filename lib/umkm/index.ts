@@ -128,11 +128,11 @@ const parseStoreFile = async (fileName: string): Promise<ParsedStore | undefined
 
 const loadStoresFromMarkdown = async (): Promise<Store[]> => {
   try {
-    const fileNames = await fs.readdir(storesDirectory);
+    const fileNames = (await fs.readdir(storesDirectory)) as string[];
     const parsedStores = await Promise.all(
       fileNames
-        .filter((fileName) => fileName.endsWith('.md'))
-        .map(async (fileName) => {
+        .filter((fileName: string) => fileName.endsWith('.md'))
+        .map(async (fileName: string) => {
           try {
             return await parseStoreFile(fileName);
           } catch (error) {

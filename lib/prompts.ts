@@ -203,11 +203,11 @@ export interface Prompt {
 
 const readPromptsFromDirectory = async (directory: string): Promise<Prompt[]> => {
   try {
-    const fileNames = await fs.readdir(directory);
+    const fileNames = (await fs.readdir(directory)) as string[];
     const prompts = await Promise.all(
       fileNames
-        .filter(fileName => fileName.endsWith('.md'))
-        .map(async fileName => {
+        .filter((fileName: string) => fileName.endsWith('.md'))
+        .map(async (fileName: string) => {
           const fullPath = path.join(directory, fileName);
           const fileContents = await fs.readFile(fullPath, 'utf8');
           const { data, content } = matter(fileContents);
