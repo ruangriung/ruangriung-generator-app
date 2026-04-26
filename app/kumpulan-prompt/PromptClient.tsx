@@ -30,7 +30,7 @@ const highlightMatches = (text: string, term: string) => {
 
   return parts.map((part, index) =>
     part.toLowerCase() === lowerTerm ? (
-      <mark key={`${part}-${index}`} className="bg-yellow-200 dark:bg-yellow-500/40">
+      <mark key={`${part}-${index}`} className="bg-yellow-200 text-slate-900 dark:bg-yellow-500/40 dark:text-white px-0.5 rounded-sm">
         {part}
       </mark>
     ) : (
@@ -374,24 +374,24 @@ export default function PromptClient({
                     onChange={e => handleSearchChange(e.target.value)}
                     onFocus={handleInputFocus}
                     onBlur={handleInputBlur}
-                    className="w-full h-14 pl-12 pr-4 rounded-2xl glass-inset bg-transparent text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-primary-500/50 transition-all"
+                    className="w-full h-14 pl-12 pr-4 rounded-2xl glass-inset bg-transparent text-sm font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-primary-500/50 transition-all placeholder:text-slate-400"
                   />
                   {shouldShowSuggestions && (
-                    <div className="absolute left-0 right-0 top-full mt-3 z-[100] overflow-hidden rounded-2xl glass-card border border-white/10 shadow-2xl">
+                    <div className="absolute left-0 right-0 top-full mt-3 z-[100] overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl ring-1 ring-black/5">
                       {suggestions.map(suggestion => (
                         <button
                           key={`${suggestion.type}-${suggestion.value}`}
                           type="button"
-                          className="w-full px-6 py-4 text-left border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors group"
+                          className="w-full px-6 py-4 text-left border-b border-slate-100 dark:border-white/5 last:border-0 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors group"
                           onMouseDown={event => {
                             event.preventDefault();
                             handleSuggestionSelect(suggestion.value);
                           }}
                         >
-                          <div className="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-white transition-colors">
+                          <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                             {highlightMatches(suggestion.value, searchTerm)}
                           </div>
-                          <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-white/70 mt-1">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 group-hover:text-primary-500/70 mt-1">
                             {suggestion.type === 'title' ? 'Judul' : 'Penulis'} • {suggestion.occurrences} matches
                           </div>
                         </button>

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 const POLLINATIONS_BASE_URL = 'https://gen.pollinations.ai';
