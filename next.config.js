@@ -38,6 +38,19 @@ const nextConfig = {
         tls: false,
         dns: false,
         child_process: false,
+        crypto: false,
+        stream: false,
+        buffer: false,
+        util: false,
+      };
+
+      // Enable nodejs_compat aliases if needed
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'crypto': 'node:crypto',
+        'stream': 'node:stream',
+        'buffer': 'node:buffer',
+        'util': 'node:util',
       };
     }
     return config;
