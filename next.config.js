@@ -29,7 +29,7 @@ const nextConfig = {
     ],
   },
   webpack: (config, { isServer }) => {
-    if (isServer) {
+    if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
@@ -43,15 +43,6 @@ const nextConfig = {
         buffer: false,
         util: false,
         nodemailer: false,
-      };
-
-      // Enable nodejs_compat aliases if needed
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        'crypto': 'node:crypto',
-        'stream': 'node:stream',
-        'buffer': 'node:buffer',
-        'util': 'node:util',
       };
     }
     return config;
