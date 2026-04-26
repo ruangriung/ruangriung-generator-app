@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 300; // Extend duration for video generation (Pro/Enterprise)
 
 export async function POST(request: Request) {
     try {

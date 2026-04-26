@@ -99,15 +99,16 @@ export async function GET(requestObj: Request) {
       headers['Authorization'] = `Bearer ${activeApiKey}`;
     }
 
-
-    // === OPTIMIZATION: Redirect for GET only (Public/BYOP) ===
-    // If it's a GET request and we are NOT using a server-side private key,
-    // we can redirect the browser to fetch the image directly.
-    if (requestObj.method === 'GET' && (!process.env.POLLINATIONS_API_KEY || clientKey)) {
-      return NextResponse.redirect(apiUrl, { status: 307 });
+    /* === OPTIMIZATION: Redirect vs Proxy === */
+    
+    // If we have an API Key, we MUST proxy to keep the key secret from the client.
+    // If NO API Key is involved, we can redirect the browser directly to pollinations.ai.
+    // This avoids Vercel's 10s timeout on Hobby plan for long-running image generation.
+    if (!activeApiKey) {
+      return NextResponse.redirect(apiUrl, 307);
     }
 
-    // If using server key, we still need to proxy to keep the key secret
+    // Proxy the request for private keys
     const response = await fetch(apiUrl, {
       method: 'GET',
       headers,

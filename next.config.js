@@ -28,8 +28,9 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
+  webpack: (config, { isServer, nextRuntime }) => {
+    // Apply fallbacks for client-side and Edge runtime bundles
+    if (!isServer || nextRuntime === 'edge') {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,

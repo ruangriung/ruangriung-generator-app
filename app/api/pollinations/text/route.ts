@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // Extend duration for LLM response
 
 const POLLINATIONS_BASE_URL = 'https://gen.pollinations.ai';
 

@@ -18,8 +18,7 @@ const backgroundStyle: CSSProperties = {
   padding: '64px 72px',
   color: '#f8fafc',
   backgroundColor: '#050505',
-  backgroundImage:
-    'radial-gradient(circle at 20% 20%, rgba(180, 255, 120, 0.18), transparent 55%), radial-gradient(circle at 80% 15%, rgba(82, 246, 170, 0.16), transparent 50%), radial-gradient(circle at 10% 90%, rgba(56, 189, 248, 0.12), transparent 45%)',
+  backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(180, 255, 120, 0.15), transparent 80%)',
 };
 
 const titleStyle: CSSProperties = {
@@ -37,7 +36,6 @@ const igniteStyle: CSSProperties = {
   textTransform: 'uppercase',
   letterSpacing: '-0.04em',
   color: '#9ef01a',
-  textShadow: '0 20px 48px rgba(148, 255, 94, 0.35)',
 };
 
 const friendshipStyle: CSSProperties = {
@@ -74,7 +72,6 @@ const scheduleStyle: CSSProperties = {
 const stagesStyle: CSSProperties = {
   display: 'flex',
   gap: 24,
-  flexWrap: 'wrap',
   fontSize: 20,
   letterSpacing: '0.25em',
   textTransform: 'uppercase',
@@ -85,8 +82,7 @@ const ribbonStyle: CSSProperties = {
   position: 'absolute',
   inset: '0 0 auto 0',
   height: 220,
-  background:
-    'linear-gradient(92deg, rgba(15, 118, 110, 0.65) 0%, rgba(21, 128, 61, 0.0) 75%), linear-gradient(245deg, rgba(59, 130, 246, 0.18) 0%, rgba(22, 163, 74, 0.08) 60%)',
+  background: 'linear-gradient(92deg, rgba(15, 118, 110, 0.4) 0%, transparent 100%)',
 };
 
 const containerStyle: CSSProperties = {
@@ -102,8 +98,7 @@ const cornerAccent: CSSProperties = {
   width: 280,
   height: 280,
   borderRadius: '50%',
-  filter: 'blur(60px)',
-  opacity: 0.45,
+  opacity: 0.25,
 };
 
 const cornerAccents = [
@@ -138,8 +133,7 @@ const participantNames = [
 
 const participantsContainer: CSSProperties = {
   display: 'flex',
-  flexWrap: 'wrap',
-  justifyContent: 'space-between',
+  flexDirection: 'column',
   gap: 16,
   marginTop: 32,
 };
@@ -149,8 +143,8 @@ const participantCard: CSSProperties = {
   flexDirection: 'column',
   gap: 8,
   padding: '16px 20px',
-  width: '23%',
-  marginBottom: 16,
+  width: '100%',
+  marginBottom: 12,
   borderRadius: 24,
   backgroundColor: 'rgba(15, 23, 42, 0.55)',
   border: '1px solid rgba(74, 222, 128, 0.18)',
