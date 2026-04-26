@@ -1,4 +1,3 @@
-export const runtime = 'edge';
 import { MetadataRoute } from 'next';
 import { getAllArticles } from '@/lib/articles';
 import { getStores } from '@/lib/umkm';

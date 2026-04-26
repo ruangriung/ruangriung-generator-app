@@ -1,11 +1,16 @@
-import fs from 'fs/promises';
-import path from 'path';
 import matter from 'gray-matter';
 import { cache } from 'react';
 
+const getFs = () => (process.env.NEXT_RUNTIME !== 'edge' ? require('fs/promises') : null);
+const getPath = () => (process.env.NEXT_RUNTIME !== 'edge' ? require('path') : null);
+
+const fs = getFs();
+const path = getPath();
+
+
 import type { Product, Store } from './types';
 
-const storesDirectory = path.join(process.cwd(), 'content/umkm/stores');
+const storesDirectory = path ? path.join(process.cwd(), 'content/umkm/stores') : '';
 
 type StoreFrontMatter = {
   id?: string;

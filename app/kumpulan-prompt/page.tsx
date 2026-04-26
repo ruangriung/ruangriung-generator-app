@@ -1,5 +1,5 @@
 
-export const runtime = 'edge';
+
 import type { Metadata } from 'next';
 import { getAllPrompts } from '../../lib/prompts';
 import PromptClient from './PromptClient';
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 0;
+
 
 export default async function KumpulanPromptPage() {
   const prompts = await getAllPrompts();

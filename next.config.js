@@ -28,7 +28,22 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        net: false,
+        tls: false,
+        dns: false,
+        child_process: false,
+      };
+    }
+    return config;
+  },
 };
+
 
 module.exports = withPWA({
   dest: 'public',

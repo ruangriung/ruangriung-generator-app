@@ -1,7 +1,9 @@
-import path from 'path';
+const getPath = () => (process.env.NEXT_RUNTIME !== 'edge' ? require('path') : null);
+const path = getPath();
 import { getPromptsFromDirectory, Prompt } from './prompts';
 
-const buildAppPromptsDirectory = path.join(process.cwd(), 'content/build-app-prompts');
+const buildAppPromptsDirectory = path ? path.join(process.cwd(), 'content/build-app-prompts') : '';
+
 
 export const getBuildAppPrompts = async (): Promise<Prompt[]> => {
   return getPromptsFromDirectory(buildAppPromptsDirectory);

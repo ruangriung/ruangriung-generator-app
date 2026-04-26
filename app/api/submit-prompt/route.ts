@@ -1,4 +1,5 @@
 
+export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { createPrompt } from '@/lib/prompts';

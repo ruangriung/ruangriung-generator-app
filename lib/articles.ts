@@ -1,8 +1,13 @@
-import fs from 'fs';
-import path from 'path';
 import matter from 'gray-matter';
 
-const articlesDirectory = path.join(process.cwd(), 'content/articles-md');
+const getFs = () => (process.env.NEXT_RUNTIME !== 'edge' ? require('fs') : null);
+const getPath = () => (process.env.NEXT_RUNTIME !== 'edge' ? require('path') : null);
+
+const fs = getFs();
+const path = getPath();
+
+
+const articlesDirectory = path ? path.join(process.cwd(), 'content/articles-md') : '';
 
 export function getArticleSlugs() {
   try {
