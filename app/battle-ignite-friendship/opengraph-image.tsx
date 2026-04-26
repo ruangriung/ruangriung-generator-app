@@ -45,13 +45,13 @@ const friendshipStyle: CSSProperties = {
   fontSize: 72,
   letterSpacing: '0.6em',
   fontWeight: 600,
-  display: 'inline-flex',
+  display: 'flex',
   alignItems: 'center',
   gap: 24,
 };
 
 const badgeStyle: CSSProperties = {
-  display: 'inline-flex',
+  display: 'flex',
   alignItems: 'center',
   gap: 12,
   padding: '18px 28px',
@@ -137,8 +137,9 @@ const participantNames = [
 ];
 
 const participantsContainer: CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+  display: 'flex',
+  flexWrap: 'wrap',
+  justifyContent: 'space-between',
   gap: 16,
   marginTop: 32,
 };
@@ -148,6 +149,8 @@ const participantCard: CSSProperties = {
   flexDirection: 'column',
   gap: 8,
   padding: '16px 20px',
+  width: '23%',
+  marginBottom: 16,
   borderRadius: 24,
   backgroundColor: 'rgba(15, 23, 42, 0.55)',
   border: '1px solid rgba(74, 222, 128, 0.18)',
@@ -172,7 +175,7 @@ export default function Image() {
               friendship
               <span
                 style={{
-                  display: 'inline-block',
+                  display: 'flex',
                   width: 120,
                   height: 6,
                   backgroundColor: '#bef264',
