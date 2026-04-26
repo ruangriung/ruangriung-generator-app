@@ -284,18 +284,7 @@ const IdCardGeneratorClient = () => {
             <div className="container mx-auto px-4 relative z-10">
                 <div className="max-w-7xl mx-auto space-y-12">
                     {/* Navigation */}
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
-                        <Link
-                            href="/"
-                            className="glass-button px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3 text-slate-600 dark:text-slate-400"
-                        >
-                            <ArrowLeft size={16} />
-                            <span>Beranda</span>
-                        </Link>
-                        <div className="w-48">
-                            <ThemeToggle />
-                        </div>
-                    </div>
+
 
                     <div className="text-center space-y-4">
                         <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
