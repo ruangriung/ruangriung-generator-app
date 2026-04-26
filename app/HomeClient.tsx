@@ -287,11 +287,6 @@ const HomeClient = memo(({ latestArticle }: HomeClientProps) => {
       <div className="w-full max-w-5xl mt-8">
         <FAQ />
       </div>
-
-      <HelpModal
-        isOpen={isHelpOpen}
-        onClose={closeHelp}
-      />
     </div>
   );
 });

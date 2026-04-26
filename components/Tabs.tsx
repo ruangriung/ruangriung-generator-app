@@ -39,12 +39,12 @@ const Tabs = memo(() => {
   }, []);
 
   const tabs = useMemo(() => [
-    { name: 'chatbot', label: 'Chatbot', icon: MessageSquare, content: <Chatbot />, isProtected: false, isDisabled: false },
+    { name: 'chatbot', label: 'Chatbot', icon: MessageSquare, component: Chatbot, isProtected: false, isDisabled: false },
     { 
       name: 'video', 
       label: 'Video Prompt', 
       icon: Video, 
-      content: <VideoCreator />, 
+      component: VideoCreator, 
       isProtected: true, 
       isDisabled: !hasByopKey 
     },
@@ -52,12 +52,12 @@ const Tabs = memo(() => {
       name: 'text-to-video', 
       label: 'Text to Video', 
       icon: Video, 
-      content: <TextToVideo />, 
+      component: TextToVideo, 
       isProtected: true, 
       isDisabled: !hasByopKey 
     },
-    { name: 'audio', label: 'Audio', icon: AudioLines, content: <AudioGenerator />, isProtected: true },
-    { name: 'image', label: 'Image', icon: Image, content: <Generator />, isProtected: false }
+    { name: 'audio', label: 'Audio', icon: AudioLines, component: AudioGenerator, isProtected: true },
+    { name: 'image', label: 'Image', icon: Image, component: Generator, isProtected: false }
   ], [hasByopKey]);
 
   const [activeTab, setActiveTab] = useState('image');
@@ -70,7 +70,10 @@ const Tabs = memo(() => {
     if (currentTab.isProtected && status !== 'authenticated') {
       return <LockedContent />;
     }
-    return currentTab.content;
+    
+    // Instantiate component only when active
+    const ActiveComp = currentTab.component;
+    return <ActiveComp />;
   }, [activeTab, tabs, status]);
 
   return (
