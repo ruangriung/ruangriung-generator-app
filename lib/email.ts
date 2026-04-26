@@ -1,4 +1,4 @@
-const getNodemailer = () => (process.env.NEXT_RUNTIME !== 'edge' ? require('nodemailer') : null);
+import nodemailer from 'nodemailer';
 import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 type NormalizedEmail = {
@@ -167,11 +167,6 @@ export const createEmailTransporter = () => {
 
   if (!nodemailerUser || !nodemailerPass) {
     throw new Error('NODEMAILER_EMAIL atau NODEMAILER_APP_PASSWORD belum dikonfigurasi dengan benar.');
-  }
-
-  const nodemailer = getNodemailer();
-  if (!nodemailer) {
-    throw new Error('Nodemailer tidak tersedia di runtime ini (Edge). Gunakan API email berbasis fetch (misal: Resend) sebagai gantinya.');
   }
 
   const transportOptions = createTransportOptions(nodemailerUser, nodemailerPass);
