@@ -8,8 +8,6 @@ export async function middleware(request: NextRequest) {
   // Define protected routes
   const protectedRoutes = [
     '/video-prompt',
-    '/id-card-generator',
-    '/storyteller',
     '/v1/video-prompt',
     '/v1/random-spinner.html'
   ];
@@ -39,8 +37,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/video-prompt/:path*',
-    '/id-card-generator/:path*',
-    '/storyteller/:path*',
     '/v1/video-prompt/:path*',
     '/v1/random-spinner.html',
   ],
