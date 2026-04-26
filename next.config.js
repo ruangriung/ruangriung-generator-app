@@ -27,6 +27,18 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'pollinations.ai',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.pollinations.ai',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   webpack: (config, { isServer, nextRuntime }) => {

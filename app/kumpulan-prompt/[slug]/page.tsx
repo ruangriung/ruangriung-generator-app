@@ -99,12 +99,24 @@ export async function generateStaticParams() {
 
 export default async function PromptDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const prompts = await getAllPrompts();
-  const prompt = prompts.find(currentPrompt => currentPrompt.slug === slug);
+  const allPrompts = await getAllPrompts();
+  const prompt = allPrompts.find(currentPrompt => currentPrompt.slug === slug);
 
   if (!prompt) {
     notFound();
   }
 
-  return <PromptDetailClient prompt={prompt} prompts={prompts} />;
+  // Optimize: Only send a small subset of prompts for recommendations to the client
+  // instead of the entire collection to reduce payload size.
+  const relatedPrompts = allPrompts
+    .filter(p => p.slug !== slug && p.tags.some(tag => prompt.tags.includes(tag)))
+    .slice(0, 8);
+
+  const featuredPrompts = allPrompts
+    .filter(p => p.slug !== slug && !relatedPrompts.some(rp => rp.slug === p.slug))
+    .slice(0, 4);
+
+  const combinedPrompts = [...relatedPrompts, ...featuredPrompts];
+
+  return <PromptDetailClient prompt={prompt} prompts={combinedPrompts} />;
 }

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Prompt } from '@/lib/prompts';
 import { Tag, Clock, User, ArrowRight } from 'lucide-react';
 
@@ -12,13 +13,14 @@ export default function PromptCard({ prompt }: PromptCardProps) {
       href={`/kumpulan-prompt/${prompt.slug}`}
       className="group relative glass-card !p-0 !rounded-[2rem] overflow-hidden flex flex-col h-full hover:shadow-2xl hover:shadow-primary-500/10 transition-all duration-500"
     >
-      {/* Visual Header */}
       <div className="relative h-48 overflow-hidden">
         {prompt.image ? (
-          <img 
+          <Image 
             src={prompt.image} 
             alt={prompt.title}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary-500/20 via-primary-500/5 to-transparent flex items-center justify-center">

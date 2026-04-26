@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Share2 } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowLeft, Share2, Clock, Calendar, User as UserIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import CopyButton from '@/components/CopyButton';
@@ -204,8 +205,20 @@ export default function PromptDetailClient({
                     <span className="px-4 py-1.5 rounded-xl bg-primary-500/10 text-[10px] font-black uppercase tracking-[0.2em] text-primary-500">
                       {currentPrompt.tool}
                     </span>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                      {new Date(currentPrompt.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+                      <Calendar size={12} />
+                      <span suppressHydrationWarning>
+                        {(() => {
+                          try {
+                            const date = new Date(currentPrompt.date);
+                            return isNaN(date.getTime()) 
+                              ? 'Baru saja' 
+                              : date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                          } catch (e) {
+                            return 'Baru saja';
+                          }
+                        })()}
+                      </span>
                     </span>
                   </div>
                   <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-tight">
@@ -245,8 +258,18 @@ export default function PromptDetailClient({
               </div>
 
               {currentPrompt.image && (
-                <div className="p-4 rounded-2xl glass-inset border border-white/5 overflow-hidden">
-                  <img src={currentPrompt.image} alt={currentPrompt.title} className="w-full h-auto rounded-xl shadow-2xl" />
+                <div className="relative group mt-8">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-primary-500/20 to-purple-500/20 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                  <div className="relative aspect-video md:aspect-[21/9] w-full overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl glass">
+                    <Image 
+                      src={currentPrompt.image} 
+                      alt={currentPrompt.title} 
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(max-width: 1280px) 100vw, 1280px"
+                      priority
+                    />
+                  </div>
                 </div>
               )}
             </div>

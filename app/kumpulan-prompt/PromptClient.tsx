@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Search, Hash, PenTool, Sparkles, Filter, ChevronDown, Check, X, Tag as TagIcon, Clock, ArrowRight, User } from 'lucide-react';
+import Link from 'next/link';
 import PromptCard from '@/components/PromptCard';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Prompt } from '@/lib/prompts';
@@ -36,7 +37,14 @@ export default function PromptClient({
   const [selectedTool, setSelectedTool] = useState(searchParams.get('tool') || '');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
   const searchInputRef = useRef<HTMLDivElement>(null);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedTag, selectedTool]);
 
   // Get all unique tags and tools for filters
   const allTags = useMemo(() => {
@@ -76,6 +84,18 @@ export default function PromptClient({
       return matchesSearch && matchesTag && matchesTool;
     });
   }, [initialPrompts, searchTerm, selectedTag, selectedTool]);
+
+  // Pagination logic
+  const { paginatedPrompts, totalPages } = useMemo(() => {
+    const total = filteredPrompts.length;
+    const pages = Math.ceil(total / itemsPerPage);
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return {
+      paginatedPrompts: filteredPrompts.slice(start, end),
+      totalPages: pages
+    };
+  }, [filteredPrompts, currentPage, itemsPerPage]);
 
   // Search Suggestions Logic
   const suggestions = useMemo(() => {
@@ -153,6 +173,19 @@ export default function PromptClient({
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 md:py-20">
+      {/* Back Button */}
+      <div className="mb-8">
+        <Link 
+          href={backHref}
+          className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-primary-500 transition-colors group"
+        >
+          <div className="h-8 w-8 rounded-xl glass border border-slate-200 dark:border-white/10 flex items-center justify-center group-hover:border-primary-500/30 group-hover:bg-primary-500/5 transition-all">
+            <ArrowRight size={16} className="rotate-180" />
+          </div>
+          {backLabel}
+        </Link>
+      </div>
+
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
         <div className="space-y-4 max-w-2xl">
@@ -271,8 +304,8 @@ export default function PromptClient({
 
       {/* Results Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-        {filteredPrompts.length > 0 ? (
-          filteredPrompts.map((prompt) => (
+        {paginatedPrompts.length > 0 ? (
+          paginatedPrompts.map((prompt) => (
             <PromptCard key={prompt.slug} prompt={prompt} />
           ))
         ) : (
@@ -293,6 +326,39 @@ export default function PromptClient({
           </div>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="mt-16 flex items-center justify-center gap-3">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="h-12 w-12 rounded-2xl glass border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary-500/30 hover:text-primary-500 transition-all"
+          >
+            <ArrowRight size={20} className="rotate-180" />
+          </button>
+          
+          <div className="flex items-center gap-2">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`h-12 w-12 rounded-2xl text-xs font-black transition-all ${currentPage === page ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30' : 'glass border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-primary-500/30'}`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className="h-12 w-12 rounded-2xl glass border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary-500/30 hover:text-primary-500 transition-all"
+          >
+            <ArrowRight size={20} />
+          </button>
+        </div>
+      )}
 
       {/* Submission CTA */}
       {showSubmissionTrigger && (
