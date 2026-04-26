@@ -29,5 +29,5 @@ jobs:
           git config --global user.name "RuangRiung AI Bot"
           git config --global user.email "bot@ruangriung.my.id"
           git add content/articles-md/
-          git commit -m "feat: automated blog post generation [skip ci]" || echo "No changes to commit"
+          git commit -m "feat: automated blog post generation" || echo "No changes to commit"
           git push
