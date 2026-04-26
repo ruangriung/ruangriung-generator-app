@@ -76,18 +76,17 @@ const INTENAL_PROXY_TEXT_ENDPOINT = '/api/pollinations/text';
 
 
 const shouldEnforceDefaultTemperature = (modelId: string) => {
-  const normalized = modelId.trim().toLowerCase();
-  if (!normalized) {
-    return false;
-  }
-
-  return normalized.includes('azure') || normalized.includes('openai');
+  const normalized = modelId.toLowerCase();
+  return normalized.includes('azure') || normalized.includes('openai') || normalized.includes('deepseek');
 };
 
 const getSafeTemperature = (modelId: string, desired: number) => {
   if (Number.isNaN(desired)) {
     return undefined;
   }
+
+  // DeepSeek often prefers specific temperature or none
+  if (modelId.toLowerCase().includes('deepseek')) return 0.7;
 
   return shouldEnforceDefaultTemperature(modelId) ? undefined : desired;
 };
@@ -405,6 +404,14 @@ const formatArtistsForClipboard = (items: ArtistResult[]) =>
     )
     .join('\n');
 
+const formatQAForClipboard = (items: Array<{ question: string; answer: string }>) =>
+  items
+    .map(
+      (item, index) =>
+        `Q: ${item.question}\nA: ${item.answer}`,
+    )
+    .join('\n\n---\n\n');
+
 const TermCard = memo(({ item, index, onCopy, isCopied }: { item: KeywordResult; index: number; onCopy: (item: KeywordResult) => void; isCopied: boolean }) => (
   <div className="group flex h-full flex-col justify-between rounded-3xl bg-white/80 p-5 text-gray-800 shadow-neumorphic dark:bg-dark-neumorphic-light dark:text-gray-100 dark:shadow-dark-neumorphic">
     <div className="space-y-3">
@@ -558,11 +565,15 @@ const KeywordGeneratorClient = memo(() => {
   }, [isKeywordHelpOpen]);
 
   useEffect(() => {
+    const controller = new AbortController();
+    
     const fetchModels = async () => {
       setIsLoadingModels(true);
       setModelError(null);
       try {
-        const response = await fetch('/api/pollinations/models/text');
+        const response = await fetch('/api/pollinations/models/text', {
+          signal: controller.signal
+        });
         if (!response.ok) {
           throw new Error(`Gagal memuat model (${response.status})`);
         }
@@ -577,6 +588,8 @@ const KeywordGeneratorClient = memo(() => {
         setModels(parsedModels);
         setSelectedModel(parsedModels.find((model) => model.id === 'openai')?.id || parsedModels[0].id);
       } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return;
+        
         console.error('Kesalahan memuat model:', error);
         setModelError('Tidak dapat memuat model dari Pollinations. Menggunakan opsi cadangan.');
         setModels(FALLBACK_MODELS);
@@ -587,6 +600,7 @@ const KeywordGeneratorClient = memo(() => {
     };
 
     fetchModels();
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -708,11 +722,28 @@ const KeywordGeneratorClient = memo(() => {
     [creativeBrief, results, stylisticHints],
   );
 
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const stopOngoingRequests = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => stopOngoingRequests();
+  }, [stopOngoingRequests]);
+
   const handleGenerate = useCallback(async () => {
     if (!selectedModel) {
       toast.error('Model belum siap.');
       return;
     }
+
+    stopOngoingRequests();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     setIsGenerating(true);
     setGenerationError(null);
@@ -733,7 +764,7 @@ const KeywordGeneratorClient = memo(() => {
           {
             role: 'system',
             content:
-              'Anda adalah kurator kata kunci eksperimental yang terus menemukan istilah baru untuk pengetesan prompt visual. Selalu patuhi format yang diminta dan pastikan hasil dapat langsung disalin dan berikan dalam bahasa inggris.',
+              'Anda adalah kurator kata kunci eksperimental yang terus menemukan istilah baru untuk pengetesan prompt visual. Selalu patuhi format yang diminta dan pastikan hasil dapat langsung disalin. Gunakan bahasa Indonesia sesuai instruksi pengguna.',
           },
           { role: 'user', content: instruction },
         ],
@@ -750,6 +781,7 @@ const KeywordGeneratorClient = memo(() => {
         headers: {
           'Content-Type': 'application/json'
         },
+        signal: controller.signal,
         body: JSON.stringify(payload),
       });
 
@@ -777,7 +809,8 @@ const KeywordGeneratorClient = memo(() => {
         shouldAutoGenerateArtists.current = true;
       }
       toast.success('Berhasil membuat kata kunci unik!');
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') return;
       console.error('Gagal membuat kata kunci:', error);
       const rawMessage = error instanceof Error ? error.message : 'Terjadi kesalahan tak dikenal.';
       const normalized = rawMessage.toLowerCase();
@@ -788,15 +821,22 @@ const KeywordGeneratorClient = memo(() => {
       toast.error('Gagal membuat kata kunci.');
       shouldAutoGenerateArtists.current = false;
     } finally {
-      setIsGenerating(false);
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+        setIsGenerating(false);
+      }
     }
-  }, [autoGenerateArtists, buildInstruction, results, selectedModel]);
+  }, [autoGenerateArtists, buildInstruction, results, selectedModel, stopOngoingRequests]);
 
   const handleGenerateArtists = useCallback(async () => {
     if (!selectedModel) {
       toast.error('Model belum siap.');
       return;
     }
+
+    stopOngoingRequests();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     shouldAutoGenerateArtists.current = false;
     setIsGeneratingArtists(true);
@@ -834,6 +874,7 @@ const KeywordGeneratorClient = memo(() => {
         headers: {
           'Content-Type': 'application/json'
         },
+        signal: controller.signal,
         body: JSON.stringify(payload),
       });
 
@@ -858,7 +899,8 @@ const KeywordGeneratorClient = memo(() => {
       setArtistRawContent(content);
       setLastArtistsGeneratedAt(new Date());
       toast.success('Berhasil mendapatkan seniman terkenal!');
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') return;
       console.error('Gagal membuat daftar seniman:', error);
       const rawMessage = error instanceof Error ? error.message : 'Terjadi kesalahan tak dikenal.';
       const normalized = rawMessage.toLowerCase();
@@ -868,9 +910,12 @@ const KeywordGeneratorClient = memo(() => {
       setArtistError(friendlyMessage);
       toast.error('Gagal menampilkan seniman.');
     } finally {
-      setIsGeneratingArtists(false);
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+        setIsGeneratingArtists(false);
+      }
     }
-  }, [buildArtistInstruction, selectedModel]);
+  }, [buildArtistInstruction, selectedModel, stopOngoingRequests]);
 
   useEffect(() => {
     if (!autoGenerateArtists) {
@@ -956,6 +1001,23 @@ const KeywordGeneratorClient = memo(() => {
       });
   }, [artists]);
 
+  const handleCopyAllQA = useCallback(() => {
+    if (qaHistory.length === 0) {
+      toast.error('Belum ada riwayat tanya jawab.');
+      return;
+    }
+
+    const text = formatQAForClipboard(qaHistory);
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        toast.success('Riwayat tanya jawab disalin!');
+      })
+      .catch(() => {
+        toast.error('Gagal menyalin riwayat.');
+      });
+  }, [qaHistory]);
+
   const handleResetArtists = useCallback(() => {
     setArtists([]);
     setArtistRawContent('');
@@ -986,6 +1048,10 @@ const KeywordGeneratorClient = memo(() => {
       return;
     }
 
+    stopOngoingRequests();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setIsAsking(true);
     setAskError(null);
 
@@ -996,7 +1062,7 @@ const KeywordGeneratorClient = memo(() => {
           {
             role: 'system',
             content:
-              'Anda adalah asisten singkat untuk brainstorming prompt visual. Jawab padat, fokus pada ide kreatif yang bisa ditindaklanjuti.',
+              'Anda adalah asisten singkat untuk brainstorming prompt visual. Jawab padat, fokus pada ide kreatif yang bisa ditindaklanjuti. Gunakan bahasa Indonesia.',
           },
           { role: 'user', content: trimmedQuestion },
         ],
@@ -1013,6 +1079,7 @@ const KeywordGeneratorClient = memo(() => {
         headers: {
           'Content-Type': 'application/json'
         },
+        signal: controller.signal,
         body: JSON.stringify(payload),
       });
 
@@ -1032,7 +1099,8 @@ const KeywordGeneratorClient = memo(() => {
         { question: trimmedQuestion, answer: content },
       ]);
       setQuestion('');
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') return;
       console.error('Gagal mengirim pertanyaan:', error);
       const rawMessage = error instanceof Error ? error.message : 'Terjadi kesalahan tak dikenal.';
       const normalized = rawMessage.toLowerCase();
@@ -1042,9 +1110,12 @@ const KeywordGeneratorClient = memo(() => {
       setAskError(friendlyMessage);
       toast.error('Tidak dapat menjawab pertanyaan.');
     } finally {
-      setIsAsking(false);
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+        setIsAsking(false);
+      }
     }
-  }, [question, selectedModel]);
+  }, [question, selectedModel, stopOngoingRequests]);
 
   const darkModeToggleClasses = isDarkMode
     ? 'bg-amber-300/90 text-gray-900 hover:bg-amber-200'

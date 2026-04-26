@@ -7,7 +7,7 @@ location: Denpasar, Bali
 whatsappNumber: '6281234567010'
 tagline: >-
   Minyak aromaterapi dan lilin kedelai dengan aroma khas nusantara.
-heroImage: https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/10-aroma-therapy-hero.png
 description: >-
   Aroma Therapy Nusantara meracik minyak atsiri dan lilin aromaterapi dari bahan alami, terinspirasi dari rempah dan flora Indonesia.
 highlights:

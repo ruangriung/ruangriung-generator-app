@@ -7,7 +7,7 @@ location: Garut, Jawa Barat
 whatsappNumber: '6281234567007'
 tagline: >-
   Dodol tradisional dengan inovasi rasa kekinian.
-heroImage: https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/07-kuliner-dodol-garut-hero.png
 description: >-
   Kuliner Dodol Garut menghadirkan dodol legit khas Garut yang dibuat dari bahan premium dan dimasak perlahan hingga teksturnya lembut.
 highlights:

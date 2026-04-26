@@ -208,94 +208,99 @@ export default function KontenKreatorPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-16 dark:bg-gray-950">
-      <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-8 flex justify-center">
+    <main className="min-h-screen pt-32 pb-20 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="fixed inset-0 bg-slate-50 dark:bg-[#030712] -z-20" />
+      <div className="fixed inset-0 bg-mesh-gradient opacity-40 dark:opacity-20 -z-10" />
+      
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="mb-10 flex justify-center">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white px-5 py-2 text-sm font-semibold text-purple-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-purple-50 dark:border-purple-800 dark:bg-gray-900 dark:text-purple-200 dark:hover:bg-purple-900/60"
+              className="glass-button px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3 text-slate-600 dark:text-slate-400"
             >
               <ArrowLeft className="h-4 w-4" />
               Kembali ke Beranda
             </Link>
           </div>
 
-          <span className="inline-flex items-center gap-2 rounded-full bg-purple-100 px-4 py-1 text-sm font-medium text-purple-700 shadow-sm dark:bg-purple-900/40 dark:text-purple-200">
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-primary-500/10 text-primary-500 border border-primary-500/20 mb-8">
             <Sparkles className="h-4 w-4" />
-            Direktori Konten Kreator
-          </span>
-          <h1 className="mt-6 text-4xl font-bold text-gray-900 dark:text-gray-100">
-            Bersama Kreator, Untuk Kreator, Oleh Kreator.
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Direktori Konten Kreator</span>
+          </div>
+          
+          <h1 className="text-4xl sm:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-tight mb-8">
+            Bersama Kreator,<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-fuchsia-500">Untuk Masa Depan.</span>
           </h1>
 
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-            Halaman ini dirancang untuk memperkenalkan dan memperkuat personal branding para Konten kreator di seluruh dunia sekaligus menonjolkan konten Facebook pro Anda semakin dikenal dunia. Jelajahi direktori ini untuk bertemu rekan seperjalanan yang siap berkolaborasi, membuka peluang baru, dan saling mengangkat karya terbaik.
-          </p>
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-            Submit profil membantu tim menampilkan cerita, nilai, dan karya Anda secara terkurasi sehingga komunitas maupun brand dapat memahami keahlian Anda dalam sekejap.
-          </p>
+          <div className="glass-card p-8 mb-12 text-left relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
+             <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+              Halaman ini dirancang untuk memperkenalkan dan memperkuat personal branding para Konten kreator di seluruh dunia sekaligus menonjolkan konten Facebook pro Anda semakin dikenal dunia. Jelajahi direktori ini untuk bertemu rekan seperjalanan yang siap berkolaborasi, membuka peluang baru, dan saling mengangkat karya terbaik.
+            </p>
+          </div>
 
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <Link
               href="/konten-kreator/kirim-profil"
-              className="inline-flex items-center gap-2 rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+              className="w-full sm:w-auto h-16 px-10 rounded-2xl bg-primary-500 text-white text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-primary-500/25"
             >
               <Sparkles className="h-4 w-4" />
               Submit Profil Anda
             </Link>
             <Link
               href="/tentang-kami"
-              className="inline-flex items-center gap-2 rounded-full border border-purple-300 px-6 py-3 text-sm font-semibold text-purple-700 transition hover:border-purple-400 hover:text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:border-purple-700 dark:text-purple-200 dark:hover:border-purple-500 dark:hover:text-purple-100"
+              className="w-full sm:w-auto h-16 px-10 rounded-2xl glass-button text-slate-600 dark:text-slate-300 text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               Pelajari Tentang Kami
             </Link>
           </div>
         </div>
 
-        <section className="mt-12">
-          <div className="mx-auto max-w-4xl rounded-3xl border border-purple-200 bg-gradient-to-br from-purple-50 via-white to-blue-50 p-8 text-left shadow-xl dark:border-purple-900 dark:from-purple-950 dark:via-gray-950 dark:to-blue-950">
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-              Mengapa harus Submit Profil Anda dan apa keuntungannya?
-            </h2>
-            <p className="mt-3 text-base text-gray-600 dark:text-gray-300">
-              Submission ke halaman ini membuka akses eksposur dan peluang baru bagi personal brand Anda.
-            </p>
-            <div className="mt-6 space-y-3">
+        <section className="mt-24 max-w-5xl mx-auto">
+          <div className="glass-card p-10 sm:p-14 relative overflow-hidden">
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary-500/5 blur-[100px] rounded-full -ml-32 -mb-32" />
+            
+            <div className="max-w-2xl">
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mb-6 tracking-tight uppercase">
+                Mengapa harus <span className="text-primary-500">Submit Profil</span> Anda?
+              </h2>
+              <p className="text-slate-500 dark:text-slate-400 font-bold mb-10 leading-relaxed">
+                Submission ke halaman ini membuka akses eksposur dan peluang baru bagi personal brand Anda.
+              </p>
+            </div>
+
+            <div className="grid gap-4">
               {submissionBenefits.map((benefit, index) => {
                 const isOpen = activeBenefitIndex === index;
-                const buttonId = `benefit-trigger-${index}`;
-                const panelId = `benefit-panel-${index}`;
-
                 return (
                   <div
                     key={benefit.title}
-                    className="overflow-hidden rounded-2xl border border-purple-200/70 bg-white/80 shadow-sm transition dark:border-purple-800 dark:bg-gray-900/60"
+                    className={`glass-card overflow-hidden transition-all duration-500 ${isOpen ? 'ring-1 ring-primary-500/30' : ''}`}
                   >
                     <button
                       type="button"
-                      id={buttonId}
-                      aria-controls={panelId}
-                      aria-expanded={isOpen}
                       onClick={() => toggleBenefit(index)}
-                      className="flex w-full items-center gap-4 px-6 py-5 text-left transition hover:bg-purple-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-purple-100 dark:hover:bg-purple-900/30 dark:focus-visible:ring-offset-gray-950"
+                      className="flex w-full items-center gap-6 px-8 py-6 text-left transition-colors hover:bg-white/5"
                     >
-                      <benefit.icon className="h-5 w-5 text-purple-600 dark:text-purple-300" />
-                      <span className="flex-1 text-base font-semibold text-gray-900 dark:text-gray-100">
+                      <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-colors ${isOpen ? 'bg-primary-500 text-white' : 'bg-slate-500/10 text-slate-500'}`}>
+                        <benefit.icon size={24} />
+                      </div>
+                      <span className="flex-1 text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
                         {benefit.title}
                       </span>
                       <ChevronDown
-                        className={`h-4 w-4 text-purple-500 transition-transform duration-200 dark:text-purple-300 ${isOpen ? '-rotate-180' : ''}`}
+                        className={`h-5 w-5 text-slate-400 transition-transform duration-300 ${isOpen ? '-rotate-180 text-primary-500' : ''}`}
                       />
                     </button>
                     <div
-                      id={panelId}
-                      role="region"
-                      aria-labelledby={buttonId}
-                      aria-hidden={!isOpen}
-                      className={`px-6 pb-6 text-sm text-gray-600 transition-all duration-200 ease-out dark:text-gray-300 ${isOpen ? 'block' : 'hidden'}`}
+                      className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}
                     >
-                      {benefit.description}
+                      <div className="px-8 pb-8 pl-[88px] text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed">
+                        {benefit.description}
+                      </div>
                     </div>
                   </div>
                 );
@@ -304,152 +309,140 @@ export default function KontenKreatorPage() {
           </div>
         </section>
 
-        <section className="mt-12 space-y-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <section className="mt-24 space-y-8" id="directory">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between bg-slate-950/5 dark:bg-black/20 p-6 rounded-[2.5rem] border border-white/10 backdrop-blur-md">
             <div className="relative w-full lg:max-w-md">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-purple-400 dark:text-purple-500" />
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-primary-500 h-5 w-5" />
               <input
                 type="search"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Cari kreator, peran, atau keahlian..."
-                aria-label="Cari kreator"
-                className="w-full rounded-full border border-purple-200 bg-white/90 px-12 py-3 text-sm font-medium text-gray-900 shadow-sm transition hover:border-purple-300 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:border-purple-800 dark:bg-gray-900/80 dark:text-gray-100"
+                placeholder="Cari talenta kreatif..."
+                className="w-full h-14 glass-inset pl-16 pr-6 rounded-2xl text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400"
               />
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-gray-600 dark:text-gray-300">
-              <span className="font-medium text-purple-700 dark:text-purple-300">
-                Total {totalCreators} profil kreator
+            <div className="flex flex-wrap items-center gap-4 px-4 text-[10px] font-black uppercase tracking-[0.2em]">
+              <span className="px-4 py-2 rounded-xl bg-primary-500/10 text-primary-500 border border-primary-500/10">
+                {totalCreators} Kreator Terdaftar
               </span>
-              <span>
+              <span className="text-slate-400">
                 {hasResults
-                  ? `Menampilkan ${rangeStart}-${rangeEnd} dari ${filteredCount} profil yang cocok`
-                  : 'Tidak ada profil yang cocok dengan pencarian Anda'}
+                  ? `Menampilkan ${rangeStart}-${rangeEnd} dari ${filteredCount}`
+                  : 'Tidak ada hasil'}
               </span>
               {searchTokens.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="inline-flex items-center gap-2 rounded-full border border-purple-200 px-4 py-2 text-xs font-semibold text-purple-700 transition hover:border-purple-300 hover:text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:border-purple-800 dark:text-purple-200 dark:hover:border-purple-600"
+                  className="text-red-500 hover:underline transition-all"
                 >
-                  Bersihkan pencarian
+                  Bersihkan
                 </button>
               )}
             </div>
           </div>
 
           {!hasResults && (
-            <div className="flex flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-purple-200 bg-white/70 px-6 py-12 text-center shadow-inner dark:border-purple-900 dark:bg-gray-900/60">
-              <Search className="h-8 w-8 text-purple-500 dark:text-purple-300" />
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Coba gunakan kata kunci lain atau telusuri profil kreator kami dari halaman Tentang Kami.
+            <div className="glass-card p-20 text-center border-dashed border-2 border-white/5">
+              <div className="h-16 w-16 rounded-full bg-slate-500/5 flex items-center justify-center text-slate-400 mx-auto mb-6">
+                <Search size={32} />
+              </div>
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+                Kreator tidak ditemukan. Coba kata kunci lain.
               </p>
             </div>
           )}
         </section>
 
         {hasResults && (
-          <div ref={resultsRef} className="mt-8 space-y-12 scroll-mt-24">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+          <div ref={resultsRef} className="mt-12 space-y-16 scroll-mt-32">
+            <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
               {paginatedCreators.map((creator) => (
                 <article
                   key={creator.slug}
-                  className="group flex h-full flex-col overflow-hidden rounded-3xl border border-purple-100 bg-white shadow-lg shadow-purple-100/50 transition-transform hover:-translate-y-1 hover:shadow-purple-200/80 dark:border-purple-900 dark:bg-gray-900/60 dark:shadow-black/40"
+                  className="glass-card group flex flex-col h-full overflow-hidden transition-all duration-500 hover:scale-[1.01] hover:ring-1 hover:ring-primary-500/30"
                 >
-                  <div className="h-1 w-full bg-gradient-to-r from-purple-400 via-fuchsia-400 to-blue-400 dark:from-purple-700 dark:via-fuchsia-700 dark:to-blue-700" />
-                  <div className="flex flex-col gap-6 p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-purple-100 bg-purple-50 shadow-inner dark:border-purple-900 dark:bg-purple-900/40">
-                        <Image
-                          src={creator.imageUrl}
-                          alt={`Foto profil ${creator.name}`}
-                          fill
-                          sizes="96px"
-                          className="h-full w-full rounded-full object-cover"
-                        />
+                  <div className="h-1.5 w-full bg-gradient-to-r from-primary-500 via-fuchsia-500 to-blue-500 opacity-30 group-hover:opacity-100 transition-opacity" />
+                  
+                  <div className="p-8 sm:p-10 flex flex-col h-full">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8 mb-8 text-center sm:text-left">
+                      <div className="relative h-28 w-28 shrink-0">
+                        <div className="absolute inset-0 bg-primary-500 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity rounded-full" />
+                        <div className="relative h-full w-full rounded-full border-4 border-white/20 overflow-hidden bg-slate-900 shadow-2xl">
+                          <Image
+                            src={creator.imageUrl}
+                            alt={creator.name}
+                            fill
+                            sizes="112px"
+                            className="object-cover transition-transform duration-700 group-hover:scale-110"
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                      
+                      <div className="flex-1">
+                        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2 group-hover:text-white transition-colors">
                           {highlightText(creator.name, searchTokens)}
                         </h2>
-                        <p className="text-sm font-medium text-purple-600 dark:text-purple-300">
+                        <div className="inline-block px-3 py-1 rounded-lg bg-primary-500/10 text-primary-500 text-[10px] font-black uppercase tracking-[0.15em] mb-4">
                           {highlightText(creator.role, searchTokens)}
-                        </p>
-                        <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                        </div>
+                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-3">
                           {highlightText(creator.description, searchTokens)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 mb-8">
                       {creator.specialties.map((specialty) => (
                         <span
                           key={specialty}
-                          className="rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700 dark:bg-purple-900/60 dark:text-purple-200"
+                          className="px-3 py-1.5 rounded-xl bg-slate-500/5 border border-white/5 text-[9px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 group-hover:border-primary-500/20 group-hover:bg-primary-500/5 transition-all"
                         >
                           {highlightText(specialty, searchTokens)}
                         </span>
                       ))}
                     </div>
 
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                        Jejak Digital
-                      </p>
-                      <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-auto pt-8 border-t border-white/5 space-y-6">
+                      <div className="flex flex-wrap items-center gap-3">
                         {socialPlatforms.map((platform) => {
                           const url = creator.socials[platform.key];
                           const Icon = platform.icon;
-
-                          if (url) {
-                            return (
-                              <a
-                                key={platform.key}
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700 transition hover:border-purple-300 hover:bg-purple-100 hover:text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:border-purple-800 dark:bg-purple-900/40 dark:text-purple-200 dark:hover:border-purple-700 dark:hover:bg-purple-900/60 dark:hover:text-purple-100"
-                              >
-                                <Icon className="h-4 w-4" />
-                                {platform.label}
-                              </a>
-                            );
-                          }
-
+                          if (!url) return null;
                           return (
-                            <span
+                            <a
                               key={platform.key}
-                              aria-disabled="true"
-                              className="inline-flex items-center gap-2 rounded-full border border-dashed border-gray-300 bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-400 dark:border-gray-700 dark:bg-gray-800/70 dark:text-gray-500"
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="h-10 w-10 flex items-center justify-center glass-button rounded-xl text-slate-400 transition-all"
+                              title={platform.label}
                             >
-                              <Icon className="h-4 w-4" />
-                              {platform.label}
-                            </span>
+                              <Icon size={18} />
+                            </a>
                           );
                         })}
                       </div>
-                    </div>
 
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      <Link
-                        href={`/konten-kreator/profil/${creator.slug}`}
-                        className="inline-flex w-max items-center gap-2 rounded-full bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                      >
-                        <Sparkles className="h-4 w-4" />
-                        Lihat Profil Lengkap
-                      </Link>
-                      {creator.socials.facebook && (
-                        <a
-                          href={creator.socials.facebook}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex w-max items-center gap-2 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:from-purple-600 hover:to-fuchsia-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <Link
+                          href={`/konten-kreator/profil/${creator.slug}`}
+                          className="flex-1 h-12 rounded-xl bg-primary-500 text-white text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-primary-600 shadow-lg shadow-primary-500/20 transition-all"
                         >
-                          <Users className="h-4 w-4" />
-                          Lihat Profil Facebook
-                        </a>
-                      )}
+                          <Sparkles size={14} /> Profil Lengkap
+                        </Link>
+                        {creator.socials.facebook && (
+                          <a
+                            href={creator.socials.facebook}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 h-12 rounded-xl glass-button text-slate-900 dark:text-white text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2"
+                          >
+                            <Facebook size={14} /> Facebook Pro
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </article>
@@ -457,76 +450,75 @@ export default function KontenKreatorPage() {
             </div>
 
             {totalPages > 1 && (
-              <nav
-                className="flex flex-wrap items-center justify-center gap-2"
-                aria-label="Navigasi halaman kreator"
-              >
+              <nav className="flex items-center justify-center gap-3 pt-10">
                 <button
-                  type="button"
                   onClick={handlePreviousPage}
                   disabled={currentPage === 1}
-                  className="inline-flex items-center rounded-full border border-purple-200 px-4 py-2 text-sm font-medium text-purple-700 transition hover:border-purple-300 hover:text-purple-800 disabled:cursor-not-allowed disabled:opacity-50 dark:border-purple-800 dark:text-purple-200 dark:hover:border-purple-600"
+                  className="h-12 px-6 glass-button rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-30"
                 >
-                  Sebelumnya
+                  Prev
                 </button>
-                {Array.from({ length: totalPages }).map((_, index) => {
-                  const pageNumber = index + 1;
-                  const isActive = pageNumber === currentPage;
-
-                  return (
-                    <button
-                      key={pageNumber}
-                      type="button"
-                      onClick={() => handleSelectPage(pageNumber)}
-                      className={`inline-flex h-10 w-10 items-center justify-center rounded-full border text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
-                        isActive
-                          ? 'border-purple-500 bg-purple-600 text-white shadow-lg shadow-purple-500/30 dark:border-purple-500 dark:bg-purple-600 dark:text-white'
-                          : 'border-purple-200 bg-white text-purple-700 hover:border-purple-300 hover:text-purple-800 dark:border-purple-800 dark:bg-gray-900 dark:text-purple-200 dark:hover:border-purple-600'
-                      }`}
-                    >
-                      {pageNumber}
-                    </button>
-                  );
-                })}
+                <div className="flex gap-2">
+                  {Array.from({ length: totalPages }).map((_, index) => {
+                    const pageNumber = index + 1;
+                    const isActive = pageNumber === currentPage;
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() => handleSelectPage(pageNumber)}
+                        className={`h-12 w-12 rounded-xl text-[10px] font-black transition-all ${
+                          isActive
+                            ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                            : 'glass-button text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  })}
+                </div>
                 <button
-                  type="button"
                   onClick={handleNextPage}
                   disabled={currentPage === totalPages}
-                  className="inline-flex items-center rounded-full border border-purple-200 px-4 py-2 text-sm font-medium text-purple-700 transition hover:border-purple-300 hover:text-purple-800 disabled:cursor-not-allowed disabled:opacity-50 dark:border-purple-800 dark:text-purple-200 dark:hover:border-purple-600"
+                  className="h-12 px-6 glass-button rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-30"
                 >
-                  Selanjutnya
+                  Next
                 </button>
               </nav>
             )}
           </div>
         )}
 
-        <section className="mt-16">
-          <div className="mx-auto max-w-3xl overflow-hidden rounded-3xl border border-purple-200 bg-gradient-to-br from-purple-100 via-white to-blue-100 p-10 text-center shadow-xl dark:border-purple-900 dark:from-purple-950 dark:via-gray-950 dark:to-blue-950">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-md shadow-purple-200 dark:bg-gray-900 dark:shadow-black/30">
-              <Users className="h-6 w-6 text-purple-600 dark:text-purple-300" />
-            </div>
-            <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-gray-100">Tampilkan Profil Anda</h2>
-            <p className="mt-3 text-base text-gray-600 dark:text-gray-300">
-              Siap membuat personal branding Anda lebih mudah diingat? Kirimkan informasi media sosial, karya unggulan, serta pesan inti brand agar kami dapat menampilkan profil yang solid dan profesional.
-            </p>
-            <div className="mt-6 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link
-                href="/konten-kreator/kirim-profil"
-                className="group inline-flex items-center gap-2 rounded-full bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/40 transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-              >
-                <Send
-                  className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-1"
-                  aria-hidden
-                />
-                Submit Profil Anda
-              </Link>
-              <Link
-                href="/tentang-kami"
-                className="inline-flex items-center gap-2 rounded-full border border-purple-300 px-6 py-3 text-sm font-semibold text-purple-700 transition hover:border-purple-400 hover:text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:border-purple-700 dark:text-purple-200 dark:hover:border-purple-500 dark:hover:text-purple-100"
-              >
-                Pelajari Tentang Kami
-              </Link>
+        <section className="mt-32">
+          <div className="glass-card p-12 sm:p-20 text-center relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 via-transparent to-fuchsia-500/10 opacity-50" />
+            <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary-500/20 blur-[100px] rounded-full group-hover:scale-150 transition-transform duration-1000" />
+            
+            <div className="relative z-10 max-w-3xl mx-auto">
+              <div className="h-16 w-16 rounded-3xl bg-primary-500 text-white flex items-center justify-center mx-auto mb-8 shadow-xl shadow-primary-500/25">
+                <Users size={32} />
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white mb-6 tracking-tight uppercase">
+                Tampilkan Profil Anda
+              </h2>
+              <p className="text-lg text-slate-600 dark:text-slate-400 font-medium mb-12 leading-relaxed">
+                Siap membuat personal branding Anda lebih mudah diingat? Kirimkan informasi media sosial, karya unggulan, serta pesan inti brand agar kami dapat menampilkan profil yang solid dan profesional.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                <Link
+                  href="/konten-kreator/kirim-profil"
+                  className="w-full sm:w-auto h-16 px-12 rounded-2xl bg-primary-500 text-white text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl shadow-primary-500/25 hover:scale-105 active:scale-95 transition-all"
+                >
+                  <Send size={18} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+                  Mulai Submission
+                </Link>
+                <Link
+                  href="/tentang-kami"
+                  className="w-full sm:w-auto h-16 px-12 rounded-2xl glass-button text-slate-600 dark:text-slate-300 text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all"
+                >
+                  Pelajari Tentang Kami
+                </Link>
+              </div>
             </div>
           </div>
         </section>

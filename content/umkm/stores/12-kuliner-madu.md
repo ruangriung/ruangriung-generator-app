@@ -7,7 +7,7 @@ location: Malang, Jawa Timur
 whatsappNumber: '6281234567012'
 tagline: >-
   Madu murni dan olahan propolis dari peternak lokal.
-heroImage: https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/12-kuliner-madu-hero.png
 description: >-
   Kuliner Madu Nusantara mengkurasi madu raw, propolis, dan olahan kesehatan lainnya langsung dari peternak lebah Indonesia.
 highlights:

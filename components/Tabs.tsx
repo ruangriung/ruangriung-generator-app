@@ -1,7 +1,7 @@
 // components/Tabs.tsx
 'use client';
 
-import { useState, useMemo, memo } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import { useSession } from 'next-auth/react';
 import { Lock, Image, Video, AudioLines, MessageSquare } from 'lucide-react';
 import AuthButton from './AuthButton';
@@ -13,13 +13,17 @@ import TextToVideo from '@/components/TextToVideo';
 
 // Komponen Placeholder untuk konten yang terkunci
 const LockedContent = () => (
-  <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic text-center">
-    <div className="flex flex-col items-center gap-4 text-gray-600 dark:text-gray-300">
-      <Lock size={48} className="text-purple-600" />
-      <h2 className="text-2xl font-bold">Fitur Terkunci</h2>
-      <p className="max-w-md">
-        Silakan login dengan akun Google atau Facebook Anda untuk mengakses fitur ini.
-      </p>
+  <div className="w-full p-8 md:p-12 glass shadow-xl rounded-[2rem] text-center animate-in fade-in zoom-in-95 duration-500">
+    <div className="flex flex-col items-center gap-6 text-slate-600 dark:text-slate-300">
+      <div className="h-20 w-20 rounded-full bg-primary-500/10 flex items-center justify-center">
+        <Lock size={40} className="text-primary-500" />
+      </div>
+      <div className="space-y-2">
+        <h2 className="text-3xl font-black text-slate-900 dark:text-white">Fitur Terkunci</h2>
+        <p className="max-w-md mx-auto text-lg">
+          Silakan login untuk membuka potensi penuh dari generator AI kami.
+        </p>
+      </div>
       <div className="mt-4">
         <AuthButton />
       </div>
@@ -28,13 +32,33 @@ const LockedContent = () => (
 );
 
 const Tabs = memo(() => {
+  const [hasByopKey, setHasByopKey] = useState(false);
+
+  useEffect(() => {
+    setHasByopKey(!!localStorage.getItem('pollinations_api_key'));
+  }, []);
+
   const tabs = useMemo(() => [
-    { name: 'chatbot', label: 'Chatbot', icon: MessageSquare, content: <Chatbot />, isProtected: false, isDisabled: true },
-    { name: 'video', label: 'Video Prompt', icon: Video, content: <VideoCreator />, isProtected: true },
-    { name: 'text-to-video', label: 'Text to Video', icon: Video, content: <TextToVideo />, isProtected: true, isDisabled: true },
+    { name: 'chatbot', label: 'Chatbot', icon: MessageSquare, content: <Chatbot />, isProtected: false, isDisabled: false },
+    { 
+      name: 'video', 
+      label: 'Video Prompt', 
+      icon: Video, 
+      content: <VideoCreator />, 
+      isProtected: true, 
+      isDisabled: !hasByopKey 
+    },
+    { 
+      name: 'text-to-video', 
+      label: 'Text to Video', 
+      icon: Video, 
+      content: <TextToVideo />, 
+      isProtected: true, 
+      isDisabled: !hasByopKey 
+    },
     { name: 'audio', label: 'Audio', icon: AudioLines, content: <AudioGenerator />, isProtected: true },
     { name: 'image', label: 'Image', icon: Image, content: <Generator />, isProtected: false }
-  ], []);
+  ], [hasByopKey]);
 
   const [activeTab, setActiveTab] = useState('image');
   const { status } = useSession();
@@ -50,8 +74,8 @@ const Tabs = memo(() => {
   }, [activeTab, tabs, status]);
 
   return (
-    <div className="w-full max-w-4xl">
-      <div className="p-2 bg-light-bg dark:bg-dark-bg rounded-xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset grid grid-cols-2 md:grid-cols-5 gap-2">
+    <div className="w-full max-w-5xl">
+      <div className="p-1.5 glass rounded-2xl md:rounded-full grid grid-cols-2 md:grid-cols-5 gap-1.5 mb-12">
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.name;
@@ -64,21 +88,20 @@ const Tabs = memo(() => {
               key={tab.name}
               onClick={() => !isDisabled && setActiveTab(tab.name)}
               disabled={isDisabled}
-              className={`flex flex-col items-center justify-center py-2 px-1 md:px-4 rounded-lg font-semibold transition-all duration-300 ${layoutClass}
-                ${isDisabled ? 'opacity-50 cursor-not-allowed grayscale' : ''}
+              className={`group relative flex flex-col md:flex-row items-center justify-center gap-2 py-3 px-4 rounded-xl md:rounded-full font-bold transition-all duration-500 ${layoutClass}
+                ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-white/10 hover:text-slate-900 dark:hover:text-white'}
                 ${isActive
-                  ? 'bg-purple-600 text-white shadow-neumorphic-button dark:shadow-dark-neumorphic-button'
-                  : !isDisabled ? 'text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-500' : 'text-gray-400'
+                  ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
+                  : 'text-slate-500 dark:text-slate-400'
                 }`
               }
             >
-              <div className="flex items-center gap-x-2">
-                <Icon size={18} />
-                <span className="text-sm md:text-base">{tab.label}</span>
-              </div>
+              <Icon size={18} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+              <span className="text-sm tracking-tight">{tab.label}</span>
+              
               {isDisabled && (
-                <span className="text-[10px] text-red-500 font-bold mt-1 animate-pulse">
-                  NONAKTIF
+                <span className="absolute top-1 right-2 md:relative md:top-0 md:right-0 text-[8px] bg-red-500 text-white px-1.5 py-0.5 rounded-full font-black animate-pulse md:ml-1">
+                  OFF
                 </span>
               )}
             </button>
@@ -86,7 +109,7 @@ const Tabs = memo(() => {
         })}
       </div>
 
-      <div className="pt-8">
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both">
         {activeContent}
       </div>
     </div>

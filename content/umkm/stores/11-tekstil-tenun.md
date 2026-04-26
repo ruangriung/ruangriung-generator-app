@@ -7,7 +7,7 @@ location: Kupang, Nusa Tenggara Timur
 whatsappNumber: '6281234567011'
 tagline: >-
   Kain tenun ikat eksklusif yang memadukan motif adat dengan gaya modern.
-heroImage: https://images.unsplash.com/photo-1542293787938-4d2226cba1f2?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/11-tekstil-tenun-hero.png
 description: >-
   Tekstil Tenun Lestari bekerja sama dengan penenun perempuan NTT untuk menghadirkan kain ikat berkualitas tinggi dengan pewarna alami.
 highlights:

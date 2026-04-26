@@ -7,7 +7,7 @@ location: Tangerang, Banten
 whatsappNumber: '6281234567015'
 tagline: >-
   Kopi susu siap minum dengan resep favorit generasi urban.
-heroImage: https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/15-kopi-susu-botol-hero.png
 description: >-
   Kopi Susu Botol Harian meracik kopi susu kekinian dengan bahan berkualitas tinggi dan proses cold brew yang menjaga rasa.
 highlights:

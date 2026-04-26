@@ -1,112 +1,83 @@
-# RuangRiung Generator App
+# 🌌 RuangRiung V2: The Next Generation AI Creative Hub
 
-RuangRiung Generator adalah aplikasi Next.js 14 yang membantu membuat konten berbasis AI seperti prompt, kartu identitas, dan cerita bergambar. Proyek ini menggunakan Tailwind CSS, PWA, serta dukungan Mode Gelap untuk pengalaman yang nyaman.
+![RuangRiung Banner](https://ruangriung.my.id/og-image.png)
 
-## Fitur Utama
-- **ID Card Generator** – buat kartu identitas kustom dengan elemen drag-and-drop.
-- **Kumpulan Prompt** – kumpulan contoh prompt dalam berkas Markdown yang bisa dieksplorasi.
-- **Storyteller** – menghasilkan cerita visual dengan gambar dan deskripsi menggunakan AI.
-- **Video Prompt** – rancang skrip dan adegan untuk pembuatan video berbasis AI.
+**RuangRiung V2** adalah evolusi drastis dari platform generator konten berbasis AI. Dibangun dengan Next.js 14, aplikasi ini dirancang untuk memberikan pengalaman kreasi yang mulus, cepat, dan profesional bagi UMKM, Konten Kreator, dan Penulis.
 
-## Memulai
-1. Instal dependensi:
+---
 
-```bash
-pnpm install
-```
+## ⚡ Apa yang Baru di V2?
 
-2. Jalankan server pengembangan:
+Kami telah merombak total pengalaman pengguna dengan fitur-fitur mutakhir:
 
-```bash
-pnpm dev
-```
+- **🤖 RR AGENT (AI Assistant)**: Asisten cerdas yang selalu siap membantu Anda menavigasi platform dan memberikan tips kreasi secara real-time.
+- **🔑 BYOP (Bring Your Own Provider)**: Kendali penuh di tangan Anda. Masukkan API Key pribadi (OpenAI, Pollinations, dll) untuk performa tanpa batas dan akses model PRO.
+- **🎨 New Tabbed UI**: Antarmuka berbasis panel yang sangat rapi. Berpindah dari *Storyteller* ke *ID Card Generator* semudah berpindah tab browser.
+- **📱 Responsive Pro**: Dioptimalkan secara mendalam untuk perangkat mobile. Tidak ada lagi elemen yang tumpang tindih—hanya kenyamanan kreasi.
+- **✨ Premium Aesthetics**: Desain Glassmorphism modern dengan transisi halus dan indikator loading yang memanjakan mata.
 
-Aplikasi dapat diakses di [http://localhost:3000](http://localhost:3000).
+---
 
-## Variabel Lingkungan
-Buat berkas `.env.local` pada root proyek dan isi variabel berikut sesuai kebutuhan fitur:
+## 🚀 Fitur Utama
 
-```
-NEXTAUTH_SECRET=
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-FACEBOOK_CLIENT_ID=
-FACEBOOK_CLIENT_SECRET=
-NODEMAILER_EMAIL=
-NODEMAILER_APP_PASSWORD=
-DEFAULT_NOTIFICATION_EMAIL=
-CONTACT_EMAIL_RECIPIENT=
-ARTICLE_SUBMISSION_RECIPIENT=
-CREATOR_PROFILE_RECIPIENT=
-PROMPT_SUBMISSION_RECIPIENT=
-UMKM_SUBMISSION_RECIPIENT=
-CLOUDFLARE_TURNSTILE_SECRET_KEY=
-NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY=
-NEXT_PUBLIC_POLLINATIONS_TOKEN=
-PROMPT_EDIT_TOKEN=
-```
+| Fitur | Deskripsi |
+| :--- | :--- |
+| **📇 ID Card Gen** | Generator kartu identitas kustom dengan antarmuka seret-lepas (*drag-and-drop*). |
+| **📚 Prompt Library** | Galeri prompt AI yang dikurasi, lengkap dengan fitur pencarian cerdas dan kategori. |
+| **📖 Storyteller** | Ubah ide menjadi narasi visual (gambar + cerita) dalam hitungan detik. |
+| **🎬 Video Prompt** | Rancang skrip visual dan adegan detail untuk generator video AI (Sora, Runway, dll). |
 
-> `DEFAULT_NOTIFICATION_EMAIL` menentukan inbox utama yang menerima seluruh notifikasi formulir. Bila tidak diisi, aplikasi akan otomatis menggunakan nilai `NODEMAILER_EMAIL`. Anda dapat menambahkan beberapa alamat penerima tambahan untuk tiap formulir melalui variabel `*_RECIPIENT` yang relevan.
+---
 
-### Pengaturan Email Formulir
+## 🛠️ Teknologi & Arsitektur
 
-Semua formulir (kontak, kirim artikel, profil kreator, kirim prompt, UMKM, dan pesan umum) memanfaatkan Nodemailer untuk meneruskan data ke inbox Anda. Pastikan langkah berikut sudah dilakukan sebelum produksi atau deploy:
+- **Framework**: Next.js 14 (App Router)
+- **Styling**: Tailwind CSS & Glassmorphism Design System
+- **Icons**: Lucide React & Custom Animated Icons
+- **Auth**: NextAuth.js (Google & Facebook Integration)
+- **Email**: Nodemailer for automated submissions
+- **PWA**: Siap diinstal di perangkat mobile Anda untuk akses instan.
 
-1. Aktifkan `NODEMAILER_EMAIL` dan `NODEMAILER_APP_PASSWORD` dengan alamat Gmail serta *App Password* yang Anda buat melalui Google Account.
-2. Isi `DEFAULT_NOTIFICATION_EMAIL` dengan alamat inbox utama yang ingin menerima semua notifikasi formulir (misalnya `ayicktigabelas@gmail.com`). Jika dikosongkan, aplikasi memakai nilai `NODEMAILER_EMAIL` sebagai fallback.
-3. (Opsional) Isi masing-masing `*_RECIPIENT` untuk menambahkan distribusi khusus selain email utama.
-4. Atur `CONTACT_EMAIL_RECIPIENT` agar formulir kontak juga mengirim ke alamat tambahan jika diperlukan.
-5. Simpan nilai-nilai ini pada **Project Settings → Environment Variables** di Vercel untuk setiap lingkungan (`Production`, `Preview`, dan/atau `Development`).
-6. Setelah menyimpan variabel di Vercel, lakukan redeploy agar Next.js memuat ulang konfigurasi lingkungan.
+---
 
-## Konten
-Artikel dan contoh prompt berada pada direktori `content` dan dimuat dari berkas Markdown.
+## 🏗️ Cara Memulai (Local Development)
 
-## Skrip
-- `pnpm dev` – menjalankan server pengembangan
-- `pnpm build` – membangun aplikasi untuk produksi
-- `pnpm start` – menjalankan aplikasi hasil build
-- `pnpm lint` – menjalankan ESLint
+1. **Clone & Install**:
+   ```bash
+   git clone https://github.com/ruangriung/ruangriung-generator-app.git
+   cd ruangriung-generator-app
+   pnpm install
+   ```
 
-## Tanya Jawab Umum
+2. **Environment Setup**:
+   Salin `.env.example` (atau gunakan daftar di bawah) ke `.env.local` dan lengkapi kredensialnya:
+   - `NEXTAUTH_SECRET`: Kode rahasia autentikasi.
+   - `GOOGLE_CLIENT_ID` / `SECRET`: Untuk login Google.
+   - `NODEMAILER_EMAIL` / `APP_PASSWORD`: Untuk sistem pengiriman formulir.
+   - `NEXT_PUBLIC_POLLINATIONS_TOKEN`: Token default untuk generator gambar.
 
-### Bisakah aplikasi memiliki dashboard yang hanya dapat diakses admin?
-Ya, Anda dapat menambahkan dashboard yang dibatasi untuk admin dengan mengombinasikan autentikasi dan pemeriksaan peran. Contoh alur kerjanya:
+3. **Run**:
+   ```bash
+   pnpm dev
+   ```
 
-1. Gunakan penyedia autentikasi seperti NextAuth, Supabase Auth, atau Firebase Authentication untuk memverifikasi identitas pengguna.
-2. Simpan informasi peran (misalnya `role: "admin"`) pada basis data atau token sesi pengguna.
-3. Buat *middleware* atau komponen pelindung halaman (protected route) yang memeriksa status login dan peran pengguna sebelum merender dashboard.
-4. Redirect pengguna non-admin ke halaman lain (misalnya beranda) bila tidak memenuhi syarat.
+Akses aplikasi di [http://localhost:3000](http://localhost:3000).
 
-Setelah akses admin dibatasi, dashboard bisa difungsikan sebagai pusat kontrol aktivitas, misalnya:
+---
 
-- Mengelola antrian konten yang dikirim pengguna seperti prompt, profil, dan data UMKM sebelum diterbitkan.
-- Memberikan aksi moderasi (setujui, revisi, tolak) serta menambahkan catatan internal untuk tiap pengajuan.
-- Menampilkan metrik penting (jumlah pengajuan baru, status publikasi, aktivitas terakhir) agar admin dapat memantau keadaan sistem secara menyeluruh.
+## ☁️ Deployment & Vercel
 
-Dengan pola ini, hanya akun dengan peran admin yang akan mengakses dashboard, sementara pengguna lainnya tetap diarahkan ke halaman publik. Semua proses kurasi dan manajemen data pun terpusat di satu tempat yang aman.
+Proyek ini siap dideploy ke Vercel dengan satu klik. Pastikan Anda telah mengatur:
+- **Build Command**: `pnpm build`
+- **Output Directory**: `.next`
+- **Environment Variables**: Masukkan semua key dari `.env.local` ke Vercel Dashboard.
 
-### Apa saja yang perlu disiapkan saat deploy ke Vercel?
-Saat melakukan deploy ke Vercel, pastikan hal-hal berikut:
+---
 
-- **Variabel lingkungan**: isi semua variabel pada menu *Project Settings > Environment Variables* di Vercel sesuai nilai yang tercantum di bagian [Variabel Lingkungan](#variabel-lingkungan).
-- **Build Command**: gunakan perintah `pnpm build` dan set *Install Command* ke `pnpm install --frozen-lockfile` agar dependensi konsisten.
-- **Output Directory**: biarkan default (`.next`) karena proyek ini menggunakan Next.js 14.
-- **Versi Node.js & pnpm**: opsional tetapi disarankan menyesuaikan versi dengan yang digunakan secara lokal melalui file `package.json` atau `engines` bila diperlukan.
-- **Pengaturan Domain**: apabila memerlukan domain khusus, konfigurasikan di tab *Domains* dan arahkan DNS ke Vercel.
+## 📄 Lisensi
 
-Setelah konfigurasi tersebut, Anda cukup menyambungkan repository Git ke Vercel dan setiap push ke branch yang dipilih akan memicu deploy otomatis.
+Proyek ini dilisensikan di bawah **ISC License**. Bebas digunakan dan dikembangkan kembali untuk kemajuan komunitas kreatif Indonesia.
 
-### Mengapa prompt yang baru dikirim langsung muncul di halaman kumpulan prompt?
-Halaman daftar (`app/kumpulan-prompt/page.tsx`) dan detail prompt (`app/kumpulan-prompt/[slug]/page.tsx`) mengekspor `export const revalidate = 0;`. Di Next.js 14, nilai `revalidate` mengatur caching untuk halaman yang digenerasi secara statis. Angka `0` berarti halaman tidak pernah di-cache dan selalu dirender ulang di sisi server untuk setiap permintaan.
+---
 
-Alurnya sebagai berikut:
-
-1. Pengguna mengirim prompt baru dan data tersimpan melalui API/basis data.
-2. Saat halaman daftar atau detail diakses, Next.js menjalankan fungsi server (`getAllPrompts` atau `getPromptBySlug`) tanpa mengambil versi cache.
-3. Karena halaman tidak di-cache, data terbaru langsung diproses dan diteruskan ke komponen klien (`PromptClient` atau `PromptDetailClient`).
-
-Dengan demikian, kiriman prompt baru akan langsung terlihat tanpa perlu menunggu revalidasi periodik ataupun menghapus cache secara manual.
-
-## Lisensi
-Proyek ini menggunakan lisensi ISC seperti yang tercantum pada `package.json`.
+**Crafted with ❤️ by [Arif Tirtana](https://github.com/ayick)**

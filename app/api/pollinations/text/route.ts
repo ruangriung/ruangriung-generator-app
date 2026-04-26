@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 const POLLINATIONS_BASE_URL = 'https://gen.pollinations.ai';
@@ -8,8 +9,15 @@ function getApiKey() {
   return process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
 }
 
-function buildAuthHeaders() {
-  const apiKey = getApiKey();
+function buildAuthHeaders(request?: Request) {
+  const serverApiKey = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
+  
+  // Support BYOP: Check client headers
+  const clientKey = request?.headers.get('x-pollinations-key') || 
+                    request?.headers.get('Authorization')?.replace('Bearer ', '');
+  
+  const apiKey = clientKey || serverApiKey;
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
@@ -36,9 +44,7 @@ export async function GET(request: Request) {
 
     const response = await fetch(finalUrl, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: buildAuthHeaders(request),
     });
 
     if (!response.ok) {
@@ -107,7 +113,7 @@ export async function POST(request: Request) {
 
     const response = await fetch(`${POLLINATIONS_BASE_URL}/v1/chat/completions`, {
       method: 'POST',
-      headers: buildAuthHeaders(),
+      headers: buildAuthHeaders(request),
       body: JSON.stringify(upstreamPayload),
     });
 
@@ -132,17 +138,31 @@ export async function POST(request: Request) {
       );
     }
 
+    // === OPTIMIZATION: Streaming Support ===
+    // If the client requested a stream, pipe it directly from upstream
+    if (body?.stream === true) {
+      return new NextResponse(response.body, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+        status: 200,
+      });
+    }
+
+    // For non-streaming, we can still pipe the body for efficiency
+    // but the current UI might expect a plain string. 
+    // Let's keep the existing logic but optimized.
     const raw = await response.text();
 
     try {
       const parsed = JSON.parse(raw);
       
-      // Jika client minta full response (OpenAI format)
       if (body?.return_full_response === true) {
         return NextResponse.json(parsed);
       }
 
-      // Default: Hanya return content string untuk kemudahan penggunaan di UI
       const content = parsed?.choices?.[0]?.message?.content;
 
       if (typeof content === 'string') {
@@ -152,25 +172,11 @@ export async function POST(request: Request) {
         });
       }
 
-      if (Array.isArray(content)) {
-        const textFromArray = content
-          .map((item: any) => (typeof item?.text === 'string' ? item.text : ''))
-          .join('')
-          .trim();
-
-        return new NextResponse(textFromArray || JSON.stringify(parsed), {
-          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-          status: 200,
-        });
-      }
-
-      // Fallback ke JSON jika content tidak ditemukan
       return new NextResponse(JSON.stringify(parsed), {
         headers: { 'Content-Type': 'application/json' },
         status: 200,
       });
     } catch {
-      // Jika gagal parse JSON, kembalikan teks mentah
       return new NextResponse(raw, {
         headers: { 'Content-Type': 'text/plain; charset=utf-8' },
         status: 200,

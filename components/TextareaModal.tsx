@@ -31,7 +31,7 @@ export default function TextareaModal({ isOpen, onClose, value, onChange, title,
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-60 p-4">
       {/* <--- PERUBAHAN: Tambahkan dark:bg-dark-bg dan dark:shadow-dark-neumorphic */}
       <div className="w-full max-w-2xl bg-light-bg dark:bg-dark-bg rounded-2xl shadow-lg flex flex-col">
         {/* <--- PERUBAHAN: Tambahkan dark:border-gray-700, dark:text-gray-200 */}

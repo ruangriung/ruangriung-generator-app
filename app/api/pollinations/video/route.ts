@@ -3,32 +3,32 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
     try {
-        const { searchParams } = new URL(request.url);
-        const queryString = searchParams.toString();
-        const prompt = searchParams.get('prompt');
+        const body = await request.json();
+        const { prompt, model, ...params } = body;
 
         if (!prompt) {
             return NextResponse.json({ message: 'Prompt is required' }, { status: 400 });
         }
 
-        // Determine base URL, usually Pollinations uses /prompt for everything or specific endpoints.
-        // Assuming /video exists for specialized models like veo/seedance based on recent updates,
-        // or it's just /image with a video model. 
-        // However, if the user requested 'veo' and 'seedance', these are video models.
-        // Let's try https://gen.pollinations.ai/video. If 404, we might fallback to /image?model=voe
-        // But for now, let's stick to the plan: /video
-
-        // Pollinations sometimes uses sending GET request to URL/prompt
+        const queryString = new URLSearchParams(params).toString();
         const baseUrl = 'https://gen.pollinations.ai/video';
-        const finalUrl = `${baseUrl}/${encodeURIComponent(prompt)}?${queryString}`;
+        const finalUrl = `${baseUrl}/${encodeURIComponent(prompt)}?model=${model}&${queryString}`;
 
         const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
+        const clientKey = request.headers.get('x-pollinations-key');
+        const activeApiKey = clientKey || POLLINATIONS_API_KEY;
+
+        // === OPTIMIZATION: Redirect for Public/BYOP ===
+        // Videos are very large. Redirecting saves tons of Vercel bandwidth.
+        if (!process.env.POLLINATIONS_API_KEY || clientKey) {
+            return NextResponse.redirect(finalUrl, { status: 307 });
+        }
 
         const headers: HeadersInit = {};
-        if (POLLINATIONS_API_KEY) {
-            headers['Authorization'] = `Bearer ${POLLINATIONS_API_KEY}`;
+        if (activeApiKey) {
+            headers['Authorization'] = `Bearer ${activeApiKey}`;
         }
 
         const response = await fetch(finalUrl, {
@@ -41,24 +41,21 @@ export async function GET(request: Request) {
             return NextResponse.json({ message: `Pollinations API Error: ${response.statusText}`, error: errorText }, { status: response.status });
         }
 
-        // Video response might be a stream (mp4) or json? 
-        // Usually standard generations return the binary.
-        const contentType = response.headers.get('Content-Type') || 'video/mp4';
+        // === OPTIMIZATION: Redirect or Stream ===
+        // If we don't have a server key, we could have redirected earlier, but pollinations video 
+        // endpoint might not support CORS as well as images. However, streaming response.body
+        // is much better than await response.blob() as it doesn't buffer in memory.
 
-        // If it's a redirect or something else, fetch handles it usually.
-        // If it returns JSON with a URL, we might need to handle that, but Gen API usually returns content.
-        const videoBlob = await response.blob();
-
-        return new NextResponse(videoBlob, {
+        return new NextResponse(response.body, {
             headers: {
-                'Content-Type': contentType,
-                'Cache-Control': 'public, max-age=31536000, immutable',
+                'Content-Type': response.headers.get('Content-Type') || 'video/mp4',
+                'Cache-Control': 'no-store',
             },
             status: 200
         });
 
     } catch (error: any) {
-        console.error('Error in Pollinations Video Proxy:', error);
+        console.error('Error in Pollinations Video Proxy (POST):', error);
         return NextResponse.json({ message: 'Internal Server Error', error: error.message }, { status: 500 });
     }
 }

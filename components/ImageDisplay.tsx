@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect, forwardRef, memo } from 'react';
 import toast from 'react-hot-toast';
 import Spinner from './Spinner';
-import { ZoomIn, Download, Paintbrush, Shuffle, X, Sun, Contrast, Droplets, RefreshCw } from 'lucide-react'; // Import RefreshCw
+import { ZoomIn, Download, Paintbrush, Shuffle, X, Sun, Contrast, Droplets, RefreshCw, Sparkles, Image as ImageIcon } from 'lucide-react'; // Import RefreshCw, Sparkles, ImageIcon
 import { EditControls } from './EditControls';
 
 // Definisikan tipe data untuk pengaturan
@@ -167,43 +167,113 @@ const ImageDisplay = memo(forwardRef<HTMLDivElement, ImageDisplayProps>(({
   };
 
   const isImageReady = !isLoading && imageUrls.length > 0;
-  const actionButtonStyle = `p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-700 dark:text-gray-300 hover:text-purple-600 transition-all`;
+  const actionButtonStyle = "h-12 w-12 glass-button";
 
   return (
-    <div ref={ref} className="w-full max-w-2xl mt-8">
-      <div className="relative aspect-square w-full bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset p-4 flex items-center justify-center">
-        <canvas ref={canvasRef} className={`m-auto max-w-full max-h-full object-contain ${isEditing ? 'cursor-move touch-none' : 'cursor-auto'}`} onPointerDown={isEditing ? handlePointerDown : undefined} onPointerMove={isEditing ? handlePointerMove : undefined} onPointerUp={isEditing ? handlePointerUp : undefined} onPointerLeave={isEditing ? handlePointerUp : undefined} />
-        {isLoading && <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-40 rounded-xl"><Spinner /></div>}
+    <div ref={ref} className="w-full max-w-3xl mt-12 space-y-6">
+      <div className="relative aspect-square w-full glass-card overflow-hidden group">
+        <div className="absolute inset-0 bg-slate-950/5 dark:bg-black/20 backdrop-blur-sm" />
+        
+        <canvas 
+          ref={canvasRef} 
+          className={`relative z-10 m-auto max-w-full max-h-full object-contain transition-transform duration-700 ${
+            isEditing ? 'cursor-move touch-none scale-[0.98]' : 'cursor-auto hover:scale-[1.02]'
+          }`} 
+          onPointerDown={isEditing ? handlePointerDown : undefined} 
+          onPointerMove={isEditing ? handlePointerMove : undefined} 
+          onPointerUp={isEditing ? handlePointerUp : undefined} 
+          onPointerLeave={isEditing ? handlePointerUp : undefined} 
+        />
 
-        {/* --- PERBAIKAN: Placeholder dibuat menjadi overlay absolut --- */}
-        {!isImageReady && !isLoading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400 p-4">
-                <p>Gambar Anda akan muncul di sini.</p>
-                <p className="text-sm">Atur parameter di atas dan klik "Buat Gambar".</p>
+        {isLoading && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950/70 backdrop-blur-md transition-all animate-in fade-in">
+            <div className="relative">
+              {/* Glow Effect */}
+              <div className="absolute inset-[-20px] rounded-full bg-primary-500/20 blur-2xl animate-pulse" />
+              
+              {/* Spinning Ring */}
+              <div className="h-24 w-24 rounded-full border-4 border-white/10 border-t-white animate-spin shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+              
+              {/* Center Icon */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Sparkles className="text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] animate-pulse" size={32} />
+              </div>
             </div>
+            <p className="mt-8 text-white font-black uppercase tracking-[0.4em] text-[10px] animate-pulse drop-shadow-sm">
+              Generating Visual...
+            </p>
+          </div>
+        )}
+
+        {!isImageReady && !isLoading && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
+            <div className="h-20 w-20 rounded-[2rem] bg-primary-500/10 flex items-center justify-center text-primary-500 mb-6 animate-float">
+              <ImageIcon size={40} />
+            </div>
+            <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">Hasil Gambar Akan muncul Disini</h3>
+            <p className="text-slate-500 dark:text-slate-400 font-medium max-w-xs">
+              Atur parameter dan klik tombol Generate untuk melihat keajaiban terjadi di sini.
+            </p>
+          </div>
+        )}
+
+        {/* Editing Mode Overlay Label */}
+        {isEditing && (
+          <div className="absolute top-6 left-6 z-30 px-4 py-2 bg-primary-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary-500/20 flex items-center gap-2">
+            <Paintbrush size={14} /> Mode Edit Aktif
+          </div>
         )}
       </div>
 
       {isImageReady && (
-        <div className="mt-4 flex justify-center items-center gap-4">
-          <button onClick={onVariationsClick} className={actionButtonStyle} aria-label="Buat Variasi"><Shuffle size={24} /></button>
-          <button onClick={() => setIsEditing(!isEditing)} className={`${actionButtonStyle} ${isEditing ? '!text-purple-600' : ''}`} aria-label={isEditing ? "Selesai Edit" : "Edit Gambar"} disabled={imageUrls.length > 1}>
-            {isEditing ? <X size={24} /> : <Paintbrush size={24} />}
+        <div className="flex justify-center items-center gap-3 animate-in slide-in-from-bottom-4 duration-500">
+          <button 
+            onClick={onVariationsClick} 
+            className={`${actionButtonStyle} text-slate-700 dark:text-slate-200 hover:text-white`} 
+            title="Buat Variasi"
+          >
+            <Shuffle size={20} />
           </button>
-          <button onClick={onZoomClick} className={actionButtonStyle} aria-label="Perbesar Gambar" disabled={imageUrls.length > 1}><ZoomIn size={24} /></button>
-          <button onClick={handleDownload} className={actionButtonStyle} aria-label="Unduh Gambar"><Download size={24} /></button>
+          <div className="h-8 w-px bg-white/10" />
+          <button 
+            onClick={() => setIsEditing(!isEditing)} 
+            className={`${actionButtonStyle} ${isEditing ? 'bg-primary-500 text-white border-primary-500' : 'text-primary-500'}`} 
+            title={isEditing ? "Selesai Edit" : "Edit Gambar"}
+            disabled={imageUrls.length > 1}
+          >
+            {isEditing ? <X size={20} /> : <Paintbrush size={20} />}
+          </button>
+          <button 
+            onClick={onZoomClick} 
+            className={`${actionButtonStyle} text-slate-700 dark:text-slate-200 hover:text-white`} 
+            title="Perbesar Gambar" 
+            disabled={imageUrls.length > 1}
+          >
+            <ZoomIn size={20} />
+          </button>
+          <div className="h-8 w-px bg-white/10" />
+          <button 
+            onClick={handleDownload} 
+            className="h-12 px-6 glass-button text-primary-500 hover:bg-primary-500 hover:text-white"
+            title="Unduh Gambar"
+          >
+            <Download size={20} className="mr-2" />
+            <span className="font-black uppercase tracking-widest text-[10px]">Unduh</span>
+          </button>
         </div>
       )}
 
       {isEditing && (
-        <EditControls
-          watermark={watermark}
-          filters={filters}
-          onWatermarkChange={handleWatermarkChange}
-          onFilterChange={handleFilterChange}
-          onWatermarkFileChange={handleWatermarkFileChange} // eslint-disable-line
-          onResetFilters={handleResetFilters}
-        />
+        <div className="animate-in slide-in-from-top-4 duration-500">
+          <EditControls
+            watermark={watermark}
+            filters={filters}
+            onWatermarkChange={handleWatermarkChange}
+            onFilterChange={handleFilterChange}
+            onWatermarkFileChange={handleWatermarkFileChange} // eslint-disable-line
+            onResetFilters={handleResetFilters}
+          />
+        </div>
       )}
     </div>
   );

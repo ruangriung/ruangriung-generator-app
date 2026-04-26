@@ -479,68 +479,75 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
   const canAddMoreProducts = formData.products.length < MAX_PRODUCTS;
 
   return (
-    <div className="bg-white pb-16 pt-12 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 pt-20 text-slate-900 dark:text-slate-100 selection:bg-primary-500/30">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-12 flex flex-wrap items-center justify-between gap-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800/60"
+            className="group flex items-center gap-3 px-6 py-3 glass-button rounded-full text-sm font-black uppercase tracking-widest text-slate-600 dark:text-slate-400"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.5"
-              className="h-4 w-4"
+              strokeWidth="2.5"
+              className="h-4 w-4 transition-transform group-hover:-translate-x-1"
               aria-hidden="true"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 9.75 12 4.5l9 5.25M4.5 10.5v9.75h15V10.5" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
             </svg>
-            Kembali ke Beranda
+            Beranda
           </Link>
 
-          <div className="w-full sm:w-auto sm:min-w-[220px]">
+          <div className="flex items-center gap-4">
             <ThemeToggle variant="umkm" />
           </div>
         </div>
-        <section className="mb-12 overflow-hidden rounded-3xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-slate-50 p-8 shadow-sm shadow-indigo-100/70 dark:border-indigo-900/50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 dark:shadow-slate-900/40 sm:p-12">
-          <div className="mx-auto max-w-4xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-1 text-sm font-medium text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200">
-              <Sparkles className="h-4 w-4" aria-hidden="true" />
-              Etalase UMKM
+        <section className="mb-20 glass-card p-8 sm:p-16 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary-500/10 blur-[120px] rounded-full -mr-48 -mt-48" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 blur-[120px] rounded-full -ml-48 -mb-48" />
+          
+          <div className="relative z-10 mx-auto max-w-4xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary-500/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-primary-500 mb-6">
+              <Sparkles className="h-3 w-3" aria-hidden="true" />
+              Etalase UMKM Indonesia
             </span>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-4xl">
-              Temukan UMKM Inspiratif dari Berbagai Penjuru Nusantara
+            <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white sm:text-6xl leading-[1.1]">
+              Gerbang <span className="text-primary-500">Inspirasi</span> Ekonomi Lokal
             </h1>
-            <p className="mt-4 text-base text-slate-600 dark:text-slate-300 sm:text-lg">
-              Jelajahi katalog UMKM pilihan kami. Setiap profil menonjolkan kekuatan produk, kisah di balik usaha, dan cara
-              tercepat menghubungi pemiliknya.
+            <p className="mt-8 text-lg text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-2xl mx-auto">
+              Jelajahi kurasi UMKM terbaik dari seluruh Nusantara. Temukan kisah unik, produk berkualitas, dan jalin kolaborasi langsung.
             </p>
           </div>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-3">
+          <div className="relative z-10 mt-16 grid gap-6 sm:grid-cols-3">
             {heroStats.map((stat) => (
               <div
                 key={stat.label}
-                className="rounded-2xl border border-white/60 bg-white/80 p-6 text-left shadow-sm backdrop-blur dark:border-slate-800/60 dark:bg-slate-900/70"
+                className="glass-inset p-8 text-left group hover:bg-white/10 transition-colors"
               >
-                <p className="text-sm font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-500 mb-2">
                   {stat.label}
                 </p>
-                <p className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-50">{stat.value}</p>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{stat.description}</p>
+                <p className="text-4xl font-black text-slate-900 dark:text-white">{stat.value}</p>
+                <p className="mt-4 text-xs font-bold text-slate-400 leading-relaxed">{stat.description}</p>
               </div>
             ))}
           </div>
 
-          <figure className="mt-10 rounded-2xl border border-indigo-100/80 bg-white/80 p-6 text-left shadow-sm dark:border-indigo-900/40 dark:bg-slate-950/60">
-            <blockquote className="text-base italic text-slate-700 dark:text-slate-200 sm:text-lg">{curatedTestimonial.quote}</blockquote>
-            <figcaption className="mt-4 text-sm font-medium text-indigo-700 dark:text-indigo-300">
-              {curatedTestimonial.author}
-              <span className="mt-1 block text-xs font-normal uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                {curatedTestimonial.role}
-              </span>
+          <figure className="relative z-10 mt-12 glass p-8 text-left border-l-4 border-l-primary-500">
+            <blockquote className="text-lg italic font-medium text-slate-700 dark:text-slate-200">
+              {curatedTestimonial.quote}
+            </blockquote>
+            <figcaption className="mt-6 flex items-center gap-4">
+              <div className="h-10 w-10 rounded-full bg-primary-500/20 flex items-center justify-center text-primary-500 font-black">
+                {curatedTestimonial.author[0]}
+              </div>
+              <div>
+                <p className="text-sm font-black text-slate-900 dark:text-white">{curatedTestimonial.author}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">{curatedTestimonial.role}</p>
+              </div>
             </figcaption>
           </figure>
         </section>
@@ -672,68 +679,55 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
           </section>
         ) : null}
 
-        <section className="mb-10 grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm shadow-slate-200/60 dark:border-slate-700 dark:bg-slate-900/60 dark:shadow-slate-900/40 sm:grid-cols-4 sm:items-end">
-          <label className="flex flex-col gap-2 sm:col-span-2">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Cari toko atau kata kunci</span>
-            <div className="relative">
+        <section className="mb-12 glass-card p-6 grid gap-6 sm:grid-cols-4 items-end">
+          <label className="flex flex-col gap-3 sm:col-span-2">
+            <span className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Pencarian Pintar</span>
+            <div className="relative group">
               <input
                 type="search"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Misal: kopi, batik, Yogyakarta"
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 pl-11 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                placeholder="Cari kopi, batik, kuliner..."
+                className="w-full h-12 rounded-2xl border-2 border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20 px-4 pl-12 text-sm font-bold text-slate-900 dark:text-white focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 transition-all"
               />
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-500 transition-colors" aria-hidden="true" />
             </div>
           </label>
 
-          <label className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Filter kategori</span>
-            <select
-              value={selectedCategory}
-              onChange={(event) => setSelectedCategory(event.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-            >
-              <option value={ALL_CATEGORY_VALUE}>Semua kategori</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+          <label className="flex flex-col gap-3">
+            <span className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Kategori</span>
+            <div className="relative group">
+              <select
+                value={selectedCategory}
+                onChange={(event) => setSelectedCategory(event.target.value)}
+                className="w-full h-12 rounded-2xl border-2 border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20 px-4 text-sm font-bold text-slate-900 dark:text-white appearance-none cursor-pointer focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 transition-all"
+              >
+                <option value={ALL_CATEGORY_VALUE} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Semua kategori</option>
+                {categories.map((category) => (
+                  <option key={category} value={category} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                    {category}
+                  </option>
+                ))}
+              </select>
+              <ArrowUpDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 group-hover:text-primary-500 transition-colors" aria-hidden="true" />
+            </div>
           </label>
 
-          <label className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Pilih lokasi</span>
-            <select
-              value={selectedLocation}
-              onChange={(event) => setSelectedLocation(event.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-            >
-              <option value={ALL_LOCATION_VALUE}>Semua lokasi</option>
-              {uniqueLocations.map((location) => (
-                <option key={location} value={location}>
-                  {location}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Urutkan daftar</span>
-            <div className="relative">
+          <label className="flex flex-col gap-3">
+            <span className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Urutkan</span>
+            <div className="relative group">
               <select
                 value={sortOption}
                 onChange={(event) => setSortOption(event.target.value as SortOption)}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 pr-10 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                className="w-full h-12 rounded-2xl border-2 border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20 px-4 text-sm font-bold text-slate-900 dark:text-white appearance-none cursor-pointer focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 transition-all"
               >
                 {SORT_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
+                  <option key={option.value} value={option.value} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
                     {option.label}
                   </option>
                 ))}
               </select>
-              <ArrowUpDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+              <ArrowUpDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 group-hover:text-primary-500 transition-colors" aria-hidden="true" />
             </div>
           </label>
         </section>
@@ -748,47 +742,37 @@ export function UmkmDirectory({ stores: initialStores, categories }: UmkmDirecto
                   <Link
                     key={store.id}
                     href={`/umkm/${store.id}`}
-                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-900 dark:hover:shadow-slate-900/60 dark:focus-visible:ring-offset-slate-950"
+                    className="group glass-card flex h-full flex-col overflow-hidden hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 hover:shadow-2xl hover:shadow-primary-500/10"
                   >
-                    <div className="relative h-32 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                    <div className="relative h-48 w-full overflow-hidden">
                       <Image
                         src={store.heroImage}
                         alt={store.name}
                         fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        sizes="(min-width: 1024px) 20vw, (min-width: 640px) 30vw, 45vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 45vw, 95vw"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent" />
-                    </div>
-                    <div className="flex flex-1 flex-col justify-between px-4 py-3 text-left">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">
-                          {store.category}
-                        </p>
-                        <h2 className="mt-1 text-sm font-semibold text-slate-900 transition-colors duration-200 group-hover:text-indigo-700 dark:text-slate-100 dark:group-hover:text-indigo-300 sm:text-base">
-                          {store.name}
-                        </h2>
-                        <p className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-slate-300 sm:text-sm">
-                          {store.tagline}
-                        </p>
-                        {featuredProduct ? (
-                          <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-indigo-50 px-3 py-2 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
-                            <Sparkles className="h-4 w-4" aria-hidden="true" />
-                            <span className="truncate">{featuredProduct.name}</span>
-                            <span aria-hidden="true">•</span>
-                            <span className="truncate">{featuredProduct.price}</span>
-                          </div>
-                        ) : null}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-60" />
+                      <div className="absolute top-4 left-4 px-3 py-1 bg-primary-500/80 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest text-white">
+                        {store.category}
                       </div>
-                      <div className="mt-4 flex flex-col gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-                        <span className="inline-flex items-center gap-1">
-                          <MapPin className="h-4 w-4" aria-hidden="true" />
+                    </div>
+                    <div className="flex flex-1 flex-col p-6 text-left">
+                      <h2 className="text-lg font-black text-slate-900 dark:text-white group-hover:text-primary-500 transition-colors line-clamp-1">
+                        {store.name}
+                      </h2>
+                      <p className="mt-2 line-clamp-2 text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+                        {store.tagline}
+                      </p>
+                      
+                      <div className="mt-auto pt-6 flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                          <MapPin size={12} className="text-primary-500" />
                           {store.location}
-                        </span>
-                        <span className="inline-flex items-center gap-1 text-indigo-600 transition-colors duration-200 group-hover:text-indigo-700 dark:text-indigo-300 dark:group-hover:text-indigo-200">
-                          Lihat profil lengkap
-                          <span aria-hidden="true">→</span>
-                        </span>
+                        </div>
+                        <div className="h-8 w-8 rounded-full glass-button flex items-center justify-center text-primary-500 group-hover:bg-primary-500 group-hover:text-white transition-all">
+                          <span className="text-lg font-black">→</span>
+                        </div>
                       </div>
                     </div>
                   </Link>

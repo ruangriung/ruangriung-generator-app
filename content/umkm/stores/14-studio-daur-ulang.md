@@ -7,7 +7,7 @@ location: Semarang, Jawa Tengah
 whatsappNumber: '6281234567014'
 tagline: >-
   Produk rumah tangga kreatif dari bahan daur ulang.
-heroImage: https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/14-studio-daur-ulang.png
 description: >-
   Studio Daur Ulang Kreasi mengolah limbah plastik dan tekstil menjadi produk fungsional yang bergaya.
 highlights:

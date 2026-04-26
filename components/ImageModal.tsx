@@ -12,7 +12,7 @@ export default function ImageModal({ isOpen, imageUrl, onClose }: ImageModalProp
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+      className="fixed inset-0 z-[500] flex items-center justify-center bg-black/80 backdrop-blur-sm"
       onClick={onClose} // Menutup modal saat backdrop diklik
     >
       <button 

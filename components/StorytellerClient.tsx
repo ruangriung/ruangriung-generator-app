@@ -336,281 +336,314 @@ const StorytellerClient = memo(() => {
   };
 
   // --- Gaya Umum ---
-  const inputFieldStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow text-gray-800 dark:text-gray-200";
-  const selectStyle = `${inputFieldStyle} appearance-none`;
+  const inputFieldStyle = "w-full p-4 rounded-2xl border border-white/10 bg-slate-950/5 dark:bg-black/20 text-sm font-bold text-slate-900 dark:text-white focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 transition-all placeholder:text-slate-400";
+  const selectStyle = `${inputFieldStyle} appearance-none cursor-pointer`;
 
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-10">
       {/* Bagian Input untuk Ide Cerita */}
-      <div className="bg-light-bg dark:bg-dark-bg p-6 rounded-2xl shadow-neumorphic-card dark:shadow-dark-neumorphic-card">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Ide Cerita Anda</h2>
-
-        {/* Judul Cerita */}
-        <label htmlFor="story-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Judul Cerita (Opsional):
-        </label>
-        <div className="relative mb-4">
-          <input
-            id="story-title"
-            type="text"
-            placeholder={isGeneratingTitle ? "AI sedang membuat judul..." : "Masukkan judul cerita Anda..."}
-            className={`${inputFieldStyle} pr-12`}
-            value={storyTitle}
-            onChange={(e) => setStoryTitle(e.target.value)}
-            disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle}
-          />
-          <button
-            onClick={handleGenerateTitle}
-            disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle || !mainPrompt}
-            className="absolute top-2 right-2 p-2 bg-light-bg dark:bg-dark-bg rounded-full shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-700 dark:text-gray-300 hover:text-purple-600 transition-all"
-            title="Buat Judul dengan AI"
-            aria-label="Buat Judul Cerita dengan AI"
-          >
-            {isGeneratingTitle ? <Loader2 size={20} className="animate-spin" /> : <Sparkles size={20} />}
-          </button>
+      <div className="glass-card p-8 sm:p-10 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[80px] rounded-full -mr-32 -mt-32" />
+        
+        <div className="flex items-center gap-3 mb-8">
+          <div className="h-10 w-10 rounded-2xl bg-primary-500/10 flex items-center justify-center text-primary-500">
+            <Sparkles size={20} />
+          </div>
+          <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider">Kanvas Imajinasi</h2>
         </div>
 
-        {/* Ide Cerita Utama */}
-        <label htmlFor="main-prompt" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Ide Cerita Utama:
-        </label>
-        <div className="relative mb-6">
-          <textarea
-            id="main-prompt"
-            className={`${inputFieldStyle} min-h-[180px] resize-y pr-20`}
-            placeholder={isGeneratingRandomPrompt ? "AI sedang membuat ide cerita..." : "Tekan tombol 'Ide Acak' atau masukkan ide Anda sendiri di sini..."}
-            value={mainPrompt}
-            onChange={(e) => setMainPrompt(e.target.value)}
-            disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle}
-          ></textarea>
-          {mainPrompt && (
-            <button
-              onClick={() => setMainPrompt('')}
-              disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle}
-              className="absolute top-2 right-10 p-2 bg-light-bg dark:bg-dark-bg rounded-full shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-700 dark:text-gray-300 hover:text-red-600 transition-all"
-              title="Hapus Teks"
-              aria-label="Hapus Teks"
-            >
-              <X size={20} />
-            </button>
-          )}
-          <button
-            onClick={handleRandomPrompt}
-            disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle}
-            className="absolute top-2 right-2 p-2 bg-light-bg dark:bg-dark-bg rounded-full shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-700 dark:text-gray-300 hover:text-purple-600 transition-all"
-            title="Dapatkan Ide Acak"
-            aria-label="Dapatkan Ide Cerita Acak"
-          >
-            {isGeneratingRandomPrompt ? <Loader2 size={20} className="animate-spin" /> : <Sparkles size={20} />}
-          </button>
-        </div>
-
-        {/* --- Pengaturan Lanjutan --- */}
-        <Accordion title={<div className="flex items-center gap-2"><Settings className="text-purple-600" />Pengaturan Lanjutan</div>}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Pilihan Model Teks */}
-            <div>
-              <label htmlFor="text-model" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Model AI Teks:
-              </label>
-              <select
-                id="text-model"
-                value={textModel}
-                onChange={(e) => setTextModel(e.target.value as TextModelType)}
-                className={selectStyle}
+        <div className="grid gap-8">
+          {/* Judul Cerita */}
+          <div className="space-y-3">
+            <label htmlFor="story-title" className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+              Judul Cerita <span className="text-slate-400 font-bold lowercase">(opsional)</span>
+            </label>
+            <div className="relative group">
+              <input
+                id="story-title"
+                type="text"
+                placeholder={isGeneratingTitle ? "AI sedang merangkai kata..." : "Beri judul mahakarya Anda..."}
+                className={`${inputFieldStyle} pr-14`}
+                value={storyTitle}
+                onChange={(e) => setStoryTitle(e.target.value)}
+                disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle}
+              />
+              <button
+                onClick={handleGenerateTitle}
+                disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle || !mainPrompt}
+                className="absolute top-2 right-2 h-10 w-10 flex items-center justify-center glass-button rounded-xl text-primary-500 hover:bg-primary-500 hover:text-white transition-all disabled:opacity-30"
+                title="Buat Judul dengan AI"
               >
-                {availableTextModels.map(model => (
-                  <option key={model} value={model}>
-                    {model === 'openai' ? 'OpenAI' : model}
-                  </option>
-                ))}
-              </select>
+                {isGeneratingTitle ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+              </button>
             </div>
+          </div>
 
-            {/* Pilihan Model AI Gambar */}
-            <div>
-              <label htmlFor="image-model" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Model AI Gambar:
-              </label>
-              <select
-                id="image-model"
-                value={imageModel}
-                onChange={(e) => {
-                  setImageModel(e.target.value as ImageModelType);
-                }}
-                className={selectStyle}
-              >
-                {availableImageModels.map(model => (
-                  <option key={model} value={model}>{model}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Kualitas Gambar (hanya untuk DALL-E 3) */}
-
-
-            {/* Lebar Gambar (untuk Flux/Leonardo) */}
-            {(imageModel === 'flux') && (
-              <div>
-                <label htmlFor="image-width" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Lebar Gambar (px):
-                  <span className="ml-1 cursor-help" title="Lebar gambar dalam piksel. Sesuaikan untuk rasio aspek atau ukuran tertentu.">
-                    <Info size={14} className="inline-block text-gray-500 dark:text-gray-400" />
-                  </span>
-                </label>
-                <input
-                  id="image-width"
-                  type="number"
-                  min="256" max="2048" step="64"
-                  value={imageWidth}
-                  onChange={(e) => setImageWidth(parseInt(e.target.value) || 0)}
-                  className={inputFieldStyle}
-                />
-              </div>
-            )}
-
-            {/* Tinggi Gambar (untuk Flux/Leonardo) */}
-            {(imageModel === 'flux') && (
-              <div>
-                <label htmlFor="image-height" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Tinggi Gambar (px):
-                  <span className="ml-1 cursor-help" title="Tinggi gambar dalam piksel. Sesuaikan untuk rasio aspek atau ukuran tertentu.">
-                    <Info size={14} className="inline-block text-gray-500 dark:text-gray-400" />
-                  </span>
-                </label>
-                <input
-                  id="image-height"
-                  type="number"
-                  min="256" max="2048" step="64"
-                  value={imageHeight}
-                  onChange={(e) => setImageHeight(parseInt(e.target.value) || 0)}
-                  className={inputFieldStyle}
-                />
-              </div>
-            )}
-
-            {/* Seed Gambar */}
-            <div className="md:col-span-2">
-              <label htmlFor="image-seed" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Seed Gambar:
-                <span className="ml-1 cursor-help" title="Seed mempengaruhi keunikan dan konsistensi gambar yang dihasilkan. Gunakan angka yang sama untuk hasil yang mirip; ubah untuk variasi baru.">
-                  <Info size={14} className="inline-block text-gray-500 dark:text-gray-400" />
-                </span>
-              </label>
-              <div className="flex gap-2">
-                <input
-                  id="image-seed"
-                  type="number"
-                  value={imageSeed}
-                  onChange={(e) => setImageSeed(parseInt(e.target.value) || 0)}
-                  className={`${inputFieldStyle} flex-grow`}
-                  title="Seed mempengaruhi keunikan gambar yang dihasilkan. Gunakan angka yang sama untuk hasil yang mirip."
-                />
+          {/* Ide Cerita Utama */}
+          <div className="space-y-3">
+            <label htmlFor="main-prompt" className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+              Inti Cerita
+            </label>
+            <div className="relative group">
+              <textarea
+                id="main-prompt"
+                className={`${inputFieldStyle} min-h-[200px] resize-none pr-14 pt-4 leading-relaxed`}
+                placeholder={isGeneratingRandomPrompt ? "AI sedang menggali inspirasi..." : "Tuliskan premis atau ide cerita Anda di sini..."}
+                value={mainPrompt}
+                onChange={(e) => setMainPrompt(e.target.value)}
+                disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle}
+              ></textarea>
+              
+              <div className="absolute top-2 right-2 flex flex-col gap-2">
                 <button
-                  onClick={() => setImageSeed(Math.floor(Math.random() * 1000000))}
-                  className="p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-700 dark:text-gray-300 hover:text-purple-600 transition-all"
-                  title="Acak Seed"
-                  aria-label="Acak Seed Gambar"
+                  onClick={handleRandomPrompt}
+                  disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle}
+                  className="h-10 w-10 flex items-center justify-center glass-button rounded-xl text-primary-500 hover:bg-primary-500 hover:text-white transition-all disabled:opacity-30"
+                  title="Dapatkan Ide Acak"
                 >
-                  <Sparkles size={20} />
+                  {isGeneratingRandomPrompt ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
                 </button>
+                
+                {mainPrompt && (
+                  <button
+                    onClick={() => setMainPrompt('')}
+                    disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle}
+                    className="h-10 w-10 flex items-center justify-center glass-button rounded-xl text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                    title="Hapus Teks"
+                  >
+                    <X size={18} />
+                  </button>
+                )}
               </div>
             </div>
           </div>
-        </Accordion>
+        </div>
+
+        {/* --- Pengaturan Lanjutan --- */}
+        <div className="mt-10">
+          <Accordion title={
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-xl bg-slate-500/10 flex items-center justify-center text-slate-500">
+                <Settings size={16} />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Laboratorium AI</span>
+            </div>
+          }>
+            <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Pilihan Model Teks */}
+              <div className="space-y-3">
+                <label className="px-1 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Model Narasi</label>
+                <div className="relative group">
+                  <select
+                    id="text-model"
+                    value={textModel}
+                    onChange={(e) => setTextModel(e.target.value as TextModelType)}
+                    className={selectStyle}
+                  >
+                    {availableTextModels.map(model => (
+                      <option key={model} value={model} className="bg-slate-900 text-white">
+                        {model === 'openai' ? 'OpenAI GPT-4' : model}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-primary-500 transition-colors">
+                    <Info size={16} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Pilihan Model AI Gambar */}
+              <div className="space-y-3">
+                <label className="px-1 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Model Visual</label>
+                <div className="relative group">
+                  <select
+                    id="image-model"
+                    value={imageModel}
+                    onChange={(e) => setImageModel(e.target.value as ImageModelType)}
+                    className={selectStyle}
+                  >
+                    {availableImageModels.map(model => (
+                      <option key={model} value={model} className="bg-slate-900 text-white">{model.toUpperCase()}</option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-primary-500 transition-colors">
+                    <Info size={16} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Dimensi & Seed */}
+              <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="space-y-3">
+                  <label className="px-1 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Lebar (px)</label>
+                  <input
+                    type="number"
+                    min="256" max="2048" step="64"
+                    value={imageWidth}
+                    onChange={(e) => setImageWidth(parseInt(e.target.value) || 0)}
+                    className={inputFieldStyle}
+                  />
+                </div>
+                <div className="space-y-3">
+                  <label className="px-1 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Tinggi (px)</label>
+                  <input
+                    type="number"
+                    min="256" max="2048" step="64"
+                    value={imageHeight}
+                    onChange={(e) => setImageHeight(parseInt(e.target.value) || 0)}
+                    className={inputFieldStyle}
+                  />
+                </div>
+                <div className="space-y-3">
+                  <label className="px-1 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Seed Kristal</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={imageSeed}
+                      onChange={(e) => setImageSeed(parseInt(e.target.value) || 0)}
+                      className="w-full p-4 rounded-2xl border border-white/10 bg-slate-950/5 dark:bg-black/20 text-sm font-bold text-slate-900 dark:text-white focus:border-primary-500/50 transition-all"
+                    />
+                    <button
+                      onClick={() => setImageSeed(Math.floor(Math.random() * 1000000))}
+                      className="h-12 w-12 flex items-center justify-center glass-button rounded-2xl text-primary-500"
+                    >
+                      <Sparkles size={18} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Accordion>
+        </div>
 
         <button
           onClick={handleGenerateStory}
           disabled={isLoading || isGeneratingRandomPrompt || isGeneratingTitle || !mainPrompt}
-          className="mt-6 w-full py-3 px-6 rounded-xl text-white font-semibold flex items-center justify-center transition-all duration-300
-                     bg-purple-600 hover:bg-purple-700 shadow-neumorphic-button dark:shadow-dark-neumorphic-button
-                     active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-12 w-full h-16 rounded-2xl bg-primary-500 text-white text-sm font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] shadow-xl shadow-primary-500/25 disabled:opacity-30"
         >
           {isLoading ? (
             <>
-              <Loader2 size={20} className="animate-spin mr-2" /> Membangun Cerita...
+              <Loader2 size={20} className="animate-spin" /> Merajut Narasi...
             </>
           ) : (
             <>
-              <Send size={20} className="mr-2" /> Buat Cerita
+              <Send size={20} /> Jalankan Generator
             </>
           )}
         </button>
       </div>
 
       {/* Bagian Tampilan Hasil Cerita */}
-      <div ref={resultsRef} className="bg-light-bg dark:bg-dark-bg p-6 rounded-2xl shadow-neumorphic-card dark:shadow-dark-neumorphic-card">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Hasil Cerita Visual</h2>
+      <div ref={resultsRef} className="space-y-10">
         {isLoading && generatedStoryParts.length === 0 && (
-          <div className="flex flex-col items-center justify-center min-h-[200px] text-gray-500 dark:text-gray-400">
-            <Spinner />
-            <p className="mt-4 text-center">{progressMessage || "AI RuangRIung Sedang Berpikir..."}</p>
-            {currentStep > 0 && (
-              <p className="text-sm text-center">Langkah {currentStep} dari {totalSteps} selesai.</p>
-            )}
-            <p className="text-sm text-center">Proses ini mungkin memakan waktu beberapa saat karena AI akan menghasilkan 5 gambar dan teks.</p>
+          <div className="glass-card p-20 flex flex-col items-center justify-center text-center">
+            <div className="relative mb-10">
+              <div className="absolute inset-0 bg-primary-500/20 blur-2xl rounded-full animate-pulse" />
+              <Spinner />
+            </div>
+            <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-4 uppercase tracking-wider">Menenun Imajinasi</h3>
+            <p className="text-primary-500 font-bold mb-2 animate-pulse">{progressMessage || "AI RuangRIung Sedang Berpikir..."}</p>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="h-1.5 w-32 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-primary-500 transition-all duration-500" 
+                  style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                />
+              </div>
+              <span className="text-[10px] font-black text-slate-400 uppercase">{currentStep} / {totalSteps}</span>
+            </div>
+            <p className="text-xs font-bold text-slate-400 max-w-sm leading-relaxed">
+              Harap bersabar, kami sedang menciptakan 5 mahakarya visual dan narasi teks yang selaras.
+            </p>
           </div>
         )}
 
         {!isLoading && generatedStoryParts.length === 0 && (
-          <div className="text-center text-gray-500 dark:text-gray-400 min-h-[100px] flex items-center justify-center">
-            <p>Cerita visual yang Anda hasilkan akan muncul di sini.</p>
+          <div className="glass-card p-16 text-center border-dashed border-2 border-white/5">
+            <div className="h-16 w-16 rounded-full bg-slate-500/5 flex items-center justify-center text-slate-400 mx-auto mb-6">
+              <Info size={32} />
+            </div>
+            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Ruang Kosong Menanti Cerita Anda</p>
           </div>
         )}
 
         {generatedStoryParts.length > 0 && (
-          <>
-            <h3 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-gray-100">{storyTitle || 'Cerita Visual AI'}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="animate-in fade-in slide-in-from-bottom-10 duration-1000">
+            <div className="flex flex-col items-center mb-12">
+              <div className="h-px w-24 bg-primary-500/30 mb-8" />
+              <h3 className="text-3xl sm:text-5xl font-black text-center text-slate-900 dark:text-white tracking-tight leading-tight max-w-4xl px-4">
+                {storyTitle || 'Cerita Visual AI'}
+              </h3>
+              <div className="h-px w-24 bg-primary-500/30 mt-8" />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
               {generatedStoryParts.map((part, index) => (
-                <div key={index} className="bg-light-bg-secondary dark:bg-dark-bg-secondary p-4 rounded-xl shadow-neumorphic-inset dark:shadow-neumorphic-inset flex flex-col">
-                  <h4 className="font-semibold text-lg mb-3 text-gray-800 dark:text-gray-200 text-center">Adegan {index + 1}</h4>
-                  {part.imageUrl ? (
+                <div key={index} className="glass-card group overflow-hidden flex flex-col h-full border-white/5">
+                  <div className="relative h-[400px] w-full overflow-hidden">
                     <img
                       src={part.imageUrl}
                       alt={`Adegan ${index + 1}`}
-                      className="w-full h-auto rounded-lg mb-4 object-contain max-h-64 cursor-pointer"
-                      onClick={() => handleOpenImageModal(part.imageUrl)}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4 flex items-center justify-center text-gray-500">
-                      Gambar tidak tersedia
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent opacity-80" />
+                    
+                    <div className="absolute top-6 left-6 flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-2xl bg-primary-500/80 backdrop-blur-md flex items-center justify-center text-white text-lg font-black shadow-lg">
+                        {index + 1}
+                      </div>
+                      <span className="px-4 py-2 bg-black/40 backdrop-blur-md rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                        Adegan
+                      </span>
                     </div>
-                  )}
-                  <p className="text-sm text-gray-700 dark:text-gray-300 text-center mb-2">
-                    **Prompt:** "{part.imagePrompt}"
-                  </p>
-                  <div className="relative w-full mb-4">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Deskripsi:
-                    </label>
-                    <textarea
-                      readOnly
-                      value={part.description}
-                      className={`${inputFieldStyle} min-h-[80px] resize-y pr-10`}
-                    ></textarea>
+                    
                     <button
-                      onClick={() => handleCopyDescription(part.description)}
-                      className="absolute top-8 right-2 p-1.5 text-gray-500 hover:text-green-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                      title="Salin Deskripsi"
-                      aria-label="Salin Deskripsi Adegan"
+                      onClick={() => handleOpenImageModal(part.imageUrl)}
+                      className="absolute bottom-6 right-6 h-12 w-12 glass-button rounded-2xl flex items-center justify-center text-white hover:bg-primary-500 transition-all opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0"
                     >
-                      <Copy size={16} />
+                      <ZoomIn size={20} />
                     </button>
+                  </div>
+                  
+                  <div className="p-8 sm:p-10 flex flex-col flex-1">
+                    <div className="mb-6">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-500 mb-3">Prompt Visual</p>
+                      <p className="text-xs font-bold text-slate-400 leading-relaxed italic">
+                        "{part.imagePrompt}"
+                      </p>
+                    </div>
+                    
+                    <div className="mt-auto space-y-4">
+                      <div className="flex items-center justify-between">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Narasi</p>
+                          <button
+                            onClick={() => handleCopyDescription(part.description)}
+                            className="h-8 w-8 flex items-center justify-center glass-button rounded-xl text-slate-400 transition-colors"
+                            title="Salin Narasi"
+                          >
+                            <Copy size={14} />
+                          </button>
+                      </div>
+                      <div className="glass-inset p-6 text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+                        {part.description}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-            <button
-              onClick={handleDownloadStory}
-              className="mt-8 w-full py-3 px-6 rounded-xl text-white font-semibold flex items-center justify-center transition-all duration-300
-                         bg-blue-600 hover:bg-blue-700 shadow-neumorphic-button dark:shadow-dark-neumorphic-button
-                         active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset"
-            >
-              <Download size={20} className="mr-2" /> Unduh Cerita
-            </button>
-          </>
+
+            <div className="mt-20 flex justify-center">
+              <button
+                onClick={handleDownloadStory}
+                className="group h-16 px-12 glass-button rounded-2xl text-sm font-black uppercase tracking-[0.2em] text-primary-500 flex items-center gap-4 hover:bg-primary-500 hover:text-white transition-all shadow-xl hover:shadow-primary-500/20"
+              >
+                <Download size={20} className="transition-transform group-hover:translate-y-1" /> 
+                Simpan Seluruh Cerita
+              </button>
+            </div>
+          </div>
         )}
       </div>
 

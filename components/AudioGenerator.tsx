@@ -18,13 +18,17 @@ export default function AudioGenerator() {
   const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchVoices = async () => {
       try {
-        const response = await fetch('https://text.pollinations.ai/models');
+        const response = await fetch('https://text.pollinations.ai/models', {
+          signal: controller.signal
+        });
         const data = await response.json();
         const availableVoices = data?.['openai-audio']?.voices || [];
         setVoices(availableVoices.length > 0 ? availableVoices : ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']);
       } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return;
         console.error("Gagal mengambil daftar suara:", error);
         setVoices(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']);
       }
@@ -32,6 +36,7 @@ export default function AudioGenerator() {
     fetchVoices();
 
     return () => {
+      controller.abort();
       if (audioPreviewRef.current) {
         audioPreviewRef.current.pause();
         audioPreviewRef.current = null;
@@ -147,54 +152,96 @@ export default function AudioGenerator() {
     }
   };
 
-  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
+  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-2 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-800 dark:text-gray-200";
 
   return (
-    <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
-      <div className="space-y-6">
-        <div>
-          <label htmlFor="audio-text" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Teks untuk Audio</label>
-          <textarea id="audio-text" rows={5} value={text} onChange={(e) => setText(e.target.value)} placeholder="Masukkan teks yang ingin Anda ubah menjadi suara..." className={inputStyle} />
+    <div className="glass-card p-8 sm:p-10 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[80px] rounded-full -mr-32 -mt-32" />
+      
+      <div className="flex items-center gap-3 mb-8">
+        <div className="h-10 w-10 rounded-2xl bg-primary-500/10 flex items-center justify-center text-primary-500">
+          <Volume2 size={20} />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Pilih Suara (Klik ikon Play untuk pratinjau)</label>
-          <div className="space-y-2">
-            {voices.map(voice => {
-              const isActive = selectedVoice === voice;
-              return (
-                <div key={voice} onClick={() => setSelectedVoice(voice)}
-                  className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all duration-200 ${isActive ? 'bg-purple-600 text-white' : 'bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 shadow-neumorphic-button dark:shadow-dark-neumorphic-button hover:shadow-neumorphic-inset dark:hover:shadow-dark-neumorphic-inset'}`}>
-                  <span className="font-semibold capitalize">{voice}</span>
-                  <button onClick={(e) => handlePreviewVoice(e, voice)}
-                    className={`p-2 rounded-full transition-colors ${isActive ? 'hover:bg-purple-500' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-                    title={`Pratinjau suara ${voice}`} disabled={isLoading}>
-                    {previewingVoice === voice ? <Pause size={18} /> : <Play size={18} />}
-                  </button>
-                </div>
-              )
-            })}
-             {voices.length === 0 && <p className="text-center text-gray-500 dark:text-gray-400">Memuat suara...</p>}
+        <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider">Audio AI</h2>
+      </div>
+      <p className="text-xs font-bold text-slate-400 mb-8 uppercase tracking-widest">Ubah teks menjadi suara manusia yang natural dan emosional.</p>
+
+      <div className="space-y-8">
+        {/* Input Teks */}
+        <div className="space-y-3">
+          <label className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+            Teks Narasi
+          </label>
+          <textarea
+            className="w-full p-6 bg-slate-50 dark:bg-black/40 backdrop-blur-md rounded-3xl border-2 border-slate-200 dark:border-white/10 focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 transition-all text-slate-800 dark:text-slate-100 font-medium h-32 resize-none shadow-inner leading-relaxed"
+            placeholder="Tuliskan teks yang ingin diubah menjadi suara..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+        </div>
+
+        {/* Pilihan Suara */}
+        <div className="space-y-3">
+          <label className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+            Pilih Karakter Suara
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {voices.map((voice) => (
+              <button
+                key={voice}
+                onClick={() => setSelectedVoice(voice)}
+                className={`group relative p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
+                  selectedVoice === voice
+                    ? 'bg-primary-500 border-primary-500 text-white shadow-lg shadow-primary-500/20'
+                    : 'glass border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-primary-500/30'
+                }`}
+              >
+                <span className="text-[10px] font-black uppercase tracking-widest">{voice}</span>
+                <button
+                  onClick={(e) => handlePreviewVoice(e, voice)}
+                  className={`h-8 w-8 rounded-full flex items-center justify-center transition-all ${
+                    selectedVoice === voice 
+                    ? 'bg-white/20 text-white hover:bg-white/40' 
+                    : 'bg-primary-500/10 text-primary-500 hover:bg-primary-500 hover:text-white'
+                  }`}
+                  title="Pratinjau Suara"
+                >
+                  {previewingVoice === voice ? <Pause size={12} fill="currentColor" /> : <Play size={12} fill="currentColor" className="ml-0.5" />}
+                </button>
+              </button>
+            ))}
           </div>
         </div>
-        <div className="text-center pt-4">
-          <button onClick={handleGenerateAudio} disabled={isLoading}
-            className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150">
-            {isLoading ? <ButtonSpinner /> : <Volume2 className="w-5 h-5 mr-2" />}
-            <span>Buat Audio</span>
-          </button>
-        </div>
+
+        <button
+          onClick={handleGenerateAudio}
+          disabled={isLoading || !text}
+          className="w-full h-16 rounded-2xl bg-primary-500 text-white text-sm font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] shadow-xl shadow-primary-500/25 disabled:opacity-30"
+        >
+          {isLoading ? (
+            <>
+              <ButtonSpinner /> Menghasilkan Audio...
+            </>
+          ) : (
+            <>
+              <Sparkles size={20} /> Mulai Generate
+            </>
+          )}
+        </button>
+
         {audioUrl && (
-          <div className="mt-6">
-            <h3 className="text-center font-semibold mb-2 text-gray-700 dark:text-gray-200">Hasil Audio</h3>
-            <audio key={audioUrl} controls autoPlay className="w-full">
-              <source src={audioUrl} type="audio/mpeg" />
-              Browser Anda tidak mendukung elemen audio.
-            </audio>
-            <div className="text-center mt-4">
-              <button onClick={handleDownload} disabled={isDownloading}
-                className="inline-flex items-center justify-center px-6 py-2 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150 disabled:opacity-50">
-                {isDownloading ? <ButtonSpinner /> : <Download className="w-4 h-4 mr-2" />}
-                <span>Unduh Audio</span>
+          <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="glass-inset p-6 rounded-3xl flex flex-col md:flex-row items-center gap-6">
+              <audio controls className="flex-1 h-10 accent-primary-500" src={audioUrl}>
+                Browser Anda tidak mendukung elemen audio.
+              </audio>
+              <button
+                onClick={handleDownload}
+                disabled={isDownloading}
+                className="h-12 px-6 glass-button rounded-xl text-primary-500 font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-primary-500 hover:text-white transition-all shadow-lg"
+              >
+                {isDownloading ? <ButtonSpinner /> : <Download size={16} />}
+                Unduh MP3
               </button>
             </div>
           </div>
@@ -202,4 +249,4 @@ export default function AudioGenerator() {
       </div>
     </div>
   );
-}
+}

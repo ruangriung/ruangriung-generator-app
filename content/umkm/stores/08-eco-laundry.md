@@ -7,7 +7,7 @@ location: Surabaya, Jawa Timur
 whatsappNumber: '6281234567008'
 tagline: >-
   Layanan laundry ramah lingkungan dengan deterjen biodegradable.
-heroImage: https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/08-eco-laundry-hero.png
 description: >-
   Eco Laundry menggunakan deterjen bebas fosfat dan teknologi hemat air untuk merawat pakaian pelanggan. Tersedia layanan antar jemput area Surabaya.
 highlights:

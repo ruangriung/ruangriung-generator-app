@@ -7,7 +7,7 @@ location: Yogyakarta, DI Yogyakarta
 whatsappNumber: '6281234567013'
 tagline: >-
   Produk kulit handmade dengan personalisasi inisial.
-heroImage: https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/13-kriya-kulit-hero.png
 description: >-
   Kriya Kulit Mandiri memproduksi aksesori kulit asli seperti dompet, tas, dan strap kamera dengan teknik hand-stitching.
 highlights:

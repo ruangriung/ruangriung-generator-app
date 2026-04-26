@@ -7,9 +7,9 @@ import Link from 'next/link';
 import PromptSubmissionTrigger from '../../components/PromptSubmissionTrigger';
 import Pagination from '../../components/Pagination';
 
-import { ArrowLeft, Filter, Search, XCircle } from 'lucide-react';
+import { ArrowLeft, Filter, Search, XCircle, ChevronDown, Sparkles } from 'lucide-react';
 import { usePromptSuggestions } from './usePromptSuggestions';
-// import GoogleAd from '@/components/GoogleAd'; // DISABLED - Google Ads disabled temporarily
+import GoogleAd from '@/components/GoogleAd';
 
 const PROMPTS_PER_PAGE = 9;
 
@@ -64,7 +64,7 @@ export default function PromptClient({
   const [selectedTool, setSelectedTool] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const blurTimeoutRef = useRef<NodeJS.Timeout | number | null>(null);
   const promptListRef = useRef<HTMLDivElement | null>(null);
   const hasInteractedWithPaginationRef = useRef(false);
   const effectiveTitle = title ?? 'Kumpulan Prompt';
@@ -305,349 +305,329 @@ export default function PromptClient({
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex justify-center">
-        <Link
-          href={effectiveBackHref}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all"
-        >
-          <ArrowLeft size={18} />
-          <span>{effectiveBackLabel}</span>
-        </Link>
-      </div>
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900 dark:text-white">{effectiveTitle}</h1>
+    <div className="min-h-screen pt-32 pb-20 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="fixed inset-0 bg-slate-50 dark:bg-[#030712] -z-20" />
+      <div className="fixed inset-0 bg-mesh-gradient opacity-40 dark:opacity-20 -z-10" />
 
-        <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">{effectiveDescription}</p>
-        {showSubmissionTrigger && (
-          <PromptSubmissionTrigger
-            className="mt-6 px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition duration-300 shadow-lg"
-            onSuccess={handlePromptCreated}
-          />
-        )}
-      </div>
-
-      <div className="mb-10 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
-              <Filter className="h-5 w-5" />
-            </span>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Temukan Prompt yang Tepat</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Gunakan pencarian, filter tag, dan alat untuk mempersempit pilihan Anda.
-              </p>
-            </div>
-          </div>
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              className="inline-flex items-center gap-2 rounded-full border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="max-w-7xl mx-auto space-y-16">
+          {/* Navigation */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+            <Link
+              href={effectiveBackHref}
+              className="glass-button px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3 text-slate-600 dark:text-slate-400"
             >
-              <XCircle className="h-4 w-4" />
-              Atur Ulang
-            </button>
-          )}
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div className="md:col-span-2 lg:col-span-2">
-            <label htmlFor="prompt-search" className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
-              Kata Kunci
-            </label>
-            <div className="relative">
-              <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                <Search className="h-4 w-4" />
-              </span>
-              <input
-                id="prompt-search"
-                type="text"
-                placeholder="Cari judul, penulis, atau isi prompt..."
-                value={searchTerm}
-                onChange={e => handleSearchChange(e.target.value)}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-                className="w-full rounded-lg border border-gray-300 bg-white px-10 py-3 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-500/40"
-              />
-              {shouldShowSuggestions && (
-                <ul className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
-                  {suggestions.map(suggestion => (
-                    <li key={`${suggestion.type}-${suggestion.value}`} className="border-b border-gray-100 last:border-0 dark:border-gray-700">
-                      <button
-                        type="button"
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 transition hover:bg-gray-100 focus:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 dark:focus:bg-gray-700"
-                        onMouseDown={event => {
-                          event.preventDefault();
-                          handleSuggestionSelect(suggestion.value);
-                        }}
-                      >
-                        <div className="font-medium text-gray-800 dark:text-gray-100">
-                          {highlightMatches(suggestion.value, searchTerm)}
-                        </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {suggestion.type === 'title' ? 'Judul' : 'Penulis'} • {suggestion.occurrences} kecocokan
-                        </div>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-          <div>
-            <label htmlFor="prompt-tag" className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
-              Tag
-            </label>
-            <select
-              id="prompt-tag"
-              value={selectedTag}
-              onChange={e => applyTagFilter(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-500/40"
-            >
-              <option value="">Semua Tag</option>
-              {allTags.map(tag => (
-                <option key={tag} value={tag}>
-                  {tag}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="prompt-tool" className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">
-              Alat
-            </label>
-            <select
-              id="prompt-tool"
-              value={selectedTool}
-              onChange={e => applyToolFilter(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:ring-blue-500/40"
-            >
-              <option value="">Semua Alat</option>
-              {allTools.map(tool => (
-                <option key={tool} value={tool}>
-                  {tool}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div ref={promptListRef} className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {paginatedPrompts.map((prompt: Prompt) => (
-          <div
-            key={prompt.id}
-            className="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-6 shadow-md transition-shadow duration-300 hover:shadow-xl dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700"
-          >
-            <Link href={`${effectiveBasePath}/${prompt.slug}`} className="flex-1">
-              <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                {highlightMatches(prompt.title, searchTerm)}
-              </h5>
-              <p className="font-normal text-gray-500 dark:text-gray-400">
-                Oleh{' '}
-                {prompt.link ? (
-                  <a
-                    href={prompt.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    {highlightMatches(prompt.author, searchTerm)}
-                  </a>
-                ) : prompt.facebook ? (
-                  <a
-                    href={prompt.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    {highlightMatches(prompt.author, searchTerm)}
-                  </a>
-                ) : (
-                  <>{highlightMatches(prompt.author, searchTerm)}</>
-                )}
-              </p>
-              {(prompt.link || prompt.facebook) && (
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
-                  {prompt.link && (
-                    <a
-                      href={prompt.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      Website
-                    </a>
-                  )}
-                  {prompt.facebook && (
-                    <a
-                      href={prompt.facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      Facebook
-                    </a>
-                  )}
-                </div>
-              )}
-              <p className="mb-3 text-sm text-gray-500 dark:text-gray-400">
-                Tanggal: {new Date(prompt.date).toLocaleDateString('id-ID')}
-              </p>
-              <p className="mb-4 font-normal text-gray-600 dark:text-gray-300">
-                Tool: <strong>{highlightMatches(prompt.tool, searchTerm)}</strong>
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {prompt.tags.map(tag => (
-                  <span
-                    key={tag}
-                    className="inline-block rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              <ArrowLeft size={16} />
+              <span>{effectiveBackLabel}</span>
             </Link>
+            {showSubmissionTrigger && (
+              <PromptSubmissionTrigger
+                className="glass-button !bg-primary-500/10 hover:!bg-primary-500 !text-primary-500 hover:!text-white px-8 py-3 rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-lg shadow-primary-500/20 transition-all active:scale-95"
+                onSuccess={handlePromptCreated}
+              />
+            )}
           </div>
-        ))}
-      </div>
 
-      {totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      )}
+          <div className="text-center space-y-6">
+            <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tight uppercase leading-tight">
+              {effectiveTitle.split(' ').map((word, i) => i === effectiveTitle.split(' ').length - 1 ? <span key={i} className="text-primary-500">{word}</span> : word + ' ')}
+            </h1>
+            <p className="text-sm font-black uppercase tracking-[0.3em] text-slate-400 max-w-3xl mx-auto">
+              {effectiveDescription}
+            </p>
+          </div>
 
-
-      {(featuredPrompts.length > 0 || recommendedTags.length > 0 || recommendedTools.length > 0) && (
-        <div className="mt-12 space-y-12">
-          {featuredPrompts.length > 0 && (
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Prompt Pilihan Minggu Ini</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Dipilih otomatis dari kiriman terbaru yang banyak diminati komunitas.
-                  </p>
+          {/* Search & Filters */}
+          <div className="glass-card p-6 md:p-10 space-y-6 md:space-y-8 shadow-xl relative z-[50]">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 pb-6 border-b border-slate-200/10 dark:border-white/5">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-2xl bg-primary-500/10 flex items-center justify-center text-primary-500">
+                  <Filter size={20} />
                 </div>
+                <div>
+                  <h2 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">Precision Search</h2>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Temukan Prompt yang Sempurna</p>
+                </div>
+              </div>
+              {hasActiveFilters && (
                 <button
                   type="button"
-                  onClick={() => {
-                    hasInteractedWithPaginationRef.current = true;
-                    setCurrentPage(1);
-                    scrollToPromptListTop();
-                  }}
-                  className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500/60 dark:text-blue-400"
+                  onClick={handleResetFilters}
+                  className="glass-button px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-red-500 flex items-center gap-2"
                 >
-                  Lihat semua prompt
+                  <XCircle size={14} />
+                  Reset Filter
                 </button>
+              )}
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              <div className="md:col-span-2 lg:col-span-2 space-y-3">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Kata Kunci</label>
+                <div className="relative group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-500 transition-colors" size={18} />
+                  <input
+                    type="text"
+                    placeholder="Cari judul, penulis, atau isi prompt..."
+                    value={searchTerm}
+                    onChange={e => handleSearchChange(e.target.value)}
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
+                    className="w-full h-14 pl-12 pr-4 rounded-2xl glass-inset bg-transparent text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-primary-500/50 transition-all"
+                  />
+                  {shouldShowSuggestions && (
+                    <div className="absolute left-0 right-0 top-full mt-3 z-[100] overflow-hidden rounded-2xl glass-card border border-white/10 shadow-2xl">
+                      {suggestions.map(suggestion => (
+                        <button
+                          key={`${suggestion.type}-${suggestion.value}`}
+                          type="button"
+                          className="w-full px-6 py-4 text-left border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors group"
+                          onMouseDown={event => {
+                            event.preventDefault();
+                            handleSuggestionSelect(suggestion.value);
+                          }}
+                        >
+                          <div className="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-white transition-colors">
+                            {highlightMatches(suggestion.value, searchTerm)}
+                          </div>
+                          <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-white/70 mt-1">
+                            {suggestion.type === 'title' ? 'Judul' : 'Penulis'} • {suggestion.occurrences} matches
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="mt-6 grid gap-4 md:grid-cols-3">
-                {featuredPrompts.map(prompt => (
-                  <Link
-                    key={prompt.id}
-                    href={`${effectiveBasePath}/${prompt.slug}`}
-                    className="group flex h-full flex-col justify-between rounded-xl border border-gray-100 bg-gray-50 p-4 transition hover:border-blue-200 hover:bg-white hover:shadow-md dark:border-gray-800 dark:bg-gray-800/60 dark:hover:border-blue-700 dark:hover:bg-gray-800"
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Kategori Tag</label>
+                <div className="relative">
+                  <select
+                    value={selectedTag}
+                    onChange={e => applyTagFilter(e.target.value)}
+                    className="w-full h-14 px-5 pr-12 rounded-2xl glass-inset bg-transparent text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-primary-500/50 transition-all appearance-none border-2 border-transparent focus:border-primary-500/30"
                   >
-                    <div>
-                      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                        <span>{prompt.tool}</span>
-                        <span>{new Date(prompt.date).toLocaleDateString('id-ID')}</span>
+                    <option value="" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Semua Tag</option>
+                    {allTags.map(tag => (
+                      <option key={tag} value={tag} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{tag}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Model AI</label>
+                <div className="relative">
+                  <select
+                    value={selectedTool}
+                    onChange={e => applyToolFilter(e.target.value)}
+                    className="w-full h-14 px-5 pr-12 rounded-2xl glass-inset bg-transparent text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-primary-500/50 transition-all appearance-none border-2 border-transparent focus:border-primary-500/30"
+                  >
+                    <option value="" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Semua Alat</option>
+                    {allTools.map(tool => (
+                      <option key={tool} value={tool} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{tool}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Prompt Grid */}
+          <div ref={promptListRef} className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {paginatedPrompts.map((prompt: Prompt) => (
+              <div key={prompt.id} className="group relative">
+                <Link href={`${effectiveBasePath}/${prompt.slug}`} className="block h-full group">
+                  <div className="glass-card h-full p-6 md:p-8 flex flex-col space-y-6 hover:translate-y-[-4px] transition-all duration-500 border-2 border-transparent hover:border-primary-500/30 shadow-lg hover:shadow-primary-500/10">
+                    <div className="space-y-4 flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-500">
+                          {prompt.tool}
+                        </span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                          {new Date(prompt.date).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' })}
+                        </span>
                       </div>
-                      <h3 className="mt-3 text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-gray-100 dark:group-hover:text-blue-300">
+
+                      <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight uppercase group-hover:text-primary-500 transition-colors">
                         {highlightMatches(prompt.title, searchTerm)}
                       </h3>
-                      <p className="mt-2 text-sm text-gray-600 line-clamp-4 dark:text-gray-300">
-                        {highlightMatches(createPromptPreview(prompt.promptContent), searchTerm)}
+
+                      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                        Oleh{' '}
+                        <span className="font-black text-slate-700 dark:text-slate-300">
+                          {highlightMatches(prompt.author, searchTerm)}
+                        </span>
+                      </p>
+
+                      <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3 italic leading-relaxed">
+                        &quot;{createPromptPreview(prompt.promptContent, 120)}&quot;
                       </p>
                     </div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {prompt.tags.map(tag => (
+
+                    <div className="pt-6 border-t border-white/5 flex flex-wrap gap-2">
+                      {prompt.tags.slice(0, 3).map(tag => (
                         <span
                           key={tag}
-                          className="inline-block rounded-full bg-blue-100 px-2.5 py-0.5 text-[11px] font-semibold text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                          className="px-3 py-1 rounded-lg glass-inset bg-slate-500/5 text-[9px] font-black uppercase tracking-widest text-slate-400"
                         >
                           #{tag}
                         </span>
                       ))}
+                      {prompt.tags.length > 3 && (
+                        <span className="text-[9px] font-black text-slate-400 self-center">
+                          +{prompt.tags.length - 3}
+                        </span>
+                      )}
                     </div>
-                  </Link>
-                ))}
+                  </div>
+                </Link>
               </div>
+            ))}
+          </div>
+
+          {/* Empty State */}
+          {filteredPrompts.length === 0 && (
+            <div className="glass-card p-20 text-center space-y-6">
+              <div className="h-20 w-20 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center mx-auto text-slate-400">
+                <Search size={40} />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Tidak Ditemukan</h3>
+                <p className="text-sm font-black uppercase tracking-widest text-slate-400">Coba gunakan kata kunci atau filter lain</p>
+              </div>
+              <button onClick={handleResetFilters} className="glass-button px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-primary-500">
+                Lihat Semua Prompt
+              </button>
             </div>
           )}
 
-          {(recommendedTags.length > 0 || recommendedTools.length > 0) && (
-            <div className="grid gap-6 lg:grid-cols-3">
-              <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-6 shadow-sm dark:border-blue-900/40 dark:bg-blue-900/20 lg:col-span-2">
-                <h2 className="text-xl font-semibold text-blue-900 dark:text-blue-100">Rekomendasi Tag Populer</h2>
-                <p className="mt-1 text-sm text-blue-900/70 dark:text-blue-100/70">
-                  Pilih salah satu tag berikut untuk langsung memfilter daftar prompt dan menemukan inspirasi yang sedang ramai digunakan.
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {recommendedTags.map(({ tag, count }) => (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => applyTagFilter(tag)}
-                      className="inline-flex items-center gap-2 rounded-full border border-blue-300 bg-white px-4 py-2 text-sm font-medium text-blue-800 shadow-sm transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-blue-700 dark:bg-blue-900/60 dark:text-blue-100 dark:hover:bg-blue-900"
-                    >
-                      <span>#{tag}</span>
-                      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-200">
-                        {count}
-                      </span>
-                    </button>
-                  ))}
-                  {recommendedTags.length === 0 && (
-                    <p className="text-sm text-blue-900/70 dark:text-blue-100/70">
-                      Tag akan muncul secara otomatis ketika prompt baru ditambahkan.
-                    </p>
-                  )}
-                </div>
+          {/* Ads Placement */}
+          <div className="pt-8">
+            <div className="glass-card p-6 overflow-hidden">
+              <div className="text-center mb-4">
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em]">Advertisement</span>
               </div>
+              <GoogleAd className="min-h-[100px]" />
+            </div>
+          </div>
 
-              <div className="flex flex-col gap-4 rounded-2xl border border-blue-100 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Shortcut Alat Favorit</h3>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Klik untuk melihat koleksi prompt terbaik berdasarkan alat populer pilihan komunitas.
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {recommendedTools.map(({ tool, count }) => (
-                      <button
-                        key={tool}
-                        type="button"
-                        onClick={() => applyToolFilter(tool)}
-                        className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center pt-8">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
+
+          {/* Sidebar-like Bottom Sections */}
+          {(featuredPrompts.length > 0 || recommendedTags.length > 0 || recommendedTools.length > 0) && (
+            <div className="space-y-12">
+              {featuredPrompts.length > 0 && (
+                <div className="glass-card p-10 space-y-10">
+                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="h-2 w-2 rounded-full bg-primary-500 animate-pulse" />
+                        <h2 className="text-xl font-black uppercase tracking-tight text-slate-900 dark:text-white">Trending Now</h2>
+                      </div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Prompt Pilihan Komunitas Minggu Ini</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        handleResetFilters();
+                      }}
+                      className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-500 hover:tracking-[0.3em] transition-all flex items-center gap-2"
+                    >
+                      Explore Library <ArrowLeft size={14} className="rotate-180" />
+                    </button>
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-3">
+                    {featuredPrompts.map(prompt => (
+                      <Link
+                        key={prompt.id}
+                        href={`${effectiveBasePath}/${prompt.slug}`}
+                        className="glass-inset p-6 rounded-2xl group hover:bg-primary-500/5 transition-all"
                       >
-                        <span>{tool}</span>
-                        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-200">
-                          {count}
-                        </span>
-                      </button>
+                        <div className="space-y-4">
+                          <span className="text-[9px] font-black uppercase tracking-widest text-primary-500">{prompt.tool}</span>
+                          <h3 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase leading-tight group-hover:text-primary-500">
+                            {prompt.title}
+                          </h3>
+                          <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 line-clamp-3 italic">
+                            &quot;{createPromptPreview(prompt.promptContent, 80)}&quot;
+                          </p>
+                          <div className="flex flex-wrap gap-2 pt-2">
+                            {prompt.tags.slice(0, 2).map(tag => (
+                              <span key={tag} className="text-[8px] font-black uppercase text-slate-400">#{tag}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </Link>
                     ))}
-                    {recommendedTools.length === 0 && (
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Alat populer akan muncul setelah data tersedia.</p>
-                    )}
                   </div>
                 </div>
-                <div className="rounded-lg border border-dashed border-gray-200 p-4 dark:border-gray-700">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Tips eksplorasi</p>
-                  <ul className="mt-2 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                    <li>• Kombinasikan pencarian kata kunci dengan filter tag untuk hasil yang lebih presisi.</li>
-                    <li>• Manfaatkan panel saran otomatis ketika mengetik untuk menemukan judul atau kreator serupa.</li>
-                    <li>• Buka halaman detail prompt untuk menyalin instruksi lengkap dan pelajari variasi outputnya.</li>
-                  </ul>
+              )}
+
+              {(recommendedTags.length > 0 || recommendedTools.length > 0) && (
+                <div className="grid gap-10 lg:grid-cols-3">
+                  <div className="glass-card p-10 lg:col-span-2 space-y-8">
+                    <div className="space-y-2">
+                      <h2 className="text-lg font-black uppercase tracking-tight text-slate-900 dark:text-white">Popular Clusters</h2>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Jelajahi Berdasarkan Tag Populer</p>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      {recommendedTags.map(({ tag, count }) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => applyTagFilter(tag)}
+                          className={`glass-button px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 transition-all ${selectedTag === tag ? 'bg-primary-500 !text-white' : 'text-slate-600 dark:text-slate-300'}`}
+                        >
+                          <span>#{tag}</span>
+                          <span className={`px-2 py-0.5 rounded-md text-[9px] ${selectedTag === tag ? 'bg-white/20' : 'bg-slate-500/10'}`}>{count}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="glass-card p-10 space-y-8">
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-black uppercase tracking-tight text-slate-900 dark:text-white">Tool Shortcuts</h3>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Quick Filter By Engine</p>
+                    </div>
+                    <div className="space-y-3">
+                      {recommendedTools.map(({ tool, count }) => (
+                        <button
+                          key={tool}
+                          type="button"
+                          onClick={() => applyToolFilter(tool)}
+                          className={`w-full flex items-center justify-between p-4 rounded-xl glass-inset group hover:bg-primary-500/5 transition-all ${selectedTool === tool ? '!bg-primary-500/10 border-primary-500/30' : ''}`}
+                        >
+                          <span className={`text-[10px] font-black uppercase tracking-widest ${selectedTool === tool ? 'text-primary-500' : 'text-slate-600 dark:text-slate-300'}`}>
+                            {tool}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md glass-button text-[9px] font-black text-slate-400">
+                            {count}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>
-      )}
-
+      </div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 
+export const runtime = 'edge';
 import type { Metadata } from 'next';
 import { getAllPrompts } from '../../lib/prompts';
 import PromptClient from './PromptClient';

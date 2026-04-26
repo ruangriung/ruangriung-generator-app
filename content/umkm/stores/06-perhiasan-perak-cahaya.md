@@ -7,7 +7,7 @@ location: Gianyar, Bali
 whatsappNumber: '6281234567006'
 tagline: >-
   Perhiasan perak handmade dengan sentuhan budaya Bali.
-heroImage: https://images.unsplash.com/photo-1518544801976-3e89f2f1df8e?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/06-perhiasan-perak-cahaya-hero.png
 description: >-
   Perhiasan Perak Cahaya menawarkan koleksi cincin, gelang, dan kalung berbahan perak sterling dengan detail ukir tradisional dan desain modern.
 highlights:

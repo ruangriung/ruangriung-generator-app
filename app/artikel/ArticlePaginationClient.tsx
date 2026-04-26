@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import ArticleSearchForm from '@/components/ArticleSearchForm';
+import GoogleAd from '@/components/GoogleAd';
 
 const escapeRegExp = (value: string) => value.replace(/[-/\\^$*+?.()|[\]{}]/g, '\$&');
 
@@ -145,103 +146,140 @@ export default function ArticlePaginationClient({ initialArticles }: ArticlePagi
     };
 
     return (
-        <>
-            <div className="mb-8 flex justify-center">
-                <ArticleSearchForm
-                    className="w-full max-w-4xl backdrop-blur"
-                    placeholder="Cari judul, ringkasan, atau tag artikel..."
-                />
+        <div className="space-y-12">
+            <div className="flex justify-center">
+                <div className="w-full max-w-2xl glass-card p-2">
+                    <ArticleSearchForm
+                        className="w-full"
+                        placeholder="Cari artikel menarik..."
+                    />
+                </div>
+            </div>
+
+            {/* Ads Placement */}
+            <div className="w-full max-w-4xl mx-auto">
+              <div className="glass-card p-6 overflow-hidden">
+                <div className="text-center mb-4">
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em]">Advertisement</span>
+                </div>
+                <GoogleAd className="min-h-[100px]" />
+              </div>
             </div>
 
             {filteredArticles.length === 0 ? (
-                <div className="rounded-lg bg-white p-8 text-center shadow-md dark:bg-gray-800">
-                    <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Tidak ada artikel ditemukan</h2>
+                <div className="glass-card p-16 text-center animate-in fade-in zoom-in duration-500">
+                    <div className="h-20 w-20 rounded-[2rem] bg-primary-500/10 flex items-center justify-center text-primary-500 mx-auto mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-black text-slate-900 dark:text-white">Artikel Tidak Ditemukan</h2>
                     {rawSearchQuery ? (
-                        <p className="mt-2 text-gray-600 dark:text-gray-400">
-                            Kami tidak menemukan artikel yang cocok untuk{' '}
-                            <mark className="rounded bg-yellow-200 px-1 py-0 font-semibold text-purple-700 dark:bg-yellow-500/40 dark:text-purple-200">
-                                "{rawSearchQuery}"
-                            </mark>
-                            . Coba gunakan kata kunci lain.
+                        <p className="mt-4 text-slate-500 dark:text-slate-400 font-medium">
+                            Maaf, kami tidak menemukan hasil untuk <span className="text-primary-500 font-bold">"{rawSearchQuery}"</span>.
                         </p>
                     ) : (
-                        <p className="mt-2 text-gray-600 dark:text-gray-400">
-                            Saat ini belum ada artikel yang tersedia.
+                        <p className="mt-4 text-slate-500 dark:text-slate-400 font-medium">
+                            Katalog artikel sedang dalam pemeliharaan.
                         </p>
                     )}
                 </div>
             ) : (
                 <>
-                    <div ref={listContainerRef} className="space-y-8">
+                    <div ref={listContainerRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {currentPosts.map(article => (
-                            <Fragment key={article.slug}>
-                                <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                                    <div className="flex items-start justify-between mb-2">
-                                        <Link href={`/artikel/${article.slug}`} className="block">
-                                            <h2 className="text-2xl font-bold text-purple-600 dark:text-purple-400 hover:underline">
-                                                {highlightMatches(article.title, rawSearchQuery)}
-                                            </h2>
-                                        </Link>
-                                        <span className="whitespace-nowrap rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-600 dark:bg-indigo-900 dark:text-indigo-400">
-                                            {highlightMatches(article.category, rawSearchQuery)}
+                            <Link 
+                                key={article.slug}
+                                href={`/artikel/${article.slug}`}
+                                className="group glass-card flex flex-col overflow-hidden hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 hover:shadow-2xl hover:shadow-primary-500/10"
+                            >
+                                <div className="relative h-48 w-full bg-slate-100 dark:bg-slate-900 overflow-hidden">
+                                    {article.image ? (
+                                        <img 
+                                            src={article.image} 
+                                            alt={article.title} 
+                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-500/20 to-blue-500/20">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-primary-500/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 2v6h6" />
+                                            </svg>
+                                        </div>
+                                    )}
+                                    <div className="absolute top-4 left-4">
+                                        <span className="px-3 py-1 bg-primary-500/80 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest text-white">
+                                            {article.category}
                                         </span>
                                     </div>
-                                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                        Oleh{' '}
-                                        <span className="font-medium text-gray-700 dark:text-gray-200">
-                                            {highlightMatches(article.author, rawSearchQuery)}
-                                        </span>{' '}
-                                        -
-                                        {' '}
-                                        {new Date(article.date).toLocaleDateString('id-ID', {
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric',
-                                        })}
+                                </div>
+                                
+                                <div className="p-6 flex flex-col flex-1">
+                                    <h2 className="text-xl font-black text-slate-900 dark:text-white group-hover:text-primary-500 transition-colors line-clamp-2 leading-tight mb-3">
+                                        {highlightMatches(article.title, rawSearchQuery)}
+                                    </h2>
+                                    
+                                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 line-clamp-3 mb-6 flex-1">
+                                        {highlightMatches(article.summary, rawSearchQuery)}
                                     </p>
-                                    <Link href={`/artikel/${article.slug}`} className="block">
-                                        <p className="mt-3 text-gray-700 dark:text-gray-300">
-                                            {highlightMatches(article.summary, rawSearchQuery)}
-                                        </p>
-                                    </Link>
-                                    <div className="mt-4 flex flex-wrap gap-2">
-                                        {article.tags.map(tag => (
-                                            <span
-                                                key={tag}
-                                                className="rounded-full bg-gray-200 px-3 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300"
-                                            >
-                                                {highlightMatches(`#${tag}`, rawSearchQuery)}
-                                            </span>
-                                        ))}
+                                    
+                                    <div className="pt-6 border-t border-white/10 mt-auto flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-8 w-8 rounded-full bg-primary-500/10 flex items-center justify-center text-primary-500 text-xs font-black">
+                                                {article.author[0]}
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-tight">{article.author}</p>
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase">
+                                                    {new Date(article.date).toLocaleDateString('id-ID', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric'
+                                                    })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="h-8 w-8 rounded-full glass-button flex items-center justify-center text-primary-500 group-hover:bg-primary-500 group-hover:text-white transition-all">
+                                            <span className="text-lg font-black">→</span>
+                                        </div>
                                     </div>
                                 </div>
-                    </Fragment>
+                            </Link>
                         ))}
                     </div>
 
-                    {totalPages > 0 && (
-                        <div className="mt-12 flex items-center justify-between">
+                    {totalPages > 1 && (
+                        <div className="mt-16 flex items-center justify-center gap-6">
                             <button
                                 onClick={handlePrevPage}
                                 disabled={currentPage === 1}
-                                className="px-4 py-2 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button disabled:cursor-not-allowed disabled:opacity-50 active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset"
+                                className="h-12 px-6 glass-button text-sm font-black uppercase tracking-widest disabled:opacity-30 disabled:cursor-not-allowed group"
                             >
-                                Sebelumnya
+                                <span className="transition-transform group-hover:-translate-x-1 inline-block mr-2">←</span>
+                                Prev
                             </button>
-                            <span className="text-gray-700 dark:text-gray-300">
-                                Halaman {safeCurrentPage} dari {totalPages}
-                            </span>
+                            
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Page</span>
+                                <span className="h-10 w-10 rounded-xl bg-primary-500 flex items-center justify-center text-white font-black shadow-lg shadow-primary-500/20">
+                                    {safeCurrentPage}
+                                </span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">of {totalPages}</span>
+                            </div>
+
                             <button
                                 onClick={handleNextPage}
                                 disabled={currentPage === totalPages}
-                                className="px-4 py-2 bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 font-bold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button disabled:cursor-not-allowed disabled:opacity-50 active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset"
+                                className="h-12 px-6 glass-button text-sm font-black uppercase tracking-widest disabled:opacity-30 disabled:cursor-not-allowed group"
                             >
-                                Selanjutnya
+                                Next
+                                <span className="transition-transform group-hover:translate-x-1 inline-block ml-2">→</span>
                             </button>
                         </div>
                     )}
                 </>
             )}
-        </>
+        </div>
     );
-}
+}

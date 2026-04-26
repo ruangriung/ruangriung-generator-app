@@ -75,26 +75,40 @@ export async function GET(requestObj: Request) {
 
     const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
     
+    // Support BYOP: Check if client provided their own key in headers
+    const clientKey = requestObj.headers.get('x-pollinations-key') || 
+                      requestObj.headers.get('Authorization')?.replace('Bearer ', '');
+    
+    const activeApiKey = clientKey || POLLINATIONS_API_KEY;
+
     // Gunakan endpoint gen.pollinations.ai jika ada API Key (Pro), 
     // jika tidak ada, gunakan endpoint publik pollinations.ai/p/
-    const baseUrl = POLLINATIONS_API_KEY 
+    const baseUrl = activeApiKey 
       ? `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`
       : `https://pollinations.ai/p/${encodeURIComponent(prompt)}`;
 
     const apiUrl = `${baseUrl}?${pollParams.toString()}`;
     
-    console.log('[API] Image Request:', apiUrl);
+    console.log('[API] Image Request:', apiUrl, clientKey ? '(Using Client BYOP Key)' : '(Using Server Key)');
 
     const headers: Record<string, string> = {
       'Accept': 'image/*, application/json',
     };
 
-    if (POLLINATIONS_API_KEY) {
-      headers['Authorization'] = `Bearer ${POLLINATIONS_API_KEY}`;
+    if (activeApiKey) {
+      headers['Authorization'] = `Bearer ${activeApiKey}`;
     }
 
 
-    // Use global fetch (built-in in Vercel/Node 18+)
+    // === OPTIMIZATION: Redirect instead of Proxying ===
+    // If we are NOT using a server-side private key (meaning it's public or BYOP),
+    // we can redirect the browser to fetch the image directly from Pollinations.
+    // This saves 100% of the image bandwidth on Vercel.
+    if (!process.env.POLLINATIONS_API_KEY || clientKey) {
+      return NextResponse.redirect(apiUrl, { status: 307 });
+    }
+
+    // If using server key, we still need to proxy to keep the key secret
     const response = await fetch(apiUrl, {
       method: 'GET',
       headers,
@@ -109,13 +123,10 @@ export async function GET(requestObj: Request) {
       );
     }
 
-    // Get the image buffer
-    const imageBuffer = await response.arrayBuffer();
-    const contentType = response.headers.get('content-type') || 'image/jpeg';
-
-    return new NextResponse(imageBuffer, {
+    // Stream the response directly to the client to save memory and execution time
+    return new NextResponse(response.body, {
       headers: {
-        'Content-Type': contentType,
+        'Content-Type': response.headers.get('content-type') || 'image/jpeg',
         'Cache-Control': 'public, max-age=31536000, immutable',
       },
       status: 200,
@@ -130,5 +141,67 @@ export async function GET(requestObj: Request) {
       },
       { status: 500 }
     );
+  }
+}
+export async function POST(requestObj: Request) {
+  try {
+    const body = await requestObj.json();
+    const { prompt } = body;
+
+    if (!prompt) {
+      return NextResponse.json({ message: 'Prompt is required' }, { status: 400 });
+    }
+
+    const pollParams = new URLSearchParams();
+    const supportedParams = [
+      'width', 'height', 'seed', 'model', 'nologo', 'enhance', 
+      'private', 'safe', 'transparent', 'referrer', 
+      'guidance_scale', 'negative_prompt', 'aspectRatio', 
+      'duration', 'image', 'audio'
+    ];
+
+    supportedParams.forEach(param => {
+      if (body[param] !== undefined) {
+        pollParams.append(param, body[param].toString());
+      }
+    });
+
+    const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
+    const clientKey = requestObj.headers.get('x-pollinations-key') || 
+                      requestObj.headers.get('Authorization')?.replace('Bearer ', '');
+    const activeApiKey = clientKey || POLLINATIONS_API_KEY;
+
+    const baseUrl = activeApiKey 
+      ? `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`
+      : `https://pollinations.ai/p/${encodeURIComponent(prompt)}`;
+
+    const apiUrl = `${baseUrl}?${pollParams.toString()}`;
+    
+    const headers: Record<string, string> = { 'Accept': 'image/*, application/json' };
+    if (activeApiKey) headers['Authorization'] = `Bearer ${activeApiKey}`;
+
+    // === OPTIMIZATION: Redirect instead of Proxying ===
+    if (!process.env.POLLINATIONS_API_KEY || clientKey) {
+      return NextResponse.redirect(apiUrl, { status: 307 });
+    }
+
+    const response = await fetch(apiUrl, { method: 'GET', headers });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return NextResponse.json({ message: `Pollinations API Error: ${response.status}`, error: errorText }, { status: response.status });
+    }
+
+    // Stream the response
+    return new NextResponse(response.body, {
+      headers: {
+        'Content-Type': response.headers.get('content-type') || 'image/jpeg',
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
+      status: 200,
+    });
+
+  } catch (error: any) {
+    return NextResponse.json({ message: 'Internal Server Error', error: error.message }, { status: 500 });
   }
 }

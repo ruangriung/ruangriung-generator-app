@@ -13,7 +13,7 @@ interface PromptSubmissionTriggerProps {
 }
 
 const DEFAULT_BUTTON_CLASS =
-  'px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-700 transition duration-300 shadow-lg';
+  'glass-button !bg-primary-500/10 hover:!bg-primary-500 !text-primary-500 hover:!text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-primary-500/20 transition-all active:scale-95 border-2 border-primary-500/20 hover:border-primary-500';
 
 export default function PromptSubmissionTrigger({
   label,

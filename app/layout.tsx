@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s | RuangRiung"
   },
   description: "Ruang Riung AI Generator adalah platform kreatif bertenaga AI untuk membuat gambar artistik, naskah video, dan audio berkualitas tinggi. Solusi cerdas untuk konten kreator modern.",
-  keywords: ["AI generator", "ruangriung indonesia", "image generator", "video creator", "audio generator", "Next.js", "AI art", "text to image", "generator ai indonesia", "konten kreator"],
+  keywords: ["AI generator", "ruangriung indonesia", "image generator", "video creator", "audio generator", "Next.js", "AI art", "text to image", "generator ai indonesia", "konten kreator", "Midjourney prompt", "Stable Diffusion prompt", "ChatGPT Indonesia"],
   authors: [
     {
       name: "Ayick",
@@ -99,7 +99,12 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
-      <body className="bg-light-bg font-sans">
+      <body className="bg-light-bg font-sans relative">
+        {/* Optimized Fixed Background Layer */}
+        <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(at_0%_0%,hsla(253,16%,95%,1)_0,transparent_50%),radial-gradient(at_50%_0%,hsla(225,39%,90%,1)_0,transparent_50%),radial-gradient(at_100%_0%,hsla(339,49%,90%,1)_0,transparent_50%)] dark:hidden" />
+          <div className="absolute inset-0 hidden bg-[radial-gradient(at_0%_0%,hsla(253,16%,7%,1)_0,transparent_50%),radial-gradient(at_50%_0%,hsla(225,39%,10%,1)_0,transparent_50%),radial-gradient(at_100%_0%,hsla(339,49%,10%,1)_0,transparent_50%)] dark:block" />
+        </div>
         <JsonLd type="Organization" data={organizationSchema} />
         <JsonLd type="WebSite" data={websiteSchema} />
         
@@ -115,8 +120,7 @@ export default function RootLayout({
           <RRAssistant />
         </ChatProvider>
 
-        {/* Google AdSense Script - DISABLED */}
-        {/* 
+        {/* Google AdSense Script */}
         <Script
           id="google-adsense-script"
           async
@@ -124,7 +128,6 @@ export default function RootLayout({
           crossOrigin="anonymous"
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6394253519537490"
         />
-        */}
 
         {/* Google Analytics Script */}
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-7T365LMTJ7" />

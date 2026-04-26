@@ -7,7 +7,7 @@ location: Jakarta Selatan, DKI Jakarta
 whatsappNumber: '6281234567005'
 tagline: >-
   Menu plant-based lezat, sehat, dan praktis.
-heroImage: https://images.unsplash.com/photo-1533777419517-3e4017e2e15b?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/05-kuliner-vegan-hijau-hero.png
 description: >-
   Kuliner Vegan Hijau menghadirkan hidangan plant-based dengan bahan organik lokal. Cocok untuk gaya hidup sehat tanpa mengorbankan rasa.
 highlights:

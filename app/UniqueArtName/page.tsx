@@ -4,7 +4,7 @@ import JsonLd from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ruangriung.my.id'),
-  title: 'Generator tema unik untuk  Gambar AI| RuangRiung',
+  title: 'Generator Tema Unik untuk Gambar AI | RuangRiung',
   description:
     'Eksplorasi tema AI untuk pemula — dapatkan 20 tema visual eksperimental yang belum pernah terpikirkan sebelumnya, sempurna untuk memperkuat prompt AI Anda.',
   keywords:

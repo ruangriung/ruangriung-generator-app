@@ -7,7 +7,7 @@ location: Solo, Jawa Tengah
 whatsappNumber: '6281234567002'
 tagline: >-
   Menghidupkan warisan budaya melalui batik tulis kontemporer.
-heroImage: https://images.unsplash.com/photo-1591769225440-811ad7d9e0d1?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/02-batik-pradana-hero.png
 description: >-
   Batik Pradana memadukan motif klasik dengan sentuhan modern sehingga cocok dikenakan pada acara formal maupun kasual. Semua kain diproduksi secara etis oleh pengrajin lokal.
 highlights:

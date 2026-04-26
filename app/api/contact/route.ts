@@ -1,5 +1,6 @@
 // app/api/contact/route.ts
 
+export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import {
   createEmailTransporter,

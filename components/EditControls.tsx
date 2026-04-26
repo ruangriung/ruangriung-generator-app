@@ -29,7 +29,7 @@ export const EditControls: React.FC<EditControlsProps> = ({
   onWatermarkFileChange,
   onResetFilters
 }) => {
-  const inputStyle = `w-full p-2 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500`;
+  const inputStyle = `w-full p-2 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-2 border-slate-200 dark:border-white/10 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`;
   const labelStyle = `block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1`;
   const sectionTitleStyle = `text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3`;
   // const sliderValueStyle = `text-sm text-gray-600 dark:text-gray-400 ml-2`; // Tidak diperlukan lagi, nilai akan ada di label ControlRow

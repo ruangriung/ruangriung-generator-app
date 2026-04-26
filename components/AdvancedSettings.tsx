@@ -1,10 +1,12 @@
 'use client';
 
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState, useEffect } from 'react';
 
 import { GeneratorSettings } from './ControlPanel';
-import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sparkles, ImageIcon, Sprout, ChevronDown, Lock, Shield, EyeOff, Link2, Plus, X } from 'lucide-react';
+import { Palette, Cpu, ArrowLeftRight, ArrowUpDown, Sparkles, ImageIcon, Sprout, ChevronDown, Lock, Shield, EyeOff, Link2, Plus, X, Info } from 'lucide-react';
 import { artStyles, ArtStyleCategory, ArtStyleOption } from '@/lib/artStyles';
+import BYOPHandler from './BYOPHandler';
+import toast from 'react-hot-toast';
 
 interface AdvancedSettingsProps {
   settings: GeneratorSettings;
@@ -16,11 +18,46 @@ interface AdvancedSettingsProps {
   onImageQualityChange: (quality: 'Standar' | 'HD' | 'Ultra') => void;
   className?: string;
   onModelSelect: (model: string) => void;
+  onByopChange?: () => void;
 }
 
-const AdvancedSettings = memo(({ settings, setSettings, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, className, onModelSelect }: AdvancedSettingsProps) => {
+const AdvancedSettings = memo(({ settings, setSettings, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, className, onModelSelect, onByopChange }: AdvancedSettingsProps) => {
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const [hasByopKey, setHasByopKey] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const dropdown = document.getElementById('image-model-dropdown');
+      if (dropdown && !dropdown.contains(event.target as Node)) {
+        setIsModelDropdownOpen(false);
+      }
+    };
+
+    if (isModelDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isModelDropdownOpen]);
+
+  useEffect(() => {
+    setHasByopKey(!!localStorage.getItem('pollinations_api_key'));
+  }, []);
+
   const handleSettingChange = useCallback((field: keyof GeneratorSettings, value: string | number | boolean) => {
     if (field === 'model') {
+      const proModels = ['flux-pro', 'openai', 'flux-realism', 'flux-anime'];
+      const isPro = proModels.includes((value as string).toLowerCase());
+      const hasApiKey = !!localStorage.getItem('pollinations_api_key');
+
+      if (isPro && !hasApiKey) {
+        toast.error('Model PRO memerlukan koneksi Pollinations atau Kredit Pro.');
+        // Kita bisa membiarkan user memilih tapi akan ada peringatan saat generate
+      }
       onModelSelect(value as string);
     } else if (field === 'private' || field === 'safe' || field === 'transparent') {
       setSettings(prev => ({ ...prev, [field]: value as boolean }));
@@ -41,22 +78,29 @@ const AdvancedSettings = memo(({ settings, setSettings, models, aspectRatio, onA
     }
   }, [onModelSelect, setSettings, onManualDimensionChange, settings.width, settings.height]);
 
-  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
-  const selectStyle = `${inputStyle} appearance-none`;
-  const checkboxContainerStyle = "flex items-center gap-3 p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button";
-  const checkboxStyle = "h-5 w-5 rounded text-purple-600 focus:ring-purple-500 cursor-pointer";
+  const inputStyle = "w-full p-3 bg-slate-950/5 dark:bg-black/20 backdrop-blur-md rounded-xl border-2 border-slate-200 dark:border-white/20 focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 transition-all text-slate-800 dark:text-slate-200 font-bold text-sm";
+  const selectStyle = `${inputStyle} appearance-none cursor-pointer`;
+  const checkboxContainerStyle = "flex items-center gap-3 p-4 glass rounded-2xl hover:bg-white/10 transition-colors cursor-pointer group";
   
   const LabelWithIcon = ({ icon: Icon, text, htmlFor }: { icon: React.ElementType, text: string, htmlFor?: string }) => (
-    <div className="flex items-center gap-x-2 mb-2">
-      <Icon className="h-4 w-4 text-purple-600" />
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-600 dark:text-gray-300">
+    <div className="flex items-center gap-x-2 mb-3 px-1">
+      <Icon className="h-4 w-4 text-primary-500" />
+      <label htmlFor={htmlFor} className="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">
         {text}
       </label>
     </div>
   );
 
-  const imageToImageModels = ['nanobanana', 'seedream', 'kontext'];
-  const isImageToImageModel = imageToImageModels.includes(settings.model.toLowerCase());
+  const isImageToImageModel = (modelName: string): boolean => {
+    const normalized = modelName.toLowerCase();
+    const specificModels = ['nanobanana', 'seedream', 'kontext', 'upscale', 'edit'];
+    return specificModels.includes(normalized) || 
+           normalized.includes('edit') || 
+           normalized.includes('image-to-image') ||
+           normalized.includes('img2img');
+  };
+
+  const isI2I = isImageToImageModel(settings.model);
   const MAX_REFERENCE_IMAGES = 4;
 
   const handleReferenceImageChange = useCallback((index: number, url: string) => {
@@ -89,20 +133,46 @@ const AdvancedSettings = memo(({ settings, setSettings, models, aspectRatio, onA
   const referenceImages = referenceImagesRaw.length ? referenceImagesRaw : [''];
 
   return (
-    <div className={`mt-6 p-6 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset ${className || ''}`}>
-        <div className="mb-6">
-          <label className="block text-center text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Preset Aspek Rasio</label>
-          <div className="flex justify-center gap-4">
-            <button onClick={() => onAspectRatioChange('Kotak')} className={`px-4 py-2 rounded-lg transition-all duration-200 font-medium ${aspectRatio === 'Kotak' ? 'bg-purple-600 text-white shadow-neumorphic-button dark:shadow-dark-neumorphic-button' : 'bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 shadow-neumorphic-button dark:shadow-dark-neumorphic-button'}`}>Kotak</button>
-            <button onClick={() => onAspectRatioChange('Portrait')} className={`px-4 py-2 rounded-lg transition-all duration-200 font-medium ${aspectRatio === 'Portrait' ? 'bg-purple-600 text-white shadow-neumorphic-button dark:shadow-dark-neumorphic-button' : 'bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 shadow-neumorphic-button dark:shadow-dark-neumorphic-button'}`}>Portrait</button>
-            <button onClick={() => onAspectRatioChange('Lansekap')} className={`px-4 py-2 rounded-lg transition-all duration-200 font-medium ${aspectRatio === 'Lansekap' ? 'bg-purple-600 text-white shadow-neumorphic-button dark:shadow-dark-neumorphic-button' : 'bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-300 shadow-neumorphic-button dark:shadow-dark-neumorphic-button'}`}>Lansekap</button>
+    <div className={`space-y-8 overflow-visible ${className || ''}`}>
+        {/* BYOP Section */}
+        <div className="w-full">
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <Shield className="h-4 w-4 text-primary-500" />
+              <h4 className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">Koneksi Provider (BYOP)</h4>
+            </div>
+          <BYOPHandler onKeyChange={onByopChange} />
+        </div>
+
+        <div>
+          <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Preset Aspek Rasio</label>
+          <div className="flex justify-center gap-3">
+            {[
+              { id: 'Kotak', label: 'Kotak', ratio: '1:1' },
+              { id: 'Portrait', label: 'Portrait', ratio: '9:16' },
+              { id: 'Lansekap', label: 'Lansekap', ratio: '16:9' },
+            ].map((preset) => (
+              <button 
+                key={preset.id}
+                onClick={() => onAspectRatioChange(preset.id as any)} 
+                className={`flex-1 flex flex-col items-center gap-1 p-4 rounded-2xl transition-all duration-300 border ${
+                  aspectRatio === preset.id 
+                  ? 'bg-primary-500/10 border-primary-500/50 shadow-lg shadow-primary-500/10' 
+                  : 'glass border-white/10 hover:border-white/30'
+                }`}
+              >
+                <span className={`text-sm font-black ${aspectRatio === preset.id ? 'text-primary-500' : 'text-slate-600 dark:text-slate-300'}`}>
+                  {preset.label}
+                </span>
+                <span className="text-[10px] font-bold text-slate-400">{preset.ratio}</span>
+              </button>
+            ))}
           </div>
         </div>
-        <hr className="my-6 border-gray-300 dark:border-gray-600" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
-          <div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-visible">
+          <div className="glass-inset p-4">
             <LabelWithIcon icon={Sparkles} text="Guidance Scale (CFG)" htmlFor="cfg-scale" />
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <input
                 type="range"
                 id="cfg-scale"
@@ -111,123 +181,273 @@ const AdvancedSettings = memo(({ settings, setSettings, models, aspectRatio, onA
                 step="0.5"
                 value={settings.cfg_scale}
                 onChange={(e) => handleSettingChange('cfg_scale', parseFloat(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 range-slider-colored-track"
+                className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-primary-500"
               />
-              <span className="font-bold text-purple-600 w-10 text-center">{settings.cfg_scale}</span>
+              <div className="h-10 w-12 glass flex items-center justify-center rounded-xl font-black text-primary-500 text-sm">
+                {settings.cfg_scale}
+              </div>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Nilai rendah lebih kreatif, nilai tinggi lebih mengikuti prompt.</p>
+            <p className="text-[10px] text-slate-400 font-bold mt-3">Rendah: Kreatif • Tinggi: Patuh Prompt</p>
           </div>
-          <div>
-            <LabelWithIcon icon={ArrowLeftRight} text="Lebar" htmlFor="width" />
-            <input type="number" id="width" value={settings.width} onChange={(e) => handleSettingChange('width', e.target.value)} className={inputStyle} />
-          </div>
-          <div>
-            <LabelWithIcon icon={ArrowUpDown} text="Tinggi" htmlFor="height" />
-            <input type="number" id="height" value={settings.height} onChange={(e) => handleSettingChange('height', e.target.value)} className={inputStyle} />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <LabelWithIcon icon={ArrowLeftRight} text="Lebar" htmlFor="width" />
+              <input type="number" id="width" value={settings.width} onChange={(e) => handleSettingChange('width', e.target.value)} className={inputStyle} />
+            </div>
+            <div>
+              <LabelWithIcon icon={ArrowUpDown} text="Tinggi" htmlFor="height" />
+              <input type="number" id="height" value={settings.height} onChange={(e) => handleSettingChange('height', e.target.value)} className={inputStyle} />
+            </div>
           </div>
           
           <div>
             <LabelWithIcon icon={Sparkles} text="Kualitas Gambar" htmlFor="imageQuality" />
-            <div className="relative">
+            <div className="relative group">
               <select id="imageQuality" value={settings.imageQuality} onChange={(e) => onImageQualityChange(e.target.value as 'Standar' | 'HD' | 'Ultra')} className={selectStyle}>
-                <option value="Standar" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Standar</option>
-                <option value="HD" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">HD</option>
-                <option value="Ultra" className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Ultra</option>
+                <option value="Standar" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Standar (Cepat)</option>
+                <option value="HD" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">High Definition</option>
+                <option value="Ultra" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Ultra Realistic</option>
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-primary-500 transition-colors">
+                <ChevronDown size={18} />
+              </div>
             </div>
           </div>
 
           <div>
             <LabelWithIcon icon={Palette} text="Gaya Seni" htmlFor="artStyle" />
-            <div className="relative">
+            <div className="relative group">
               <select id="artStyle" value={settings.artStyle} onChange={(e) => handleSettingChange('artStyle', e.target.value)} className={selectStyle}>
                 {artStyles.map((category: ArtStyleCategory) => (
-                  <optgroup key={category.label} label={category.label} className="bg-light-bg dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+                  <optgroup key={category.label} label={category.label} className="bg-white dark:bg-slate-900 text-primary-500 font-black">
                     {category.options.map((style: ArtStyleOption) => (
-                      <option key={style.value} value={style.value} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                      <option key={style.value} value={style.value} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium">
                         {style.label}
                       </option>
                     ))}
                   </optgroup>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-primary-500 transition-colors">
+                <ChevronDown size={18} />
+              </div>
             </div>
           </div>
 
-          <div>
-            <LabelWithIcon icon={Cpu} text="Model AI" htmlFor="model" />
-            <div className="relative">
-              <select id="model" value={settings.model} onChange={(e) => handleSettingChange('model', e.target.value)} className={selectStyle}>
-                {models.length > 0 ? (models.map(model => (<option key={model} value={model} className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">{model}</option>))) : (<option disabled className="bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">Memuat...</option>)}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
-            </div>
-          </div>
-          <div>
-            <LabelWithIcon icon={ImageIcon} text="Jumlah Gambar" htmlFor="batchSize" />
-            <input type="number" id="batchSize" min="1" max="10" value={settings.batchSize} onChange={(e) => handleSettingChange('batchSize', e.target.value)} className={inputStyle} />
-          </div>
-          <div>
-            <LabelWithIcon icon={Sprout} text="Seed" htmlFor="seed" />
-            <input type="number" id="seed" value={settings.seed} onChange={(e) => handleSettingChange('seed', e.target.value)} className={inputStyle} />
-          </div>
-           {/* -- KONTROL UNTUK PARAMETER BARU -- */}
-          {isImageToImageModel && (
-            <div className="md:col-span-2">
-              <div className="flex items-center justify-between mb-2">
-                <LabelWithIcon icon={Link2} text="Reference Images (Image-to-Image)" />
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{filledReferenceCount}/{MAX_REFERENCE_IMAGES} images</span>
-              </div>
-              <div className="space-y-3">
-                {referenceImages.map((url, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <input
-                      type="text"
-                      value={url}
-                      onChange={(e) => handleReferenceImageChange(index, e.target.value)}
-                      className={`${inputStyle} flex-1`}
-                      placeholder={`https://example.com/reference-${index + 1}.jpg`}
-                    />
-                    {referenceImages.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveReferenceImage(index)}
-                        className="p-2 text-gray-500 hover:text-red-500 transition-colors"
-                        aria-label={`Remove reference image ${index + 1}`}
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+          <div className="relative" id="image-model-dropdown">
+            <LabelWithIcon icon={Cpu} text="Mesin AI" htmlFor="model" />
+            <div className="relative group">
+              <button
+                type="button"
+                onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
+                className="w-full flex items-center justify-between p-4 bg-slate-950/5 dark:bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 hover:border-primary-500/30 transition-all text-sm font-bold text-slate-800 dark:text-slate-200"
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <span className="uppercase">{settings.model}</span>
+                  {['flux-pro', 'openai', 'flux-realism', 'flux-anime'].includes(settings.model.toLowerCase()) && (
+                    <span className="px-1.5 py-0.5 rounded-md bg-primary-500/10 text-primary-500 text-[8px] font-black uppercase">PRO</span>
+                  )}
+                </div>
+                <ChevronDown 
+                  size={18} 
+                  className={`text-slate-400 transition-transform duration-300 ${isModelDropdownOpen ? 'rotate-180 text-primary-500' : ''}`} 
+                />
+              </button>
+
+              {isModelDropdownOpen && (
+                <div className="absolute top-full left-0 right-0 mt-2 z-[90] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="max-h-64 overflow-y-auto p-2">
+                    {models.length > 0 ? (
+                      models.map((model) => {
+                        const isPro = ['flux-pro', 'openai', 'flux-realism', 'flux-anime'].includes(model.toLowerCase());
+                        const isSelected = settings.model.toLowerCase() === model.toLowerCase();
+                        
+                        return (
+                          <button
+                            key={model}
+                            onClick={() => {
+                              handleSettingChange('model', model);
+                              setIsModelDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all ${
+                              isSelected 
+                                ? 'bg-primary-500/10 text-primary-500' 
+                                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className={`text-sm font-bold uppercase ${isSelected ? 'text-primary-500' : ''}`}>
+                                {model}
+                              </span>
+                              {isPro && (
+                                <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase ${
+                                  isSelected ? 'bg-primary-500/20' : 'bg-slate-100 dark:bg-white/5'
+                                }`}>
+                                  PRO
+                                </span>
+                              )}
+                            </div>
+                            {isSelected && (
+                              <div className="flex items-center gap-2">
+                                {isPro && hasByopKey && (
+                                  <span className="h-1.5 w-1.5 rounded-full bg-yellow-500 animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.5)]" />
+                                )}
+                                <div className="h-1.5 w-1.5 rounded-full bg-primary-500" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })
+                    ) : (
+                      <div className="p-4 text-center text-xs text-slate-500 italic">Memuat Model...</div>
                     )}
                   </div>
-                ))}
-              </div>
-              {referenceImages.length < MAX_REFERENCE_IMAGES && (
-                <button
-                  type="button"
-                  onClick={handleAddReferenceImage}
-                  className="mt-3 inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-purple-600 hover:text-purple-700"
-                >
-                  <Plus className="w-4 h-4" /> Add image
-                </button>
+                </div>
               )}
-              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Works best with models like nanobanana, seedream, or kontext. Paste direct image links to guide the generation.
-              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <LabelWithIcon icon={ImageIcon} text="Batch" htmlFor="batchSize" />
+              <input type="number" id="batchSize" min="1" max="10" value={settings.batchSize} onChange={(e) => handleSettingChange('batchSize', e.target.value)} className={inputStyle} />
+            </div>
+            <div>
+              <LabelWithIcon icon={Sprout} text="Seed" htmlFor="seed" />
+              <input type="number" id="seed" value={settings.seed} onChange={(e) => handleSettingChange('seed', e.target.value)} className={inputStyle} />
+            </div>
+          </div>
+
+          {isI2I && (
+            <div className="md:col-span-2 glass-inset p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4 text-primary-500" />
+                  <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">Gambar Referensi</span>
+                </div>
+                <span className="text-[10px] font-black text-primary-500 bg-primary-500/10 px-2 py-1 rounded-full uppercase">{filledReferenceCount}/{MAX_REFERENCE_IMAGES}</span>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {referenceImages.map((url, index) => (
+                  <div key={index} className="relative group">
+                    <div className="glass-card !bg-white/5 border-dashed border-2 border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 hover:border-primary-500/50 transition-all min-h-[120px]">
+                      {url ? (
+                        <div className="relative w-full aspect-video rounded-lg overflow-hidden group">
+                          <img src={url} alt="Preview" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                             <button
+                              type="button"
+                              onClick={() => handleRemoveReferenceImage(index)}
+                              className="p-2 bg-red-500 text-white rounded-lg hover:scale-110 transition-transform"
+                              title="Hapus"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <input
+                            type="file"
+                            id={`file-upload-${index}`}
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                if (file.size > 2 * 1024 * 1024) {
+                                  toast.error("File terlalu besar (Maks 2MB). Gunakan link untuk file besar.");
+                                  return;
+                                }
+                                const reader = new FileReader();
+                                reader.onloadend = () => handleReferenceImageChange(index, reader.result as string);
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor={`file-upload-${index}`}
+                            className="flex flex-col items-center cursor-pointer"
+                          >
+                            <Plus className="w-8 h-8 text-slate-400 group-hover:text-primary-500 transition-colors mb-2" />
+                            <span className="text-[10px] font-bold text-slate-500">UNGGAH GAMBAR</span>
+                          </label>
+                          <div className="w-full flex items-center gap-2 mt-2">
+                            <div className="h-px bg-white/10 flex-1" />
+                            <span className="text-[8px] font-bold text-slate-600">ATAU</span>
+                            <div className="h-px bg-white/10 flex-1" />
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="Tempel link gambar..."
+                            className="w-full bg-transparent border-b border-white/10 text-[10px] py-1 text-center focus:border-primary-500 outline-none"
+                            onBlur={(e) => handleReferenceImageChange(index, e.target.value)}
+                          />
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {referenceImages.length < MAX_REFERENCE_IMAGES && (
+                  <button
+                    type="button"
+                    onClick={handleAddReferenceImage}
+                    className="glass-card !bg-white/5 border-dashed border-2 border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-primary-500/50 transition-all opacity-60 hover:opacity-100"
+                  >
+                    <Plus className="w-6 h-6 text-slate-400" />
+                    <span className="text-[10px] font-bold text-slate-500">TAMBAH SLOT</span>
+                  </button>
+                )}
+              </div>
+              
+              <div className="mt-4 flex items-start gap-2 p-3 rounded-xl bg-primary-500/5 border border-primary-500/10">
+                <Sparkles size={14} className="text-primary-500 shrink-0 mt-0.5" />
+                <p className="text-[9px] font-medium text-slate-500 leading-relaxed italic">
+                  Tips: Gunakan model seperti <span className="text-primary-500 font-bold">Nanobanana</span> untuk mengubah gambar asli Anda menjadi gaya lain. Mendukung upload file langsung (Maks 2MB) atau link URL.
+                </p>
+              </div>
             </div>
           )}
-          <div className={checkboxContainerStyle}>
-            <input id="private" type="checkbox" checked={settings.private} onChange={(e) => handleSettingChange('private', e.target.checked)} className={checkboxStyle} />
-            <label htmlFor="private" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 cursor-pointer"><Lock size={16}/>Mode Privat</label>
+
+          <div className={checkboxContainerStyle} onClick={() => handleSettingChange('private', !settings.private)}>
+            <div className={`h-6 w-11 rounded-full transition-all duration-300 relative ${settings.private ? 'bg-primary-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+              <div className={`absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-all duration-300 ${settings.private ? 'translate-x-5' : ''}`} />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-black text-slate-800 dark:text-slate-200">Mode Privat</span>
+              <span className="text-[10px] font-bold text-slate-400">Sembunyikan dari galeri publik</span>
+            </div>
           </div>
-          <div className={checkboxContainerStyle}>
-            <input id="safe" type="checkbox" checked={settings.safe} onChange={(e) => handleSettingChange('safe', e.target.checked)} className={checkboxStyle} />
-            <label htmlFor="safe" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 cursor-pointer"><Shield size={16}/>Filter NSFW Ketat</label>
+
+          <div className={checkboxContainerStyle} onClick={() => handleSettingChange('safe', !settings.safe)}>
+            <div className={`h-6 w-11 rounded-full transition-all duration-300 relative ${settings.safe ? 'bg-primary-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+              <div className={`absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-all duration-300 ${settings.safe ? 'translate-x-5' : ''}`} />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-black text-slate-800 dark:text-slate-200">Filter NSFW</span>
+              <span className="text-[10px] font-bold text-slate-400">Keamanan konten ketat</span>
+            </div>
           </div>
-          <div className={checkboxContainerStyle}>
-            <input id="transparent" type="checkbox" checked={settings.transparent} onChange={(e) => handleSettingChange('transparent', e.target.checked)} className={checkboxStyle} disabled={settings.model !== 'gptimage'} />
-            <label htmlFor="transparent" className={`flex items-center gap-2 text-sm font-medium cursor-pointer ${settings.model !== 'gptimage' ? 'text-gray-400 dark:text-gray-500' : 'text-gray-600 dark:text-gray-300'}`}><EyeOff size={16}/>Latar Transparan (Hanya gptimage)</label>
+
+          <div 
+            className={`${checkboxContainerStyle} ${settings.model.toLowerCase().includes('gptimage') ? 'ring-2 ring-primary-500/50' : ''}`} 
+            onClick={() => handleSettingChange('transparent', !settings.transparent)}
+          >
+            <div className={`h-6 w-11 rounded-full transition-all duration-300 relative ${settings.transparent ? 'bg-primary-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+              <div className={`absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-all duration-300 ${settings.transparent ? 'translate-x-5' : ''}`} />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-black text-slate-800 dark:text-slate-200">Latar Transparan</span>
+                {settings.model.toLowerCase().includes('gptimage') && (
+                  <span className="animate-pulse flex h-2 w-2 rounded-full bg-primary-500" />
+                )}
+              </div>
+              <span className="text-[10px] font-bold text-slate-400">Hapus latar belakang (khusus gptimage)</span>
+            </div>
           </div>
         </div>
     </div>

@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import {
   createEmailTransporter,
@@ -38,8 +39,8 @@ const sanitizeProducts = (value: unknown): SubmissionProduct[] => {
     return [];
   }
 
-  return value
-    .map((entry) => {
+  return (value as any[])
+    .map((entry): SubmissionProduct | undefined => {
       if (!entry || typeof entry !== 'object') {
         return undefined;
       }
@@ -59,9 +60,9 @@ const sanitizeProducts = (value: unknown): SubmissionProduct[] => {
         price,
         description,
         image: image || undefined,
-      } satisfies SubmissionProduct;
+      };
     })
-    .filter((product): product is SubmissionProduct => Boolean(product));
+    .filter((product): product is SubmissionProduct => product !== undefined);
 };
 
 export async function POST(request: Request) {

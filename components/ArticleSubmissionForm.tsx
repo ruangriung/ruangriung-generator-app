@@ -94,8 +94,14 @@ export default function ArticleSubmissionForm({ isOpen, onClose }: ArticleSubmis
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex justify-center items-center"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className="text-2xl font-bold mb-6">Kirim Artikel Anda</h2>
         {submitStatus === 'success' ? (
           <div className="text-green-500 text-center">
@@ -116,7 +122,7 @@ export default function ArticleSubmissionForm({ isOpen, onClose }: ArticleSubmis
                 value={author}
                 onChange={event => setAuthor(event.target.value)}
                 required
-                className="p-2 border rounded dark:bg-gray-700"
+                className="p-2 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded dark:bg-gray-700"
               />
               <input
                 type="email"
@@ -124,7 +130,7 @@ export default function ArticleSubmissionForm({ isOpen, onClose }: ArticleSubmis
                 value={email}
                 onChange={event => setEmail(event.target.value)}
                 required
-                className="p-2 border rounded dark:bg-gray-700"
+                className="p-2 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded dark:bg-gray-700"
               />
             </div>
             <input
@@ -133,21 +139,21 @@ export default function ArticleSubmissionForm({ isOpen, onClose }: ArticleSubmis
               value={title}
               onChange={event => setTitle(event.target.value)}
               required
-              className="w-full p-2 border rounded dark:bg-gray-700"
+              className="w-full p-2 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded dark:bg-gray-700"
             />
             <input
               type="text"
               placeholder="Kategori (opsional)"
               value={category}
               onChange={event => setCategory(event.target.value)}
-              className="w-full p-2 border rounded dark:bg-gray-700"
+              className="w-full p-2 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded dark:bg-gray-700"
             />
             <textarea
               placeholder="Ringkasan Artikel"
               value={summary}
               onChange={event => setSummary(event.target.value)}
               rows={3}
-              className="w-full p-2 border rounded dark:bg-gray-700"
+              className="w-full p-2 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded dark:bg-gray-700"
             ></textarea>
             <textarea
               placeholder="Isi Artikel"
@@ -155,21 +161,21 @@ export default function ArticleSubmissionForm({ isOpen, onClose }: ArticleSubmis
               onChange={event => setContent(event.target.value)}
               required
               rows={10}
-              className="w-full p-2 border rounded dark:bg-gray-700"
+              className="w-full p-2 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded dark:bg-gray-700"
             ></textarea>
             <input
               type="text"
               placeholder="Tags (pisahkan dengan koma)"
               value={tags}
               onChange={event => setTags(event.target.value)}
-              className="w-full p-2 border rounded dark:bg-gray-700"
+              className="w-full p-2 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded dark:bg-gray-700"
             />
             <textarea
               placeholder="Referensi atau catatan tambahan (opsional)"
               value={references}
               onChange={event => setReferences(event.target.value)}
               rows={3}
-              className="w-full p-2 border rounded dark:bg-gray-700"
+              className="w-full p-2 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded dark:bg-gray-700"
             ></textarea>
 
             <div className="flex justify-center mb-6">

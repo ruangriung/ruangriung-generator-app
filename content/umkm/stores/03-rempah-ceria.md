@@ -7,7 +7,7 @@ location: Yogyakarta, DI Yogyakarta
 whatsappNumber: '6281234567003'
 tagline: >-
   Bumbu instan rumahan dengan rasa autentik Indonesia.
-heroImage: https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/03-rempah-ceria-hero.png
 description: >-
   Rempah Ceria menghadirkan bumbu instan siap pakai tanpa bahan pengawet, dibuat dari rempah segar pilihan dan resep turun temurun.
 highlights:

@@ -7,7 +7,7 @@ location: Gresik, Jawa Timur
 whatsappNumber: '6281330763633'
 tagline: >-
   Kelezatan burger dan kebab khas pesisir Gresik dalam cita rasa modern.
-heroImage: https://unsplash.com/id/foto/burger-dengan-selada-dan-tomat-sc5sTPMrVfk
+heroImage: /images/umkm/stores/16-burger-dan-kebab-gresik-hero.png
 description: >-
   Burger dan Kebab, Gresik menghadirkan sajian cepat saji yang mengedepankan cita rasa lokal pesisir Jawa Timur.
   Patty burgernya diracik dari daging sapi pilihan yang diperkaya bumbu khas, ebi, dan ikan teri halus untuk

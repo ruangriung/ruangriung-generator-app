@@ -3,11 +3,47 @@
 @tailwind utilities;
 
 body {
-  background-color: #e0e0e0; /* Default light background */
+  @apply bg-light-bg text-slate-900 transition-colors duration-300;
 }
 
 .dark body {
-  background-color: #2b2b2b; /* Use dark-bg color */
+  @apply bg-dark-bg text-slate-100;
+}
+
+.glass {
+  @apply backdrop-blur-xl bg-white/60 dark:bg-slate-900/60 border border-white/40 dark:border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.08)];
+}
+
+.glass-card {
+  @apply glass rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(31,38,135,0.15)] hover:border-primary-500/20 hover:-translate-y-1 shadow-lg;
+}
+
+.glass-inset {
+  @apply bg-slate-50 dark:bg-black/30 backdrop-blur-md border-2 border-slate-200 dark:border-white/10 shadow-inner rounded-2xl transition-all focus-within:border-primary-500/50;
+}
+
+.glass-button {
+  @apply glass px-4 py-2.5 rounded-xl border-2 border-slate-200/50 dark:border-white/10
+         hover:bg-primary-500 hover:text-white hover:border-primary-500 dark:hover:bg-primary-500 dark:hover:text-white
+         hover:shadow-lg hover:shadow-primary-500/20 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 font-bold text-sm shadow-md;
+}
+
+.glass-interactive {
+  @apply cursor-pointer hover:bg-white/80 dark:hover:bg-slate-800/80 border-2 border-transparent hover:border-primary-500/30 transition-all;
+}
+
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-primary-500 via-primary-400 to-accent-500 font-black;
+}
+
+.btn-primary {
+  @apply px-8 py-4 rounded-2xl bg-gradient-to-br from-primary-600 to-accent-600 text-white font-black shadow-xl shadow-primary-500/20
+         transition-all duration-500 hover:scale-[1.02] hover:shadow-primary-500/40 active:scale-[0.98] flex items-center justify-center gap-2;
+}
+
+.btn-secondary {
+  @apply px-8 py-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-slate-900 dark:text-white font-black
+         transition-all duration-500 hover:bg-white/20 hover:border-white/40 active:scale-[0.98] flex items-center justify-center gap-2;
 }
 
 /* Menghilangkan panah di input number */
@@ -164,4 +200,9 @@ input[type="range"].range-slider-colored-track::-moz-range-thumb {
 .dark input[type="range"].range-slider-colored-track::-webkit-slider-thumb,
 .dark input[type="range"].range-slider-colored-track::-moz-range-thumb {
   background-color: #a855f7; /* Warna thumb yang konsisten untuk dark mode (purple-500) */
+}
+
+/* Hide floating elements when mobile menu is open */
+.mobile-menu-open .rr-assistant-trigger {
+  display: none !important;
 }

@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState } from 'react';
-import { Video, Sparkles, Download, AlertCircle, Wand2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Video, Sparkles, Download, AlertCircle, Wand2, Image as ImageIcon, X, Plus } from 'lucide-react';
 import ButtonSpinner from './ButtonSpinner';
 import toast from 'react-hot-toast';
 
@@ -12,9 +12,48 @@ export default function TextToVideo() {
     const [seed, setSeed] = useState('-1');
     const [aspectRatio, setAspectRatio] = useState('16:9');
     const [model, setModel] = useState('veo');
+    const [models, setModels] = useState<string[]>(['veo', 'seedance', 'seedance-pro']);
+    const [inputImage, setInputImage] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
     const [isEnhancing, setIsEnhancing] = useState(false);
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
+
+    // Fetch dynamic models
+    useEffect(() => {
+        const fetchModels = async () => {
+            try {
+                const headers: Record<string, string> = {};
+                const apiKey = localStorage.getItem('pollinations_api_key');
+                if (apiKey) {
+                    headers['x-pollinations-key'] = apiKey;
+                }
+
+                const response = await fetch('/api/pollinations/models/image', { headers });
+                if (response.ok) {
+                    const rawModels: string[] = await response.json();
+                    // Filter for video models
+                    const videoModels = rawModels.filter(m => 
+                        m.toLowerCase().includes('video') || 
+                        m.toLowerCase().includes('veo') || 
+                        m.toLowerCase().includes('wan') || 
+                        m.toLowerCase().includes('seedance') || 
+                        m.toLowerCase().includes('ltx') || 
+                        m.toLowerCase().includes('reel')
+                    );
+                    if (videoModels.length > 0) {
+                        setModels(videoModels);
+                        // If current model not in list, set to first video model
+                        if (!videoModels.includes(model)) {
+                            setModel(videoModels[0]);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch video models:", error);
+            }
+        };
+        fetchModels();
+    }, []);
 
     const handleEnhancePrompt = async () => {
         if (!prompt) return;
@@ -24,8 +63,8 @@ export default function TextToVideo() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: 'openai', // Use decent model for enhancement
-                    prompt: `Enhance this video prompt to be detailed and cinematic, suitable for AI video generation. Keep it under 50 words: "${prompt}"`,
+                    model: 'openai', 
+                    messages: [{ role: 'user', content: `Enhance this video prompt to be detailed and cinematic, suitable for AI video generation. Keep it under 50 words: "${prompt}"` }],
                     json: false
                 })
             });
@@ -48,15 +87,9 @@ export default function TextToVideo() {
 
         setIsLoading(true);
         setVideoUrl(null);
-
+        
         try {
-            // Calculate width/height from aspect ratio
             const [wRatio, hRatio] = aspectRatio.split(':').map(Number);
-            // Base size roughly 1024x1024 area, adapted for ratio
-            // Pollinations likely takes width/height
-            // Let's assume standard HD-ish sizing scaling
-            // 16:9 -> 1280x720 or 1024x576. Let's send ratio string or dimensions if API supports.
-            // Based on Image API it accepts width/height.
             let width = 1024;
             let height = 1024;
             if (wRatio > hRatio) {
@@ -67,28 +100,32 @@ export default function TextToVideo() {
                 width = Math.round(1280 * (wRatio / hRatio));
             }
 
-            const params = new URLSearchParams({
-                model: model,
-                prompt: prompt,
-                negative_prompt: negativePrompt,
-                seed: seed === '-1' || !seed ? Math.floor(Math.random() * 1000000).toString() : seed,
-                width: width.toString(),
-                height: height.toString(),
+            const response = await fetch('/api/pollinations/video', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: model,
+                    prompt: prompt,
+                    negative_prompt: negativePrompt,
+                    seed: seed === '-1' || !seed ? Math.floor(Math.random() * 1000000).toString() : seed,
+                    width: width.toString(),
+                    height: height.toString(),
+                    image: inputImage || undefined
+                })
             });
 
-            const response = await fetch(`/api/pollinations/video?${params.toString()}`);
-
             if (!response.ok) {
-                throw new Error('Gagal membuat video');
+                const error = await response.json();
+                throw new Error(error.message || 'Gagal membuat video');
             }
 
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);
             setVideoUrl(url);
             toast.success('Video berhasil dibuat!');
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error('Terjadi kesalahan saat membuat video.');
+            toast.error(error.message || 'Terjadi kesalahan saat membuat video.');
         } finally {
             setIsLoading(false);
         }
@@ -106,85 +143,142 @@ export default function TextToVideo() {
     };
 
     return (
-        <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
-            <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-200 flex items-center justify-center gap-x-2">
-                    <Video className="text-purple-600" />
-                    Text to Video Generator
-                </h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">Buat video pendek dari teks menggunakan model AI terbaru.</p>
+        <div className="glass-card p-8 sm:p-10 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/5 blur-[80px] rounded-full -mr-32 -mt-32" />
+            
+            <div className="flex items-center gap-3 mb-8">
+                <div className="h-10 w-10 rounded-2xl bg-primary-500/10 flex items-center justify-center text-primary-500">
+                    <Video size={20} />
+                </div>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider">Text to Video</h2>
             </div>
+            <p className="text-xs font-bold text-slate-400 mb-8 uppercase tracking-widest">Ciptakan mahakarya visual bergerak dari kata-kata Anda.</p>
 
             <div className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Model
+                <div className="space-y-3">
+                    <label className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                        Pilih Mesin Video
                     </label>
-                    <div className="grid grid-cols-3 gap-2">
-                        {['veo', 'seedance', 'seedance-pro'].map((m) => (
+                    <div className="flex flex-wrap gap-2 max-h-[180px] overflow-y-auto p-1 custom-scrollbar">
+                        {models.map((m) => (
                             <button
                                 key={m}
                                 onClick={() => setModel(m)}
-                                className={`p-3 rounded-lg text-sm font-semibold capitalize border transition-all ${model === m
-                                    ? 'bg-purple-600 text-white border-purple-600 shadow-neumorphic-button'
-                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all whitespace-nowrap ${model === m
+                                    ? 'bg-primary-500 text-white border-primary-500 shadow-md shadow-primary-500/20'
+                                    : 'glass border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-primary-500/30'
                                     }`}
                             >
-                                {m.replace('-', ' ')}
+                                {m.replace(/-/g, ' ')}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <div className="glass-inset p-6 rounded-3xl">
+                    <label className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2">
+                        <ImageIcon size={14} className="text-primary-500" /> Gambar Referensi <span className="text-slate-400 lowercase">(opsional)</span>
+                    </label>
+                    
+                    <div className="relative group">
+                        <div className="glass-card !bg-white/5 border-dashed border-2 border-white/10 rounded-xl p-4 flex flex-col items-center justify-center gap-3 hover:border-purple-500/50 transition-all min-h-[100px]">
+                            {inputImage ? (
+                                <div className="relative w-full max-w-[200px] aspect-video rounded-lg overflow-hidden group">
+                                    <img src={inputImage} alt="Preview" className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button
+                                            type="button"
+                                            onClick={() => setInputImage('')}
+                                            className="p-2 bg-red-500 text-white rounded-lg hover:scale-110 transition-transform"
+                                            title="Hapus"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <input
+                                        type="file"
+                                        id="video-image-upload"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={async (e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                if (file.size > 2 * 1024 * 1024) {
+                                                    toast.error("File terlalu besar (Maks 2MB).");
+                                                    return;
+                                                }
+                                                const reader = new FileReader();
+                                                reader.onloadend = () => setInputImage(reader.result as string);
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }}
+                                    />
+                                    <label
+                                        htmlFor="video-image-upload"
+                                        className="flex flex-col items-center cursor-pointer"
+                                    >
+                                        <Plus className="w-8 h-8 text-gray-400 group-hover:text-purple-500 transition-colors mb-2" />
+                                        <span className="text-[10px] font-bold text-gray-500">UNGGAH GAMBAR REFERENSI</span>
+                                    </label>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                    <p className="text-[9px] text-slate-400 mt-4 italic font-bold">Gunakan foto sebagai titik awal untuk video AI Anda (I2V).</p>
+                </div>
+
+                <div className="space-y-3">
+                    <label className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                         Prompt Video
                     </label>
                     <textarea
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
-                        placeholder="Deskripsikan video yang ingin Anda buat... (Inggris lebih akurat)"
-                        className="w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow text-gray-800 dark:text-gray-200 h-32 resize-none"
+                        placeholder="Deskripsikan video yang ingin Anda buat..."
+                        className="w-full p-6 bg-slate-50 dark:bg-black/40 backdrop-blur-md rounded-3xl border-2 border-slate-200 dark:border-white/10 focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 transition-all text-slate-800 dark:text-slate-100 font-medium placeholder:text-slate-400 h-32 resize-none shadow-inner leading-relaxed"
                     />
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Negative Prompt (Elemen yang dihindari)
+                <div className="space-y-3">
+                    <label className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                        Negative Prompt <span className="text-slate-400 lowercase">(dihindari)</span>
                     </label>
                     <textarea
                         value={negativePrompt}
                         onChange={(e) => setNegativePrompt(e.target.value)}
                         placeholder="Blurry, distorted, bad quality..."
-                        className="w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow text-gray-800 dark:text-gray-200 h-20 resize-none"
+                        className="w-full p-6 bg-slate-50 dark:bg-black/40 backdrop-blur-md rounded-3xl border-2 border-slate-200 dark:border-white/10 focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 transition-all text-slate-800 dark:text-slate-100 font-medium placeholder:text-slate-400 h-24 resize-none shadow-inner leading-relaxed"
                     />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Seed (Opsional, -1 untuk acak)
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                        <label className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                            Seed <span className="text-slate-400 lowercase">(acak: -1)</span>
                         </label>
                         <input
                             type="number"
                             value={seed}
                             onChange={(e) => setSeed(e.target.value)}
-                            className="w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800 dark:text-gray-200"
+                            className="w-full p-4 bg-slate-50 dark:bg-black/40 rounded-2xl border-2 border-slate-200 dark:border-white/10 focus:border-primary-500/50 transition-all text-slate-800 dark:text-slate-200 font-bold"
                             placeholder="-1"
                         />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Aspect Ratio
+                    <div className="space-y-3">
+                        <label className="px-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                            Aspek Rasio
                         </label>
                         <select
                             value={aspectRatio}
                             onChange={(e) => setAspectRatio(e.target.value)}
-                            className="w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800 dark:text-gray-200 appearance-none"
+                            className="w-full p-4 bg-slate-50 dark:bg-black/40 rounded-2xl border-2 border-slate-200 dark:border-white/10 focus:border-primary-500/50 transition-all text-slate-800 dark:text-slate-200 font-bold appearance-none cursor-pointer"
                         >
-                            <option value="16:9">16:9 (Landscape)</option>
-                            <option value="9:16">9:16 (Portrait/Shorts)</option>
-                            <option value="1:1">1:1 (Square)</option>
+                            <option value="16:9" className="bg-white dark:bg-slate-900">16:9 (Landscape)</option>
+                            <option value="9:16" className="bg-white dark:bg-slate-900">9:16 (Portrait/Shorts)</option>
+                            <option value="1:1" className="bg-white dark:bg-slate-900">1:1 (Square)</option>
                         </select>
                     </div>
                 </div>

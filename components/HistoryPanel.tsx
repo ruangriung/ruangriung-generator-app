@@ -25,7 +25,7 @@ export default function HistoryPanel({ history, onSelect, onClear }: HistoryPane
       <div className="flex justify-between items-center mb-4">
         {/* <--- PERUBAHAN: Tambahkan dark:text-gray-300 */}
         <h2 className="text-xl font-bold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-          <History className="text-purple-600" />
+          <History className="text-primary-600" />
           Riwayat Generate
         </h2>
         <button 

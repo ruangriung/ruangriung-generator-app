@@ -263,7 +263,7 @@ Pastikan hanya mengembalikan objek JSON, tidak ada teks atau penjelasan lain seb
   };
 
   // Gaya CSS umum
-  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
+  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-2 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-800 dark:text-gray-200";
   const textareaStyle = `${inputStyle} pr-20 cursor-pointer resize-none`;
   const actionButtonStyle = "flex items-center gap-x-1.5 px-3 py-1.5 text-sm rounded-md transition-colors duration-200 bg-light-bg dark:bg-dark-bg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-700";
   const selectStyleWithIcon = `${inputStyle} appearance-none pr-10`;

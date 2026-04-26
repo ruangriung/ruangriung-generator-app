@@ -36,6 +36,21 @@ const RRAssistant = () => {
     }
   }, [pendingPrompt, setIsAssistantOpen, setPendingPrompt]);
 
+  // Onboarding: Welcome message for V2 transition
+  useEffect(() => {
+    if (isMounted) {
+      const hasSeenOnboarding = localStorage.getItem('has_seen_v2_onboarding');
+      if (!hasSeenOnboarding) {
+        // Hanya siapkan pesan, jangan buka otomatis
+        processAndSendMessage({
+          role: 'assistant',
+          content: "Halo! Selamat datang di **RuangRiung V2**. Saya adalah **RR AGENT**, asisten AI baru Anda.\n\nKami telah melakukan banyak perubahan besar pada antarmuka untuk membuat kreasi Anda lebih cepat dan mudah. \n\nAda yang bisa saya bantu jelaskan mengenai fitur-fitur baru kami hari ini?"
+        });
+        localStorage.setItem('has_seen_v2_onboarding', 'true');
+      }
+    }
+  }, [isMounted, setIsAssistantOpen, processAndSendMessage]);
+
   // Auto-scroll to bottom
   useEffect(() => {
     if (scrollRef.current) {
@@ -126,18 +141,18 @@ const RRAssistant = () => {
 
   return (
     <div 
-      className={`fixed z-50 transition-all duration-300 ease-in-out ${
+      className={`fixed ${isAssistantOpen ? 'z-[250]' : 'z-[150]'} transition-all duration-300 ease-in-out ${
          (isAssistantOpen && isFullScreen) 
           ? 'inset-0 w-full h-full sm:inset-4 sm:w-auto sm:h-auto' 
           : isAssistantOpen 
-            ? 'bottom-6 left-6 w-[95vw] sm:w-[450px] h-[80vh] max-h-[700px]' 
-            : 'bottom-6 left-6 w-auto h-auto'
-      }`}
+            ? 'bottom-6 right-6 w-[95vw] sm:w-[450px] h-[80vh] max-h-[700px]' 
+            : 'bottom-6 right-6 w-auto h-auto'
+      } ${!isAssistantOpen ? 'rr-assistant-trigger' : ''}`}
     >
       {!isAssistantOpen ? (
         <button
           onClick={() => setIsAssistantOpen(true)}
-          className="flex items-center gap-3 p-4 bg-purple-600 dark:bg-purple-500 text-white rounded-full shadow-2xl hover:scale-110 transition-all duration-300 group"
+          className="flex items-center gap-3 p-4 bg-gradient-to-br from-primary-600 to-indigo-600 dark:from-primary-500 dark:to-indigo-500 text-white rounded-full shadow-2xl shadow-primary-500/20 hover:scale-110 hover:shadow-primary-500/40 transition-all duration-500 group border border-white/20 animate-pulse"
           aria-label="Buka RR AGENT"
         >
           <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white/50 bg-white">
@@ -146,9 +161,9 @@ const RRAssistant = () => {
           <span className="font-bold text-sm pr-2 whitespace-nowrap">RR AGENT</span>
         </button>
       ) : (
-        <div className="w-full h-full bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-purple-200 dark:border-purple-800 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div className="w-full h-full bg-white dark:bg-slate-950 rounded-2xl shadow-2xl border border-primary-500/20 dark:border-primary-500/10 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300">
           {/* Header */}
-          <div className="p-4 bg-purple-600 text-white flex justify-between items-center shrink-0">
+          <div className="p-4 bg-gradient-to-r from-primary-600 to-indigo-600 text-white flex justify-between items-center shrink-0">
             <div className="flex items-center gap-3">
               <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/30 bg-white flex items-center justify-center">
                 <Image src="/logo.png" alt="RR" width={32} height={32} className="object-contain" />
@@ -228,7 +243,7 @@ const RRAssistant = () => {
                     </div>
                     <div className="max-w-xl p-4 rounded-xl bg-white dark:bg-gray-800 shadow-md flex flex-col gap-2">
                       <div className="flex items-center gap-2">
-                         <Loader2 className="animate-spin text-purple-600" size={16} />
+                         <Loader2 className="animate-spin text-primary-600" size={16} />
                          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
                            {typingText}
                          </span>
@@ -265,7 +280,7 @@ const RRAssistant = () => {
                       <button
                         type="submit"
                         disabled={!chatInput.trim() || isLoading}
-                        className="p-2.5 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-xl shadow-lg transition-all active:scale-95"
+                        className="p-2.5 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-xl shadow-lg transition-all active:scale-95"
                       >
                         <Send size={20} />
                       </button>

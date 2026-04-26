@@ -22,7 +22,7 @@ const TranslationAssistant = memo(({ onUsePrompt }: TranslationAssistantProps) =
   const [editingField, setEditingField] = useState<null | 'input' | 'output'>(null);
 
   // <--- PERUBAHAN: inputStyle, textareaStyle, selectStyle sekarang punya dark variant
-  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow text-gray-800 dark:text-gray-200";
+  const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-2 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-gray-800 dark:text-gray-200";
   const textareaStyle = `${inputStyle} min-h-[150px] resize-y`; // Tinggi awal dan bisa di-resize vertikal
   const selectStyle = `${inputStyle} appearance-none`;
 
@@ -121,7 +121,7 @@ const TranslationAssistant = memo(({ onUsePrompt }: TranslationAssistantProps) =
 
   return (
     // <--- PERUBAHAN: Tambahkan dark:bg-dark-bg dan dark:shadow-dark-neumorphic
-    <Accordion title={<div className="flex items-center gap-2"><Languages className="text-purple-600" />Asisten Terjemahan</div>} className="mt-6">
+    <Accordion title={<div className="flex items-center gap-2"><Languages className="text-primary-500" />Asisten Terjemahan</div>}>
       <div className="space-y-4">
         <div className="flex items-center gap-4">
           <div className="flex-1">

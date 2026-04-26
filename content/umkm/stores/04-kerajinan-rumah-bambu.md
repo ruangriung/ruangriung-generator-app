@@ -7,7 +7,7 @@ location: Bogor, Jawa Barat
 whatsappNumber: '6281234567004'
 tagline: >-
   Dekorasi rumah ramah lingkungan berbahan bambu pilihan.
-heroImage: https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/04-kerajinan-rumah-bambu-hero.png
 description: >-
   Kerajinan Rumah Bambu menciptakan furnitur dan dekorasi rumah minimalis yang terbuat dari bambu berkualitas tinggi. Produk dirakit oleh pengrajin yang terampil dengan sentuhan modern.
 highlights:

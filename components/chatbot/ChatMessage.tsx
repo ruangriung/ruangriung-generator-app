@@ -93,7 +93,7 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
       <span className="relative group my-2 block min-h-[200px]">
         {isLoading && (
           <span className="absolute inset-0 w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg flex flex-col items-center justify-center gap-2">
-            <Bot className="text-purple-400 animate-bounce" size={32} />
+            <Bot className="text-primary-400 animate-bounce" size={32} />
             <span className="text-[10px] text-gray-500 uppercase tracking-widest animate-pulse">Memproses Visual...</span>
           </span>
         )}
@@ -116,7 +116,7 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
         {!isLoading && !hasError && showDownload && (
           <button 
             onClick={() => downloadImage(imageUrl || '')}
-            className="absolute top-2 right-2 p-2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 text-purple-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md border border-purple-100"
+            className="absolute top-2 right-2 p-2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 text-primary-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md border border-primary-100"
             title="Unduh Gambar"
           >
             <Download size={16} />
@@ -164,8 +164,10 @@ export const ChatMessage = ({ message, messageId, onRegenerate }: ChatMessagePro
             <Image src="/logo.png" alt="RR" width={24} height={24} className="object-contain" />
         </div>
 
-      <div className={`max-w-xl flex flex-col`}>
-        <div className={`break-words ${isAssistant ? 'prose dark:prose-invert text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 shadow-md rounded-xl p-3 sm:p-4' : 'p-3 sm:p-4 rounded-xl bg-purple-600 text-white shadow-md'}`}>
+      <div className={`max-w-xl flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+        <div className={`break-words ${isAssistant 
+          ? 'prose dark:prose-invert text-slate-700 dark:text-slate-300 glass shadow-md rounded-[1.5rem] p-4 sm:p-5' 
+          : 'p-4 sm:p-5 rounded-[1.5rem] bg-gradient-to-br from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-500/20'}`}>
           {renderContent()}
         </div>
         

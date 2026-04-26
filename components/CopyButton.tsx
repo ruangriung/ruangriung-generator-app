@@ -23,10 +23,14 @@ export default function CopyButton({ text }: CopyButtonProps) {
   return (
     <button
       onClick={handleCopy}
-      className="inline-flex items-center px-3 py-1 text-sm text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+      className={`glass-button px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 shadow-md border-2 transition-all ${
+        copied 
+          ? 'bg-emerald-500 text-white border-emerald-500' 
+          : 'text-slate-600 dark:text-slate-400 border-primary-500/10 hover:border-primary-500/30'
+      }`}
     >
       {copied ? <Check size={16} /> : <Copy size={16} />}
-      <span className="ml-2">{copied ? 'Disalin' : 'Salin'}</span>
+      <span>{copied ? 'Copied' : 'Copy'}</span>
     </button>
   );
 }

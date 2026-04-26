@@ -22,90 +22,115 @@ const teamMembers = [
 
 export default function TentangKamiPage() {
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-          <div className="mb-8 flex justify-center">
-            <Link 
-              href="/" 
-              className="inline-flex items-center justify-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-            >
-              <ArrowLeft size={18} />
-              <span>Kembali ke Beranda</span>
-            </Link>
+    <main className="min-h-screen mesh-gradient py-20 px-4">
+      <div className="max-w-5xl mx-auto space-y-12">
+        {/* Hero Section */}
+        <div className="glass-card p-12 text-center space-y-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 blur-3xl rounded-full -mr-32 -mt-32" />
+          <div className="inline-flex p-4 rounded-2xl bg-primary-500/10 text-primary-500 relative z-10">
+            <ContactRound size={48} />
           </div>
-          
-          <div className="flex justify-center mb-6">
-            <ContactRound size={48} className="text-red-500" />
-          </div>
-
-          <h1 className="text-4xl font-bold text-center mb-4 text-gray-800 dark:text-gray-100">
-            Tentang kami RuangRiung
-          </h1>
-          <p className="text-center text-lg text-gray-600 dark:text-gray-400 mb-8">
-            Dari sebuah gambar terjalin sebuah persahabatan
-          </p>
-
-          <div className="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 text-justify">
-            <p>
-              Semuanya berawal dari sebuah grup Facebook yang ramai, dengan Motto <strong>"Dari sebuah gambar terjalin sebuah persahabatan"</strong> sebuah ruang digital tempat canda tawa, semangat, dan ide-ide liar tak pernah ada habisnya. Kami adalah <strong>RuangRiung</strong>, sebuah kolektif yang percaya bahwa kreativitas terbaik lahir dari kolaborasi, dukungan, dan sedikit kegilaan yang sehat. Visi kami sederhana: menjadi sumber inspirasi yang tak pernah kering bagi siapa saja.
-            </p><br/>
-            <p>
-              Misi kami adalah memberdayakan Anda untuk mandiri. Kami ingin setiap orang, terlepas dari latar belakangnya, memiliki alat untuk mengubah imajinasi menjadi kenyataan. Generator AI ini adalah perwujudan dari semangat tersebut. Ini bukan sekadar alat; ini adalah kanvas digital yang kami bangun khusus untuk Anda, para pejuang kreatif yang ingin berkarya tanpa batas. Kami ingin Anda tidak lagi bergantung pada sumber daya yang mahal atau proses yang rumit. Dengan beberapa klik, ide yang dulu hanya ada di kepala kini bisa divisualisasikan, diedit, dan dibagikan ke seluruh dunia.
-            </p><br/>
-            <p>
-              RuangRiung lebih dari sekadar aplikasi; ini adalah sebuah gerakan. Gerakan untuk terus belajar, berbagi, dan tentu saja, bersenang-senang. Kami mengundang Anda untuk tidak hanya menggunakan alat ini, tetapi juga untuk bergabung dengan percakapan hangat kami di Facebook. Jadilah bagian dari keluarga kami, tempat di mana setiap ide dihargai dan setiap karya dirayakan.
-            </p>
-            <p className="text-center font-semibold mt-6">
-              Mari ciptakan sesuatu yang luar biasa, bersama-sama!
+          <div className="space-y-4 relative z-10">
+            <h1 className="text-5xl font-black uppercase tracking-tight text-slate-900 dark:text-white">
+              Tentang RuangRiung
+            </h1>
+            <p className="text-lg font-medium text-slate-600 dark:text-slate-400 max-w-2xl mx-auto italic">
+              "Dari sebuah gambar terjalin sebuah persahabatan"
             </p>
           </div>
+        </div>
 
-          <div className="mt-10 text-center">
-            <a 
-              href="https://web.facebook.com/groups/1182261482811767/" // Ganti dengan URL grup Facebook Anda yang sebenarnya
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 py-3 px-6 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              <FacebookIcon size={20} />
-              Gabung Komunitas Kami
-            </a>
-          </div>
-          
-          <hr className="my-8 border-gray-300 dark:border-gray-600" />
-
-          <div>
-            <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-6 flex items-center justify-center gap-2">
-              <Users className="text-purple-600" /> Tim di Balik RuangRiung
+        {/* Narrative Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="glass-card p-10 space-y-6">
+            <h2 className="text-2xl font-black uppercase tracking-tight flex items-center gap-3 text-primary-500">
+              <Heart size={24} /> Our Story
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-              {teamMembers.map((member, index) => (
-                <a 
-                  key={index} 
-                  href={member.profileUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button hover:shadow-neumorphic-inset dark:hover:shadow-dark-neumorphic-inset transition-all text-center"
-                >
-                  <Image 
-                    src={member.imageUrl} 
-                    alt={`Foto profil ${member.name}`}
-                    width={64}
-                    height={64}
-                    className="rounded-full mb-2 border-2 border-black dark:border-purple-800"
-                  />
-                  <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200">{member.name}</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{member.role}</p>
-                  <span className="text-xs text-purple-600 dark:text-purple-400 mt-1">Lihat Profil</span>
-
-                </a>
-              ))}
+            <div className="prose prose-premium dark:prose-invert">
+              <p>
+                Semuanya berawal dari sebuah grup Facebook yang ramai, tempat canda tawa, semangat, dan ide-ide liar tak pernah ada habisnya. Kami adalah <strong>RuangRiung</strong>, sebuah kolektif yang percaya bahwa kreativitas terbaik lahir dari kolaborasi, dukungan, dan sedikit kegilaan yang sehat.
+              </p>
+              <p>
+                Generator AI ini adalah perwujudan dari semangat tersebut. Ini bukan sekadar alat; ini adalah kanvas digital yang kami bangun khusus untuk Anda, para pejuang kreatif yang ingin berkarya tanpa batas.
+              </p>
+            </div>
+            <div className="pt-6">
+              <a 
+                href="https://web.facebook.com/groups/1182261482811767/" 
+                target="_blank"
+                className="glass-button w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-blue-600 hover:text-white transition-all"
+              >
+                <FacebookIcon size={18} />
+                Join Our Community
+              </a>
             </div>
           </div>
 
-          <hr className="my-8 border-gray-300 dark:border-gray-600" />
+          <div className="glass-card p-10 space-y-6 bg-slate-900/5 dark:bg-white/5">
+            <h2 className="text-2xl font-black uppercase tracking-tight text-primary-500">Our Mission</h2>
+            <div className="space-y-6">
+              {[
+                { title: 'Independent Creativity', desc: 'Memberdayakan Anda untuk mengubah imajinasi menjadi kenyataan tanpa hambatan teknis.' },
+                { title: 'Digital Equality', desc: 'Menyediakan alat premium yang bisa diakses oleh siapa saja, di mana saja.' },
+                { title: 'Continuous Growth', desc: 'Membangun ekosistem tempat kita bisa belajar, berbagi, dan bersenang-senang bersama.' }
+              ].map((item) => (
+                <div key={item.title} className="glass-inset p-5 rounded-2xl space-y-1">
+                  <h3 className="text-sm font-black uppercase tracking-widest">{item.title}</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
+        {/* Team Section */}
+        <div className="space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-black uppercase tracking-tight flex items-center justify-center gap-3">
+              <Users className="text-primary-500" /> Core Collective
+            </h2>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">The brains behind the Riung</p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {teamMembers.map((member, index) => (
+              <a 
+                key={index} 
+                href={member.profileUrl} 
+                target="_blank" 
+                className="glass-card p-4 text-center group hover:scale-[1.02] transition-all"
+              >
+                <div className="relative w-20 h-20 mx-auto mb-4">
+                  <Image 
+                    src={member.imageUrl} 
+                    alt={member.name}
+                    fill
+                    className="rounded-2xl object-cover grayscale group-hover:grayscale-0 transition-all duration-500 ring-2 ring-slate-500/10 group-hover:ring-primary-500/30"
+                  />
+                </div>
+                <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-900 dark:text-white truncate">
+                  {member.name}
+                </h3>
+                <p className="text-[9px] font-black uppercase tracking-tight text-slate-400 mb-3 truncate">
+                  {member.role}
+                </p>
+                <div className="text-[8px] font-black uppercase tracking-widest text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                  View Profile
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Back Button */}
+        <div className="flex justify-center pt-8">
+          <Link 
+            href="/" 
+            className="glass-button px-12 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-4 group"
+          >
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+            Kembali ke Beranda
+          </Link>
         </div>
       </div>
     </main>

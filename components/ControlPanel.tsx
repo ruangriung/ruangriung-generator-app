@@ -1,11 +1,11 @@
 // components/ControlPanel.tsx
 'use client';
 
-import { useState, useEffect, Dispatch, SetStateAction, useCallback, useMemo, memo } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction, useCallback, useMemo, memo, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import AdvancedSettings from './AdvancedSettings';
 import ButtonSpinner from './ButtonSpinner';
-import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon, ChevronDown, Languages, Megaphone, Braces, FlaskConical } from 'lucide-react';
+import { Sparkles, X, Expand, Shuffle, Save, Wand2, Cpu, ArrowLeftRight, ArrowUpDown, Sprout, Settings, Image as ImageIcon, ChevronDown, Languages, Megaphone, Braces, FlaskConical, Shield, Info } from 'lucide-react';
 import TextareaModal from './TextareaModal';
 import Accordion from './Accordion';
 import PromptAssistant from './PromptAssistant';
@@ -47,9 +47,10 @@ interface ControlPanelProps {
   onImageQualityChange: (quality: 'Standar' | 'HD' | 'Ultra') => void;
   onModelSelect: (model: string) => void;
   onSurpriseMe: () => void;
+  onByopChange: () => void;
 }
 
-const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, onModelSelect, onSurpriseMe }: ControlPanelProps) => {
+const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, models, aspectRatio, onAspectRatioChange, onManualDimensionChange, onImageQualityChange, onModelSelect, onSurpriseMe, onByopChange }: ControlPanelProps) => {
   const { status } = useSession();
   const isAuthenticated = status === 'authenticated';
   const [editingField, setEditingField] = useState<null | 'prompt' | 'negativePrompt'>(null);
@@ -60,11 +61,22 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
   const [isGeneratingJson, setIsGeneratingJson] = useState(false);
   const [enhancementModels, setEnhancementModels] = useState<{ id: string; name: string }[]>([]);
   const [selectedEnhancementModel, setSelectedEnhancementModel] = useState('openai');
+  const [isBrainAssistOpen, setIsBrainAssistOpen] = useState(false);
+  const [hasByopKey, setHasByopKey] = useState(false);
+  const brainAssistRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setHasByopKey(!!localStorage.getItem('pollinations_api_key'));
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
     const fetchModels = async () => {
       try {
-        const response = await fetch('/api/pollinations/models/text');
+        const response = await fetch('/api/pollinations/models/text', {
+          signal: controller.signal
+        });
         if (!response.ok) throw new Error('Failed to fetch text models');
         const data = await response.json();
 
@@ -87,8 +99,10 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
           throw new Error('No models found');
         }
 
-      } catch (error) {
-        console.error("Failed to fetch models, using fallback", error);
+      } catch (error: any) {
+        if (error.name === 'AbortError') return;
+        
+        console.warn("Could not fetch dynamic models, using high-quality defaults.", error);
         const fallbackModels = [
           { id: 'openai', name: 'OpenAI GPT-4o Mini' },
           { id: 'mistral', name: 'Mistral Small 3.1 24B' },
@@ -102,6 +116,7 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
 
     fetchModels();
 
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -123,6 +138,25 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
     }
   }, [savedPrompts]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const targetNode = event.target as Node;
+      if (brainAssistRef.current && !brainAssistRef.current.contains(targetNode)) {
+        setIsBrainAssistOpen(false);
+      }
+    };
+
+    if (isBrainAssistOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isBrainAssistOpen]);
+
   const handleClearPrompt = useCallback(() => {
     setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: '' }));
   }, [setSettings]);
@@ -133,12 +167,18 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
 
   const callPromptApi = async (promptForApi: string, temperature = 0.5) => {
     try {
-      // Use internal API route
+      // Support BYOP
+      const byopKey = localStorage.getItem('pollinations_api_key');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (byopKey) {
+        headers['Authorization'] = `Bearer ${byopKey}`;
+      }
+
       const response = await fetch('/api/pollinations/text', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           model: selectedEnhancementModel,
           prompt: promptForApi,
@@ -354,252 +394,285 @@ const ControlPanel = memo(({ settings, setSettings, onGenerate, isLoading, model
   };
 
 
-  const featureButtonStyle = "flex-1 inline-flex items-center justify-center gap-x-2 px-3 py-2 bg-light-bg dark:bg-dark-bg text-gray-600 dark:text-gray-300 font-semibold rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed";
+  const featureButtonStyle = "glass-button flex-1 min-w-[140px]";
 
   return (
     <>
-      <div className="w-full p-6 md:p-8 bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic">
-
-        <details className="w-full group mb-6">
-          <summary className="flex items-center justify-between p-4 bg-light-bg dark:bg-dark-bg rounded-lg cursor-pointer list-none shadow-neumorphic-button dark:shadow-dark-neumorphic-button transition-shadow">
-            <div className="flex items-center gap-x-2">
-              <Settings className="w-5 h-5 text-purple-600" />
-              <span className="font-medium text-gray-700 dark:text-gray-300">
-                Pengaturan Lanjutan
-              </span>
-            </div>
-            <ChevronDown className="w-5 h-5 text-purple-600 transition-transform duration-300 group-open:rotate-90" />
-          </summary>
-          {!isAuthenticated && (
-            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 px-4">
-              Anda belum masuk. Beberapa fitur tertentu mungkin tetap terkunci, tetapi Anda bisa mengubah pengaturan lanjutan di sini.
-            </p>
-          )}
-          <AdvancedSettings
-            settings={settings}
-            setSettings={setSettings}
-            models={models}
-            aspectRatio={aspectRatio}
-            onAspectRatioChange={onAspectRatioChange}
-            onManualDimensionChange={onManualDimensionChange}
-            onImageQualityChange={onImageQualityChange}
-            onModelSelect={onModelSelect}
-            className="mt-0 pt-0"
-          />
-        </details>
-
-
-        {/* Textarea Prompt Utama */}
-        <div className="mb-4">
-          <label htmlFor="prompt" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Describe your imagination</label>
-          <div className="relative w-full">
-            <textarea
-              id="prompt"
-              className="w-full p-3 pr-20 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 resize-y h-[150px] text-gray-800 dark:text-gray-200"
-              value={settings.prompt}
-              onChange={(e) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: e.target.value }))}
-              placeholder="Ketikkan imajinasimu atau gunakan tombol bantuan di bawah..."
-            />
-            <div className="absolute top-2 right-2 flex gap-x-1">
-              {settings.prompt && (
-                <button onClick={handleClearPrompt} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus">
-                  <X size={18} />
-                </button>
+      <div className="w-full space-y-8 relative">
+        {/* Advanced Settings Accordion */}
+        <div className="glass rounded-[2rem] overflow-visible border border-white/20 dark:border-white/10 shadow-xl relative">
+          <details className="w-full group overflow-visible" suppressHydrationWarning>
+            <summary className="flex items-center justify-between p-6 cursor-pointer list-none hover:bg-white/10 transition-colors">
+              <div className="flex items-center gap-x-3">
+                <div className="h-10 w-10 rounded-xl bg-primary-500/10 flex items-center justify-center text-primary-500">
+                  <Settings className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 dark:text-white">Pengaturan Lanjutan</h3>
+                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Konfigurasi Model & Output</p>
+                </div>
+              </div>
+              <div className="h-10 w-10 rounded-full glass flex items-center justify-center group-open:rotate-180 transition-transform duration-500">
+                <ChevronDown className="w-5 h-5 text-primary-500" />
+              </div>
+            </summary>
+            <div className="p-6 pt-0 border-t border-white/10 bg-white/5 overflow-visible">
+              {!isAuthenticated && (
+                <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold flex items-center gap-3">
+                  <Shield size={16} />
+                  Anda belum masuk. Beberapa fitur premium mungkin terkunci.
+                </div>
               )}
-              <button onClick={() => setEditingField('prompt')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
-                <Expand size={18} />
-              </button>
+              <AdvancedSettings
+                settings={settings}
+                setSettings={setSettings}
+                models={models}
+                aspectRatio={aspectRatio}
+                onAspectRatioChange={onAspectRatioChange}
+                onManualDimensionChange={onManualDimensionChange}
+                onImageQualityChange={onImageQualityChange}
+                onModelSelect={onModelSelect}
+                onByopChange={onByopChange}
+              />
             </div>
-          </div>
+          </details>
         </div>
 
-        {/* Textarea Negative Prompt */}
-        <div>
-          <label htmlFor="negative-prompt" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Negative Prompt (Hal yang ingin dihindari)</label>
-          <div className="relative w-full">
-            <textarea
-              id="negative-prompt"
-              className="w-full p-3 pr-20 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 resize-y h-[150px] text-gray-800 dark:text-gray-200"
-              value={settings.negativePrompt}
-              onChange={(e) => setSettings((prev: GeneratorSettings) => ({ ...prev, negativePrompt: e.target.value }))}
-              placeholder="Contoh: blurry, ugly, deformed hands, watermark..."
-            />
-            <div className="absolute top-2 right-2 flex gap-x-1">
-              {settings.negativePrompt && (
-                <button onClick={handleClearNegativePrompt} className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Hapus">
-                  <X size={18} />
-                </button>
-              )}
-              <button onClick={() => setEditingField('negativePrompt')} className="p-1.5 text-gray-500 hover:text-purple-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Perbesar">
-                <Expand size={18} />
-              </button>
-            </div>
-          </div>
-          {/* Tombol Preset Negative Prompt */}
-          <div className="flex flex-wrap gap-2 mt-2">
-            <button onClick={() => addNegativePreset('kualitas')} className="text-xs px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-              + Kualitas Buruk
-            </button>
-            <button onClick={() => addNegativePreset('anatomi')} className="text-xs px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-              + Anatomi Buruk
-            </button>
-            <button onClick={() => addNegativePreset('teks')} className="text-xs px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-              + Teks/UI
-            </button>
-            <button onClick={() => addNegativePreset('cacat')} className="text-xs px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-              + Cacat/Duplikat
-            </button>
-          </div>
-        </div>
-
-        {/* Tombol Generate dan Aksi Prompt lainnya */}
-        <div className="mt-4 pt-4 border-t border-gray-300 dark:border-gray-600 flex flex-col justify-center items-center gap-3">
-          <button
-            onClick={onGenerate}
-            className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 text-white font-bold rounded-xl shadow-lg active:shadow-inner dark:active:shadow-dark-neumorphic-button-active disabled:bg-purple-400 disabled:cursor-not-allowed transition-all duration-150 w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <ButtonSpinner />
-                <span>Mohon Tunggu...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5 mr-2" />
-                <span>Buat {settings.batchSize > 1 ? `${settings.batchSize} Gambar` : 'Gambar'}</span>
-              </>
-            )}
-          </button>
-
-          <div className="grid grid-cols-1 gap-3 w-full mt-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            <button
-              onClick={handleRandomPrompt}
-              className={`${featureButtonStyle} order-1 sm:order-1`}
-              disabled={isRandomizing || isEnhancing || isGeneratingJson}
-            >
-              {isRandomizing ? <ButtonSpinner /> : <Shuffle size={16} />} <span>Acak Prompt</span>
-            </button>
-            <button
-              onClick={onSurpriseMe}
-              className={`${featureButtonStyle} order-2 sm:order-2`}
-              disabled={isLoading || isRandomizing || isEnhancing || isGeneratingJson}
-            >
-              <FlaskConical size={16} /> <span>Surprise Me!</span>
-            </button>
-            <button
-              onClick={handleEnhancePrompt}
-              className={`${featureButtonStyle} order-3 sm:order-3`}
-              disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}
-            >
-              {isEnhancing ? <ButtonSpinner /> : <Wand2 size={16} />} <span>Sempurnakan</span>
-            </button>
-            <button
-              onClick={handleGenerateJsonPrompt}
-              className={`${featureButtonStyle} order-4 sm:order-5`}
-              disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}
-            >
-              {isGeneratingJson ? <ButtonSpinner /> : <Braces size={16} />} <span>JSON</span>
-            </button>
-            <div className="col-span-2 sm:col-span-1 order-5 sm:order-4 flex flex-col gap-2 w-full sm:hidden">
-              <label htmlFor="enhancement-model" className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                Pilih Model AI untuk Bantuan Prompt
-              </label>
-              <div className="relative">
-                <select
-                  id="enhancement-model"
-                  value={selectedEnhancementModel}
-                  onChange={(event) => setSelectedEnhancementModel(event.target.value)}
-                  className="w-full appearance-none p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800 dark:text-gray-200"
-                  disabled={enhancementModels.length === 0}
-                >
-                  {enhancementModels.length > 0 ? (
-                    enhancementModels.map((model) => (
-                      <option key={model.id} value={model.id} className="bg-white dark:bg-gray-700">
-                        {model.name} ({model.id})
-                      </option>
-                    ))
-                  ) : (
-                    <option>Memuat...</option>
+        {/* Prompt Input Section */}
+        <div className="glass-card relative z-[0]">
+          <div className="space-y-6">
+            <div>
+              <div className="flex items-center justify-between mb-3 px-1">
+                <label htmlFor="prompt" className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">
+                  Deskripsikan Imajinasi Anda
+                </label>
+                <div className="flex gap-2">
+                   {settings.prompt && (
+                    <button onClick={handleClearPrompt} className="h-8 w-8 flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm" title="Hapus">
+                      <X size={16} />
+                    </button>
                   )}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
+                  <button onClick={() => setEditingField('prompt')} className="h-8 w-8 flex items-center justify-center rounded-lg bg-primary-500/10 border border-primary-500/20 text-primary-600 dark:text-primary-400 hover:bg-primary-500 hover:text-white transition-all shadow-sm" title="Perbesar">
+                    <Expand size={16} />
+                  </button>
+                </div>
+              </div>
+              <div className="relative group">
+                <textarea
+                  id="prompt"
+                  className="w-full p-6 bg-slate-950/5 dark:bg-black/40 backdrop-blur-md rounded-[2rem] border-2 border-slate-200 dark:border-white/10 focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 transition-all duration-500 resize-none h-[180px] text-slate-800 dark:text-slate-100 font-medium placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-inner"
+                  value={settings.prompt}
+                  onChange={(e) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: e.target.value }))}
+                  placeholder="Ketikkan imajinasimu di sini... (Contoh: Kucing astronot di planet Mars, gaya sinematik)"
+                />
               </div>
             </div>
-            {/* PERUBAHAN DI SINI: Menambahkan kelas col-span-2 sm:col-span-1 */}
-            <button
-              onClick={handleSavePrompt}
-              className={`${featureButtonStyle} ${isSaving ? '!text-green-500' : ''} col-span-2 sm:col-span-1 order-6 sm:order-6`}
-              disabled={isSaving || !settings.prompt}
-            >
-              <Save size={16} /> <span>{isSaving ? 'Tersimpan!' : 'Simpan'}</span>
-            </button>
+
+            <div>
+              <div className="flex items-center justify-between mb-3 px-1">
+                <label htmlFor="negative-prompt" className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">
+                  Negative Prompt <span className="text-slate-400 dark:text-slate-500 font-bold ml-1">(Hal yang dihindari)</span>
+                </label>
+                <div className="flex gap-2">
+                  {settings.negativePrompt && (
+                    <button onClick={handleClearNegativePrompt} className="h-8 w-8 flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm" title="Hapus">
+                      <X size={16} />
+                    </button>
+                  )}
+                  <button onClick={() => setEditingField('negativePrompt')} className="h-8 w-8 flex items-center justify-center rounded-lg bg-primary-500/10 border border-primary-500/20 text-primary-600 dark:text-primary-400 hover:bg-primary-500 hover:text-white transition-all shadow-sm" title="Perbesar">
+                    <Expand size={16} />
+                  </button>
+                </div>
+              </div>
+              <textarea
+                id="negative-prompt"
+                className="w-full p-4 bg-slate-950/5 dark:bg-black/40 backdrop-blur-md rounded-2xl border-2 border-slate-200 dark:border-white/10 focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 transition-all duration-500 resize-none h-[100px] text-slate-800 dark:text-slate-100 font-medium text-sm placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-inner"
+                value={settings.negativePrompt}
+                onChange={(e) => setSettings((prev: GeneratorSettings) => ({ ...prev, negativePrompt: e.target.value }))}
+                placeholder="blurry, ugly, watermark, text, low quality..."
+              />
+              <div className="flex flex-wrap gap-2 mt-4">
+                {[
+                  { id: 'kualitas', label: 'Kualitas Buruk' },
+                  { id: 'anatomi', label: 'Anatomi Buruk' },
+                  { id: 'teks', label: 'Teks/Logo' },
+                  { id: 'cacat', label: 'Cacat/Grid' },
+                ].map((preset) => (
+                  <button 
+                    key={preset.id}
+                    onClick={() => addNegativePreset(preset.id as any)} 
+                    className="px-4 py-2 rounded-xl glass text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary-500 hover:border-primary-500/30 transition-all"
+                  >
+                    + {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="hidden w-full flex-col gap-2 sm:flex">
-            <label htmlFor="enhancement-model-desktop" className="text-sm font-medium text-gray-600 dark:text-gray-300">
-              Pilih Model AI untuk Bantuan Prompt
-            </label>
-            <div className="relative">
-                <select
-                  id="enhancement-model-desktop"
-                  value={selectedEnhancementModel}
-                  onChange={(event) => setSelectedEnhancementModel(event.target.value)}
-                  className="w-full appearance-none p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800 dark:text-gray-200"
+          <div className="mt-10 pt-8 border-t border-white/10 flex flex-col items-center gap-6">
+            <button
+              onClick={onGenerate}
+              className="btn-primary w-full max-w-md h-16 text-lg tracking-widest"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <ButtonSpinner />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-6 h-6" />
+                  <span>GENERATE {settings.batchSize > 1 ? `(${settings.batchSize})` : ''}</span>
+                </>
+              )}
+            </button>
+
+            <div className="flex flex-wrap justify-center gap-3 w-full">
+              <button
+                onClick={handleRandomPrompt}
+                className={featureButtonStyle}
+                disabled={isRandomizing || isEnhancing || isGeneratingJson}
+              >
+                {isRandomizing ? <ButtonSpinner className="text-primary-500" /> : <Shuffle size={18} />} <span>Acak Idea</span>
+              </button>
+              <button
+                onClick={onSurpriseMe}
+                className={featureButtonStyle}
+                disabled={isLoading || isRandomizing || isEnhancing || isGeneratingJson}
+              >
+                <FlaskConical size={18} /> <span>Surprise!</span>
+              </button>
+              <button
+                onClick={handleEnhancePrompt}
+                className={featureButtonStyle}
+                disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}
+              >
+                {isEnhancing ? <ButtonSpinner className="text-primary-500" /> : <Wand2 size={18} />} <span>Sempurnakan</span>
+              </button>
+              <button
+                onClick={handleGenerateJsonPrompt}
+                className={featureButtonStyle}
+                disabled={isRandomizing || isEnhancing || isGeneratingJson || !settings.prompt}
+              >
+                {isGeneratingJson ? <ButtonSpinner className="text-primary-500" /> : <Braces size={18} />} <span>Prompt JSON</span>
+              </button>
+              <button
+                onClick={handleSavePrompt}
+                className={`${featureButtonStyle} ${isSaving ? 'text-green-500' : ''}`}
+                disabled={isSaving || !settings.prompt}
+              >
+                <Save size={18} /> <span>{isSaving ? 'Tersimpan' : 'Simpan Idea'}</span>
+              </button>
+            </div>
+
+            <div className="w-full max-w-md relative" id="brain-assist-dropdown" ref={brainAssistRef}>
+              <div className="flex items-center gap-2 mb-3 px-1">
+                <Cpu size={14} className="text-primary-500" />
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                  AI Brain Assist
+                </label>
+                {hasByopKey && (
+                  <span className="px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-500 text-[8px] font-black uppercase tracking-widest border border-yellow-500/20">
+                    Premium Active
+                  </span>
+                )}
+              </div>
+              
+              <div className="relative group">
+                <button
+                  type="button"
+                  onClick={() => setIsBrainAssistOpen(!isBrainAssistOpen)}
+                  className="w-full flex items-center justify-between p-4 bg-slate-950/5 dark:bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 hover:border-primary-500/30 transition-all text-sm font-bold text-slate-800 dark:text-slate-200"
                   disabled={enhancementModels.length === 0}
                 >
-                  {enhancementModels.length > 0 ? (
-                    enhancementModels.map((model) => (
-                      <option key={model.id} value={model.id} className="bg-white dark:bg-gray-700">
-                        {model.name} ({model.id})
-                      </option>
-                    ))
-                  ) : (
-                    <option>Memuat...</option>
-                  )}
-                </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-300 pointer-events-none" />
+                  <span className="truncate">
+                    {enhancementModels.find(m => m.id === selectedEnhancementModel)?.name || 'Memuat Model...'}
+                  </span>
+                  <ChevronDown className={`w-5 h-5 text-slate-400 group-hover:text-primary-500 transition-all ${isBrainAssistOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isBrainAssistOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-2 z-[80] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="max-h-60 overflow-y-auto p-2">
+                      {enhancementModels.map((model) => (
+                        <button
+                          key={model.id}
+                          onClick={() => {
+                            setSelectedEnhancementModel(model.id);
+                            setIsBrainAssistOpen(false);
+                          }}
+                          className={`w-full flex items-center gap-3 p-3 rounded-xl text-left text-xs font-bold transition-all ${
+                            selectedEnhancementModel === model.id
+                            ? 'bg-primary-500/10 text-primary-500'
+                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          }`}
+                        >
+                          <div className={`h-2 w-2 rounded-full ${selectedEnhancementModel === model.id ? 'bg-primary-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-700'}`} />
+                          {model.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        <PromptAssistant
-          onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
-        />
-
-        <TranslationAssistant
-          onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
-        />
-
-        <ImageAnalysisAssistant
-          onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
-        />
+        {/* Assistants Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 overflow-visible">
+          <PromptAssistant
+            onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
+          />
+          <TranslationAssistant
+            onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
+          />
+          <ImageAnalysisAssistant
+            onUsePrompt={(newPrompt) => setSettings((prev: GeneratorSettings) => ({ ...prev, prompt: newPrompt }))}
+          />
+        </div>
 
         {savedPrompts.length > 0 && (
-          <Accordion
-            title={<div className="flex items-center gap-2"><Save size={16} className="text-purple-600" />Prompt Tersimpan ({savedPrompts.length})</div>}
-            className="mt-4"
-          >
-            <div className="flex justify-end mb-4">
-              <button onClick={handleClearAllSavedPrompts} className="text-sm text-red-500 hover:underline">
-                Hapus Semua
-              </button>
-            </div>
-            <ul className="space-y-3">
-              {savedPrompts.map((prompt, index) => (
-                <li key={index} className="flex justify-between items-center bg-white dark:bg-gray-700 p-3 rounded-lg shadow-md dark:shadow-dark-neumorphic cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                  <span onClick={() => handleSelectSavedPrompt(prompt)} className="flex-grow text-sm text-gray-700 dark:text-gray-200 truncate mr-4">
-                    {prompt}
-                  </span>
-                  <button onClick={() => handleDeleteSavedPrompt(prompt)} className="p-1 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" title="Hapus">
-                    <X size={16} />
+          <div className="glass rounded-[2rem] overflow-hidden border border-white/20 dark:border-white/10 shadow-xl mt-8">
+            <Accordion
+              title={
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-primary-500/10 flex items-center justify-center text-primary-500">
+                    <Save size={18} />
+                  </div>
+                  <span className="font-black">Prompt Tersimpan ({savedPrompts.length})</span>
+                </div>
+              }
+            >
+              <div className="p-4 space-y-4">
+                <div className="flex justify-end">
+                  <button onClick={handleClearAllSavedPrompts} className="text-xs font-black uppercase tracking-widest text-red-500 hover:opacity-70 transition-opacity">
+                    Hapus Semua
                   </button>
-                </li>
-              ))}
-            </ul>
-          </Accordion>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {savedPrompts.map((prompt, index) => (
+                    <div key={index} className="group relative flex items-center justify-between p-4 glass rounded-2xl hover:border-primary-500/30 transition-all cursor-pointer">
+                      <p onClick={() => handleSelectSavedPrompt(prompt)} className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate pr-8">
+                        {prompt}
+                      </p>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleDeleteSavedPrompt(prompt); }} 
+                        className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-500 transition-all"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Accordion>
+          </div>
         )}
       </div>
+
       <TextareaModal
         isOpen={editingField !== null}
         onClose={() => setEditingField(null)}

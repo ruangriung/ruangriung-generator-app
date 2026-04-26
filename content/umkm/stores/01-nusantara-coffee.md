@@ -7,7 +7,7 @@ location: Bandung, Jawa Barat
 whatsappNumber: '6281234567001'
 tagline: >-
   Mempersembahkan biji kopi single origin terbaik dari seluruh Nusantara.
-heroImage: https://images.unsplash.com/photo-1507133750040-4a8f57021571?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/01-nusantara-coffee-hero.png
 description: >-
   Nusantara Coffee Roasters bekerja langsung dengan petani kopi Indonesia untuk menghadirkan racikan biji kopi spesialti dengan profil rasa khas wilayah. Sangat cocok untuk para penikmat kopi manual brew maupun espresso.
 highlights:

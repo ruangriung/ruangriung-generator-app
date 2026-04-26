@@ -63,7 +63,15 @@ const mergeUniqueModels = (...modelGroups: string[][]): string[] => {
 
 const DEFAULT_BASE_MODELS = ['flux'];
 const PREMIUM_MODELS: string[] = [];
-const IMAGE_TO_IMAGE_MODELS = new Set(['nanobanana', 'seedream', 'kontext']);
+const IMAGE_TO_IMAGE_MODELS = new Set(['nanobanana', 'seedream', 'kontext', 'upscale', 'edit']);
+
+const isImageToImageModel = (modelName: string): boolean => {
+  const normalized = modelName.toLowerCase();
+  return IMAGE_TO_IMAGE_MODELS.has(normalized) || 
+         normalized.includes('edit') || 
+         normalized.includes('image-to-image') ||
+         normalized.includes('img2img');
+};
 const MAX_REFERENCE_IMAGES = 4;
 const createEmptyReferenceImages = () => [''];
 
@@ -174,9 +182,10 @@ export default function Generator() {
     setHistory(prev => [newItem, ...prev.filter(i => i.imageUrl !== newItem.imageUrl)].slice(0, 15));
   }, []);
 
+  const [byopKeyVersion, setByopKeyVersion] = useState(0);
+
   useEffect(() => {
     let hasStoredSettings = false;
-
     try {
       const storedSettings = localStorage.getItem('ruangriung_generator_settings');
       if (storedSettings) {
@@ -191,7 +200,6 @@ export default function Generator() {
           });
         }
       }
-
       if (!hasStoredSettings) {
         const unsavedPrompt = localStorage.getItem('ruangriung_unsaved_prompt');
         if (unsavedPrompt) {
@@ -203,18 +211,32 @@ export default function Generator() {
           });
         }
       }
-
       const savedHistory = localStorage.getItem('ruangriung_history');
       if (savedHistory) setHistory(JSON.parse(savedHistory));
     } catch (error) { console.error("Gagal memuat pengaturan atau riwayat:", error); }
     finally { setIsHistoryLoaded(true); }
+  }, []);
 
+  useEffect(() => {
     const fetchImageModels = async () => {
       try {
-        const response = await fetch('/api/pollinations/models/image');
+        const byopKey = localStorage.getItem('pollinations_api_key');
+        const headers: Record<string, string> = {};
+        if (byopKey) {
+          headers['Authorization'] = `Bearer ${byopKey}`;
+        }
+
+        const response = await fetch('/api/pollinations/models/image', { headers });
         if (!response.ok) throw new Error(`Gagal mengambil model: ${response.statusText}`);
         const data = await response.json();
-        const fetchedModels = extractModelNames(data);
+        const rawFetchedModels = extractModelNames(data);
+        
+        // Filter out video models from image endpoint
+        const fetchedModels = rawFetchedModels.filter(m => 
+          !m.toLowerCase().includes('video') && 
+          !m.toLowerCase().includes('mp4')
+        );
+
         const combinedModels = fetchedModels.length
           ? mergeUniqueModels(fetchedModels, PREMIUM_MODELS)
           : mergeUniqueModels(DEFAULT_BASE_MODELS, PREMIUM_MODELS);
@@ -227,7 +249,7 @@ export default function Generator() {
             if (normalizedModels.has(prev.model.toLowerCase())) return prev;
             const fallbackModel = fetchedModels[0] ?? DEFAULT_BASE_MODELS[0];
             if (!fallbackModel) return prev;
-            const shouldClearInput = !IMAGE_TO_IMAGE_MODELS.has(fallbackModel.toLowerCase());
+            const shouldClearInput = !isImageToImageModel(fallbackModel);
             return {
               ...prev,
               model: fallbackModel,
@@ -241,9 +263,7 @@ export default function Generator() {
       }
     };
     fetchImageModels();
-
-
-  }, []);
+  }, [byopKeyVersion]);
 
   useEffect(() => {
     try {
@@ -297,30 +317,79 @@ export default function Generator() {
 
     const generatePromises = Array(batchSize).fill(0).map(async (_, i) => {
       const batchSeed = currentSeed + i;
-      let finalUrl = '';
       try {
-        const params = new URLSearchParams({
-          model, width: width.toString(), height: height.toString(), seed: batchSeed.toString(),
-          enhance: imageQuality !== 'Standar' ? 'true' : 'false', nologo: 'true', referrer: 'ruangriung.my.id',
-          guidance_scale: cfg_scale.toString(),
-        });
-        if (negativePrompt) params.append('negative_prompt', negativePrompt);
-        if (isPrivate) params.append('private', 'true');
-        if (safe) params.append('safe', 'true');
-        if (transparent && model === 'gptimage') params.append('transparent', 'true');
         const referenceImages = inputImages
           .filter(url => typeof url === 'string' && url.trim().length > 0)
           .slice(0, MAX_REFERENCE_IMAGES);
-        if (referenceImages.length && (IMAGE_TO_IMAGE_MODELS.has(model.toLowerCase()) || model === 'gptimage')) {
-          referenceImages.forEach(url => params.append('image', url));
+
+        const usePost = referenceImages.length > 0;
+        const byopKey = localStorage.getItem('pollinations_api_key');
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+        if (byopKey) headers['Authorization'] = `Bearer ${byopKey}`;
+
+        // === OPTIMIZATION: Direct Client Fetch ===
+        // If we have a BYOP Key or we are in a simple GET mode, we can try to fetch directly from Pollinations
+        // to save Vercel Edge Request and Bandwidth quotas.
+        
+        const baseUrl = byopKey 
+          ? `https://gen.pollinations.ai/image/${encodeURIComponent(fullPrompt)}`
+          : `https://pollinations.ai/p/${encodeURIComponent(fullPrompt)}`;
+
+        if (usePost) {
+          const body = {
+            prompt: fullPrompt,
+            model, width, height, seed: batchSeed,
+            enhance: imageQuality !== 'Standar' ? 'true' : 'false',
+            nologo: 'true', referrer: 'ruangriung.my.id',
+            guidance_scale: cfg_scale,
+            negative_prompt: negativePrompt,
+            private: isPrivate,
+            safe,
+            transparent: (transparent && model.toLowerCase().includes('gptimage')),
+            image: referenceImages[0], // Pollinations usually takes the first for i2i
+          };
+          
+          // For POST/i2i, we still use the API route as it handles multi-part/json complexity better
+          // but it will use our Redirect optimization if possible.
+          const response = await fetch('/api/pollinations/image', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body),
+          });
+
+          if (!response.ok) throw new Error(`Gagal membuat gambar #${i + 1}`);
+          const blob = await response.blob();
+          return URL.createObjectURL(blob);
+        } else {
+          const params = new URLSearchParams({
+            model, width: width.toString(), height: height.toString(), seed: batchSeed.toString(),
+            enhance: imageQuality !== 'Standar' ? 'true' : 'false', nologo: 'true', referrer: 'ruangriung.my.id',
+            guidance_scale: cfg_scale.toString(),
+          });
+          if (negativePrompt) params.append('negative_prompt', negativePrompt);
+          if (isPrivate) params.append('private', 'true');
+          if (safe) params.append('safe', 'true');
+          if (transparent && model.toLowerCase().includes('gptimage')) params.append('transparent', 'true');
+
+          // Check if we can bypass Vercel entirely
+          const canBypass = byopKey || !process.env.NEXT_PUBLIC_FORCE_PROXY; // Add a flag if needed
+          
+          if (canBypass) {
+            const directUrl = `${baseUrl}?${params.toString()}`;
+            const response = await fetch(directUrl, { headers });
+            if (!response.ok) throw new Error(`Gagal membuat gambar #${i + 1}`);
+            const blob = await response.blob();
+            return URL.createObjectURL(blob);
+          } else {
+            const finalUrl = `/api/pollinations/image?prompt=${encodeURIComponent(fullPrompt)}&${params.toString()}`;
+            const response = await fetch(finalUrl, { headers });
+            if (!response.ok) throw new Error(`Gagal membuat gambar #${i + 1}`);
+            const blob = await response.blob();
+            return URL.createObjectURL(blob);
+          }
         }
-
-        // Use internal API route
-        finalUrl = `/api/pollinations/image?prompt=${encodeURIComponent(fullPrompt)}&${params.toString()}`;
-
-        const response = await fetch(finalUrl);
-        if (!response.ok) throw new Error(`Gagal membuat gambar #${i + 1}`);
-        return response.url;
 
       } catch (error: any) {
         toast.error(error.message || `Gagal membuat gambar #${i + 1}`);
@@ -405,6 +474,7 @@ export default function Generator() {
           onImageQualityChange={onImageQualityChange}
           onModelSelect={handleModelSelect}
           onSurpriseMe={handleSurpriseMe} // Tambahkan fungsi surprise me
+          onByopChange={() => setByopKeyVersion(v => v + 1)}
         />
         <ImageDisplay
           ref={imageDisplayRef}

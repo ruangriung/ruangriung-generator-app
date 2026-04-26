@@ -1,4 +1,5 @@
 // ruangriung/ruangriung-generator-app/ruangriung-generator-app-3a68b1c6536b7de1915cdc5d286c7ce19bf9481e/app/api/gemini/route.ts
+export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 
 interface Message {

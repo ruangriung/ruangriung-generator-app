@@ -45,7 +45,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isMounted, setIsMounted] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const activeChat = sessions?.find((s) => s.id === activeSessionId);
 
@@ -93,18 +93,23 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [sessions, isMounted]);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchAndSetModels = async () => {
       try {
-        const responseText = await fetch('/api/pollinations/models/text');
+        const responseText = await fetch('/api/pollinations/models/text', {
+          signal: controller.signal
+        });
         if (!responseText.ok) throw new Error('Gagal ambil model.');
         const textModels = await responseText.json();
         const availableModels = ["Flux", "gptimage", ...textModels.map((m: any) => typeof m === 'string' ? m : m.name), "openai", "gemini-fast"];
         setModels([...new Set(availableModels)]);
       } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return;
         setModels(["Flux", "gptimage", "openai", "gemini-fast", "deepseek", "grok"]);
       }
     };
     if (isMounted) fetchAndSetModels();
+    return () => controller.abort();
   }, [isMounted]);
 
   const updateMessages = (sessionId: number, updater: (prevMessages: Message[]) => Message[]) => {
@@ -122,6 +127,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     setSessions(prev => [newSession, ...(prev ?? [])]);
     setActiveSessionId(newSession.id);
+  };
+
+  const stopGenerating = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setIsLoading(false);
+      toast.success("Generasi dihentikan.");
+    }
   };
 
   const deleteAllSessions = () => {
@@ -142,6 +156,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const processAndSendMessage = async (newMessage: Message) => {
     if (isLoading || !activeChat) return;
+    
+    stopGenerating();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    
     const currentActiveChatId = activeChat.id;
     updateMessages(currentActiveChatId, prev => [...prev, newMessage]);
     setIsLoading(true);
@@ -177,15 +196,15 @@ KEMAMPUAN GENERASI GAMBAR (PENTING):
 - Jika pengguna meminta untuk dibuatkan gambar, lukisan, atau visual, Anda HARUS membantu mereka.
 - Caranya adalah dengan memberikan deskripsi singkat dan menyertakan Markdown Image dengan format: 
   ![image](https://pollinations.ai/p/[PROMPT]?model=zimage&width=1024&height=1024&nologo=true&seed=[RANDOM])
-- Ganti [PROMPT] dengan deskripsi visual yang sangat detail dalam Bahasa Inggris (English) agar hasilnya maksimal. Pastikan prompt di-URL-encode dengan benar (gunakan %20 untuk spasi).
+- Ganti [PROMPT] dengan deskripsi visual yang sangat detail dalam Bahasa Inggris (English) agar hasilnya maksimal. Pastikan prompt di-URL-encode dengan benar (gunakan %20 for spaces).
 - Ganti [RANDOM] dengan angka acak bulat (integer).
-- Contoh: Jika user minta "Gambar kucing lucu", Anda kirim pesan: "Tentu! Ini gambar kucing lucu untuk Anda: ![image](https://pollinations.ai/p/cute%20cat%20fluffy%20highly%20detailed?model=zimage&width=1024&height=1024&nologo=true&seed=42)\n\njika ingin lebih banya model gunakan Tools kami di beranda"
+- Contoh: Jika user minta "Gambar kucing lucu", Anda kirim pesan: "Tentu! Ini gambar kucing lucu untuk Anda: ![image](https://pollinations.ai/p/cute%20cat%20fluffy%20highly%20detailed?model=zimage&width=1024&height=1024&nologo=true&seed=42)\n\njika ingin lebih banyak model gunakan Tools kami di beranda"
 
 Catatan Khusus:
 - Selalu sebutkan RuangRiung dengan bangga.
 - Ajak pengguna bergabung ke Grup Facebook RuangRiung jika mereka ingin berinteraksi lebih dalam dengan komunitas.
 - Jika ditanya siapa Anda, jawablah Anda adalah asisten resmi RuangRiung.
-- Sertakan teks "jika ingin lebih banya model gunakan Tools kami di beranda" (cetak tebal atau miring jika perlu) di akhir setiap pesan yang menghasilkan gambar.`
+- Sertakan teks "jika ingin lebih banyak model gunakan Tools kami di beranda" (cetak tebal atau miring jika perlu) di akhir setiap pesan yang menghasilkan gambar.`
       };
 
       const userText = typeof newMessage.content === 'string' ? newMessage.content : (newMessage.content as any).text || '';
@@ -197,6 +216,7 @@ Catatan Khusus:
         const response = await fetch('/api/pollinations/text', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
           body: JSON.stringify({
             model: 'openai',
             messages: [
@@ -208,18 +228,21 @@ Catatan Khusus:
         const reply = await response.text();
         updateMessages(currentActiveChatId, prev => [...prev, { role: 'assistant', content: reply }]);
       } else if (isImageGenerationMode || isImageIntent) {
-        // Jika mode gambar aktif ATAU terdeteksi permintaan gambar via teks
         let promptText = userText;
         if (isImageIntent && !isImageGenerationMode) {
-          // Bersihkan teks perintah untuk mengambil prompt inti
           promptText = userText.replace(imageKeywords, '').trim() || 'Pemandangan indah digital art';
         }
 
         const seed = Math.floor(Math.random() * 1000000);
         const proxyUrl = `/api/pollinations/image?prompt=${encodeURIComponent(promptText)}&model=zimage&width=1024&height=1024&nologo=true&seed=${seed}`;
         
-        // Buat jeda buatan agar indikator "sedang mengetik" terlihat lebih lama
-        await new Promise(resolve => setTimeout(resolve, 2500));
+        await new Promise((resolve, reject) => {
+          const timeout = setTimeout(resolve, 2500);
+          controller.signal.addEventListener('abort', () => {
+            clearTimeout(timeout);
+            reject(new Error('Aborted'));
+          });
+        });
 
         const assistantReply = { 
           type: 'image_url', 
@@ -235,6 +258,7 @@ Catatan Khusus:
         const response = await fetch('/api/pollinations/text', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
           body: JSON.stringify({
             model: activeChat.model,
             messages: [
@@ -250,9 +274,13 @@ Catatan Khusus:
         updateMessages(currentActiveChatId, prev => [...prev, { role: 'assistant', content: reply }]);
       }
     } catch (error: any) {
+      if (error.name === 'AbortError' || error.message === 'Aborted') return;
       toast.error(error.message);
     } finally {
-      setIsLoading(false);
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+        setIsLoading(false);
+      }
     }
   };
 
@@ -260,7 +288,7 @@ Catatan Khusus:
     <ChatContext.Provider value={{
       sessions, setSessions, activeSessionId, setActiveSessionId,
       activeChat, isLoading, models, processAndSendMessage, startNewChat,
-      stopGenerating: () => {}, regenerateResponse: () => {}, deleteAllSessions,
+      stopGenerating, regenerateResponse: () => {}, deleteAllSessions,
       setModelForImage,
       isAssistantOpen, setIsAssistantOpen,
       pendingPrompt, setPendingPrompt

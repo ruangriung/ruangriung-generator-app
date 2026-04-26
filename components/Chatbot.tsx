@@ -129,47 +129,109 @@ const Chatbot = memo(({ initialPrompt, autoSend = false }: ChatbotProps) => {
     );
   }
 
-  const formElementStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow text-gray-800 dark:text-gray-200";
+  const formElementStyle = "w-full p-3 glass-inset border-2 border-slate-200 dark:border-white/10 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-slate-900 dark:text-white font-medium";
 
   const imageGenerationModels = ['Flux', 'gptimage'];
   const isImageModeActive = imageGenerationModels.includes(activeChat.model);
 
   return (
     <>
-      <div className="w-full flex h-[90vh] bg-light-bg dark:bg-dark-bg rounded-2xl shadow-neumorphic dark:shadow-dark-neumorphic overflow-hidden relative">
-        <aside className={`absolute top-0 left-0 h-full z-20 md:static md:z-auto w-full md:w-1/4 md:min-w-[280px] p-2 sm:p-4 border-r border-gray-300 dark:border-gray-700 flex flex-col bg-light-bg dark:bg-dark-bg transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-          <div className="flex justify-between items-center mb-4 gap-2">
-            <button onClick={startNewChat} className="flex-grow flex items-center justify-center gap-2 p-3 rounded-lg font-semibold text-gray-700 dark:text-gray-200 bg-light-bg dark:bg-dark-bg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset"><Plus size={18} /> Chat Baru</button>
+      <div className="w-full flex h-[85vh] glass rounded-[2.5rem] border border-white/20 dark:border-white/10 overflow-hidden relative shadow-2xl">
+        {/* Sidebar Overlay for Mobile */}
+        {isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[25] md:hidden transition-opacity"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        <aside className={`absolute top-0 left-0 h-full z-[30] md:static md:z-auto w-[280px] p-4 border-r border-slate-200 dark:border-white/10 flex flex-col glass dark:bg-slate-900/90 transition-transform duration-500 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+          <div className="flex justify-between items-center mb-6 gap-2">
+            <button 
+              onClick={startNewChat} 
+              className="flex-grow flex items-center justify-center gap-2 p-3 rounded-2xl font-black text-xs uppercase tracking-widest text-white bg-primary-600 hover:bg-primary-500 shadow-lg shadow-primary-500/20 transition-all active:scale-95"
+            >
+              <Plus size={16} /> Chat Baru
+            </button>
             <button
               onClick={deleteAllSessions}
               title="Hapus semua riwayat"
-              className="p-3 text-red-500 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset"
+              className="p-3 text-red-500 glass-button !p-3 !rounded-2xl"
             >
-              <Trash2 size={18} />
+              <Trash2 size={16} />
             </button>
-            <button onClick={() => setIsSidebarOpen(false)} className="md:hidden ml-2 p-2 text-gray-600 dark:text-gray-300"><X size={20} /></button>
+            <button onClick={() => setIsSidebarOpen(false)} className="md:hidden ml-2 p-2 text-slate-500 hover:text-primary-500 transition-colors">
+              <X size={24} />
+            </button>
           </div>
-          <div className="flex-1 overflow-y-auto space-y-2 pr-2">
+
+          <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 px-2">Riwayat Percakapan</p>
             {sessions.map(session => (
-              <div key={session.id} onClick={() => handleSelectSession(session.id)} className={`p-2 rounded-lg cursor-pointer group ${activeSessionId === session.id ? 'bg-purple-100 dark:bg-purple-900/50' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
-                {isRenaming === session.id ? (<input ref={renameInputRef} type="text" value={renameInput} onChange={e => setRenameInput(e.target.value)} onBlur={() => handleSaveRename(session.id)} onKeyDown={e => e.key === 'Enter' && handleSaveRename(session.id)} className="w-full bg-transparent text-sm font-medium focus:outline-none" />
-                ) : (<div className="flex justify-between items-center"><p className="text-sm text-gray-700 dark:text-gray-300 truncate">{session.title}</p><div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity"><button onClick={(e) => { e.stopPropagation(); handleRename(session); }} className="p-1 text-gray-500 hover:text-purple-600"><Edit size={14} /></button><button onClick={(e) => { e.stopPropagation(); handleDeleteSession(session.id); }} className="p-1 text-gray-500 hover:text-red-500"><Trash2 size={14} /></button></div></div>)}
+              <div 
+                key={session.id} 
+                onClick={() => handleSelectSession(session.id)} 
+                className={`p-3 rounded-2xl cursor-pointer group transition-all border-2 ${
+                  activeSessionId === session.id 
+                    ? 'bg-primary-500/10 border-primary-500/30' 
+                    : 'border-transparent hover:bg-slate-100 dark:hover:bg-white/5'
+                }`}
+              >
+                {isRenaming === session.id ? (
+                  <input 
+                    ref={renameInputRef} 
+                    type="text" 
+                    value={renameInput} 
+                    onChange={e => setRenameInput(e.target.value)} 
+                    onBlur={() => handleSaveRename(session.id)} 
+                    onKeyDown={e => e.key === 'Enter' && handleSaveRename(session.id)} 
+                    className="w-full bg-transparent text-sm font-bold focus:outline-none text-primary-500" 
+                  />
+                ) : (
+                  <div className="flex justify-between items-center">
+                    <p className={`text-sm truncate font-bold ${activeSessionId === session.id ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-300'}`}>
+                      {session.title}
+                    </p>
+                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity gap-1">
+                      <button onClick={(e) => { e.stopPropagation(); handleRename(session); }} className="p-1 text-slate-400 hover:text-primary-500">
+                        <Edit size={14} />
+                      </button>
+                      <button onClick={(e) => { e.stopPropagation(); handleDeleteSession(session.id); }} className="p-1 text-slate-400 hover:text-red-500">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </aside>
 
-        <main className="flex-1 flex flex-col h-full">
-          <header className="p-3 sm:p-4 border-b border-gray-300 dark:border-gray-700 flex justify-between items-center gap-4">
-            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-gray-600 dark:text-gray-300"><Menu size={20} /></button>
-            <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 truncate flex-1">{activeChat.title}</h2>
+        <main className="flex-1 flex flex-col h-full bg-white/30 dark:bg-slate-950/20 backdrop-blur-sm">
+          <header className="p-4 border-b border-slate-200 dark:border-white/10 flex justify-between items-center gap-4 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl transition-colors">
+                <Menu size={20} />
+              </button>
+              <div className="h-8 w-8 rounded-lg bg-primary-500/10 flex items-center justify-center text-primary-500">
+                <MessageSquare size={18} />
+              </div>
+              <h2 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-md">
+                {activeChat.title}
+              </h2>
+            </div>
           </header>
 
-          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-6">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 custom-scrollbar">
             {activeChat.messages.length === 0 && !isLoading && (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                <MessageSquare size={48} />
-                <p className="mt-4">Pilih model atau klik tombol "Gambar" untuk memulai.</p>
+              <div className="flex flex-col items-center justify-center h-full text-slate-400 text-center space-y-4">
+                <div className="h-20 w-20 rounded-3xl bg-slate-100 dark:bg-white/5 flex items-center justify-center">
+                  <Bot size={40} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">RuangRiung Chatbot</h3>
+                  <p className="text-sm font-medium max-w-xs mx-auto">Pilih model atau klik tombol "Gambar" untuk memulai percakapan kreatif.</p>
+                </div>
               </div>
             )}
             {activeChat.messages.map((msg, index) => (
@@ -181,46 +243,46 @@ const Chatbot = memo(({ initialPrompt, autoSend = false }: ChatbotProps) => {
               />
             ))}
             {isLoading && (
-              <div className="flex items-start gap-2 sm:gap-4">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-600 flex items-center justify-center text-white shrink-0">
-                  <Bot size={22} />
+              <div className="flex items-start gap-4 animate-in fade-in slide-in-from-left-2 duration-300">
+                <div className="w-10 h-10 rounded-2xl bg-primary-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-primary-500/20">
+                  <Bot size={22} className="animate-pulse" />
                 </div>
-                <div className="max-w-xl p-4 rounded-xl bg-white dark:bg-gray-800 shadow-md flex items-center">
+                <div className="glass shadow-md rounded-2xl p-5 flex items-center">
                   <div className="dot-flashing"></div>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="p-2 sm:p-4 border-t border-gray-300 dark:border-gray-700 space-y-2">
-            <div className="flex items-center gap-2 sm:gap-4 px-1">
-              <label htmlFor="model-select" className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300"><Cpu size={16} /> Model:</label>
-              <select
-                id="model-select"
-                value={activeChat.model}
-                onChange={(e) => handleModelChange(e.target.value)}
-                className={`${formElementStyle} flex-1 text-sm appearance-none`}
-              >
-                {models.map(m => <option key={m} value={m}>{m}</option>)}
-              </select>
-              <div className="flex flex-col items-center">
+          <div className="p-4 sm:p-6 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md border-t border-slate-200 dark:border-white/10 space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10 shrink-0">
+                <Cpu size={14} className="text-primary-500" /> Model AI
+              </div>
+              <div className="flex-1 w-full flex items-center gap-2">
+                <select
+                  id="model-select"
+                  value={activeChat.model}
+                  onChange={(e) => handleModelChange(e.target.value)}
+                  className="w-full p-2.5 glass-inset !rounded-xl text-xs font-bold appearance-none cursor-pointer hover:border-primary-500/50 transition-all text-slate-900 dark:text-white"
+                >
+                  {models.map(m => <option key={m} value={m} className="bg-white dark:bg-slate-900">{m}</option>)}
+                </select>
                 <button
                   onClick={handleImageShortcutClick}
-                  className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg font-semibold bg-light-bg dark:bg-dark-bg text-gray-700 dark:text-gray-200 transition-all duration-150
-                          ${isImageModeActive
-                      ? 'shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset text-purple-600'
-                      : 'shadow-neumorphic-button dark:shadow-dark-neumorphic-button active:shadow-neumorphic-inset dark:active:shadow-dark-neumorphic-inset'
+                  className={`flex items-center gap-2 px-4 py-2.5 text-xs rounded-xl font-black uppercase tracking-widest transition-all duration-300 shrink-0
+                    ${isImageModeActive
+                      ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
+                      : 'glass-button'
                     }`}
                   title="Pilih mode gambar"
                 >
-                  <ImageIcon size={16} />
+                  <ImageIcon size={14} />
                   <span>Gambar</span>
                 </button>
-                {isImageModeActive && (
-                  <span className="text-xs font-semibold text-green-600 dark:text-green-400 mt-1">Mode Gambar Aktif</span>
-                )}
               </div>
             </div>
+            
             <ChatInput
               isLoading={isLoading}
               onSendMessage={handleSendMessage}

@@ -48,6 +48,10 @@ const faqData: FAQItem[] = [
     answer: "Tentu saja! Aplikasi ini adalah Progressive Web App (PWA), yang berarti Anda bisa menginstalnya di perangkat desktop atau mobile Anda untuk akses yang lebih cepat dan pengalaman seperti aplikasi asli. Cari tombol 'Install App' di banner atas."
   },
   {
+    question: "Apa itu fitur BYOP (Bring Your Own Pollen)?",
+    answer: "Fitur BYOP memungkinkan Anda untuk memasukkan kunci API pribadi dari pollinations.ai yang nantinya akan membukamodel-model AI populer seperti OpenAI, Google Gemini Flash, Nanobanana, Groq, Seedream 5.0 Lite,Seedance Pro-Fast dll Dengan menggunakan kunci Anda sendiri, Anda mendapatkan kontrol penuh atas batas penggunaan dan biaya, serta data Anda diproses langsung menggunakan kredensial Anda. Kunci ini hanya disimpan di browser lokal Anda (localStorage) dan tidak pernah dikirim ke server RuangRiung."
+  },
+  {
     question: "Bagaimana jika saya mengalami masalah atau memiliki pertanyaan lain?",
     answer: "Jika Anda mengalami kendala atau memiliki pertanyaan lebih lanjut, jangan ragu untuk menghubungi kami melalui halaman kontak atau media sosial yang tertera di bagian bawah halaman."
   }

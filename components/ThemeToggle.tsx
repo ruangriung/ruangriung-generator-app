@@ -45,45 +45,31 @@ export default function ThemeToggle({ variant = 'default' }: ThemeToggleProps) {
 
 
   if (!mounted) {
-    return <div className="h-[52px] w-full bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset animate-pulse"></div>;
+    return <div className="h-[52px] w-full glass rounded-2xl animate-pulse"></div>;
   }
 
   const getButtonStyle = (buttonTheme: 'light' | 'dark' | 'system') => {
     const isActive = theme === buttonTheme;
     const baseStyles =
-      'flex-1 flex justify-center items-center p-3 rounded-lg transition-all duration-200 mx-0.5 focus-visible:outline-none';
+      'flex-1 flex justify-center items-center py-2.5 rounded-xl transition-all duration-300 mx-0.5 focus-visible:outline-none relative';
 
-    if (variant === 'umkm') {
-      return `${baseStyles} focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 ${
-        isActive
-          ? 'bg-indigo-600 text-white shadow-sm dark:bg-indigo-500'
-          : 'bg-transparent text-slate-500 hover:bg-indigo-50/80 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-slate-800/70 dark:hover:text-indigo-400'
-      }`;
+    if (isActive) {
+      return `${baseStyles} text-primary-500 dark:text-primary-400 scale-[1.3] drop-shadow-[0_0_10px_rgba(139,92,246,0.5)]`;
     }
 
-    return `${baseStyles} ${
-      isActive
-        ? 'bg-purple-600 text-white shadow-neumorphic-button dark:shadow-dark-neumorphic-button'
-        : 'bg-light-bg dark:bg-dark-bg text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-500'
-    }`;
+    return `${baseStyles} text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 hover:scale-110`;
   };
 
   return (
-    <div
-      className={`w-full flex items-center p-1 rounded-xl min-h-[52px] ${
-        variant === 'umkm'
-          ? 'border border-slate-200 bg-white/90 shadow-sm shadow-slate-200/60 backdrop-blur dark:border-slate-700 dark:bg-slate-900/70 dark:shadow-slate-900/40'
-          : 'bg-light-bg dark:bg-dark-bg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset'
-      }`}
-    >
+    <div className="w-full flex items-center p-1.5 glass rounded-2xl border border-white/20 dark:border-white/10 shadow-xl min-h-[52px]">
       <button onClick={() => setTheme('light')} className={getButtonStyle('light')} aria-label="Set Light Theme">
-        <Sun size={20} />
+        <Sun size={18} className={theme === 'light' ? 'animate-spin-slow' : ''} />
       </button>
       <button onClick={() => setTheme('dark')} className={getButtonStyle('dark')} aria-label="Set Dark Theme">
-        <Moon size={20} />
+        <Moon size={18} className={theme === 'dark' ? 'animate-bounce-slow' : ''} />
       </button>
       <button onClick={() => setTheme('system')} className={getButtonStyle('system')} aria-label="Set System Theme">
-        <Laptop size={20} />
+        <Laptop size={18} />
       </button>
     </div>
   );

@@ -28,14 +28,6 @@ const nextConfig = {
       },
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: '/v1/:path*',
-        destination: '/v1/:path*',
-      },
-    ];
-  },
 };
 
 module.exports = withPWA({

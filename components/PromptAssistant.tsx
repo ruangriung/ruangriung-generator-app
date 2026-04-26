@@ -21,7 +21,7 @@ const LabelWithIcon = ({ icon: Icon, text, htmlFor, colorClass }: { icon: React.
   </div>
 );
 
-const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-gray-800 dark:text-gray-200";
+const inputStyle = "w-full p-3 bg-light-bg dark:bg-dark-bg rounded-lg shadow-neumorphic-inset dark:shadow-dark-neumorphic-inset border-2 border-slate-200 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-800 dark:text-gray-200";
 const textareaStyle = `${inputStyle} resize-none`;
 const selectStyle = `${inputStyle} appearance-none`;
 
@@ -148,7 +148,7 @@ const PromptAssistant = memo(({ onUsePrompt }: PromptAssistantProps) => {
 
   return (
     <>
-      <Accordion title={<div className="flex items-center gap-2"><Megaphone className="text-purple-600" />Asisten Prompt</div>} className="mt-6">
+      <Accordion title={<div className="flex items-center gap-2"><Megaphone className="text-primary-500" />Asisten Prompt</div>}>
         <div className="space-y-4">
           <div>
             <LabelWithIcon icon={Cpu} text="Pilih Model Asisten" htmlFor="assistant-model" />

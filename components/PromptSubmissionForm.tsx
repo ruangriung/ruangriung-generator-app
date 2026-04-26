@@ -265,7 +265,7 @@ export default function PromptSubmissionForm({
               value={author}
               onChange={e => setAuthor(e.target.value)}
               required
-              className="p-3 border rounded-lg dark:bg-gray-700"
+              className="p-3 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded-lg dark:bg-gray-700"
             />
             <input
               type="email"
@@ -273,7 +273,7 @@ export default function PromptSubmissionForm({
               value={email}
               onChange={e => setEmail(e.target.value)}
               required={!isEditMode}
-              className="p-3 border rounded-lg dark:bg-gray-700"
+              className="p-3 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded-lg dark:bg-gray-700"
             />
           </div>
           <input
@@ -281,21 +281,21 @@ export default function PromptSubmissionForm({
             placeholder="Link Facebook (opsional)"
             value={facebook}
             onChange={e => setFacebook(e.target.value)}
-            className="w-full p-3 border rounded-lg mb-4 dark:bg-gray-700"
+            className="w-full p-3 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded-lg mb-4 dark:bg-gray-700"
           />
           <input
             type="url"
             placeholder="Link Referensi (opsional)"
             value={link}
             onChange={e => setLink(e.target.value)}
-            className="w-full p-3 border rounded-lg mb-4 dark:bg-gray-700"
+            className="w-full p-3 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded-lg mb-4 dark:bg-gray-700"
           />
           <input
             type="url"
             placeholder="Link Gambar (opsional)"
             value={image}
             onChange={e => setImage(e.target.value)}
-            className="w-full p-3 border rounded-lg mb-4 dark:bg-gray-700"
+            className="w-full p-3 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded-lg mb-4 dark:bg-gray-700"
           />
           <input
             type="text"
@@ -303,7 +303,7 @@ export default function PromptSubmissionForm({
             value={title}
             onChange={e => setTitle(e.target.value)}
             required
-            className="w-full p-3 border rounded-lg mb-4 dark:bg-gray-700"
+            className="w-full p-3 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded-lg mb-4 dark:bg-gray-700"
           />
           <textarea
             placeholder="Isi Prompt"
@@ -311,7 +311,7 @@ export default function PromptSubmissionForm({
             onChange={e => setPromptContent(e.target.value)}
             required
             rows={6}
-            className="w-full p-3 border rounded-lg mb-4 dark:bg-gray-700"
+            className="w-full p-3 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded-lg mb-4 dark:bg-gray-700"
           ></textarea>
           <input
             type="text"
@@ -319,7 +319,7 @@ export default function PromptSubmissionForm({
             value={tool}
             onChange={e => setTool(e.target.value)}
             required
-            className="w-full p-3 border rounded-lg mb-4 dark:bg-gray-700"
+            className="w-full p-3 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded-lg mb-4 dark:bg-gray-700"
           />
           <div className="mb-4">
             <label htmlFor="prompt-date" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -330,7 +330,7 @@ export default function PromptSubmissionForm({
               type="date"
               value={date}
               onChange={e => setDate(e.target.value)}
-              className="mt-2 w-full p-3 border rounded-lg dark:bg-gray-700"
+              className="mt-2 w-full p-3 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded-lg dark:bg-gray-700"
             />
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
               Kosongkan untuk menggunakan tanggal hari ini secara otomatis.
@@ -341,7 +341,7 @@ export default function PromptSubmissionForm({
             placeholder="Tags (pisahkan dengan koma)"
             value={tags}
             onChange={e => setTags(e.target.value)}
-            className="w-full p-3 border rounded-lg mb-6 dark:bg-gray-700"
+            className="w-full p-3 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded-lg mb-6 dark:bg-gray-700"
           />
 
           {isEditMode && (
@@ -351,7 +351,7 @@ export default function PromptSubmissionForm({
                 placeholder="Token admin"
                 value={adminToken}
                 onChange={e => setAdminToken(e.target.value)}
-                className="w-full p-3 border rounded-lg dark:bg-gray-700"
+                className="w-full p-3 border-2 border-slate-200 dark:border-gray-600 focus:border-blue-500 transition-all outline-none rounded-lg dark:bg-gray-700"
                 required
               />
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
@@ -401,8 +401,13 @@ export default function PromptSubmissionForm({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black bg-opacity-50 p-4 sm:items-center sm:p-6">
-      {formContent}
+    <div 
+      className="fixed inset-0 z-[1000] flex items-start justify-center overflow-y-auto bg-black bg-opacity-50 p-4 sm:items-center sm:p-6"
+      onClick={handleClose}
+    >
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-2xl">
+        {formContent}
+      </div>
     </div>
   );
 }

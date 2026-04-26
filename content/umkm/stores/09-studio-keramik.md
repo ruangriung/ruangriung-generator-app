@@ -7,7 +7,7 @@ location: Bandung, Jawa Barat
 whatsappNumber: '6281234567009'
 tagline: >-
   Studio keramik artisana dengan sentuhan flora nusantara.
-heroImage: https://images.unsplash.com/photo-1520256862855-398228c41684?auto=format&fit=crop&w=800&q=80
+heroImage: /images/umkm/stores/09-studio-keramik-hero.png
 description: >-
   Studio Keramik Taman membuat peralatan makan dan dekorasi rumah dari stoneware yang dibakar suhu tinggi sehingga tahan lama dan aman food-grade.
 highlights:
