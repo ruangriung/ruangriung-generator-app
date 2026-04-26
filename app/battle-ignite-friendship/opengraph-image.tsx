@@ -23,6 +23,7 @@ const backgroundStyle: CSSProperties = {
 };
 
 const titleStyle: CSSProperties = {
+  display: 'flex',
   textTransform: 'uppercase',
   letterSpacing: '0.4em',
   fontSize: 32,
@@ -32,6 +33,7 @@ const titleStyle: CSSProperties = {
 };
 
 const igniteStyle: CSSProperties = {
+  display: 'flex',
   fontSize: 184,
   fontWeight: 800,
   textTransform: 'uppercase',
@@ -64,6 +66,7 @@ const badgeStyle: CSSProperties = {
 };
 
 const scheduleStyle: CSSProperties = {
+  display: 'flex',
   fontSize: 32,
   fontWeight: 500,
   letterSpacing: '0.2em',
@@ -82,6 +85,7 @@ const stagesStyle: CSSProperties = {
 };
 
 const ribbonStyle: CSSProperties = {
+  display: 'flex',
   position: 'absolute',
   inset: '0 0 auto 0',
   height: 220,
@@ -90,6 +94,7 @@ const ribbonStyle: CSSProperties = {
 };
 
 const containerStyle: CSSProperties = {
+  display: 'flex',
   position: 'relative',
   width: '100%',
   height: '100%',
@@ -98,6 +103,7 @@ const containerStyle: CSSProperties = {
 };
 
 const cornerAccent: CSSProperties = {
+  display: 'flex',
   position: 'absolute',
   width: 280,
   height: 280,
@@ -140,6 +146,8 @@ const participantsContainer: CSSProperties = {
   display: 'flex',
   flexWrap: 'wrap',
   justifyContent: 'space-between',
+
+
   gap: 16,
   marginTop: 32,
 };
@@ -147,6 +155,7 @@ const participantsContainer: CSSProperties = {
 const participantCard: CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
+  width: 250,
   gap: 8,
   padding: '16px 20px',
   width: '23%',
@@ -168,7 +177,7 @@ export default function Image() {
           <div key={index} style={accent.style} />
         ))}
         <div style={backgroundStyle}>
-          <div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={titleStyle}>Battle ignite friendship</div>
             <div style={igniteStyle}>ignite</div>
             <div style={friendshipStyle}>
@@ -204,7 +213,7 @@ export default function Image() {
               <span>Final</span>
               <span>3rd Place</span>
             </div>
-            <div style={{ fontSize: 20, letterSpacing: '0.35em', textTransform: 'uppercase', color: '#94a3b8' }}>
+            <div style={{ display: 'flex', fontSize: 20, letterSpacing: '0.35em', textTransform: 'uppercase', color: '#94a3b8' }}>
               RuangRiung AI Image • 19.00 WIB
             </div>
           </div>
