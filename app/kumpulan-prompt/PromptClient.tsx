@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Search, Hash, PenTool, Sparkles, Filter, ChevronDown, Check, X, Tag as TagIcon, Clock, ArrowRight, User } from 'lucide-react';
 import PromptCard from '@/components/PromptCard';
