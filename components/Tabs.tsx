@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo, memo } from 'react';
 import { useSession } from 'next-auth/react';
-import { Lock, Image, Video, AudioLines, MessageSquare } from 'lucide-react';
+import { Lock, Image, Video, AudioLines, MessageSquare, Crown } from 'lucide-react';
 import AuthButton from './AuthButton';
 import Generator from '@/components/Generator';
 import VideoCreator from '@/components/VideoCreator';
@@ -103,8 +103,9 @@ const Tabs = memo(() => {
               <span className="text-sm tracking-tight">{tab.label}</span>
               
               {isDisabled && (
-                <span className="absolute top-1 right-2 md:relative md:top-0 md:right-0 text-[8px] bg-red-500 text-white px-1.5 py-0.5 rounded-full font-black animate-pulse md:ml-1">
-                  OFF
+                <span className="absolute top-1 right-2 md:relative md:top-0 md:right-0 text-[8px] bg-amber-500 text-white px-2 py-0.5 rounded-full font-black flex items-center gap-1 md:ml-1 shadow-lg shadow-amber-500/20">
+                  <Crown size={8} fill="currentColor" />
+                  BYOP
                 </span>
               )}
             </button>
