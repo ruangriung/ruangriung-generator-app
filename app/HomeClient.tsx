@@ -121,11 +121,11 @@ const HomeClient = memo(({ latestArticle }: HomeClientProps) => {
   }, [deferredPrompt]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center px-4 pt-32 pb-8 sm:px-8">
+    <div className="flex min-h-screen flex-col items-center px-4 pt-14 pb-8 sm:px-8">
 
       
       {showBanner && (
-        <div className="w-full max-w-5xl bg-gradient-to-r from-primary-600 via-primary-500 to-accent-500 text-white p-4 rounded-2xl shadow-xl shadow-primary-500/20 mb-12 flex flex-col sm:flex-row items-center justify-between gap-4 relative animate-in fade-in slide-in-from-top-4 duration-500">
+        <div className="w-full max-w-5xl bg-gradient-to-r from-primary-600 via-primary-500 to-accent-500 text-white p-4 rounded-2xl shadow-xl shadow-primary-500/20 mb-4 flex flex-col sm:flex-row items-center justify-between gap-4 relative animate-in fade-in slide-in-from-top-4 duration-500">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-md">
               <Sparkles size={20} className="text-yellow-300 animate-pulse" />
@@ -154,16 +154,16 @@ const HomeClient = memo(({ latestArticle }: HomeClientProps) => {
         </div>
       )}
 
-      <header className="w-full max-w-5xl mb-16 relative">
-        <div className="flex flex-col items-center text-center space-y-6">
+      <header className="w-full max-w-5xl mb-8 relative">
+        <div className="flex flex-col items-center text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/20 text-primary-600 dark:text-primary-400 text-[10px] font-black uppercase tracking-[0.2em] mb-2 animate-bounce-slow">
             <Sparkles size={14} /> AI Powered Platform
           </div>
           <div className="relative">
-            <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter text-slate-950 dark:text-white leading-[0.9]">
-              RUANG<br /><span className="gradient-text">RIUNG</span>
-              <span className="block text-[0.25em] tracking-[0.3em] uppercase text-primary-500/60 mt-4 font-black">AI Generator</span>
+            <h1 className="text-4xl sm:text-7xl md:text-9xl font-black tracking-[-0.05em] text-slate-950 dark:text-white leading-none inline-flex items-center scale-x-110 sm:scale-x-125 origin-center">
+              <span>RUANG</span><span className="gradient-text">RIUNG</span>
             </h1>
+            <span className="block text-[10px] sm:text-xs tracking-[0.5em] uppercase text-primary-500/60 mt-6 font-black">AI Generator</span>
             <div className="absolute -right-12 top-0 animate-float opacity-30 hidden md:block">
               <Wand2 size={80} className="text-primary-500 rotate-12" />
             </div>
