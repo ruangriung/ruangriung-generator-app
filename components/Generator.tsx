@@ -328,9 +328,16 @@ export default function Generator() {
       imageDisplayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
 
-    const newRandomSeed = Math.floor(Math.random() * 1000000);
-    setSettings(prev => ({ ...prev, seed: newRandomSeed }));
-    let currentSeed = newRandomSeed;
+    // Logic for seed: If -1 (auto) or it's a variation request, generate new seed.
+    // Otherwise use the fixed seed provided in settings.
+    const shouldRandomize = settings.seed === -1 || isVariation;
+    const currentSeed = shouldRandomize 
+      ? Math.floor(Math.random() * 1000000) 
+      : (typeof settings.seed === 'number' ? settings.seed : parseInt(settings.seed) || 0);
+
+    if (shouldRandomize) {
+      setSettings(prev => ({ ...prev, seed: currentSeed }));
+    }
 
     const { model, prompt, negativePrompt, width, height, imageQuality, batchSize, artStyle, private: isPrivate, safe, transparent, nologo, inputImages = [], cfg_scale } = settings;
     const fullPrompt = `${prompt}${artStyle}`;
@@ -370,14 +377,11 @@ export default function Generator() {
           t: t.toString()
         });
 
-        // Parameters only for flux/zimage/etc.
-        const seedSupported = ['flux', 'zimage', 'seedream', 'klein', 'seedance'].some(m => modelLower.includes(m));
-        if (seedSupported) {
-          pollParams.append('seed', batchSeed.toString());
-        }
+        // Most models in Pollinations support seed
+        pollParams.append('seed', batchSeed.toString());
 
-        const negativeSupported = ['flux', 'zimage'].some(m => modelLower.includes(m));
-        if (negativeSupported && negativePrompt) {
+        // Negative prompt is supported by flux and many other stable diffusion based models
+        if (negativePrompt) {
           pollParams.append('negative_prompt', negativePrompt);
         }
 
