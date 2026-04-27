@@ -48,18 +48,23 @@ const AdvancedSettings = memo(({ settings, setSettings, models, aspectRatio, onA
     setHasByopKey(!!localStorage.getItem('pollinations_api_key'));
   }, []);
 
+  const isProModel = useCallback((modelName: string) => {
+    const normalized = modelName.toLowerCase();
+    return normalized.includes('-pro') || 
+           ['nanobanana', 'nanobanana-2', 'seedream5', 'grok-imagine', 'nova-canvas', 'p-image', 'veo', 'seedance', 'wan', 'wan-fast', 'p-video'].includes(normalized);
+  }, []);
+
   const handleSettingChange = useCallback((field: keyof GeneratorSettings, value: string | number | boolean) => {
     if (field === 'model') {
-      const proModels = ['flux-pro', 'openai', 'flux-realism', 'flux-anime'];
-      const isPro = proModels.includes((value as string).toLowerCase());
+      const modelName = value as string;
+      const isPro = isProModel(modelName);
       const hasApiKey = !!localStorage.getItem('pollinations_api_key');
 
       if (isPro && !hasApiKey) {
         toast.error('Model PRO memerlukan koneksi Pollinations atau Kredit Pro.');
-        // Kita bisa membiarkan user memilih tapi akan ada peringatan saat generate
       }
-      onModelSelect(value as string);
-    } else if (field === 'private' || field === 'safe' || field === 'transparent') {
+      onModelSelect(modelName);
+    } else if (field === 'private' || field === 'safe' || field === 'transparent' || field === 'nologo') {
       setSettings(prev => ({ ...prev, [field]: value as boolean }));
     } else if (field === 'width' || field === 'height' || field === 'batchSize' || field === 'seed') {
       const parsedValue = parseInt(value as string, 10);
@@ -76,7 +81,7 @@ const AdvancedSettings = memo(({ settings, setSettings, models, aspectRatio, onA
     } else {
       setSettings(prev => ({ ...prev, [field]: value }));
     }
-  }, [onModelSelect, setSettings, onManualDimensionChange, settings.width, settings.height]);
+  }, [onModelSelect, setSettings, onManualDimensionChange, settings.width, settings.height, isProModel]);
 
   const inputStyle = "w-full p-3 bg-slate-950/5 dark:bg-black/20 backdrop-blur-md rounded-xl border-2 border-slate-200 dark:border-white/20 focus:border-primary-500/50 focus:ring-4 focus:ring-primary-500/10 transition-all text-slate-800 dark:text-slate-200 font-bold text-sm";
   const selectStyle = `${inputStyle} appearance-none cursor-pointer`;
@@ -91,14 +96,11 @@ const AdvancedSettings = memo(({ settings, setSettings, models, aspectRatio, onA
     </div>
   );
 
-  const isImageToImageModel = (modelName: string): boolean => {
+  const isImageToImageModel = useCallback((modelName: string): boolean => {
     const normalized = modelName.toLowerCase();
-    const specificModels = ['nanobanana', 'seedream', 'kontext', 'upscale', 'edit'];
-    return specificModels.includes(normalized) || 
-           normalized.includes('edit') || 
-           normalized.includes('image-to-image') ||
-           normalized.includes('img2img');
-  };
+    const i2iKeywords = ['nanobanana', 'seedream', 'kontext', 'upscale', 'edit', 'img2img', 'image-to-image'];
+    return i2iKeywords.some(keyword => normalized.includes(keyword));
+  }, []);
 
   const isI2I = isImageToImageModel(settings.model);
   const MAX_REFERENCE_IMAGES = 4;
@@ -245,7 +247,7 @@ const AdvancedSettings = memo(({ settings, setSettings, models, aspectRatio, onA
               >
                 <div className="flex items-center gap-2 truncate">
                   <span className="uppercase">{settings.model}</span>
-                  {['flux-pro', 'openai', 'flux-realism', 'flux-anime'].includes(settings.model.toLowerCase()) && (
+                  {isProModel(settings.model) && (
                     <span className="px-1.5 py-0.5 rounded-md bg-primary-500/10 text-primary-500 text-[8px] font-black uppercase">PRO</span>
                   )}
                 </div>
@@ -260,7 +262,7 @@ const AdvancedSettings = memo(({ settings, setSettings, models, aspectRatio, onA
                   <div className="max-h-64 overflow-y-auto p-2">
                     {models.length > 0 ? (
                       models.map((model) => {
-                        const isPro = ['flux-pro', 'openai', 'flux-realism', 'flux-anime'].includes(model.toLowerCase());
+                        const isPro = isProModel(model);
                         const isSelected = settings.model.toLowerCase() === model.toLowerCase();
                         
                         return (
@@ -447,6 +449,19 @@ const AdvancedSettings = memo(({ settings, setSettings, models, aspectRatio, onA
                 )}
               </div>
               <span className="text-[10px] font-bold text-slate-400">Hapus latar belakang (khusus gptimage)</span>
+            </div>
+          </div>
+
+          <div className={checkboxContainerStyle} onClick={() => handleSettingChange('nologo', !settings.nologo)}>
+            <div className={`h-6 w-11 rounded-full transition-all duration-300 relative ${settings.nologo ? 'bg-primary-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
+              <div className={`absolute top-1 left-1 h-4 w-4 rounded-full bg-white transition-all duration-300 ${settings.nologo ? 'translate-x-5' : ''}`} />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-black text-slate-800 dark:text-slate-200">Tanpa Logo</span>
+                <span className="px-1.5 py-0.5 rounded-md bg-yellow-500/10 text-yellow-500 text-[8px] font-black uppercase tracking-widest border border-yellow-500/20">PREMIUM</span>
+              </div>
+              <span className="text-[10px] font-bold text-slate-400">Hapus watermark Pollinations</span>
             </div>
           </div>
         </div>

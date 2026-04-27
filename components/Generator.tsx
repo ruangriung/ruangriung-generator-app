@@ -62,16 +62,21 @@ const mergeUniqueModels = (...modelGroups: string[][]): string[] => {
 };
 
 const DEFAULT_BASE_MODELS = ['flux'];
-const PREMIUM_MODELS: string[] = [];
+const FREE_IMAGE_MODELS = [
+  'flux', 'nanobanana', 'seedream', 'gptimage', 'zimage', 
+  'wan-image', 'qwen-image', 'grok-imagine', 'klein', 'p-image'
+];
+const PREMIUM_IMAGE_MODELS = [
+  'nanobanana-pro', 'seedream-pro', 'wan-image-pro', 'grok-imagine-pro', 'nova-canvas'
+];
 const IMAGE_TO_IMAGE_MODELS = new Set(['nanobanana', 'seedream', 'kontext', 'upscale', 'edit']);
 
 const isImageToImageModel = (modelName: string): boolean => {
   const normalized = modelName.toLowerCase();
-  return IMAGE_TO_IMAGE_MODELS.has(normalized) || 
-         normalized.includes('edit') || 
-         normalized.includes('image-to-image') ||
-         normalized.includes('img2img');
+  const i2iKeywords = ['nanobanana', 'seedream', 'kontext', 'upscale', 'edit', 'img2img', 'image-to-image'];
+  return i2iKeywords.some(keyword => normalized.includes(keyword));
 };
+
 const MAX_REFERENCE_IMAGES = 4;
 const createEmptyReferenceImages = () => [''];
 
@@ -98,6 +103,8 @@ const sanitizeStoredSettings = (data: unknown): Partial<GeneratorSettings> | nul
   if (typeof raw.private === 'boolean') sanitized.private = raw.private;
   if (typeof raw.safe === 'boolean') sanitized.safe = raw.safe;
   if (typeof raw.transparent === 'boolean') sanitized.transparent = raw.transparent;
+
+  if (typeof raw.nologo === 'boolean') sanitized.nologo = raw.nologo;
 
   if (Array.isArray(raw.inputImages)) {
     const cleanedImages = raw.inputImages
@@ -134,13 +141,14 @@ export default function Generator() {
       private: false,
       safe: false,
       transparent: false,
+      nologo: true,
       inputImages: createEmptyReferenceImages(),
     };
   });
 
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [modelList, setModelList] = useState<string[]>(() => mergeUniqueModels(DEFAULT_BASE_MODELS, PREMIUM_MODELS));
+  const [modelList, setModelList] = useState<string[]>(() => mergeUniqueModels(DEFAULT_BASE_MODELS, PREMIUM_IMAGE_MODELS));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('Portrait');
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -224,42 +232,51 @@ export default function Generator() {
         const headers: Record<string, string> = {};
         if (byopKey) {
           headers['Authorization'] = `Bearer ${byopKey}`;
+          headers['x-pollinations-key'] = byopKey;
         }
 
         const response = await fetch('/api/pollinations/models/image', { headers });
         if (!response.ok) throw new Error(`Gagal mengambil model: ${response.statusText}`);
         const data = await response.json();
-        const rawFetchedModels = extractModelNames(data);
+        const apiModels = extractModelNames(data);
         
         // Filter out video models from image endpoint
-        const fetchedModels = rawFetchedModels.filter(m => 
+        const fetchedModels = apiModels.filter(m => 
           !m.toLowerCase().includes('video') && 
           !m.toLowerCase().includes('mp4')
         );
 
-        const combinedModels = fetchedModels.length
-          ? mergeUniqueModels(fetchedModels, PREMIUM_MODELS)
-          : mergeUniqueModels(DEFAULT_BASE_MODELS, PREMIUM_MODELS);
-
-        setModelList(combinedModels);
-
-        if (fetchedModels.length) {
-          const normalizedModels = new Set(combinedModels.map(model => model.toLowerCase()));
-          setSettings(prev => {
-            if (normalizedModels.has(prev.model.toLowerCase())) return prev;
-            const fallbackModel = fetchedModels[0] ?? DEFAULT_BASE_MODELS[0];
-            if (!fallbackModel) return prev;
-            const shouldClearInput = !isImageToImageModel(fallbackModel);
-            return {
-              ...prev,
-              model: fallbackModel,
-              ...(shouldClearInput ? { inputImages: createEmptyReferenceImages() } : {}),
-            };
-          });
+        // Dynamic model list building
+        let finalModels: string[];
+        if (byopKey) {
+          // If BYOP is active, show everything from API + our known premium models
+          finalModels = mergeUniqueModels(FREE_IMAGE_MODELS, PREMIUM_IMAGE_MODELS, fetchedModels);
+        } else {
+          // If NOT BYOP, only show free models
+          finalModels = mergeUniqueModels(FREE_IMAGE_MODELS, fetchedModels.filter(m => !m.toLowerCase().includes('-pro')));
         }
+
+        setModelList(finalModels);
+
+        // Only revert model if the CURRENTLY SELECTED model is absolutely invalid for the current mode
+        setSettings(prev => {
+          const isCurrentModelValid = finalModels.some(m => m.toLowerCase() === prev.model.toLowerCase());
+          if (isCurrentModelValid) return prev;
+          
+          // Only fallback if current model is not in the list at all
+          const fallbackModel = finalModels.includes('flux') ? 'flux' : (finalModels[0] || 'flux');
+          const shouldClearInput = !isImageToImageModel(fallbackModel);
+          return {
+            ...prev,
+            model: fallbackModel,
+            ...(shouldClearInput ? { inputImages: createEmptyReferenceImages() } : {}),
+          };
+        });
       } catch (error) {
         console.error("Error mengambil model gambar:", error);
-        setModelList(mergeUniqueModels(DEFAULT_BASE_MODELS, PREMIUM_MODELS));
+        // Fallback to basic list if API fails
+        const byopKey = localStorage.getItem('pollinations_api_key');
+        setModelList(byopKey ? mergeUniqueModels(FREE_IMAGE_MODELS, PREMIUM_IMAGE_MODELS) : FREE_IMAGE_MODELS);
       }
     };
     fetchImageModels();
@@ -315,7 +332,7 @@ export default function Generator() {
     setSettings(prev => ({ ...prev, seed: newRandomSeed }));
     let currentSeed = newRandomSeed;
 
-    const { model, prompt, negativePrompt, width, height, imageQuality, batchSize, artStyle, private: isPrivate, safe, transparent, inputImages = [], cfg_scale } = settings;
+    const { model, prompt, negativePrompt, width, height, imageQuality, batchSize, artStyle, private: isPrivate, safe, transparent, nologo, inputImages = [], cfg_scale } = settings;
     const fullPrompt = `${prompt}${artStyle}`;
 
     const generatePromises = Array(batchSize).fill(0).map(async (_, i) => {
@@ -337,40 +354,66 @@ export default function Generator() {
         // we can try to fetch directly from Pollinations to avoid local server bottlenecks.
         
         const t = Date.now();
+        // Map our quality levels to API quality levels
+        const qualityMap: Record<string, string> = {
+          'Standar': 'medium',
+          'HD': 'high',
+          'Ultra': 'hd'
+        };
+        const apiQuality = qualityMap[imageQuality] || 'medium';
+        const modelLower = model.toLowerCase();
+
         const pollParams = new URLSearchParams({
-          model, width: width.toString(), height: height.toString(), seed: batchSeed.toString(),
-          enhance: imageQuality !== 'Standar' ? 'true' : 'false', nologo: 'true', referrer: 'ruangriung.my.id',
-          guidance_scale: cfg_scale.toString(),
+          model, width: width.toString(), height: height.toString(), 
+          enhance: imageQuality !== 'Standar' ? 'true' : 'false', 
+          referrer: 'ruangriung.my.id',
           t: t.toString()
         });
-        if (negativePrompt) pollParams.append('negative_prompt', negativePrompt);
-        if (isPrivate) pollParams.append('private', 'true');
+
+        // Parameters only for flux/zimage/etc.
+        const seedSupported = ['flux', 'zimage', 'seedream', 'klein', 'seedance'].some(m => modelLower.includes(m));
+        if (seedSupported) {
+          pollParams.append('seed', batchSeed.toString());
+        }
+
+        const negativeSupported = ['flux', 'zimage'].some(m => modelLower.includes(m));
+        if (negativeSupported && negativePrompt) {
+          pollParams.append('negative_prompt', negativePrompt);
+        }
+
+        // Parameters only for gptimage
+        if (modelLower.includes('gptimage') || modelLower.includes('gpt-image')) {
+          pollParams.append('quality', apiQuality);
+          if (transparent) pollParams.append('transparent', 'true');
+        }
+
+        // Handle Video models (veo, seedance, wan)
+        const isVideo = ['veo', 'seedance', 'wan', 'nova-reel', 'p-video'].some(m => modelLower.includes(m));
+        if (isVideo) {
+          // aspectRatio handled by width/height ratio if not set, but we can be explicit
+          const ratio = width > height ? '16:9' : '9:16';
+          pollParams.append('aspectRatio', ratio);
+          // Default duration 5s if not specified
+          pollParams.append('duration', '5');
+          pollParams.append('audio', 'true');
+        }
+
         if (safe) pollParams.append('safe', 'true');
-        if (transparent && model.toLowerCase().includes('gptimage')) pollParams.append('transparent', 'true');
+        if (nologo) pollParams.append('nologo', 'true');
 
         let imageUrl: string | null = null;
 
         try {
           if (usePost) {
-            // For POST (i2i), we must use our proxy because it handles the multipart/base64 logic
-            const body = {
-              prompt: fullPrompt,
-              model, width, height, seed: batchSeed,
-              enhance: imageQuality !== 'Standar' ? 'true' : 'false',
-              nologo: 'true', referrer: 'ruangriung.my.id',
-              guidance_scale: cfg_scale,
-              negative_prompt: negativePrompt,
-              private: isPrivate,
-              safe,
-              transparent: (transparent && model.toLowerCase().includes('gptimage')),
-              image: referenceImages[0],
-              t
-            };
+            // Convert params to object for POST body
+            const postBody: any = Object.fromEntries(pollParams.entries());
+            postBody.prompt = fullPrompt;
+            if (referenceImages[0]) postBody.image = referenceImages[0];
 
             const response = await fetch('/api/pollinations/image', {
               method: 'POST',
               headers,
-              body: JSON.stringify(body),
+              body: JSON.stringify(postBody),
             });
 
             if (!response.ok) throw new Error(`Proxy Error: ${response.status}`);
@@ -379,9 +422,13 @@ export default function Generator() {
           } else {
             // For GET (Text-to-Image), we use pollinations proxy with cache buster
             const proxyUrl = `/api/pollinations/image?prompt=${encodeURIComponent(fullPrompt)}&${pollParams.toString()}`;
-            const directUrl = `https://pollinations.ai/p/${encodeURIComponent(fullPrompt)}?${pollParams.toString()}`;
+            
+            // For direct URL, we MUST include the key in query if available
+            const directParams = new URLSearchParams(pollParams);
+            if (byopKey) directParams.append('key', byopKey);
+            const directUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(fullPrompt)}?${directParams.toString()}`;
 
-            console.log(`[Generator] Generating with model: ${model}, seed: ${batchSeed}`);
+            console.log(`[Generator] Generating with model: ${model}, params: ${pollParams.toString()}`);
 
             // Try proxy first
             try {
@@ -396,9 +443,7 @@ export default function Generator() {
               // Only attempt direct fetch if we have a personal key (BYOP)
               if (byopKey) {
                 console.warn('Proxy failed, attempting direct fetch:', proxyError);
-                const directResponse = await fetch(directUrl, { 
-                  headers: { 'Authorization': `Bearer ${byopKey}` }
-                });
+                const directResponse = await fetch(directUrl, { signal: AbortSignal.timeout(90000) });
                 if (!directResponse.ok) throw new Error(`Direct Fetch Error: ${directResponse.status}`);
                 const blob = await directResponse.blob();
                 imageUrl = URL.createObjectURL(blob);
@@ -474,6 +519,7 @@ export default function Generator() {
       private: false, // Reset ke default
       safe: false, // Reset ke default
       transparent: false, // Reset ke default
+      nologo: true, // Reset ke default
       inputImages: createEmptyReferenceImages(), // Kosongkan input image
     }));
     setAspectRatio(randomAspectRatioPreset);

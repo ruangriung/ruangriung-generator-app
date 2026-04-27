@@ -12,31 +12,36 @@ export async function GET(requestObj: Request) {
       return NextResponse.json({ message: 'Prompt is required' }, { status: 400 });
     }
 
-    // Bangun query parameter Pollinations secara eksplisit
-    const pollParams = new URLSearchParams();
-
-    // Copy basic parameters
-    const supportedParams = [
-      'width', 'height', 'seed', 'model', 'nologo', 'enhance', 
-      'private', 'safe', 'transparent', 'referrer', 
-      'guidance_scale', 'negative_prompt', 'aspectRatio', 
-      'duration', 'image', 'audio'
-    ];
-
-    supportedParams.forEach(param => {
-      const val = searchParams.get(param);
-      if (val) pollParams.append(param, val);
-    });
-
     const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
     const clientKey = requestObj.headers.get('x-pollinations-key') || 
                       requestObj.headers.get('Authorization')?.replace('Bearer ', '');
     const activeApiKey = clientKey || POLLINATIONS_API_KEY;
 
-    const baseUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}`;
+    // Build the query parameters for Pollinations
+    const pollParams = new URLSearchParams();
+    
+    // Official parameters from documentation
+    const supportedParams = [
+      'model', 'width', 'height', 'seed', 'enhance', 'nologo',
+      'negative_prompt', 'safe', 'quality', 'transparent',
+      'image', 'duration', 'aspectRatio', 'audio', 't'
+    ];
+
+    searchParams.forEach((value, key) => {
+      if (supportedParams.includes(key) && value !== 'undefined' && value !== 'null') {
+        pollParams.append(key, value);
+      }
+    });
+
+    // Add key as query parameter for maximum compatibility (crucial for some PAID models)
+    if (activeApiKey) {
+      pollParams.append('key', activeApiKey);
+    }
+
+    const baseUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`;
     const apiUrl = `${baseUrl}?${pollParams.toString()}`;
     
-    console.log(`[API] Image GET: model=${searchParams.get('model')} seed=${searchParams.get('seed')} prompt=${prompt.substring(0, 30)}...`);
+    console.log(`[API] Image GET: model=${searchParams.get('model')} auth=${activeApiKey ? 'YES' : 'NO'} prompt=${prompt.substring(0, 30)}...`);
 
     const headers: Record<string, string> = {
       'Accept': 'image/*, application/json',
@@ -48,7 +53,6 @@ export async function GET(requestObj: Request) {
       headers['Authorization'] = `Bearer ${activeApiKey}`;
     }
 
-    // Proxy the request with extended timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 60000); 
 
@@ -73,7 +77,7 @@ export async function GET(requestObj: Request) {
       return new NextResponse(response.body, {
         headers: {
           'Content-Type': response.headers.get('content-type') || 'image/jpeg',
-          'Cache-Control': 'public, max-age=3600', // Remove immutable, use 1 hour cache
+          'Cache-Control': 'public, max-age=3600', 
         },
         status: 200,
       });
@@ -99,29 +103,32 @@ export async function POST(requestObj: Request) {
       return NextResponse.json({ message: 'Prompt is required' }, { status: 400 });
     }
 
-    const pollParams = new URLSearchParams();
-    const supportedParams = [
-      'width', 'height', 'seed', 'model', 'nologo', 'enhance', 
-      'private', 'safe', 'transparent', 'referrer', 
-      'guidance_scale', 'negative_prompt', 'aspectRatio', 
-      'duration', 'image', 'audio', 't'
-    ];
-
-    supportedParams.forEach(param => {
-      if (body[param] !== undefined) {
-        pollParams.append(param, body[param].toString());
-      }
-    });
-
     const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
     const clientKey = requestObj.headers.get('x-pollinations-key') || 
                       requestObj.headers.get('Authorization')?.replace('Bearer ', '');
     const activeApiKey = clientKey || POLLINATIONS_API_KEY;
 
-    const baseUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}`;
+    const pollParams = new URLSearchParams();
+    const supportedParams = [
+      'model', 'width', 'height', 'seed', 'enhance', 'nologo',
+      'negative_prompt', 'safe', 'quality', 'transparent',
+      'image', 'duration', 'aspectRatio', 'audio', 't'
+    ];
+
+    supportedParams.forEach(param => {
+      if (body[param] !== undefined && body[param] !== null && body[param] !== 'undefined') {
+        pollParams.append(param, body[param].toString());
+      }
+    });
+
+    if (activeApiKey) {
+      pollParams.append('key', activeApiKey);
+    }
+
+    const baseUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`;
     const apiUrl = `${baseUrl}?${pollParams.toString()}`;
     
-    console.log(`[API] Image POST: model=${body.model} seed=${body.seed} prompt=${prompt.substring(0, 30)}...`);
+    console.log(`[API] Image POST: model=${body.model} auth=${activeApiKey ? 'YES' : 'NO'} prompt=${prompt.substring(0, 30)}...`);
     
     const headers: Record<string, string> = { 
       'Accept': 'image/*, application/json',

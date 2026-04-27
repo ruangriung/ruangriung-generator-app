@@ -79,6 +79,11 @@ export default function TextToVideo() {
         }
     };
 
+    const isProModel = (modelName: string) => {
+        const normalized = modelName.toLowerCase();
+        return normalized.includes('-pro') || ['veo', 'seedance', 'wan', 'p-video'].some(m => normalized.includes(m));
+    };
+
     const handleGenerate = async () => {
         if (!prompt) {
             toast.error('Masukkan prompt terlebih dahulu!');
@@ -89,6 +94,12 @@ export default function TextToVideo() {
         setVideoUrl(null);
         
         try {
+            const apiKey = localStorage.getItem('pollinations_api_key');
+            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+            if (apiKey) {
+                headers['x-pollinations-key'] = apiKey;
+            }
+
             const [wRatio, hRatio] = aspectRatio.split(':').map(Number);
             let width = 1024;
             let height = 1024;
@@ -102,7 +113,7 @@ export default function TextToVideo() {
 
             const response = await fetch('/api/pollinations/video', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify({
                     model: model,
                     prompt: prompt,
@@ -160,18 +171,26 @@ export default function TextToVideo() {
                         Pilih Mesin Video
                     </label>
                     <div className="flex flex-wrap gap-2 max-h-[180px] overflow-y-auto p-1 custom-scrollbar">
-                        {models.map((m) => (
-                            <button
-                                key={m}
-                                onClick={() => setModel(m)}
-                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all whitespace-nowrap ${model === m
-                                    ? 'bg-primary-500 text-white border-primary-500 shadow-md shadow-primary-500/20'
-                                    : 'glass border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-primary-500/30'
-                                    }`}
-                            >
-                                {m.replace(/-/g, ' ')}
-                            </button>
-                        ))}
+                        {models.map((m) => {
+                            const isPro = isProModel(m);
+                            return (
+                                <button
+                                    key={m}
+                                    onClick={() => setModel(m)}
+                                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all whitespace-nowrap flex items-center gap-2 ${model === m
+                                        ? 'bg-primary-500 text-white border-primary-500 shadow-md shadow-primary-500/20'
+                                        : 'glass border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-primary-500/30'
+                                        }`}
+                                >
+                                    {m.replace(/-/g, ' ')}
+                                    {isPro && (
+                                        <span className={`px-1 py-0.5 rounded text-[7px] font-black ${
+                                            model === m ? 'bg-white/20 text-white' : 'bg-primary-500/10 text-primary-500'
+                                        }`}>PRO</span>
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 

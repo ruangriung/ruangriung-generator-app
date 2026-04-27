@@ -32,6 +32,7 @@ export interface GeneratorSettings {
   private: boolean;
   safe: boolean;
   transparent: boolean;
+  nologo: boolean;
   inputImages: string[];
 }
 

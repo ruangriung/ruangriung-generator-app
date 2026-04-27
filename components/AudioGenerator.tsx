@@ -46,36 +46,56 @@ export default function AudioGenerator() {
 
   const handlePreviewVoice = (e: React.MouseEvent, voice: string) => {
     e.stopPropagation();
+    
+    // Stop existing preview
     if (audioPreviewRef.current) {
       audioPreviewRef.current.pause();
       audioPreviewRef.current = null;
     }
+
+    // Toggle off if same voice
     if (previewingVoice === voice) {
       setPreviewingVoice(null);
       return;
     }
+
     setPreviewingVoice(voice);
     const sampleText = "Ini adalah pratinjau dari suara yang dipilih. Ruang Riung AI Generator.";
     
-    // Gunakan proksi lokal yang sama dengan fungsi generate utama
     const params = new URLSearchParams({
       text: sampleText,
       voice: voice
     });
     const previewUrl = `/api/generate-audio?${params.toString()}`;
 
-    const audio = new Audio(previewUrl);
-    audioPreviewRef.current = audio;
-    audio.play().catch((err: any) => {
-      console.error("Playback error:", err);
-      toast.error("Gagal memutar pratinjau.");
-      setPreviewingVoice(null);
-    });
-    audio.onended = () => setPreviewingVoice(null);
-    audio.onerror = () => {
-      toast.error("Gagal memuat pratinjau audio.");
-      setPreviewingVoice(null);
+    const headers: Record<string, string> = {};
+    const apiKey = localStorage.getItem('pollinations_api_key');
+    if (apiKey) {
+        headers['x-pollinations-key'] = apiKey;
+    }
+
+    const audio = new Audio();
+    
+    const fetchPreview = async () => {
+        try {
+            const res = await fetch(previewUrl, { headers });
+            if (!res.ok) throw new Error();
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            audio.src = url;
+            audioPreviewRef.current = audio;
+            audio.play().catch((err: any) => {
+                console.error("Playback error:", err);
+                toast.error("Gagal memutar pratinjau.");
+                setPreviewingVoice(null);
+            });
+            audio.onended = () => setPreviewingVoice(null);
+        } catch (e) {
+            toast.error("Gagal memuat pratinjau audio.");
+            setPreviewingVoice(null);
+        }
     };
+    fetchPreview();
   };
 
   const handleGenerateAudio = async () => {
@@ -91,18 +111,21 @@ export default function AudioGenerator() {
     }
 
     try {
-      // === PERBAIKAN PENTING DI SINI ===
-      // Panggil rute API Next.js lokal Anda menggunakan metode GET
+      const apiKey = localStorage.getItem('pollinations_api_key');
+      const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+      };
+      if (apiKey) {
+          headers['x-pollinations-key'] = apiKey;
+      }
+
       const params = new URLSearchParams({
           text: text,
           voice: selectedVoice
       });
       const response = await fetch(`/api/generate-audio?${params.toString()}`, {
-        method: 'GET', // Ubah metode menjadi GET
-        headers: {
-          'Content-Type': 'application/json', // Header ini tidak terlalu relevan untuk GET request dengan body kosong
-        },
-        // Tidak ada body untuk permintaan GET
+        method: 'GET',
+        headers: headers,
       });
       // ================================
 

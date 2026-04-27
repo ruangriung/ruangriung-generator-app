@@ -12,11 +12,9 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: 'Teks dan suara wajib diisi sebagai parameter URL.' }, { status: 400 });
     }
 
-    const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
-
-    if (!POLLINATIONS_API_KEY) {
-      return NextResponse.json({ message: 'Pollinations AI Token tidak ditemukan di server.' }, { status: 500 });
-    }
+    const serverKey = process.env.POLLINATIONS_API_KEY || process.env.NEXT_PUBLIC_POLLINATIONS_TOKEN;
+    const clientKey = req.headers.get('x-pollinations-key');
+    const activeApiKey = clientKey || serverKey;
 
     const queryParams = new URLSearchParams({
       voice: voice,
@@ -27,9 +25,12 @@ export async function GET(req: Request) {
     const pollinatorsApiUrl = `https://gen.pollinations.ai/audio/${encodeURIComponent(text)}?${queryParams.toString()}`;
 
     const headers: Record<string, string> = {
-      'Authorization': `Bearer ${POLLINATIONS_API_KEY}`,
       'Referer': 'https://ruangriung.my.id',
     };
+
+    if (activeApiKey) {
+      headers['Authorization'] = `Bearer ${activeApiKey}`;
+    }
 
     // Gunakan fetch global (bawaan Node 18+ / Vercel)
     const response = await fetch(pollinatorsApiUrl, {
