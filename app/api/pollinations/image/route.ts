@@ -33,10 +33,10 @@ export async function GET(requestObj: Request) {
                       requestObj.headers.get('Authorization')?.replace('Bearer ', '');
     const activeApiKey = clientKey || POLLINATIONS_API_KEY;
 
-    const baseUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`;
+    const baseUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}`;
     const apiUrl = `${baseUrl}?${pollParams.toString()}`;
     
-    console.log('[API] GET Request:', apiUrl.substring(0, 100) + '...');
+    console.log(`[API] Image GET: model=${searchParams.get('model')} seed=${searchParams.get('seed')} prompt=${prompt.substring(0, 30)}...`);
 
     const headers: Record<string, string> = {
       'Accept': 'image/*, application/json',
@@ -60,11 +60,10 @@ export async function GET(requestObj: Request) {
       });
 
       clearTimeout(timeoutId);
-      console.log('[API] Upstream Status:', response.status);
-
+      
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('[API] Pollinations API Error:', response.status, errorText);
+        console.error('[API] Pollinations Error:', response.status, errorText);
         return NextResponse.json(
           { message: `Pollinations API Error: ${response.status}`, error: errorText },
           { status: response.status }
@@ -74,7 +73,7 @@ export async function GET(requestObj: Request) {
       return new NextResponse(response.body, {
         headers: {
           'Content-Type': response.headers.get('content-type') || 'image/jpeg',
-          'Cache-Control': 'public, max-age=31536000, immutable',
+          'Cache-Control': 'public, max-age=3600', // Remove immutable, use 1 hour cache
         },
         status: 200,
       });
@@ -105,7 +104,7 @@ export async function POST(requestObj: Request) {
       'width', 'height', 'seed', 'model', 'nologo', 'enhance', 
       'private', 'safe', 'transparent', 'referrer', 
       'guidance_scale', 'negative_prompt', 'aspectRatio', 
-      'duration', 'image', 'audio'
+      'duration', 'image', 'audio', 't'
     ];
 
     supportedParams.forEach(param => {
@@ -119,10 +118,10 @@ export async function POST(requestObj: Request) {
                       requestObj.headers.get('Authorization')?.replace('Bearer ', '');
     const activeApiKey = clientKey || POLLINATIONS_API_KEY;
 
-    const baseUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`;
+    const baseUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}`;
     const apiUrl = `${baseUrl}?${pollParams.toString()}`;
     
-    console.log('[API] POST Request:', apiUrl.substring(0, 100) + '...');
+    console.log(`[API] Image POST: model=${body.model} seed=${body.seed} prompt=${prompt.substring(0, 30)}...`);
     
     const headers: Record<string, string> = { 
       'Accept': 'image/*, application/json',
@@ -140,7 +139,6 @@ export async function POST(requestObj: Request) {
     try {
       const response = await fetch(apiUrl, { method: 'GET', headers, signal: controller.signal });
       clearTimeout(timeoutId);
-      console.log('[API] POST Upstream Status:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -150,7 +148,7 @@ export async function POST(requestObj: Request) {
       return new NextResponse(response.body, {
         headers: {
           'Content-Type': response.headers.get('content-type') || 'image/jpeg',
-          'Cache-Control': 'public, max-age=31536000, immutable',
+          'Cache-Control': 'public, max-age=3600',
         },
         status: 200,
       });

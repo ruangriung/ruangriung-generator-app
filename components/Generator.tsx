@@ -336,10 +336,12 @@ export default function Generator() {
         // If we have a BYOP Key or we are in development and the proxy fails, 
         // we can try to fetch directly from Pollinations to avoid local server bottlenecks.
         
+        const t = Date.now();
         const pollParams = new URLSearchParams({
           model, width: width.toString(), height: height.toString(), seed: batchSeed.toString(),
           enhance: imageQuality !== 'Standar' ? 'true' : 'false', nologo: 'true', referrer: 'ruangriung.my.id',
           guidance_scale: cfg_scale.toString(),
+          t: t.toString()
         });
         if (negativePrompt) pollParams.append('negative_prompt', negativePrompt);
         if (isPrivate) pollParams.append('private', 'true');
@@ -362,6 +364,7 @@ export default function Generator() {
               safe,
               transparent: (transparent && model.toLowerCase().includes('gptimage')),
               image: referenceImages[0],
+              t
             };
 
             const response = await fetch('/api/pollinations/image', {
@@ -374,13 +377,15 @@ export default function Generator() {
             const blob = await response.blob();
             imageUrl = URL.createObjectURL(blob);
           } else {
-            // For GET (Text-to-Image), we must use gen.pollinations.ai
+            // For GET (Text-to-Image), we use pollinations proxy with cache buster
             const proxyUrl = `/api/pollinations/image?prompt=${encodeURIComponent(fullPrompt)}&${pollParams.toString()}`;
-            const directUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(fullPrompt)}?${pollParams.toString()}`;
+            const directUrl = `https://pollinations.ai/p/${encodeURIComponent(fullPrompt)}?${pollParams.toString()}`;
 
-            // Try proxy first (uses official key + handles slow dev server better now)
+            console.log(`[Generator] Generating with model: ${model}, seed: ${batchSeed}`);
+
+            // Try proxy first
             try {
-              const response = await fetch(proxyUrl, { headers, signal: AbortSignal.timeout(90000) }); // Increased to 90s
+              const response = await fetch(proxyUrl, { headers, signal: AbortSignal.timeout(90000) });
               if (response.ok) {
                 const blob = await response.blob();
                 imageUrl = URL.createObjectURL(blob);
@@ -390,7 +395,7 @@ export default function Generator() {
             } catch (proxyError: any) {
               // Only attempt direct fetch if we have a personal key (BYOP)
               if (byopKey) {
-                console.warn('Proxy failed, attempting direct fetch with personal key:', proxyError);
+                console.warn('Proxy failed, attempting direct fetch:', proxyError);
                 const directResponse = await fetch(directUrl, { 
                   headers: { 'Authorization': `Bearer ${byopKey}` }
                 });
@@ -398,7 +403,7 @@ export default function Generator() {
                 const blob = await directResponse.blob();
                 imageUrl = URL.createObjectURL(blob);
               } else {
-                throw new Error(`Gagal menghubungi server lokal (Proxy): ${proxyError.message}. Pastikan server pnpm dev tidak sedang macet.`);
+                throw new Error(`Gagal (Proxy): ${proxyError.message}`);
               }
             }
           }
