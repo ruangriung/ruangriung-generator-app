@@ -53,6 +53,7 @@ export async function GET(request: Request) {
     const response = await fetch(finalUrl, {
       method: 'GET',
       headers: buildAuthHeaders(request),
+      cache: 'no-store'
     });
 
     if (!response.ok) {
@@ -67,7 +68,12 @@ export async function GET(request: Request) {
     const data = await response.text();
 
     return new NextResponse(data, {
-      headers: { 'Content-Type': contentType },
+      headers: { 
+        'Content-Type': contentType,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      },
       status: 200,
     });
   } catch (error: any) {
@@ -179,25 +185,46 @@ export async function POST(request: Request) {
       const parsed = JSON.parse(raw);
       
       if (body?.return_full_response === true) {
-        return NextResponse.json(parsed);
+        return NextResponse.json(parsed, {
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+        });
       }
 
       const content = parsed?.choices?.[0]?.message?.content;
 
       if (typeof content === 'string') {
         return new NextResponse(content, {
-          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+          headers: { 
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
           status: 200,
         });
       }
 
       return new NextResponse(JSON.stringify(parsed), {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
         status: 200,
       });
     } catch {
       return new NextResponse(raw, {
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        headers: { 
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
         status: 200,
       });
     }

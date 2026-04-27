@@ -36,6 +36,7 @@ export async function GET(req: Request) {
     const response = await fetch(pollinatorsApiUrl, {
       method: 'GET',
       headers,
+      cache: 'no-store'
     });
 
     if (!response.ok) {
@@ -47,16 +48,16 @@ export async function GET(req: Request) {
       );
     }
 
-    // === OPTIMIZATION: Redirect or Stream ===
-    // If the request can be handled without server secrets (BYOP), we should redirect.
-    // However, this API currently relies on the server-side POLLINATIONS_API_KEY.
+    // === OPTIMIZATION: Stream ===
     // We will still switch to STREAMING to save memory and bandwidth.
 
     return new NextResponse(response.body, {
       headers: {
         'Content-Type': 'audio/mpeg',
         'Content-Disposition': `attachment; filename="audio-${Date.now()}.mp3"`,
-        'Cache-Control': 'public, max-age=3600',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       },
       status: 200,
     });

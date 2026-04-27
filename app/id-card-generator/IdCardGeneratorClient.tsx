@@ -205,11 +205,9 @@ const IdCardGeneratorClient = () => {
                 throw new Error(errorData.message || `Gagal mengambil gambar dari API (Status: ${response.status})`);
             }
 
-            // Karena respons proksi adalah file biner (gambar), kita perlu mengubahnya menjadi blob/URL
-            const imageBlob = await response.blob();
-            const imageUrl = URL.createObjectURL(imageBlob);
-
-            handleSettingChange('background', imageUrl);
+            // Use the persistent proxy URL instead of a temporary blob URL
+            // This ensures the background remains valid after page refresh/storage
+            handleSettingChange('background', url);
             toast.success("Background berhasil dibuat!", { id: toastId });
 
         } catch (error: any) {

@@ -79,6 +79,15 @@ const isImageToImageModel = (modelName: string): boolean => {
 
 const MAX_REFERENCE_IMAGES = 4;
 const createEmptyReferenceImages = () => [''];
+ 
+const blobToBase64 = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
 
 const sanitizeStoredSettings = (data: unknown): Partial<GeneratorSettings> | null => {
   if (!data || typeof data !== 'object') return null;
@@ -371,7 +380,7 @@ export default function Generator() {
         const modelLower = model.toLowerCase();
 
         const pollParams = new URLSearchParams({
-          model, width: width.toString(), height: height.toString(), 
+          model: modelLower, width: width.toString(), height: height.toString(), 
           enhance: imageQuality !== 'Standar' ? 'true' : 'false', 
           referrer: 'ruangriung.my.id',
           t: t.toString()
@@ -422,35 +431,35 @@ export default function Generator() {
 
             if (!response.ok) throw new Error(`Proxy Error: ${response.status}`);
             const blob = await response.blob();
-            imageUrl = URL.createObjectURL(blob);
+            // Convert to Base64 for persistence in history (POST results don't have a simple GET URL)
+            imageUrl = await blobToBase64(blob);
           } else {
-            // For GET (Text-to-Image), we use pollinations proxy with cache buster
+            // For GET (Text-to-Image), we use the persistent proxy URL
             const proxyUrl = `/api/pollinations/image?prompt=${encodeURIComponent(fullPrompt)}&${pollParams.toString()}`;
             
-            // For direct URL, we MUST include the key in query if available
+            // For direct URL fallback (only used if proxy fails and BYOP exists)
             const directParams = new URLSearchParams(pollParams);
             if (byopKey) directParams.append('key', byopKey);
             const directUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(fullPrompt)}?${directParams.toString()}`;
 
             console.log(`[Generator] Generating with model: ${model}, params: ${pollParams.toString()}`);
 
-            // Try proxy first
+            // Pre-fetch to ensure generation is successful and trigger cache
             try {
               const response = await fetch(proxyUrl, { headers, signal: AbortSignal.timeout(90000) });
               if (response.ok) {
-                const blob = await response.blob();
-                imageUrl = URL.createObjectURL(blob);
+                // Return the PERSISTENT proxy URL for history and display
+                imageUrl = proxyUrl;
               } else {
                 throw new Error(`Proxy status: ${response.status}`);
               }
             } catch (proxyError: any) {
-              // Only attempt direct fetch if we have a personal key (BYOP)
               if (byopKey) {
                 console.warn('Proxy failed, attempting direct fetch:', proxyError);
                 const directResponse = await fetch(directUrl, { signal: AbortSignal.timeout(90000) });
                 if (!directResponse.ok) throw new Error(`Direct Fetch Error: ${directResponse.status}`);
-                const blob = await directResponse.blob();
-                imageUrl = URL.createObjectURL(blob);
+                // If direct fetch succeeds, we can use the direct URL (it's persistent too)
+                imageUrl = directUrl;
               } else {
                 throw new Error(`Gagal (Proxy): ${proxyError.message}`);
               }

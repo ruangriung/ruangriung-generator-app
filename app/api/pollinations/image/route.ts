@@ -29,26 +29,33 @@ export async function GET(requestObj: Request) {
 
     searchParams.forEach((value, key) => {
       if (supportedParams.includes(key) && value !== 'undefined' && value !== 'null') {
-        pollParams.append(key, value);
+        if (key === 'model') {
+          pollParams.set(key, value.toLowerCase());
+        } else {
+          pollParams.set(key, value);
+        }
       }
     });
 
     // Add key as query parameter for maximum compatibility (crucial for some PAID models)
     if (activeApiKey) {
-      pollParams.append('key', activeApiKey);
+      pollParams.set('key', activeApiKey);
     }
 
     const baseUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`;
     const apiUrl = `${baseUrl}?${pollParams.toString()}`;
     
-    console.log(`[API] Image GET: model=${searchParams.get('model')} auth=${activeApiKey ? 'YES' : 'NO'} prompt=${prompt.substring(0, 30)}...`);
-
+    console.log(`[API] Image GET: model=${pollParams.get('model')} auth=${activeApiKey ? 'YES' : 'NO'} prompt=${prompt.substring(0, 30)}...`);
+ 
     const headers: Record<string, string> = {
       'Accept': 'image/*, application/json',
       'Referer': 'https://ruangriung.my.id',
       'User-Agent': 'RuangRiung-Generator/1.0',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
     };
-
+ 
     if (activeApiKey) {
       headers['Authorization'] = `Bearer ${activeApiKey}`;
     }
@@ -61,6 +68,7 @@ export async function GET(requestObj: Request) {
         method: 'GET',
         headers,
         signal: controller.signal,
+        cache: 'no-store'
       });
 
       clearTimeout(timeoutId);
@@ -77,7 +85,9 @@ export async function GET(requestObj: Request) {
       return new NextResponse(response.body, {
         headers: {
           'Content-Type': response.headers.get('content-type') || 'image/jpeg',
-          'Cache-Control': 'public, max-age=3600', 
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         },
         status: 200,
       });
@@ -117,23 +127,30 @@ export async function POST(requestObj: Request) {
 
     supportedParams.forEach(param => {
       if (body[param] !== undefined && body[param] !== null && body[param] !== 'undefined') {
-        pollParams.append(param, body[param].toString());
+        if (param === 'model') {
+          pollParams.set(param, body[param].toString().toLowerCase());
+        } else {
+          pollParams.set(param, body[param].toString());
+        }
       }
     });
 
     if (activeApiKey) {
-      pollParams.append('key', activeApiKey);
+      pollParams.set('key', activeApiKey);
     }
 
     const baseUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}`;
     const apiUrl = `${baseUrl}?${pollParams.toString()}`;
     
-    console.log(`[API] Image POST: model=${body.model} auth=${activeApiKey ? 'YES' : 'NO'} prompt=${prompt.substring(0, 30)}...`);
+    console.log(`[API] Image POST: model=${pollParams.get('model')} auth=${activeApiKey ? 'YES' : 'NO'} prompt=${prompt.substring(0, 30)}...`);
     
     const headers: Record<string, string> = { 
       'Accept': 'image/*, application/json',
       'Referer': 'https://ruangriung.my.id',
       'User-Agent': 'RuangRiung-Generator/1.0',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
     };
     
     if (activeApiKey) {
@@ -144,7 +161,12 @@ export async function POST(requestObj: Request) {
     const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     try {
-      const response = await fetch(apiUrl, { method: 'GET', headers, signal: controller.signal });
+      const response = await fetch(apiUrl, { 
+        method: 'GET', 
+        headers, 
+        signal: controller.signal,
+        cache: 'no-store'
+      });
       clearTimeout(timeoutId);
 
       if (!response.ok) {
@@ -155,7 +177,9 @@ export async function POST(requestObj: Request) {
       return new NextResponse(response.body, {
         headers: {
           'Content-Type': response.headers.get('content-type') || 'image/jpeg',
-          'Cache-Control': 'public, max-age=3600',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         },
         status: 200,
       });
