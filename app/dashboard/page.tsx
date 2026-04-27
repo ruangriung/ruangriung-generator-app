@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import AuthButton from '@/components/AuthButton';
 import BYOPHandler from '@/components/BYOPHandler';
-import { LayoutDashboard, History, Sparkles, CreditCard, ShieldCheck, Zap, ArrowLeft, Home } from 'lucide-react';
+import { LayoutDashboard, History, Sparkles, CreditCard, ShieldCheck, Zap, ArrowLeft, Home, FileText } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -13,6 +13,7 @@ export default function DashboardPage() {
   const [history, setHistory] = useState<any[]>([]);
   const [historyCount, setHistoryCount] = useState(0);
   const [isPremium, setIsPremium] = useState(false);
+  const [articles, setArticles] = useState<any[]>([]);
 
   useEffect(() => {
     const savedHistory = localStorage.getItem('ruangriung_history');
@@ -22,6 +23,14 @@ export default function DashboardPage() {
       setHistoryCount(parsed.length);
     }
     setIsPremium(!!localStorage.getItem('pollinations_api_key'));
+
+    // Fetch latest articles
+    fetch('/api/articles')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setArticles(data);
+      })
+      .catch(err => console.error('Error fetching dashboard articles:', err));
   }, []);
 
   if (status === 'loading') return (
@@ -206,51 +215,60 @@ export default function DashboardPage() {
 
           {/* Sidebar Info - Small Column */}
           <div className="space-y-8">
+            {/* Recent Articles */}
             <div className="glass-card p-8 space-y-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 blur-[50px] rounded-full -mr-16 -mt-16" />
-              <h3 className="text-xl font-black">Berlangganan</h3>
-              <div className="p-5 rounded-2xl bg-slate-500/5 border border-white/10 space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Status Akun</span>
-                  <span className={`text-[10px] px-3 py-1 rounded-full font-black uppercase ${isPremium ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-slate-500/10 text-slate-500'}`}>
-                    {isPremium ? 'Active PRO' : 'Basic Member'}
-                  </span>
-                </div>
-                <div className="h-2 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
-                  <div className={`h-full ${isPremium ? 'w-full bg-green-500' : 'w-1/4 bg-primary-500'} rounded-full`} />
-                </div>
-                <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
-                  {isPremium 
-                    ? 'Selamat! Anda memiliki akses tanpa batas melalui kunci API Pollinations pribadi.' 
-                    : 'Anda saat ini menggunakan akses gratis dengan fitur terbatas.'}
-                </p>
-                {!isPremium && (
-                  <button className="w-full py-3 rounded-xl bg-gradient-to-r from-primary-600 to-indigo-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary-500/25">
-                    Upgrade ke Pro
-                  </button>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[50px] rounded-full -mr-16 -mt-16" />
+              <h3 className="text-xl font-black flex items-center gap-2">
+                <FileText size={20} className="text-blue-500" />
+                Artikel Terbaru
+              </h3>
+              <div className="space-y-4">
+                {articles.length > 0 ? (
+                  articles.map((art, i) => (
+                    <Link key={i} href={`/artikel/${art.slug}`} className="block group p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-blue-500/30 transition-all">
+                      <p className="text-xs font-black group-hover:text-blue-500 transition-colors line-clamp-2">{art.title}</p>
+                      <p className="text-[9px] text-slate-500 mt-1">{new Date(art.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-[10px] text-slate-500 italic">Memuat artikel...</p>
                 )}
+                <Link href="/artikel" className="block text-center text-[10px] font-black uppercase text-blue-500 hover:underline">
+                  Baca Semua Artikel
+                </Link>
               </div>
             </div>
 
             <div className="glass-card p-8 space-y-6">
               <h3 className="text-xl font-black flex items-center gap-2">
                 <ShieldCheck className="text-primary-500" />
-                Info BYOP
+                Apa Itu BYOP?
               </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                <strong>BYOP (Bring Your Own Pollen)</strong> menghubungkan akun <span className="text-primary-500 font-bold">Pollinations.ai</span> Anda untuk akses model premium tanpa batas.
-              </p>
-              <div className="space-y-2">
-                {[
-                  'Akses Flux Pro & OpenAI',
-                  'Kecepatan Tinggi',
-                  'Tanpa Watermark',
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-3 text-[10px] font-bold text-slate-500">
-                    <div className="h-1.5 w-1.5 rounded-full bg-primary-500" />
-                    {item}
-                  </div>
-                ))}
+              <div className="space-y-4">
+                <p className="text-[11px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">Bring Your Own Pollen (BYOP)</p>
+                <p className="text-[10px] text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
+                  Gunakan API Key Pollinations Anda sendiri untuk membuka fitur eksklusif:
+                </p>
+                <div className="space-y-3">
+                  {[
+                    { label: 'Model Elit & PAID', value: 'Flux Pro, OpenAI, Pruna, Grok Imagine, Wan Pro' },
+                    { label: 'Generator Video Pro', value: 'Veo 3.1, Wan 2.6, Seedance, Grok Video' },
+                    { label: 'Model Gambar Unik', value: '🍌 NanoBanana, Nova Canvas, Seedream, Pruna' },
+                    { label: 'Layanan', value: 'Prioritas antrean & kecepatan maksimal' },
+                  ].map((item, i) => (
+                    <div key={i} className="flex gap-3">
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary-500 mt-1.5 shrink-0" />
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-500">{item.label}: <span className="text-slate-800 dark:text-slate-200 font-black">{item.value}</span></p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="pt-4 mt-4 border-t border-white/5">
+                  <p className="text-[9px] text-slate-400 italic leading-relaxed">
+                    *Memerlukan saldo (pollen) di akun Pollinations.ai. Pastikan Anda login menggunakan GitHub untuk mengakses model Pro.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -271,9 +289,9 @@ export default function DashboardPage() {
                     "{prompt}"
                   </div>
                 ))}
-                <button className="w-full text-[10px] font-black uppercase text-primary-500 hover:underline">
+                <Link href="/kumpulan-prompt" className="block w-full text-center text-[10px] font-black uppercase text-primary-500 hover:underline">
                   Lihat Semua Ide
-                </button>
+                </Link>
               </div>
             </div>
           </div>
