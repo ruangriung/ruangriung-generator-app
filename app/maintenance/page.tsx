@@ -1,5 +1,4 @@
-import Image from 'next/image';
-import { Timer, Mail, MessageSquare, ArrowRight } from 'lucide-react';
+import { Construction, Timer, Mail, MessageSquare, ArrowRight } from 'lucide-react';
 
 export default function MaintenancePage() {
   return (
@@ -10,19 +9,12 @@ export default function MaintenancePage() {
       
       <div className="max-w-2xl w-full z-10">
         <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 md:p-12 shadow-2xl">
-          {/* Logo Section */}
+          {/* Logo / Icon Section */}
           <div className="flex justify-center mb-8">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-indigo-500 rounded-3xl blur-2xl opacity-20 group-hover:opacity-40 transition-opacity animate-pulse" />
-              <div className="relative p-2 rounded-3xl">
-                <Image 
-                  src="/assets/ruangriung.png" 
-                  alt="RuangRiung Logo" 
-                  width={120} 
-                  height={120} 
-                  className="w-24 h-24 md:w-32 md:h-32 object-contain rounded-2xl drop-shadow-2xl"
-                  priority
-                />
+            <div className="relative">
+              <div className="absolute inset-0 bg-indigo-500 rounded-2xl blur-lg opacity-30 animate-pulse" />
+              <div className="relative bg-gradient-to-br from-indigo-500 to-purple-600 p-4 rounded-2xl shadow-lg">
+                <Construction className="w-12 h-12 text-white" />
               </div>
             </div>
           </div>
