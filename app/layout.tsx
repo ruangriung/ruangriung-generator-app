@@ -73,11 +73,17 @@ export const viewport: Viewport = {
   themeColor: "#6c5ce7",
 };
 
-export default function RootLayout({
+import { headers } from 'next/headers';
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headerList = await headers();
+  const pathname = headerList.get('x-pathname') || '';
+  const isMaintenance = pathname === '/maintenance';
+
   const organizationSchema = {
     name: 'RuangRiung',
     url: 'https://ruangriung.my.id',
@@ -116,15 +122,15 @@ export default function RootLayout({
         <AuthProvider>
           <UIProvider>
             <ChatProvider>
-              <Navbar />
-              <HelpModal />
-              <div className="flex min-h-screen flex-col pt-20">
+              {!isMaintenance && <Navbar />}
+              {!isMaintenance && <HelpModal />}
+              <div className={`flex min-h-screen flex-col ${!isMaintenance ? 'pt-20' : ''}`}>
                 <main className="flex-grow">{children}</main>
-                <Footer />
+                {!isMaintenance && <Footer />}
               </div>
-              <Toaster />
-              <CookieConsent />
-              <RRAssistant />
+              {!isMaintenance && <Toaster />}
+              {!isMaintenance && <CookieConsent />}
+              {!isMaintenance && <RRAssistant />}
             </ChatProvider>
           </UIProvider>
         </AuthProvider>
