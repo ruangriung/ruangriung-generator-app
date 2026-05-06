@@ -1,6 +1,4 @@
-import React from 'react';
-import Link from 'next/link';
-import { Construction, Timer, Mail, MessageCircle, ArrowRight } from 'lucide-react';
+import { Construction, Timer, Mail, MessageSquare, ArrowRight } from 'lucide-react';
 
 export default function MaintenancePage() {
   return (
@@ -50,26 +48,31 @@ export default function MaintenancePage() {
             </div>
           </div>
 
-          {/* Action / Contact Section */}
-          <div className="mt-12 pt-8 border-t border-slate-800/50 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3 text-slate-400">
-              <div className="p-2 bg-slate-800 rounded-lg">
-                <Mail className="w-5 h-5" />
+          {/* Action / Contact Section - Using Existing Project Style */}
+          <div className="mt-12 pt-8 border-t border-slate-800/50 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="flex items-center gap-4 text-slate-300">
+              <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-400">
+                <Mail className="w-6 h-6" />
               </div>
-              <div className="text-left">
-                <p className="text-xs uppercase tracking-wider text-slate-500 font-bold">Email</p>
-                <p className="text-sm">support@ruangriung.my.id</p>
+              <div className="text-left space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Email Address</p>
+                <a href="mailto:admin@ruangriung.my.id" className="text-sm font-bold text-indigo-400 hover:underline block">
+                  admin@ruangriung.my.id
+                </a>
               </div>
             </div>
 
-            <Link 
-              href="https://wa.me/628123456789" 
-              className="group flex items-center gap-2 px-6 py-3 bg-white text-slate-900 rounded-xl font-semibold transition-all hover:bg-green-50 hover:text-green-600 active:scale-95"
-            >
-              <MessageCircle className="w-5 h-5 text-green-600" />
-              Hubungi via WhatsApp
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </Link>
+            <div className="flex items-center gap-4 text-slate-300">
+              <div className="p-3 bg-purple-500/10 rounded-2xl text-purple-400">
+                <MessageSquare className="w-6 h-6" />
+              </div>
+              <div className="text-left space-y-1">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Community Hub</p>
+                <a href="https://web.facebook.com/groups/1182261482811767/" target="_blank" className="text-sm font-bold text-purple-400 hover:underline block">
+                  RuangRiung Group
+                </a>
+              </div>
+            </div>
           </div>
         </div>
         
