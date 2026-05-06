@@ -14,7 +14,7 @@ export async function middleware(request: NextRequest) {
   const isDevelopment = process.env.NODE_ENV === 'development';
   const bypassCookie = request.cookies.get('maintenance_bypass');
   const bypassQuery = request.nextUrl.searchParams.get('bypass');
-  const BYPASS_KEY = 'ruangriung2026'; // Secret key to bypass maintenance
+  const BYPASS_KEY = process.env.MAINTENANCE_BYPASS_KEY || 'ruangriung2026'; // Use ENV or fallback
 
   // If user provides correct bypass key in URL, set cookie and allow access
   if (bypassQuery === BYPASS_KEY) {
