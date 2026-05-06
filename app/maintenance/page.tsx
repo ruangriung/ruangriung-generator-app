@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Construction, Timer, Mail, ArrowRight } from 'lucide-react';
+import { Construction, Timer, Mail, MessageCircle, ArrowRight } from 'lucide-react';
 
 export default function MaintenancePage() {
   return (
@@ -57,16 +57,17 @@ export default function MaintenancePage() {
                 <Mail className="w-5 h-5" />
               </div>
               <div className="text-left">
-                <p className="text-xs uppercase tracking-wider text-slate-500 font-bold">Butuh Bantuan?</p>
+                <p className="text-xs uppercase tracking-wider text-slate-500 font-bold">Email</p>
                 <p className="text-sm">support@ruangriung.my.id</p>
               </div>
             </div>
 
             <Link 
-              href="https://ariftirtana.my.id" 
-              className="group flex items-center gap-2 px-6 py-3 bg-white text-slate-900 rounded-xl font-semibold transition-all hover:bg-indigo-50 hover:text-indigo-600 active:scale-95"
+              href="https://wa.me/628123456789" 
+              className="group flex items-center gap-2 px-6 py-3 bg-white text-slate-900 rounded-xl font-semibold transition-all hover:bg-green-50 hover:text-green-600 active:scale-95"
             >
-              Cek Portofolio Kami
+              <MessageCircle className="w-5 h-5 text-green-600" />
+              Hubungi via WhatsApp
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
