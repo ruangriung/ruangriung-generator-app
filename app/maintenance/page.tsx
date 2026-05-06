@@ -1,6 +1,17 @@
 import { Construction, Timer, Mail, MessageSquare, ArrowRight } from 'lucide-react';
 
 export default function MaintenancePage() {
+  // Progress Calculation Logic
+  const startDate = new Date('2026-05-06T00:00:00Z');
+  const endDate = new Date('2026-06-06T00:00:00Z');
+  const now = new Date();
+  
+  const total = endDate.getTime() - startDate.getTime();
+  const elapsed = now.getTime() - startDate.getTime();
+  
+  // Calculate percentage (clamped between 0 and 100)
+  const progress = Math.min(Math.max(Math.round((elapsed / total) * 100), 0), 100);
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-950">
       {/* Abstract Background Shapes */}
@@ -35,16 +46,16 @@ export default function MaintenancePage() {
               <span>Kembali dalam: 1 Bulan (6 Juni 2026)</span>
             </div>
 
-            {/* Progress Bar (Visual only) */}
+            {/* Progress Bar (Dynamic) */}
             <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden mt-8">
               <div 
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 h-full w-[15%] animate-pulse" 
-                style={{ width: '15%' }} 
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 h-full transition-all duration-1000 animate-pulse" 
+                style={{ width: `${progress}%` }} 
               />
             </div>
             <div className="flex justify-between text-xs text-slate-500 mt-2">
               <span>Sistem Update</span>
-              <span>15% Selesai</span>
+              <span>{progress}% Selesai</span>
             </div>
           </div>
 
