@@ -95,10 +95,7 @@ export default function Navbar() {
               <div className="absolute top-full left-0 pt-2 w-64 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-300 z-[110]">
                 <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-2 grid grid-cols-1 gap-1">
                   {[
-                    { label: 'StoryTeller AI', href: '/storyteller', icon: BookOpen, desc: 'Buat cerita naratif' },
-                    { label: 'Tema Unik', href: '/UniqueArtName', icon: Sparkles, desc: 'Nama seni unik' },
                     { label: 'ID CARD Gen', href: '/id-card-generator', icon: QrCode, desc: 'Kartu identitas otomatis' },
-                    { label: 'Bubble Komentar', href: '/comment-overlay', icon: MessageSquare, desc: 'Overlay komentar live' },
                   ].map((link) => (
                     <Link
                       key={link.href}
@@ -131,7 +128,6 @@ export default function Navbar() {
                   {[
                     { label: 'Prompt Library', href: '/kumpulan-prompt', icon: Sparkles, desc: 'Inspirasi prompt kreatif' },
                     { label: 'Artikel & Berita', href: '/artikel', icon: Rss, desc: 'Update info terbaru' },
-                    { label: 'Direktori UMKM', href: '/umkm', icon: Building2, desc: 'Dukungan bisnis lokal' },
                   ].map((link) => (
                     <Link
                       key={link.href}
@@ -223,9 +219,7 @@ export default function Navbar() {
         >
           <div className="flex flex-col gap-2 px-2 pb-24">
              {[
-              { label: 'StoryTeller AI', href: '/storyteller', icon: BookOpen },
               { label: 'ID CARD Gen', href: '/id-card-generator', icon: QrCode },
-              { label: 'Bubble Komentar', href: '/comment-overlay', icon: MessageSquare },
               { label: 'Prompt Library', href: '/kumpulan-prompt', icon: Sparkles },
               { label: 'Artikel & Berita', href: '/artikel', icon: Rss },
               { label: 'Dashboard Akun', href: '/dashboard', icon: LayoutDashboard },

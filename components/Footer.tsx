@@ -60,9 +60,6 @@ export default function Footer() {
             <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-8">Alat Kreatif</h3>
             <ul className="space-y-5">
               {[
-                { label: 'Keyword Generator', href: '/UniqueArtName' },
-                { label: 'Storyteller AI', href: '/storyteller' },
-                { label: 'UMKM Directory', href: '/umkm' },
                 { label: 'ID Card Generator', href: '/id-card-generator' },
                 { label: 'Kumpulan Prompt', href: '/kumpulan-prompt' },
               ].map((link, idx) => (
