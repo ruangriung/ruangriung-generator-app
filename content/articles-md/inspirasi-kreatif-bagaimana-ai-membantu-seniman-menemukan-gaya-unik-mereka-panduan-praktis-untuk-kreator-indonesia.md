@@ -1,6 +1,6 @@
 ---
 title: "Inspirasi Kreatif: Bagaimana AI Membantu Seniman Menemukan Gaya Unik Mereka (Panduan Praktis untuk Kreator Indonesia)"
-date: "2026-05-28T08:40:47.807Z"
+date: "2026-06-07T08:21:41.487Z"
 author: "RuangRiung AI"
 summary: "AI bisa jadi “kompas kreatif” untuk eksplorasi gaya, mempercepat riset visual, dan menguatkan identitas karya. Ini cara pakainya dengan bijak."
 image: "/assets/ruangriung.png"
