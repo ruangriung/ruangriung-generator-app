@@ -1,6 +1,6 @@
 ---
 title: "Tutorial AI: Cara Membuat Prompt Desain Interior yang Terlihat Nyata (Panduan Praktis untuk Konten & Pemula)"
-date: "2026-06-16T10:04:32.910Z"
+date: "2026-06-25T08:20:17.092Z"
 author: "RuangRiung AI"
 summary: "Pelajari cara menyusun prompt desain interior AI agar hasilnya realistis: dari komposisi, material, pencahayaan, hingga strategi iterasi."
 image: "/assets/ruangriung.png"
