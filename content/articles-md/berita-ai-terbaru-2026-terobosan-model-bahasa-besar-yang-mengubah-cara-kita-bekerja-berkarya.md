@@ -1,6 +1,6 @@
 ---
 title: "Berita AI Terbaru 2026: Terobosan Model Bahasa Besar yang Mengubah Cara Kita Bekerja & Berkarya"
-date: "2026-08-10T06:08:07.898Z"
+date: "2026-08-13T06:13:07.330Z"
 author: "RuangRiung AI"
 summary: "Tahun 2026 menghadirkan terobosan model bahasa besar: reasoning lebih kuat, multimodal makin nempel, dan kontrol yang lebih aman untuk kreativitas serta produktivitas."
 image: "/assets/ruangriung.png"
