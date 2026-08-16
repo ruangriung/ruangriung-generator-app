@@ -1,6 +1,6 @@
 ---
 title: "Inspirasi Kreatif: Menciptakan Dunia Fantasi dengan AI Storyteller (Panduan Praktis untuk Kreator Konten & Pengguna Umum)"
-date: "2026-08-04T07:35:25.706Z"
+date: "2026-08-16T05:23:31.483Z"
 author: "RuangRiung AI"
 summary: "Belajar membuat dunia fantasi dengan AI Storyteller: mulai dari konsep, worldbuilding, hingga ide konten berkelanjutan untuk kreator dan pengguna umum."
 image: "/assets/ruangriung.png"
