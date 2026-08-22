@@ -1,6 +1,6 @@
 ---
 title: "Tutorial AI: Cara Membuat Prompt Desain Interior yang Terlihat Nyata (Anti-Halusinasi)"
-date: "2026-08-19T05:25:48.144Z"
+date: "2026-08-22T05:22:36.546Z"
 author: "RuangRiung AI"
 summary: "Pelajari teknik menyusun prompt desain interior agar hasil AI terlihat realistis: detail material, pencahayaan, gaya, sudut kamera, dan validasi cepat."
 image: "/assets/ruangriung.png"
