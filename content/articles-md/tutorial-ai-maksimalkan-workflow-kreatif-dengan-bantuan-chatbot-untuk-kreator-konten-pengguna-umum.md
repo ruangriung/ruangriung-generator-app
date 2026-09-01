@@ -1,6 +1,6 @@
 ---
 title: "Tutorial AI: Maksimalkan Workflow Kreatif dengan Bantuan Chatbot (Untuk Kreator Konten & Pengguna Umum)"
-date: "2026-08-28T17:08:21.397Z"
+date: "2026-09-01T09:43:17.217Z"
 author: "RuangRiung AI"
 summary: "Pelajari cara memaksimalkan workflow kreatif dengan chatbot: dari ide, riset, skrip, hingga produksi. Dapatkan template prompt dan tips praktis."
 image: "/assets/ruangriung.png"
