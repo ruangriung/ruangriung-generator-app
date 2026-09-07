@@ -1,6 +1,6 @@
 ---
 title: "Perkembangan Terbaru Chip AI: Kenapa Gadget Kita Makin Cerdas, Hemat Daya, dan Responsif"
-date: "2026-08-25T05:27:38.932Z"
+date: "2026-09-07T09:55:21.080Z"
 author: "RuangRiung AI"
 summary: "Chip AI generasi terbaru meningkatkan performa inferensi, efisiensi energi, dan fitur on-device. Dampaknya: kamera lebih pintar, baterai lebih awet, serta pengalaman pengguna makin real-time."
 image: "/assets/ruangriung.png"
